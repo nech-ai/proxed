@@ -1,17 +1,28 @@
 {
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
+		"@proxed/eslint-config": "workspace:*",
+		"@proxed/prettier-config": "workspace:*",
 		"@types/node": "22.10.7",
 		"tsconfig": "workspace:*"
 	},
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules",
-		"lint": "biome check .",
-		"format": "biome format --write .",
+		"format": "prettier --check \"**/*.{ts,tsx}\"",
+		"lint": "eslint .",
 		"typecheck": "tsc --noEmit"
 	},
 	"main": "./index.tsx",
 	"name": "@proxed/utils",
 	"types": "./**/.tsx",
-	"version": "0.0.0"
+	"version": "0.0.0",
+	"prettier": "@proxed/prettier-config",
+	"eslintConfig": {
+		"root": true,
+		"extends": ["@proxed/eslint-config/base"]
+	},
+	"typesVersions": {
+		"*": {
+			"*": ["src/*"]
+		}
+	}
 }

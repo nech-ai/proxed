@@ -3,13 +3,13 @@ import { afterEach, vi } from "vitest";
 
 // Setup handlers
 afterEach(() => {
-	cleanup();
-	vi.clearAllMocks();
+  cleanup();
+  vi.clearAllMocks();
 });
 
 // Mock ResizeObserver
 global.ResizeObserver = vi.fn().mockImplementation(() => ({
-	observe: vi.fn(),
-	unobserve: vi.fn(),
-	disconnect: vi.fn(),
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
 }));

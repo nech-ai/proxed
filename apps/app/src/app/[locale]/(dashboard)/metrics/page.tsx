@@ -1,3 +1,3 @@
 export default function Page() {
-	return <div>Metrics</div>;
+  return <div>Metrics</div>;
 }

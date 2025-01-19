@@ -6,16 +6,16 @@ import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function signOutAction() {
-	const supabase = await createClient();
-	const {
-		data: { session },
-	} = await getSession();
+  const supabase = await createClient();
+  const {
+    data: { session },
+  } = await getSession();
 
-	await supabase.auth.signOut({
-		scope: "local",
-	});
+  await supabase.auth.signOut({
+    scope: "local",
+  });
 
-	revalidateTag(`user_${session?.user.id}`);
+  revalidateTag(`user_${session?.user.id}`);
 
-	return redirect("/login");
+  return redirect("/login");
 }

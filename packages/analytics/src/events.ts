@@ -1,6 +1,6 @@
 export const LogEvents = {
-	GetStarted: {
-		name: "Get Started",
-		channel: "get-started",
-	},
+  GetStarted: {
+    name: "Get Started",
+    channel: "get-started",
+  },
 };

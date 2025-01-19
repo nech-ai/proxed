@@ -8,16 +8,16 @@ import { Hero } from "@/components/sections/hero";
 import { Pricing } from "@/components/sections/pricing";
 
 export default function Page() {
-	return (
-		<main>
-			<Header />
-			<Hero />
-			<Examples />
-			<Features />
-			<Pricing />
-			<Community />
-			<CTA />
-			<Footer />
-		</main>
-	);
+  return (
+    <main>
+      <Header />
+      <Hero />
+      <Examples />
+      <Features />
+      <Pricing />
+      <Community />
+      <CTA />
+      <Footer />
+    </main>
+  );
 }

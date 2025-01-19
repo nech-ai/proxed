@@ -48,7 +48,8 @@
 		"zustand": "^5.0.3"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
+		"@proxed/eslint-config": "workspace:*",
+		"@proxed/prettier-config": "workspace:*",
 		"@proxed/logger": "workspace:*",
 		"@types/js-cookie": "^3.0.6",
 		"@types/node": "22.10.7",
@@ -64,9 +65,19 @@
 		"build": "next build",
 		"dev": "next dev -p 3000",
 		"clean": "rm -rf .turbo node_modules",
-		"lint": "biome check .",
-		"format": "biome format --write .",
+		"format": "prettier --check \"**/*.{ts,tsx}\"",
+		"lint": "eslint .",
 		"typecheck": "tsc --noEmit"
 	},
-	"version": "0.1.0"
+	"version": "0.1.0",
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+			"@proxed/eslint-config/base",
+			"@proxed/eslint-config/nextjs",
+			"@proxed/eslint-config/react",
+			"@proxed/eslint-config/apps"
+		]
+	},
+	"prettier": "@proxed/prettier-config"
 }

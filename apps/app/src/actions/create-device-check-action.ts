@@ -6,29 +6,29 @@ import { createDeviceCheckSchema } from "./schema";
 import { revalidatePath as revalidatePathFunc } from "next/cache";
 
 export const createDeviceCheckAction = authActionClient
-	.schema(createDeviceCheckSchema)
-	.action(
-		async ({
-			parsedInput: { revalidatePath, ...data },
-			ctx: { user, supabase },
-		}) => {
-			if (!user.team_id) {
-				throw new Error("User is not in a team");
-			}
+  .schema(createDeviceCheckSchema)
+  .action(
+    async ({
+      parsedInput: { revalidatePath, ...data },
+      ctx: { user, supabase },
+    }) => {
+      if (!user.team_id) {
+        throw new Error("User is not in a team");
+      }
 
-			const { data: deviceCheck, error } = await createDeviceCheck(supabase, {
-				...data,
-				team_id: user.team_id,
-			});
+      const { data: deviceCheck, error } = await createDeviceCheck(supabase, {
+        ...data,
+        team_id: user.team_id,
+      });
 
-			if (error) {
-				throw new Error("Failed to create device check");
-			}
+      if (error) {
+        throw new Error("Failed to create device check");
+      }
 
-			if (revalidatePath) {
-				revalidatePathFunc(revalidatePath);
-			}
+      if (revalidatePath) {
+        revalidatePathFunc(revalidatePath);
+      }
 
-			return deviceCheck;
-		},
-	);
+      return deviceCheck;
+    },
+  );

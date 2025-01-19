@@ -4,21 +4,21 @@ import type { SendEmailHandler } from "../types";
 const { from } = config.mailing;
 
 export const send: SendEmailHandler = async ({ to, subject, html }) => {
-	const response = await fetch("https://api.resend.com/emails", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-			Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-		},
-		body: JSON.stringify({
-			from,
-			to,
-			subject,
-			html,
-		}),
-	});
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+    },
+    body: JSON.stringify({
+      from,
+      to,
+      subject,
+      html,
+    }),
+  });
 
-	if (!response.ok) {
-		throw new Error("Could not send email");
-	}
+  if (!response.ok) {
+    throw new Error("Could not send email");
+  }
 };

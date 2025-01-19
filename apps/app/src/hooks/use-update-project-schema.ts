@@ -5,19 +5,16 @@ import { updateProjectSchemaAction } from "@/actions/update-project-schema-actio
 import type { SchemaConfig } from "@proxed/structure";
 
 export function useUpdateProjectSchema() {
-	const updateSchema = useCallback(
-		async (params: {
-			projectId: string;
-			schemaConfig: SchemaConfig;
-		}) => {
-			try {
-				await updateProjectSchemaAction(params);
-			} catch (error) {
-				console.error("Failed to update schema:", error);
-			}
-		},
-		[],
-	);
+  const updateSchema = useCallback(
+    async (params: { projectId: string; schemaConfig: SchemaConfig }) => {
+      try {
+        await updateProjectSchemaAction(params);
+      } catch (error) {
+        console.error("Failed to update schema:", error);
+      }
+    },
+    [],
+  );
 
-	return { updateSchema };
+  return { updateSchema };
 }

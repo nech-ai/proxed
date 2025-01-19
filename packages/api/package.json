@@ -4,8 +4,8 @@
 	"private": true,
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules",
-		"lint": "biome check .",
-		"format": "biome format --write .",
+		"format": "prettier --check \"**/*.{ts,tsx}\"",
+		"lint": "eslint .",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
@@ -24,9 +24,20 @@
 		"zod": "^3.24.1"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
+		"@proxed/eslint-config": "workspace:*",
+		"@proxed/prettier-config": "workspace:*",
 		"@types/jsonwebtoken": "^9.0.7",
 		"@types/node": "22.10.7",
 		"tsconfig": "workspace:*"
+	},
+	"prettier": "@proxed/prettier-config",
+	"eslintConfig": {
+		"root": true,
+		"extends": ["@proxed/eslint-config/base", "@proxed/eslint-config/nextjs"]
+	},
+	"typesVersions": {
+		"*": {
+			"*": ["src/*"]
+		}
 	}
 }

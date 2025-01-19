@@ -1,3 +1,3 @@
 export const Cookies = {
-	ProjectsColumns: "projects-columns",
+  ProjectsColumns: "projects-columns",
 };

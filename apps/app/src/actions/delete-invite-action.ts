@@ -6,15 +6,15 @@ import { authActionClient } from "./safe-action";
 import { deleteInviteSchema } from "./schema";
 
 export const deleteInviteAction = authActionClient
-	.schema(deleteInviteSchema)
-	.action(
-		async ({ parsedInput: { id, revalidatePath }, ctx: { supabase } }) => {
-			await deleteTeamInvitation(supabase, id);
+  .schema(deleteInviteSchema)
+  .action(
+    async ({ parsedInput: { id, revalidatePath }, ctx: { supabase } }) => {
+      await deleteTeamInvitation(supabase, id);
 
-			if (revalidatePath) {
-				revalidatePathFunc(revalidatePath);
-			}
+      if (revalidatePath) {
+        revalidatePathFunc(revalidatePath);
+      }
 
-			return id;
-		},
-	);
+      return id;
+    },
+  );

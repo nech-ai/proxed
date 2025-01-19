@@ -2,7 +2,7 @@
 	"recommendations": [
 		"lokalise.i18n-ally",
 		"bradlc.vscode-tailwindcss",
-		"biomejs.biome",
+		"exceptionptr.vscode-prettier-eslint",
 		"ReneSaarsoo.sql-formatter-vsc"
 	]
 }

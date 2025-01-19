@@ -6,12 +6,13 @@
 	"files": ["tailwind.config.ts", "postcss.config.js", "globals.css"],
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules",
-		"lint": "biome check .",
-		"format": "biome format --write .",
+		"format": "prettier --check \"**/*.{ts,tsx}\"",
+		"lint": "eslint .",
 		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
+		"@proxed/eslint-config": "workspace:*",
+		"@proxed/prettier-config": "workspace:*",
 		"@types/mertasan__tailwindcss-variables": "^2.6.4",
 		"@types/node": "22.10.7",
 		"@types/papaparse": "^5.3.15",
@@ -86,5 +87,15 @@
 		"tailwindcss-animate": "^1.0.7",
 		"vaul": "^1.1.2",
 		"zod": "^3.24.1"
+	},
+	"prettier": "@proxed/prettier-config",
+	"eslintConfig": {
+		"root": true,
+		"extends": ["@proxed/eslint-config/base", "@proxed/eslint-config/react"]
+	},
+	"typesVersions": {
+		"*": {
+			"*": ["src/*"]
+		}
 	}
 }

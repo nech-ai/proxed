@@ -6,24 +6,24 @@ import { z } from "zod";
 import { revalidatePath as revalidatePathFunc } from "next/cache";
 
 const schema = z.object({
-	id: z.string(),
-	revalidatePath: z.string().optional(),
+  id: z.string(),
+  revalidatePath: z.string().optional(),
 });
 
 export const deleteDeviceCheckAction = authActionClient
-	.schema(schema)
-	.action(
-		async ({ parsedInput: { id, revalidatePath }, ctx: { supabase } }) => {
-			const { error } = await deleteDeviceCheck(supabase, id);
+  .schema(schema)
+  .action(
+    async ({ parsedInput: { id, revalidatePath }, ctx: { supabase } }) => {
+      const { error } = await deleteDeviceCheck(supabase, id);
 
-			if (error) {
-				throw new Error("Failed to delete device check");
-			}
+      if (error) {
+        throw new Error("Failed to delete device check");
+      }
 
-			if (revalidatePath) {
-				revalidatePathFunc(revalidatePath);
-			}
+      if (revalidatePath) {
+        revalidatePathFunc(revalidatePath);
+      }
 
-			return { success: true };
-		},
-	);
+      return { success: true };
+    },
+  );

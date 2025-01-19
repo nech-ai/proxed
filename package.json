@@ -17,12 +17,14 @@
 		"supabase:reset": "dotenv -c -- bun run --cwd apps/api reset",
 		"supabase:generate": "dotenv -c -- bun run --cwd apps/api generate",
 		"test": "turbo test --parallel",
-		"format": "biome format --write .",
-		"lint": "turbo lint && manypkg check",
-		"typecheck": "turbo typecheck"
+		"format": "turbo format --cache-dir=.turbo --continue -- --cache --cache-location='node_modules/.cache/.prettiercache' --ignore-path='../../.gitignore'",
+    "format:fix": "turbo format --cache-dir=.turbo --continue -- --write --cache --cache-location='node_modules/.cache/.prettiercache' --ignore-path='../../.gitignore'",
+    "lint": "turbo lint --cache-dir=.turbo --continue -- --cache --cache-location 'node_modules/.cache/.eslintcache' && manypkg check",
+    "lint:fix": "turbo lint --cache-dir=.turbo --continue -- --fix --cache --cache-location 'node_modules/.cache/.eslintcache' && manypkg fix",
+    "typecheck": "turbo typecheck --cache-dir=.turbo"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
+		"prettier": "^3.4.2",
 		"@manypkg/cli": "^0.23.0",
 		"dotenv-cli": "^8.0.0",
 		"tsconfig": "workspace:*",

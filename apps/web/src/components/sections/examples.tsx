@@ -3,21 +3,21 @@ import { Section } from "@/components/section";
 import { codeToHtml } from "shiki";
 
 interface FeatureOption {
-	id: number;
-	title: string;
-	comingSoon?: boolean;
-	description: string;
-	code: string;
+  id: number;
+  title: string;
+  comingSoon?: boolean;
+  description: string;
+  code: string;
 }
 
 export const featureOptions: FeatureOption[] = [
-	{
-		id: 1,
-		title: "Vision Structured Response",
-		comingSoon: false,
-		description:
-			"Use proxed.ai to send images from your app for seamless, structured analysis",
-		code: `import UIKit
+  {
+    id: 1,
+    title: "Vision Structured Response",
+    comingSoon: false,
+    description:
+      "Use proxed.ai to send images from your app for seamless, structured analysis",
+    code: `import UIKit
 import DeviceCheck
 
 /// Handles DeviceCheck token retrieval
@@ -89,25 +89,25 @@ actor PlantClassifier {
     }
 }
 `,
-	},
+  },
 ];
 
 export async function Examples() {
-	const features = await Promise.all(
-		featureOptions.map(async (feature) => ({
-			...feature,
-			code: await codeToHtml(feature.code, {
-				lang: "swift",
-				theme: "github-dark",
-			}),
-		})),
-	);
+  const features = await Promise.all(
+    featureOptions.map(async (feature) => ({
+      ...feature,
+      code: await codeToHtml(feature.code, {
+        lang: "swift",
+        theme: "github-dark",
+      }),
+    })),
+  );
 
-	return (
-		<Section id="examples">
-			<div className="border-x border-t">
-				<FeatureSelector features={features} />
-			</div>
-		</Section>
-	);
+  return (
+    <Section id="examples">
+      <div className="border-x border-t">
+        <FeatureSelector features={features} />
+      </div>
+    </Section>
+  );
 }

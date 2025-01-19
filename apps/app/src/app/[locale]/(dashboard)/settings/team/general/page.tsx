@@ -5,27 +5,27 @@ import { getUser } from "@proxed/supabase/cached-queries";
 import { redirect } from "next/navigation";
 
 export async function generateMetadata() {
-	return {
-		title: "Team Settings",
-	};
+  return {
+    title: "Team Settings",
+  };
 }
 
 export default async function TeamSettingsPage() {
-	const userData = await getUser();
+  const userData = await getUser();
 
-	if (!userData?.data) {
-		redirect("/login");
-	}
+  if (!userData?.data) {
+    redirect("/login");
+  }
 
-	if (!userData.data.team) {
-		redirect("/settings/team/general");
-	}
+  if (!userData.data.team) {
+    redirect("/settings/team/general");
+  }
 
-	return (
-		<div className="grid grid-cols-1 gap-6">
-			<ChangeTeamAvatar team={userData.data.team} />
-			<DisplayTeamName teamName={userData.data.team?.name ?? ""} />
-			<DeleteTeam teamId={userData.data.team.id} />
-		</div>
-	);
+  return (
+    <div className="grid grid-cols-1 gap-6">
+      <ChangeTeamAvatar team={userData.data.team} />
+      <DisplayTeamName teamName={userData.data.team?.name ?? ""} />
+      <DeleteTeam teamId={userData.data.team.id} />
+    </div>
+  );
 }

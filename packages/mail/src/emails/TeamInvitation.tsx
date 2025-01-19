@@ -4,35 +4,35 @@ import PrimaryButton from "./components/PrimaryButton";
 import Wrapper from "./components/Wrapper";
 
 export function TeamInvitation({
-	url,
-	teamName,
+  url,
+  teamName,
 }: {
-	url: string;
-	teamName: string;
+  url: string;
+  teamName: string;
 }): JSX.Element {
-	return (
-		<Wrapper>
-			<Heading className="text-xl">
-				Join the team <strong>{teamName}</strong>
-			</Heading>
-			<Text>
-				You have been invited to join the team {teamName}. Click the button
-				below or copy and paste the link into your browser of choice to accept
-				the invitation and join the team.
-			</Text>
+  return (
+    <Wrapper>
+      <Heading className="text-xl">
+        Join the team <strong>{teamName}</strong>
+      </Heading>
+      <Text>
+        You have been invited to join the team {teamName}. Click the button
+        below or copy and paste the link into your browser of choice to accept
+        the invitation and join the team.
+      </Text>
 
-			<PrimaryButton href={url}>Join the team</PrimaryButton>
+      <PrimaryButton href={url}>Join the team</PrimaryButton>
 
-			<Text className="mt-4 text-muted-foreground text-sm">
-				Or manually copy and paste this link into your browser:
-				<Link href={url}>{url}</Link>
-			</Text>
-		</Wrapper>
-	);
+      <Text className="mt-4 text-muted-foreground text-sm">
+        Or manually copy and paste this link into your browser:
+        <Link href={url}>{url}</Link>
+      </Text>
+    </Wrapper>
+  );
 }
 
 TeamInvitation.subjects = {
-	en: "You have been invited to join a team",
+  en: "You have been invited to join a team",
 };
 
 export default TeamInvitation;

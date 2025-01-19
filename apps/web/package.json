@@ -7,8 +7,8 @@
 		"build": "next build",
 		"start": "next start",
 		"clean": "rm -rf .turbo node_modules",
-		"lint": "biome check .",
-		"format": "biome format --write .",
+		"format": "prettier --check \"**/*.{ts,tsx}\"",
+		"lint": "eslint .",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
@@ -49,11 +49,23 @@
 		"vaul": "^1.1.2"
 	},
 	"devDependencies": {
+		"@proxed/eslint-config": "workspace:*",
+		"@proxed/prettier-config": "workspace:*",
 		"@tailwindcss/typography": "^0.5.16",
 		"@types/node": "22.10.7",
 		"@types/react": "19.0.7",
 		"@types/react-dom": "19.0.3",
 		"tailwindcss": "^3.4.17",
 		"tsconfig": "workspace:*"
-	}
+	},
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+			"@proxed/eslint-config/base",
+			"@proxed/eslint-config/nextjs",
+			"@proxed/eslint-config/react",
+			"@proxed/eslint-config/apps"
+		]
+	},
+	"prettier": "@proxed/prettier-config"
 }

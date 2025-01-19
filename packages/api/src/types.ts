@@ -1,8 +1,8 @@
 export interface AuthSession {
-	teamId: string;
-	projectId: string;
+  teamId: string;
+  projectId: string;
 }
 
 export interface AuthMiddlewareVariables {
-	session: AuthSession;
+  session: AuthSession;
 }

@@ -1,32 +1,32 @@
 "use client";
 
 import type {
-	ColumnDef,
-	ColumnFiltersState,
-	SortingState,
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
 } from "@tanstack/react-table";
 import {
-	flexRender,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	useReactTable,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
 
 import type { Tables } from "@proxed/supabase/types";
 import { Button } from "@proxed/ui/components/button";
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@proxed/ui/components/dropdown-menu";
 import {
-	Table,
-	TableBody,
-	TableCell,
-	TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
 } from "@proxed/ui/components/table";
 import { useToast } from "@proxed/ui/hooks/use-toast";
 import { MoreVerticalIcon, TrashIcon } from "lucide-react";
@@ -35,144 +35,144 @@ import { deleteDeviceCheckAction } from "@/actions/delete-device-check-action";
 import { useAction } from "next-safe-action/hooks";
 
 export function DeviceChecksList({
-	deviceChecks,
+  deviceChecks,
 }: {
-	deviceChecks: Partial<Tables<"device_checks">>[];
+  deviceChecks: Partial<Tables<"device_checks">>[];
 }) {
-	const [sorting, setSorting] = useState<SortingState>([]);
-	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-	const { toast } = useToast();
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const { toast } = useToast();
 
-	const deleteDeviceCheck = useAction(deleteDeviceCheckAction, {
-		onSuccess: () => {
-			toast({
-				title: "Device Check deleted",
-				description:
-					"The Device Check configuration has been deleted successfully.",
-			});
-		},
-		onError: (error) => {
-			toast({
-				variant: "destructive",
-				title: "Error",
-				description:
-					error?.error?.serverError || "Failed to delete Device Check",
-			});
-		},
-	});
+  const deleteDeviceCheck = useAction(deleteDeviceCheckAction, {
+    onSuccess: () => {
+      toast({
+        title: "Device Check deleted",
+        description:
+          "The Device Check configuration has been deleted successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          error?.error?.serverError || "Failed to delete Device Check",
+      });
+    },
+  });
 
-	const columns: ColumnDef<Partial<Tables<"device_checks">>>[] = [
-		{
-			accessorKey: "name",
-			header: "Name",
-			cell: ({ row }) => (
-				<div>
-					<strong className="block">{row.original.name}</strong>
-					<small className="text-muted-foreground">
-						{row.original.apple_team_id}
-					</small>
-				</div>
-			),
-		},
-		{
-			accessorKey: "key_id",
-			header: "Key ID",
-		},
-		{
-			accessorKey: "created_at",
-			header: "Created",
-			cell: ({ row }) => (
-				<span>
-					{row.original.created_at
-						? new Date(row.original.created_at).toLocaleDateString()
-						: "N/A"}
-				</span>
-			),
-		},
-		{
-			accessorKey: "actions",
-			header: "",
-			cell: ({ row }) => {
-				return (
-					<div className="flex flex-row justify-end gap-2">
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button size="icon" variant="ghost">
-									<MoreVerticalIcon className="size-4" />
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent>
-								<DropdownMenuItem
-									className="text-destructive"
-									onClick={() => {
-										if (!row.original.id) return;
+  const columns: ColumnDef<Partial<Tables<"device_checks">>>[] = [
+    {
+      accessorKey: "name",
+      header: "Name",
+      cell: ({ row }) => (
+        <div>
+          <strong className="block">{row.original.name}</strong>
+          <small className="text-muted-foreground">
+            {row.original.apple_team_id}
+          </small>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "key_id",
+      header: "Key ID",
+    },
+    {
+      accessorKey: "created_at",
+      header: "Created",
+      cell: ({ row }) => (
+        <span>
+          {row.original.created_at
+            ? new Date(row.original.created_at).toLocaleDateString()
+            : "N/A"}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "actions",
+      header: "",
+      cell: ({ row }) => {
+        return (
+          <div className="flex flex-row justify-end gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="icon" variant="ghost">
+                  <MoreVerticalIcon className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => {
+                    if (!row.original.id) return;
 
-										const loadingToast = toast({
-											variant: "default",
-											description: "Deleting device check...",
-										});
+                    const loadingToast = toast({
+                      variant: "default",
+                      description: "Deleting device check...",
+                    });
 
-										deleteDeviceCheck.execute({
-											id: row.original.id,
-											revalidatePath: "/settings/team/device-check",
-										});
+                    deleteDeviceCheck.execute({
+                      id: row.original.id,
+                      revalidatePath: "/settings/team/device-check",
+                    });
 
-										loadingToast.dismiss();
-									}}
-								>
-									<TrashIcon className="mr-2 size-4" />
-									Delete
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
-					</div>
-				);
-			},
-		},
-	];
+                    loadingToast.dismiss();
+                  }}
+                >
+                  <TrashIcon className="mr-2 size-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    },
+  ];
 
-	const table = useReactTable({
-		data: deviceChecks,
-		columns,
-		manualPagination: true,
-		onSortingChange: setSorting,
-		onColumnFiltersChange: setColumnFilters,
-		getCoreRowModel: getCoreRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		getFilteredRowModel: getFilteredRowModel(),
-		state: {
-			sorting,
-			columnFilters,
-		},
-	});
+  const table = useReactTable({
+    data: deviceChecks,
+    columns,
+    manualPagination: true,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    state: {
+      sorting,
+      columnFilters,
+    },
+  });
 
-	return (
-		<div className="rounded-md border">
-			<Table>
-				<TableBody>
-					{table.getRowModel().rows?.length ? (
-						table.getRowModel().rows.map((row) => (
-							<TableRow
-								key={row.id}
-								data-state={row.getIsSelected() && "selected"}
-							>
-								{row.getVisibleCells().map((cell) => (
-									<TableCell key={cell.id}>
-										{flexRender(cell.column.columnDef.cell, cell.getContext())}
-									</TableCell>
-								))}
-							</TableRow>
-						))
-					) : (
-						<TableRow>
-							<TableCell colSpan={columns.length} className="h-24 text-center">
-								No results.
-							</TableCell>
-						</TableRow>
-					)}
-				</TableBody>
-			</Table>
-		</div>
-	);
+  return (
+    <div className="rounded-md border">
+      <Table>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                No results.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
 }

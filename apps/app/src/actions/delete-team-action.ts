@@ -6,12 +6,12 @@ import { authActionClient } from "./safe-action";
 import { deleteTeamSchema } from "./schema";
 
 export const deleteTeamAction = authActionClient
-	.schema(deleteTeamSchema)
-	.action(async ({ parsedInput: { teamId }, ctx: { user, supabase } }) => {
-		const { data } = await deleteTeam(supabase, teamId);
+  .schema(deleteTeamSchema)
+  .action(async ({ parsedInput: { teamId }, ctx: { user, supabase } }) => {
+    const { data } = await deleteTeam(supabase, teamId);
 
-		revalidateTag(`user_${user.id}`);
-		revalidateTag(`teams_${user.id}`);
+    revalidateTag(`user_${user.id}`);
+    revalidateTag(`teams_${user.id}`);
 
-		return data;
-	});
+    return data;
+  });

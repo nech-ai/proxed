@@ -12,23 +12,18 @@ export const BLUR_FADE_DELAY = 0.15;
 
 export const siteConfig = {
 	name: "proxed.ai",
-	description: "Create AI Agents with just a few lines of code.",
+	description: "Protect your AI API keys with DeviceCheck.",
 	cta: "Get Started",
 	url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-	keywords: [
-		"AI Agent SDK",
-		"Multi-Agent Systems",
-		"Tool Integration",
-		"Workflow Automation",
-	],
+	keywords: ["AI API", "iOS AI Wrapper", "DeviceCheck", "API Protection"],
 	links: {
 		email: "alex@proxed.ai",
-		twitter: "https://twitter.com/nech_ai",
+		twitter: "https://x.com/proxed_ai",
 		github: "https://github.com/nech-ai/proxed",
 	},
 	hero: {
 		title: "proxed.ai",
-		description: "The simplest way to get an API for your AI wrapper on iOS",
+		description: "The simplest way to protect your AI keys on iOS",
 		cta: "Get Started",
 		ctaDescription: "Open-source, free during beta",
 	},
@@ -96,6 +91,8 @@ export const siteConfig = {
 				"DeviceCheck",
 				"Cost monitoring",
 				"Usage monitoring",
+				"Rate Limiting",
+				"Real-Time Logs",
 			],
 			popular: true,
 			cta: "Get Started",
@@ -111,6 +108,8 @@ export const siteConfig = {
 				"DeviceCheck",
 				"Cost monitoring",
 				"Usage monitoring",
+				"Rate Limiting",
+				"Real-Time Logs",
 			],
 			cta: "Get Started",
 		},
@@ -123,7 +122,7 @@ export const siteConfig = {
 			},
 			{
 				icon: <Icons.twitter className="h-5 w-5" />,
-				url: "https://twitter.com/nech_ai",
+				url: "https://x.com/proxed_ai",
 			},
 		],
 		links: [

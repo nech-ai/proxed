@@ -6,6 +6,7 @@ import { getBlogPosts } from "@/lib/blog";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { Section } from "@/components/section";
 
 export async function generateStaticParams() {
 	const posts = getBlogPosts();
@@ -88,7 +89,7 @@ export default async function Page(props: {
 				}}
 			/>
 
-			<div className="max-w-[980px] w-full">
+			<Section id={post.slug}>
 				<div className="border border-gray-800 bg-black/50 p-8 backdrop-blur">
 					<article className="space-y-6">
 						<div className="space-y-4">
@@ -128,7 +129,7 @@ export default async function Page(props: {
 						</div>
 					</article>
 				</div>
-			</div>
+			</Section>
 		</div>
 	);
 }

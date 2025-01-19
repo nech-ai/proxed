@@ -1,5 +1,5 @@
-import { Footer } from "@/components/sections/footer";
 import { Header } from "@/components/sections/header";
+import { Footer } from "@/components/sections/footer";
 
 export default function Layout({
 	children,
@@ -9,9 +9,7 @@ export default function Layout({
 	return (
 		<main>
 			<Header />
-			<div className="container mx-auto px-4 sm:px-6 lg:px-8 flex-1">
-				{children}
-			</div>
+			{children}
 			<Footer />
 		</main>
 	);

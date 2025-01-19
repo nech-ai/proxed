@@ -18,6 +18,7 @@ export const featureOptions: FeatureOption[] = [
 		description:
 			"Use proxed.ai to send images from your app for seamless, structured analysis",
 		code: `import Foundation
+import DeviceCheck
 
 // Example: Making a request to your Proxed.ai endpoint
 func fetchChatResponse(prompt: String, completion: @escaping (String?) -> Void) {

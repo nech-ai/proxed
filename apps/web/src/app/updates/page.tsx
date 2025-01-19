@@ -1,5 +1,6 @@
 import { Article } from "@/components/article";
 import { UpdatesToolbar } from "@/components/updates-toolbar";
+import { Section } from "@/components/section";
 import { getBlogPosts } from "@/lib/blog";
 import { generateMetadata } from "@/lib/metadata";
 
@@ -25,17 +26,16 @@ export default async function Page() {
 		));
 
 	return (
-		<div className="flex justify-center py-4 md:py-12">
-			<div className="max-w-[980px] w-full">
-				<div className="space-y-16">{posts}</div>
-			</div>
-
-			<UpdatesToolbar
-				posts={data.map((post) => ({
-					slug: post.slug,
-					title: post.metadata.title,
-				}))}
-			/>
+		<div className="flex justify-center py-12">
+			<Section id="updates" className="flex gap-8">
+				<div className="space-y-16 flex-1">{posts}</div>
+				<UpdatesToolbar
+					posts={data.map((post) => ({
+						slug: post.slug,
+						title: post.metadata.title,
+					}))}
+				/>
+			</Section>
 		</div>
 	);
 }

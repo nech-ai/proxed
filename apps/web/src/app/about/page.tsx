@@ -1,3 +1,4 @@
+import { Section } from "@/components/section";
 import { generateMetadata } from "@/lib/metadata";
 import Image from "next/image";
 
@@ -10,25 +11,26 @@ export const metadata = generateMetadata({
 
 export default function Page() {
 	return (
-		<div className="flex justify-center py-24 md:py-32">
-			<div className="max-w-[980px] w-full">
-				<div className="border border-gray-800 bg-black/50 p-8 backdrop-blur">
+		<div className="flex justify-center py-12">
+			<Section id="about">
+				<div className="border p-8 backdrop-blur">
 					<h1 className="font-medium text-center text-5xl mb-16 leading-snug bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-						From Energy Tech to AI: <br />A Builder's Journey
+						Building the Future of AI Access
 					</h1>
 
 					<div className="space-y-12">
 						<section>
 							<h3 className="font-medium text-xl mb-4 bg-gradient-to-r from-purple-400 to-purple-200 bg-clip-text text-transparent">
-								The Journey
+								Our Mission
 							</h3>
 							<p className="text-gray-400 leading-relaxed">
-								As a co-founder and CTO of a leading SaaS company in the UK
-								energy sector, I've experienced firsthand the transformative
-								power of technology. After successfully building and selling our
-								company, I gained invaluable insights into creating products
-								that truly matter. But throughout this journey, I noticed a
-								persistent challenge that kept surfacing.
+								Proxed.ai was created to solve a common issue: while AI
+								continues to revolutionise industries, integrating it securely
+								and easily into apps remains a challenge. Drawing on experience
+								from building successful technology in other sectors, we saw the
+								need for a streamlined approach—where developers can focus on
+								building great features instead of wrestling with device
+								verification, API credentials, or complicated response handling.
 							</p>
 						</section>
 
@@ -37,12 +39,20 @@ export default function Page() {
 								Open Source First
 							</h3>
 							<p className="text-gray-400 leading-relaxed mb-12">
-								I believe that the future of AI tooling should be built in the
-								open, with transparency and community at its heart. That's why
-								Proxed is open source. We're creating a platform that not only
-								solves today's challenges but evolves with the community's
-								needs, fostering innovation and collaboration in the rapidly
-								advancing world of AI.
+								At its core, Proxed.ai is open source. We believe AI tooling
+								should be transparent, community-driven, and built to address
+								real-world problems. By offering a simple way to add DeviceCheck
+								verification, manage API keys safely, and shape responses via an
+								intuitive schema builder, Proxed.ai lets teams adopt AI faster
+								while preserving control over their data and costs.
+							</p>
+							<p className="text-gray-400 leading-relaxed">
+								We're committed to evolving with the community, embracing
+								collaboration, and keeping developers at the heart of
+								innovation. Whether you're adding AI to a new app or
+								strengthening an existing product, Proxed.ai is here to make
+								secure, structured integration effortless—so you can focus on
+								delivering the best experience possible.
 							</p>
 						</section>
 
@@ -68,7 +78,7 @@ export default function Page() {
 						</div>
 					</div>
 				</div>
-			</div>
+			</Section>
 		</div>
 	);
 }

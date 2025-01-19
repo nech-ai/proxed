@@ -1,16 +1,16 @@
 import { Header } from "@/components/sections/header";
 import { Footer } from "@/components/sections/footer";
 
-export default function AboutLayout({
+export default function Layout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
 	return (
-		<div className="flex flex-col">
+		<main>
 			<Header />
 			{children}
 			<Footer />
-		</div>
+		</main>
 	);
 }

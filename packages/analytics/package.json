@@ -1,0 +1,28 @@
+{
+	"name": "@proxed/analytics",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"clean": "rm -rf .turbo node_modules",
+		"lint": "biome check .",
+		"format": "biome format --write .",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@openpanel/nextjs": "^1.0.7",
+		"@vercel/functions": "^1.5.2",
+		"next": "15.1.5"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@types/node": "22.10.7",
+		"@types/react": "19.0.7",
+		"@types/react-dom": "19.0.3",
+		"tsconfig": "workspace:*"
+	},
+	"exports": {
+		"./server": "./src/server.ts",
+		"./client": "./src/client.tsx",
+		"./events": "./src/events.ts"
+	}
+}

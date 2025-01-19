@@ -1,0 +1,26 @@
+name: Validate code and run tests
+
+on: push
+
+jobs:
+  lint:
+    name: Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install
+      - name: Run Lint
+        run: bun lint
+      - name: Run TypeScript
+        run: bun typecheck
+
+  monorepo-lint:
+    name: Monorepo lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: QuiiBz/sherif@v1

@@ -1,0 +1,29 @@
+{
+	"name": "@proxed/structure",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"clean": "rm -rf .turbo node_modules",
+		"lint": "biome check .",
+		"format": "biome format --write .",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"test:watch": "vitest"
+	},
+	"dependencies": {
+		"zod": "^3.24.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@testing-library/dom": "^10.4.0",
+		"@testing-library/react": "^16.2.0",
+		"@testing-library/user-event": "^14.6.0",
+		"@types/node": "22.10.7",
+		"@types/react": "19.0.7",
+		"@types/react-dom": "19.0.3",
+		"@vitejs/plugin-react": "^4.3.4",
+		"tsconfig": "workspace:*",
+		"vite-tsconfig-paths": "^5.1.4",
+		"vitest": "^3.0.2"
+	}
+}

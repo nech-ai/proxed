@@ -1,0 +1,45 @@
+{
+	"dependencies": {
+		"@react-email/components": "^0.0.32",
+		"@react-email/render": "^1.0.4",
+		"lodash-es": "^4.17.21",
+		"next-intl": "^3.26.3",
+		"nodemailer": "^6.9.16",
+		"react": "19.0.0",
+		"react-dom": "19.0.0",
+		"react-email": "^3.0.6",
+		"use-intl": "^3.26.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@proxed/ui": "workspace:*",
+		"@tailwindcss/line-clamp": "^0.4.4",
+		"@types/lodash-es": "^4.17.12",
+		"@types/node": "22.10.7",
+		"@types/nodemailer": "^6.4.17",
+		"@types/react": "19.0.7",
+		"@types/react-dom": "19.0.3",
+		"tsconfig": "workspace:*",
+		"typescript": "5.7.3"
+	},
+	"main": "./src/index.ts",
+	"name": "@proxed/mail",
+	"exports": {
+		".": "./src/index.ts",
+		"./emails/*": "./src/emails/*",
+		"./util/*": "./src/util/*",
+		"./provider/*": "./src/provider/*"
+	},
+	"scripts": {
+		"export": "email export --dir ./src/emails",
+		"clean": "rm -rf .turbo node_modules",
+		"lint": "biome check .",
+		"format": "biome format --write .",
+		"typecheck": "tsc --noEmit",
+		"dev": "email dev -p 3003 --dir ./src/emails",
+		"build": "email build --dir ./src/emails",
+		"start": "email start --dir ./src/emails"
+	},
+	"types": "./src/index.ts",
+	"version": "0.0.0"
+}

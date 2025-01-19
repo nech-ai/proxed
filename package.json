@@ -1,0 +1,34 @@
+{
+	"name": "proxed",
+	"private": true,
+	"workspaces": ["packages/*", "apps/*", "tooling/*"],
+	"scripts": {
+		"build": "turbo build",
+		"clean": "git clean -xdf node_modules",
+		"clean:workspaces": "turbo clean",
+		"dev": "dotenv -c -- turbo dev --parallel",
+		"dev:web": "dotenv -c -- turbo dev --filter=@proxed/web",
+		"dev:app": "dotenv -c -- turbo dev --filter=@proxed/app",
+		"dev:api": "dotenv -c -- turbo dev --filter=@proxed/api",
+		"dev:email": "dotenv -c -- turbo dev --filter=@proxed/mail",
+		"start:web": "dotenv -c -- turbo start --filter=@proxed/web",
+		"start:app": "dotenv -c -- turbo start --filter=@proxed/app",
+		"supabase:start": "dotenv -c -- bun run --cwd apps/api dev",
+		"supabase:reset": "dotenv -c -- bun run --cwd apps/api reset",
+		"supabase:generate": "dotenv -c -- bun run --cwd apps/api generate",
+		"test": "turbo test --parallel",
+		"format": "biome format --write .",
+		"lint": "turbo lint && manypkg check",
+		"typecheck": "turbo typecheck"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@manypkg/cli": "^0.23.0",
+		"dotenv-cli": "^8.0.0",
+		"tsconfig": "workspace:*",
+		"turbo": "^2.3.3",
+		"type-fest": "^4.32.0",
+		"typescript": "5.7.3"
+	},
+	"packageManager": "bun@1.1.43"
+}

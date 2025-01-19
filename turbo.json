@@ -1,0 +1,59 @@
+{
+	"$schema": "https://turborepo.org/schema.json",
+	"globalDependencies": ["**/.env.*local"],
+	"globalEnv": [
+		"NODE_ENV",
+		"PORT",
+		"NEXT_PUBLIC_SITE_URL",
+		"VERCEL_URL",
+		"SUPABASE_SERVICE_KEY",
+		"SUPABASE_API_KEY",
+		"RESEND_API_KEY",
+		"OPENAI_API_KEY",
+		"ANTHROPIC_API_KEY",
+		"GROQ_API_KEY",
+		"MISTRAL_API_KEY",
+		"XAI_API_KEY",
+		"GOOGLE_API_KEY",
+		"PROJECT_ID",
+		"GOOGLE_CLIENT_ID",
+		"GOOGLE_SECRET",
+		"RESEND_AUDIENCE_ID",
+		"RESEND_API_KEY"
+	],
+	"ui": "stream",
+	"tasks": {
+		"topo": {
+			"dependsOn": ["^topo"]
+		},
+		"build": {
+			"dependsOn": ["^build"],
+			"outputs": [".next/**", "!.next/cache/**", "next-env.d.ts", ".expo/**"]
+		},
+		"start": {
+			"cache": false
+		},
+		"test": {
+			"cache": false
+		},
+		"clean": {
+			"cache": false
+		},
+		"dev": {
+			"inputs": ["$TURBO_DEFAULT$", ".env"],
+			"persistent": true,
+			"cache": false
+		},
+		"jobs": {
+			"persistent": true,
+			"cache": false
+		},
+		"lint": {
+			"dependsOn": ["^topo"]
+		},
+		"typecheck": {
+			"dependsOn": ["^topo"],
+			"outputs": ["node_modules/.cache/tsbuildinfo.json"]
+		}
+	}
+}

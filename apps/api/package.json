@@ -1,0 +1,18 @@
+{
+	"name": "@proxed/api",
+	"private": true,
+	"scripts": {
+		"dev": "supabase start",
+		"login": "supabase login",
+		"migrate": "supabase migration up",
+		"seed": "supabase db seed generate && supabase db seed run",
+		"reset": "supabase db reset",
+		"generate": "supabase gen types --lang=typescript --local --schema public > ../../packages/supabase/src/types/db.generated.ts",
+		"generate-functions": "supabase gen types --lang=typescript --local --schema functions > ../../packages/supabase/src/types/functions.generated.ts",
+		"functions": "supabase functions serve",
+		"clean": "rm -rf .turbo node_modules"
+	},
+	"dependencies": {
+		"supabase": "^2.6.8"
+	}
+}

@@ -1,0 +1,36 @@
+project_id = "proxed"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage"]
+extra_search_path = ["public"]
+max_rows = 100
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = [
+    "https://localhost:3000",
+    "http://localhost:54321/auth/v1/callback",
+    "http://localhost:3000/auth/token"
+]
+jwt_expiry = 3600
+
+[db]
+port = 54322
+
+[studio]
+port = 54323
+openai_api_key = "env(OPENAI_API_KEY)"
+
+
+[auth.email]
+double_confirm_changes = true
+enable_confirmations = true
+enable_signup = true
+
+[analytics]
+enabled = true
+port = 54327
+vector_port = 54328
+backend = "postgres"

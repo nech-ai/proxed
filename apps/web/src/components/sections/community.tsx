@@ -25,8 +25,8 @@ export function Community() {
 				<Ripple />
 				<div className="p-6 text-center py-12">
 					<p className="text-muted-foreground mb-6 text-balance max-w-prose mx-auto font-medium">
-						Join our open-source family on GitHub. We value every
-						contributor - your pull request might shape the future of proxed.ai!
+						Join our open-source family on GitHub. We value every contributor -
+						your pull request might shape the future of proxed.ai!
 					</p>
 					<div className="flex justify-center -space-x-6 mb-8">
 						{contributors.map((contributor, index) => (

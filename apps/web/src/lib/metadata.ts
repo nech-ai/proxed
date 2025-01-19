@@ -21,7 +21,8 @@ export function generateMetadata({
 	const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 	const fullUrl = `${baseUrl}${normalizedPath}`;
 
-	const defaultTitle = "Proxed.AI - Secure iOS API with DeviceCheck for AI Models";
+	const defaultTitle =
+		"Proxed.AI - Secure iOS API with DeviceCheck for AI Models";
 	const defaultDescription =
 		"Build secure AI wrappers with Proxed.AI - an iOS SDK with Apple DeviceCheck integration that safely manages API keys and unifies ChatGPT, Claude, LLaMA, and Mistral models. Start building for free during Beta.";
 
@@ -128,7 +129,7 @@ export const jsonLd = {
 		ratingCount: "1",
 	},
 	url: "https://proxed.ai",
-	image: "https://proxed.ai/og",
+	image: "https://proxed.ai/icon.png",
 	applicationSuite: "Secure AI SDK",
 	featureList:
 		"Apple DeviceCheck Integration, Secure Key Management, Key Rotation, ChatGPT Integration, Claude Integration, LLaMA Integration, Vision Structured Response, iOS Development",

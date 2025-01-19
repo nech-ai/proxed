@@ -89,7 +89,7 @@ export default async function Page(props: {
 			/>
 
 			<div className="max-w-[980px] w-full">
-				<div className="rounded-xl border border-gray-800 bg-black/50 p-8 backdrop-blur">
+				<div className="border border-gray-800 bg-black/50 p-8 backdrop-blur">
 					<article className="space-y-6">
 						<div className="space-y-4">
 							<PostStatus status={post.metadata.tag} />
@@ -116,7 +116,7 @@ export default async function Page(props: {
 										alt={post.metadata.title}
 										width={680}
 										height={442}
-										className="transition-transform hover:scale-105 duration-500"
+										className="transition-transform hover:scale-105 duration-500 cover"
 									/>
 								</div>
 							)}

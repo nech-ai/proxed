@@ -2,6 +2,7 @@ import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@proxed/ui/utils";
 import { Geist, Geist_Mono } from "next/font/google";
+import PlausibleProvider from "next-plausible";
 import type { Viewport } from "next";
 import "@proxed/ui/globals.css";
 import { generateMetadata, jsonLd } from "@/lib/metadata";
@@ -39,6 +40,7 @@ export default function RootLayout({
 			className={`${sansFont.variable} ${monoFont.variable}`}
 		>
 			<head>
+				<PlausibleProvider domain="proxed.ai" />
 				<script
 					type="application/ld+json"
 					// biome-ignore lint/security/noDangerouslySetInnerHtml: known good

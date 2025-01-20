@@ -128,6 +128,7 @@ export const siteConfig = {
 		links: [
 			{ text: "About", url: "/about" },
 			{ text: "Updates", url: "/updates" },
+			{ text: "Docs", url: "/docs" },
 			{ text: "Privacy Policy", url: "/legal/privacy" },
 			{ text: "Terms of Service", url: "/legal/terms" },
 			{ text: "Cookie Policy", url: "/legal/cookies" },

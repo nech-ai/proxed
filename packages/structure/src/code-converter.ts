@@ -56,8 +56,8 @@ function buildBaseSnippet(
 
 		case "array": {
 			let code = `z.array(${recurse(def.itemType)})`;
-			if (def.minLength !== undefined) code += `.min(${def.minLength})`;
-			if (def.maxLength !== undefined) code += `.max(${def.maxLength})`;
+			if (def.minItems !== undefined) code += `.min(${def.minItems})`;
+			if (def.maxItems !== undefined) code += `.max(${def.maxItems})`;
 			return code;
 		}
 

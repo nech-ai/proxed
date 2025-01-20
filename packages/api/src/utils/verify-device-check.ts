@@ -1,7 +1,7 @@
-import jwt from "jsonwebtoken";
-import axios from "axios";
-import type { Tables } from "@proxed/supabase/types";
 import { randomUUID } from "node:crypto";
+import type { Tables } from "@proxed/supabase/types";
+import axios from "axios";
+import jwt from "jsonwebtoken";
 
 export async function verifyDeviceCheckToken(
 	deviceToken: Buffer,

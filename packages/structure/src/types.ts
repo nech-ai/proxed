@@ -46,6 +46,8 @@ export interface BooleanJsonSchema extends BaseJsonSchema {
 export interface ArrayJsonSchema extends BaseJsonSchema {
 	type: "array";
 	itemType: JsonSchema;
+	minItems?: number;
+	maxItems?: number;
 }
 
 export interface ObjectJsonSchema extends BaseJsonSchema {

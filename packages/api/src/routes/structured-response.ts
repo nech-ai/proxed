@@ -1,12 +1,12 @@
-import { Hono } from "hono";
-import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
-import { describeRoute } from "hono-openapi";
+import { type JsonSchema, jsonToZod } from "@proxed/structure";
 import { createClient } from "@proxed/supabase/api";
 import { getProjectQuery } from "@proxed/supabase/queries";
-import { type JsonSchema, jsonToZod } from "@proxed/structure";
-import type { AuthMiddlewareVariables } from "../types";
+import { generateObject } from "ai";
+import { Hono } from "hono";
+import { describeRoute } from "hono-openapi";
 import { authMiddleware } from "../middleware/auth";
+import type { AuthMiddlewareVariables } from "../types";
 
 export const structuredResponseRouter = new Hono<{
 	Variables: AuthMiddlewareVariables;

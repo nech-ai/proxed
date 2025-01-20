@@ -1,13 +1,5 @@
 {
 	"extends": "tsconfig/react-library.json",
-	"compilerOptions": {
-		"allowImportingTsExtensions": true,
-		"baseUrl": ".",
-		"paths": {
-			"@proxed/mail/*": ["./src/*"],
-			"@config": ["../../config"]
-		}
-	},
-	"include": ["src"],
-	"exclude": ["node_modules"]
+	"include": ["**/*.ts", "**/*.tsx"],
+	"exclude": ["dist", "build", "node_modules"]
 }

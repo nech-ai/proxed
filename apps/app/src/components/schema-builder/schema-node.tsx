@@ -62,6 +62,7 @@ function FieldHeader({
 				</span>
 				{description ? (
 					<button
+						type="button"
 						onClick={(e) => {
 							e.stopPropagation();
 							onDescriptionClick?.();
@@ -72,6 +73,7 @@ function FieldHeader({
 					</button>
 				) : (
 					<button
+						type="button"
 						onClick={(e) => {
 							e.stopPropagation();
 							onDescriptionClick?.();

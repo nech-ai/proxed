@@ -6,6 +6,8 @@ import PlausibleProvider from "next-plausible";
 import type { Viewport } from "next";
 import "@proxed/ui/globals.css";
 import { generateMetadata, jsonLd } from "@/lib/metadata";
+import { I18nProvider as FumadocsI18nProvider } from "fumadocs-ui/i18n";
+import { RootProvider as FumadocsRootProvider } from "fumadocs-ui/provider";
 
 export const metadata = generateMetadata();
 export const viewport: Viewport = {
@@ -59,8 +61,12 @@ export default function RootLayout({
 					defaultTheme="dark"
 					enableSystem={false}
 				>
-					{children}
-					<TailwindIndicator />
+					<FumadocsRootProvider>
+						<FumadocsI18nProvider locale="en">
+							{children}
+							<TailwindIndicator />
+						</FumadocsI18nProvider>
+					</FumadocsRootProvider>
 				</ThemeProvider>
 			</body>
 		</html>

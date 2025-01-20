@@ -18,9 +18,6 @@
 				"noExplicitAny": "off",
 				"noArrayIndexKey": "off"
 			},
-			"style": {
-				"noNonNullAssertion": "off"
-			},
 			"complexity": {
 				"noForEach": "off"
 			},
@@ -28,8 +25,12 @@
 				"useExhaustiveDependencies": "off",
 				"noUnusedImports": "error"
 			},
-			"nursery": {
-				"useSortedClasses": "off"
+			"style": {
+				"noNonNullAssertion": "off",
+				"noUnusedTemplateLiteral": {
+					"level": "error",
+					"fix": "safe"
+				}
 			}
 		}
 	},
@@ -43,9 +44,10 @@
 			".turbo",
 			"node_modules/*",
 			".content-collections",
-			".expo",
-			"apps/mobile/ios/**/*",
-			"apps/mobile/android/**/*"
+			"dist"
 		]
+	},
+	"javascript": {
+		"jsxRuntime": "reactClassic"
 	}
 }

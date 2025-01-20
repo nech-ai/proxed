@@ -12,6 +12,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@fumadocs/content-collections": "^1.1.6",
 		"@proxed/analytics": "workspace:*",
 		"@proxed/ui": "workspace:*",
 		"@proxed/utils": "workspace:*",
@@ -24,7 +25,10 @@
 		"@splinetool/runtime": "^1.9.59",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
+		"content-collections": "^0.1.3",
 		"framer-motion": "^11.18.1",
+		"fumadocs-core": "^14.7.6",
+		"fumadocs-ui": "^14.7.6",
 		"geist": "^1.3.1",
 		"lucide-react": "^0.473.0",
 		"next": "15.1.5",
@@ -49,10 +53,18 @@
 		"vaul": "^1.1.2"
 	},
 	"devDependencies": {
+		"@content-collections/core": "^0.8.0",
+		"@content-collections/mdx": "^0.2.0",
+		"@content-collections/next": "^0.2.4",
+		"@mdx-js/mdx": "^3.1.0",
+		"@shikijs/rehype": "^1.27.2",
 		"@tailwindcss/typography": "^0.5.16",
+		"@types/mdx": "^2.0.13",
 		"@types/node": "22.10.7",
 		"@types/react": "19.0.7",
 		"@types/react-dom": "19.0.3",
+		"markdown-toc": "^1.2.0",
+		"mdx": "^0.3.1",
 		"tailwindcss": "^3.4.17",
 		"tsconfig": "workspace:*"
 	}

@@ -131,7 +131,7 @@ export function zodToJson(schema: z.ZodTypeAny): ZodToJsonResult {
 				const fields: Record<string, JsonSchema> = {};
 
 				for (const [key, value] of Object.entries(shape)) {
-					const fieldSchema = zodToJson(value);
+					const fieldSchema = zodToJson(value as z.ZodTypeAny);
 					if (!fieldSchema.success) {
 						return fieldSchema;
 					}
@@ -273,11 +273,11 @@ export function jsonToZod(def: JsonSchema): JsonToZodResult {
 			case "array": {
 				const itemSchema = jsonToZod(def.itemType);
 				if (!itemSchema.success) return itemSchema;
-				schema = z.array(itemSchema.data);
-				if (def.minLength !== undefined)
-					schema = (schema as z.ZodArray<any>).min(def.minLength);
-				if (def.maxLength !== undefined)
-					schema = (schema as z.ZodArray<any>).max(def.maxLength);
+				schema = z.array(itemSchema.data!);
+				if (def.minItems !== undefined)
+					schema = (schema as z.ZodArray<any>).min(def.minItems);
+				if (def.maxItems !== undefined)
+					schema = (schema as z.ZodArray<any>).max(def.maxItems);
 				break;
 			}
 

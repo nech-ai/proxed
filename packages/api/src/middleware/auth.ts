@@ -1,8 +1,8 @@
-import { createMiddleware } from "hono/factory";
-import { verifyDeviceCheckToken } from "../utils/verify-device-check";
-import { getProjectQuery } from "@proxed/supabase/queries";
 import { createClient } from "@proxed/supabase/api";
+import { getProjectQuery } from "@proxed/supabase/queries";
+import { createMiddleware } from "hono/factory";
 import type { AuthMiddlewareVariables } from "../types";
+import { verifyDeviceCheckToken } from "../utils/verify-device-check";
 
 export const authMiddleware = createMiddleware<{
 	Variables: AuthMiddlewareVariables;

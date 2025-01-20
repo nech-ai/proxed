@@ -6,24 +6,24 @@ import { getUser } from "@proxed/supabase/cached-queries";
 import { redirect } from "next/navigation";
 
 export async function generateMetadata() {
-  return {
-    title: "Account Settings",
-  };
+	return {
+		title: "Account Settings",
+	};
 }
 
 export default async function AccountSettingsPage() {
-  const userData = await getUser();
+	const userData = await getUser();
 
-  if (!userData?.data) {
-    redirect("/login");
-  }
+	if (!userData?.data) {
+		redirect("/login");
+	}
 
-  return (
-    <div className="grid grid-cols-1 gap-6">
-      <ChangeAvatar user={userData.data} />
-      <DisplayName fullName={userData.data.full_name ?? ""} />
-      <ChangeEmail email={userData.data.email ?? ""} />
-      <DeleteAccount />
-    </div>
-  );
+	return (
+		<div className="grid grid-cols-1 gap-6">
+			<ChangeAvatar user={userData.data} />
+			<DisplayName fullName={userData.data.full_name ?? ""} />
+			<ChangeEmail email={userData.data.email ?? ""} />
+			<DeleteAccount />
+		</div>
+	);
 }

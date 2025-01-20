@@ -4,8 +4,8 @@
 	"private": true,
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules",
-		"format": "prettier --check \"**/*.{ts,tsx}\"",
-		"lint": "eslint .",
+		"lint": "biome check .",
+		"format": "biome format --write .",
 		"typecheck": "tsc --noEmit",
 		"test": "vitest run",
 		"test:watch": "vitest"
@@ -14,8 +14,7 @@
 		"zod": "^3.24.1"
 	},
 	"devDependencies": {
-		"@proxed/eslint-config": "workspace:*",
-		"@proxed/prettier-config": "workspace:*",
+		"@biomejs/biome": "1.9.4",
 		"@testing-library/dom": "^10.4.0",
 		"@testing-library/react": "^16.2.0",
 		"@testing-library/user-event": "^14.6.0",
@@ -26,15 +25,5 @@
 		"tsconfig": "workspace:*",
 		"vite-tsconfig-paths": "^5.1.4",
 		"vitest": "^3.0.2"
-	},
-	"prettier": "@proxed/prettier-config",
-	"eslintConfig": {
-		"root": true,
-		"extends": ["@proxed/eslint-config/base", "@proxed/eslint-config/nextjs"]
-	},
-	"typesVersions": {
-		"*": {
-			"*": ["src/*"]
-		}
 	}
 }

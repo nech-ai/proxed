@@ -4,8 +4,8 @@
 	"private": true,
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules",
-		"format": "prettier --check \"**/*.{ts,tsx}\"",
-		"lint": "eslint .",
+		"lint": "biome check .",
+		"format": "biome format --write .",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
@@ -18,8 +18,6 @@
 		"supabase": "^2.6.8"
 	},
 	"devDependencies": {
-		"@proxed/eslint-config": "workspace:*",
-		"@proxed/prettier-config": "workspace:*",
 		"@supabase/supabase-js": "^2.47.16",
 		"typescript": "5.7.3"
 	},
@@ -33,15 +31,5 @@
 		"./types": "./src/types/index.ts",
 		"./cached-queries": "./src/queries/cached-queries.ts",
 		"./storage": "./src/utils/storage.ts"
-	},
-	"prettier": "@proxed/prettier-config",
-	"eslintConfig": {
-		"root": true,
-		"extends": ["@proxed/eslint-config/base", "@proxed/eslint-config/nextjs"]
-	},
-	"typesVersions": {
-		"*": {
-			"*": ["src/*"]
-		}
 	}
 }

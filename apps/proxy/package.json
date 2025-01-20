@@ -15,8 +15,7 @@
 		"zod": "^3.24.1"
 	},
 	"devDependencies": {
-		"@proxed/eslint-config": "workspace:*",
-		"@proxed/prettier-config": "workspace:*",
+		"@biomejs/biome": "1.9.4",
 		"@proxed/logger": "workspace:*",
 		"@types/node": "22.10.7",
 		"tsconfig": "workspace:*"
@@ -27,18 +26,9 @@
 		"build": "next build",
 		"dev": "next dev -p 3004",
 		"clean": "rm -rf .turbo node_modules",
-		"format": "prettier --check \"**/*.{ts,tsx}\"",
-		"lint": "eslint .",
+		"lint": "biome check .",
+		"format": "biome format --write .",
 		"typecheck": "tsc --noEmit"
 	},
-	"version": "0.1.0",
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-			"@proxed/eslint-config/base",
-			"@proxed/eslint-config/nextjs",
-			"@proxed/eslint-config/apps"
-		]
-	},
-	"prettier": "@proxed/prettier-config"
+	"version": "0.1.0"
 }

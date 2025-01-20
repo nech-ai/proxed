@@ -6,38 +6,38 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function GET(
-  request: Request,
-  { params }: { params: { code: string } },
+	request: Request,
+	{ params }: { params: { code: string } },
 ) {
-  const { code } = params;
-  if (!code) {
-    return redirect("/login?error=invitation-not-found");
-  }
-  const supabase = await createClient();
-  const supaSupabase = await createSuperClient();
+	const { code } = params;
+	if (!code) {
+		return redirect("/login?error=invitation-not-found");
+	}
+	const supabase = await createClient();
+	const supaSupabase = await createSuperClient();
 
-  const invitation = await getTeamInviteQuery(supaSupabase, code);
-  if (!invitation.data) {
-    return redirect("/login?error=invitation-not-found");
-  }
+	const invitation = await getTeamInviteQuery(supaSupabase, code);
+	if (!invitation.data) {
+		return redirect("/login?error=invitation-not-found");
+	}
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+	const {
+		data: { session },
+	} = await supabase.auth.getSession();
 
-  if (!session) {
-    const { data: existingUser } = await supaSupabase
-      .from("users")
-      .select("id")
-      .eq("email", invitation.data.email)
-      .single();
+	if (!session) {
+		const { data: existingUser } = await supaSupabase
+			.from("users")
+			.select("id")
+			.eq("email", invitation.data.email)
+			.single();
 
-    const authPath = existingUser ? "login" : "signup";
-    return redirect(
-      `/${authPath}?invitationCode=${invitation.data.id}&email=${encodeURIComponent(
-        invitation.data.email,
-      )}`,
-    );
-  }
-  return redirect(`/teams/accept-invitation?code=${invitation.data.id}`);
+		const authPath = existingUser ? "login" : "signup";
+		return redirect(
+			`/${authPath}?invitationCode=${invitation.data.id}&email=${encodeURIComponent(
+				invitation.data.email,
+			)}`,
+		);
+	}
+	return redirect(`/teams/accept-invitation?code=${invitation.data.id}`);
 }

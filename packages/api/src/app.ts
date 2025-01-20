@@ -16,31 +16,31 @@ app.route("/", healthRouter);
 app.route("/openai", structuredResponseRouter);
 
 app.get(
-  "/openapi",
-  openAPISpecs(app, {
-    documentation: {
-      info: {
-        title: "Proxy API",
-        version: "1.0.0",
-      },
-      servers: [
-        {
-          url: getBaseUrl(),
-          description: "API server",
-        },
-      ],
-    },
-  }),
+	"/openapi",
+	openAPISpecs(app, {
+		documentation: {
+			info: {
+				title: "Proxy API",
+				version: "1.0.0",
+			},
+			servers: [
+				{
+					url: getBaseUrl(),
+					description: "API server",
+				},
+			],
+		},
+	}),
 );
 
 app.get(
-  "/docs",
-  apiReference({
-    theme: "saturn",
-    spec: {
-      url: "/api/openapi",
-    },
-  }),
+	"/docs",
+	apiReference({
+		theme: "saturn",
+		spec: {
+			url: "/api/openapi",
+		},
+	}),
 );
 
 export type AppRouter = typeof app;

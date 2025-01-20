@@ -3,22 +3,22 @@ import { DeviceChecksBlock } from "@/components/settings/team/device-checks/devi
 import { getDeviceChecks } from "@proxed/supabase/cached-queries";
 
 export async function generateMetadata() {
-  return {
-    title: "Device Checks",
-  };
+	return {
+		title: "Device Checks",
+	};
 }
 
 export default async function Page() {
-  const deviceChecks = await getDeviceChecks();
+	const deviceChecks = await getDeviceChecks();
 
-  if (!deviceChecks?.data) {
-    return <div>No device checks found</div>;
-  }
+	if (!deviceChecks || !deviceChecks.data) {
+		return <div>No device checks found</div>;
+	}
 
-  return (
-    <div className="grid grid-cols-1 gap-6">
-      <DeviceCheckCreateForm revalidatePath="/settings/team/device-check" />
-      <DeviceChecksBlock deviceChecks={deviceChecks.data} />
-    </div>
-  );
+	return (
+		<div className="grid grid-cols-1 gap-6">
+			<DeviceCheckCreateForm revalidatePath="/settings/team/device-check" />
+			<DeviceChecksBlock deviceChecks={deviceChecks.data} />
+		</div>
+	);
 }

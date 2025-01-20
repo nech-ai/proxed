@@ -11,8 +11,7 @@
 		"use-intl": "^3.26.3"
 	},
 	"devDependencies": {
-		"@proxed/eslint-config": "workspace:*",
-		"@proxed/prettier-config": "workspace:*",
+		"@biomejs/biome": "1.9.4",
 		"@proxed/ui": "workspace:*",
 		"@tailwindcss/line-clamp": "^0.4.4",
 		"@types/lodash-es": "^4.17.12",
@@ -34,23 +33,13 @@
 	"scripts": {
 		"export": "email export --dir ./src/emails",
 		"clean": "rm -rf .turbo node_modules",
-		"format": "prettier --check \"**/*.{ts,tsx}\"",
-		"lint": "eslint .",
+		"lint": "biome check .",
+		"format": "biome format --write .",
 		"typecheck": "tsc --noEmit",
 		"dev": "email dev -p 3003 --dir ./src/emails",
 		"build": "email build --dir ./src/emails",
 		"start": "email start --dir ./src/emails"
 	},
 	"types": "./src/index.ts",
-	"version": "0.0.0",
-	"prettier": "@proxed/prettier-config",
-	"eslintConfig": {
-		"root": true,
-		"extends": ["@proxed/eslint-config/base", "@proxed/eslint-config/react"]
-	},
-	"typesVersions": {
-		"*": {
-			"*": ["src/*"]
-		}
-	}
+	"version": "0.0.0"
 }

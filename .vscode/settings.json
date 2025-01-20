@@ -1,15 +1,15 @@
 {
 	"[javascript]": {
-		"editor.defaultFormatter": "exceptionptr.vscode-prettier-eslint"
+		"editor.defaultFormatter": "biomejs.biome"
 	},
 	"[typescript]": {
-		"editor.defaultFormatter": "exceptionptr.vscode-prettier-eslint"
+		"editor.defaultFormatter": "biomejs.biome"
 	},
 	"[typescriptreact]": {
-		"editor.defaultFormatter": "exceptionptr.vscode-prettier-eslint"
+		"editor.defaultFormatter": "biomejs.biome"
 	},
 	"[json]": {
-		"editor.defaultFormatter": "exceptionptr.vscode-prettier-eslint"
+		"editor.defaultFormatter": "biomejs.biome"
 	},
 	"tailwindCSS.experimental.classRegex": [
 		["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]

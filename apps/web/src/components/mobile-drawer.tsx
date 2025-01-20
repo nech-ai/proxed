@@ -32,12 +32,21 @@ export function MobileDrawer() {
 					</Link>
 					<DrawerDescription>{siteConfig.description}</DrawerDescription>
 				</DrawerHeader>
-				<DrawerFooter>
+				<DrawerFooter className="flex flex-col gap-2">
+					<Link
+						href="/login"
+						className={cn(
+							buttonVariants({ variant: "ghost" }),
+							"rounded-full w-full",
+						)}
+					>
+						Login
+					</Link>
 					<Link
 						href="#"
 						className={cn(
 							buttonVariants({ variant: "default" }),
-							"text-white rounded-full group",
+							"text-white rounded-full group w-full",
 						)}
 					>
 						{siteConfig.cta}

@@ -6,20 +6,62 @@ import { buttonVariants } from "@proxed/ui/components/button";
 import { siteConfig } from "@/lib/config";
 import { cn } from "@proxed/ui/utils";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export function Header() {
+	const pathname = usePathname();
+
+	const isActive = (path: string) => {
+		return pathname === path;
+	};
+
 	return (
 		<header className="sticky top-0 h-[var(--header-height)] z-50 p-0 bg-background/60 backdrop-blur">
 			<div className="flex justify-between items-center container mx-auto p-2">
-				<Link
-					href="/"
-					title="brand-logo"
-					className="relative mr-6 flex items-center space-x-2"
-				>
-					<Icons.logo className="w-auto" />
-					<span className="font-semibold text-lg">{siteConfig.name}</span>
-				</Link>
-				<div className="hidden lg:block">
+				<div className="flex items-center gap-8">
+					<Link
+						href="/"
+						title="brand-logo"
+						className="relative flex items-center space-x-2"
+					>
+						<Icons.logo className="w-auto" />
+						<span className="font-semibold text-lg">{siteConfig.name}</span>
+					</Link>
+					<nav className="hidden lg:flex items-center gap-6">
+						<Link
+							href="/about"
+							className={cn(
+								"transition-colors",
+								isActive("/about")
+									? "text-foreground font-medium"
+									: "text-muted-foreground hover:text-foreground",
+							)}
+						>
+							About
+						</Link>
+						<Link
+							href="/updates"
+							className={cn(
+								"transition-colors",
+								isActive("/updates")
+									? "text-foreground font-medium"
+									: "text-muted-foreground hover:text-foreground",
+							)}
+						>
+							Updates
+						</Link>
+					</nav>
+				</div>
+				<div className="hidden lg:flex items-center gap-4">
+					<Link
+						href="#"
+						className={cn(
+							buttonVariants({ variant: "ghost" }),
+							"h-8 rounded-lg tracking-tight font-medium",
+						)}
+					>
+						Login
+					</Link>
 					<Link
 						href="#"
 						className={cn(

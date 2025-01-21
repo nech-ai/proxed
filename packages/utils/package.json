@@ -10,8 +10,8 @@
 		"format": "biome format --write .",
 		"typecheck": "tsc --noEmit"
 	},
-	"main": "./index.tsx",
+	"main": "./index.ts",
 	"name": "@proxed/utils",
-	"types": "./**/.tsx",
+	"types": "./**/*.ts",
 	"version": "0.0.0"
 }

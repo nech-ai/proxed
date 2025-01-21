@@ -159,6 +159,27 @@ export async function getDeviceCheckQuery(supabase: Client, id: string) {
 		.single();
 }
 
+export async function getProviderKeysQuery(supabase: Client, teamId: string) {
+	return supabase
+		.from("provider_keys")
+		.select(
+			"id, team_id, provider, is_active, display_name, created_at, updated_at",
+		)
+		.eq("team_id", teamId)
+		.throwOnError();
+}
+
+export async function getProviderKeyQuery(supabase: Client, id: string) {
+	return supabase
+		.from("provider_keys")
+		.select(
+			"id, team_id, provider, is_active, display_name, created_at, updated_at",
+		)
+		.eq("id", id)
+		.throwOnError()
+		.single();
+}
+
 export type GetProjectsParams = {
 	teamId: string;
 	to: number;

@@ -110,6 +110,47 @@ export type Database = {
 					},
 				];
 			};
+			provider_keys: {
+				Row: {
+					created_at: string;
+					display_name: string;
+					id: string;
+					is_active: boolean;
+					partial_key_server: string;
+					provider: Database["public"]["Enums"]["provider_type"];
+					team_id: string;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					display_name: string;
+					id?: string;
+					is_active?: boolean;
+					partial_key_server: string;
+					provider: Database["public"]["Enums"]["provider_type"];
+					team_id: string;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					display_name?: string;
+					id?: string;
+					is_active?: boolean;
+					partial_key_server?: string;
+					provider?: Database["public"]["Enums"]["provider_type"];
+					team_id?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "provider_keys_team_id_fkey";
+						columns: ["team_id"];
+						isOneToOne: false;
+						referencedRelation: "teams";
+						referencedColumns: ["id"];
+					},
+				];
+			};
 			team_invitations: {
 				Row: {
 					created_at: string;

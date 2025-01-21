@@ -5,6 +5,7 @@
 		"dev": "supabase start",
 		"login": "supabase login",
 		"migrate": "supabase migration up",
+		"migration:create": "supabase migration new",
 		"seed": "supabase db seed generate && supabase db seed run",
 		"reset": "supabase db reset",
 		"generate": "supabase gen types --lang=typescript --local --schema public > ../../packages/supabase/src/types/db.generated.ts",

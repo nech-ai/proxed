@@ -15,6 +15,8 @@
 		"start:app": "dotenv -c -- turbo start --filter=@proxed/app",
 		"supabase:start": "dotenv -c -- bun run --cwd apps/api dev",
 		"supabase:reset": "dotenv -c -- bun run --cwd apps/api reset",
+		"supabase:migrate": "dotenv -c -- bun run --cwd apps/api migrate",
+		"supabase:migration:create": "dotenv -c -- bun run --cwd apps/api migration:create",
 		"supabase:generate": "dotenv -c -- bun run --cwd apps/api generate",
 		"test": "turbo test --parallel",
 		"format": "biome format --write .",

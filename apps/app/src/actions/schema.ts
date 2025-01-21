@@ -102,6 +102,20 @@ export type CreateDeviceCheckFormValues = z.infer<
 	typeof createDeviceCheckSchema
 >;
 
+export const createProviderKeySchema = z.object({
+	display_name: z.string().min(2, {
+		message: "Name must be at least 2 characters.",
+	}),
+	partial_key_server: z.string().url(),
+	provider: z.enum(["OPENAI", "ANTHROPIC", "GOOGLE", "MISTRAL"]),
+	is_active: z.boolean().default(true),
+	revalidatePath: z.string().optional(),
+});
+
+export type CreateProviderKeyFormValues = z.infer<
+	typeof createProviderKeySchema
+>;
+
 export const createProjectSchema = z.object({
 	name: z.string(),
 	description: z.string().optional().default(""),

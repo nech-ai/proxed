@@ -18,6 +18,10 @@ export default async function SettingsLayout({ children }: PropsWithChildren) {
 						title: "Device Checks",
 						href: "/settings/team/device-check",
 					},
+					{
+						title: "Partial Keys",
+						href: "/settings/team/keys",
+					},
 				]}
 			/>
 			<div className="mt-8">{children}</div>

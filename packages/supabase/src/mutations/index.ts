@@ -183,6 +183,40 @@ export async function deleteDeviceCheck(supabase: Client, id: string) {
 	return supabase.from("device_checks").delete().eq("id", id).throwOnError();
 }
 
+type CreateProviderKeyParams = {
+	display_name: string;
+	partial_key_server: string;
+	provider: "OPENAI" | "ANTHROPIC" | "GOOGLE" | "MISTRAL";
+	is_active: boolean;
+	team_id: string;
+};
+
+export async function createProviderKey(
+	supabase: Client,
+	params: CreateProviderKeyParams,
+) {
+	return supabase.from("provider_keys").insert(params).select().single();
+}
+
+type UpdateProviderKeyParams = Partial<CreateProviderKeyParams>;
+
+export async function updateProviderKey(
+	supabase: Client,
+	id: string,
+	params: UpdateProviderKeyParams,
+) {
+	return supabase
+		.from("provider_keys")
+		.update(params)
+		.eq("id", id)
+		.select()
+		.single();
+}
+
+export async function deleteProviderKey(supabase: Client, id: string) {
+	return supabase.from("provider_keys").delete().eq("id", id).throwOnError();
+}
+
 type CreateProjectParams = {
 	name: string;
 	description: string;
@@ -230,7 +264,7 @@ export async function updateProjectSchema(
 export async function updateProject(
 	supabase: Client,
 	id: string,
-	data: Partial<Tables<"projects">>,
+	data: TablesUpdate<"projects">,
 ) {
 	return supabase.from("projects").update(data).eq("id", id).select().single();
 }

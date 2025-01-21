@@ -9,6 +9,8 @@ import {
 	getDeviceChecksQuery,
 	getProjectQuery,
 	getProjectsQuery,
+	getProviderKeyQuery,
+	getProviderKeysQuery,
 	getTeamInvitesQuery,
 	getTeamMembersQuery,
 	getTeamMembershipsByUserIdQuery,
@@ -191,6 +193,30 @@ export const getDeviceCheck = async (id: string) => {
 			tags: [`device_check_${id}`],
 			revalidate: 180,
 		},
+	)();
+};
+
+export const getProviderKeys = async () => {
+	const supabase = await createClient();
+
+	const user = await getUser();
+	const teamId = user?.data?.team_id;
+	if (!teamId) return null;
+
+	return unstable_cache(
+		async () => getProviderKeysQuery(supabase, teamId),
+		["provider_keys", teamId],
+		{ tags: [`provider_keys_${teamId}`], revalidate: 180 },
+	)();
+};
+
+export const getProviderKey = async (id: string) => {
+	const supabase = await createClient();
+
+	return unstable_cache(
+		async () => getProviderKeyQuery(supabase, id),
+		["provider_key", id],
+		{ tags: [`provider_key_${id}`], revalidate: 180 },
 	)();
 };
 

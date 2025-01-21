@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@proxed/ui/utils";
 import { Loader2Icon } from "lucide-react";
 import {
 	Select,

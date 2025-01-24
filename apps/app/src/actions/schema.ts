@@ -106,9 +106,8 @@ export const createProviderKeySchema = z.object({
 	display_name: z.string().min(2, {
 		message: "Name must be at least 2 characters.",
 	}),
-	partial_key_server: z.string().url(),
+	partial_key_server: z.string().min(1),
 	provider: z.enum(["OPENAI", "ANTHROPIC", "GOOGLE", "MISTRAL"]),
-	is_active: z.boolean().default(true),
 	revalidatePath: z.string().optional(),
 });
 

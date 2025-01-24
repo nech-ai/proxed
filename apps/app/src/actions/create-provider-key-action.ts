@@ -22,7 +22,7 @@ export const createProviderKeyAction = authActionClient
 			});
 
 			if (error) {
-				throw new Error("Failed to create partial key");
+				throw new Error(error.message);
 			}
 
 			if (revalidatePath) {

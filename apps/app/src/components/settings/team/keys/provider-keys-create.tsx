@@ -31,8 +31,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@proxed/ui/components/select";
-import { Switch } from "@proxed/ui/components/switch";
-import { toast, useToast } from "@proxed/ui/hooks/use-toast";
+import { toast } from "@proxed/ui/hooks/use-toast";
 import { Loader2, Check, Copy, AlertCircle } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
@@ -42,7 +41,7 @@ import {
 	validateApiKey,
 	type KeyValidationResult,
 } from "@proxed/utils/lib/partial-keys";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@proxed/ui/utils";
 import { Alert, AlertDescription } from "@proxed/ui/components/alert";
 
@@ -58,16 +57,28 @@ export enum ProviderType {
 	MISTRAL = "MISTRAL",
 }
 
+interface FormState {
+	isCreating: boolean;
+	isSuccess: boolean;
+	isSubmitting: boolean;
+}
+
 export function ProviderKeyCreateForm({
 	onSuccess,
 	revalidatePath,
 }: ProviderKeyCreateFormProps) {
 	const [clientPart, setClientPart] = useState<string>("");
 	const [savedClientPart, setSavedClientPart] = useState<string>("");
+	const clientPartRef = useRef<string>("");
 	const [keyValidation, setKeyValidation] = useState<KeyValidationResult>({
 		isValid: false,
 	});
-	const { toast } = useToast();
+
+	const [formState, setFormState] = useState<FormState>({
+		isCreating: true,
+		isSuccess: false,
+		isSubmitting: false,
+	});
 
 	const form = useForm<CreateProviderKeyFormValues>({
 		resolver: zodResolver(createProviderKeySchema),
@@ -75,23 +86,52 @@ export function ProviderKeyCreateForm({
 			display_name: "",
 			partial_key_server: "",
 			provider: ProviderType.OPENAI,
-			is_active: true,
 			revalidatePath,
 		},
 	});
 
-	const createProviderKey = useAction(createProviderKeyAction, {
-		onSuccess: () => {
-			setSavedClientPart(clientPart);
+	useEffect(() => {
+		return () => {
 			setClientPart("");
-			form.reset();
-			toast({
-				title: "Partial Key created",
-				description: "The Partial Key has been created successfully.",
+			setSavedClientPart("");
+			clientPartRef.current = "";
+		};
+	}, []);
+
+	const createProviderKey = useAction(createProviderKeyAction, {
+		onExecute: () => setFormState((prev) => ({ ...prev, isSubmitting: true })),
+		onSuccess: () => {
+			setSavedClientPart(clientPartRef.current);
+
+			setFormState({
+				isCreating: false,
+				isSuccess: true,
+				isSubmitting: false,
 			});
+
+			form.reset({
+				display_name: "",
+				partial_key_server: "",
+				provider: ProviderType.OPENAI,
+				revalidatePath,
+			});
+
+			setKeyValidation({ isValid: false });
+			clientPartRef.current = "";
+			setClientPart("");
+
+			toast({
+				title: "✅ Partial Key created",
+				description:
+					"Please copy your client key part below. You won't see it again!",
+				variant: "default",
+				duration: 10000,
+			});
+
 			onSuccess?.();
 		},
 		onError: (error) => {
+			setFormState((prev) => ({ ...prev, isSubmitting: false }));
 			toast({
 				variant: "destructive",
 				title: "Error",
@@ -105,190 +145,219 @@ export function ProviderKeyCreateForm({
 		const validation = validateApiKey(value);
 		setKeyValidation(validation);
 
-		if (validation.isValid) {
-			try {
-				const { serverPart, clientPart } = splitKeyWithPrefix(value);
-				form.setValue("partial_key_server", serverPart, { shouldDirty: true });
-				setClientPart(clientPart);
+		if (!validation.isValid) {
+			clientPartRef.current = "";
+			setClientPart("");
+			form.setValue("partial_key_server", "", { shouldDirty: false });
+			return;
+		}
 
-				if (validation.provider) {
-					form.setValue("provider", validation.provider, { shouldDirty: true });
-					if (!form.getValues("display_name")) {
-						form.setValue("display_name", `${validation.provider} Key`, {
-							shouldDirty: true,
-						});
-					}
-				}
-			} catch (error) {
-				if (error instanceof KeyValidationError) {
-					toast({
-						variant: "destructive",
-						title: "Invalid Key Format",
-						description: error.message,
+		try {
+			const { serverPart, clientPart: generatedClientPart } =
+				splitKeyWithPrefix(value);
+			clientPartRef.current = generatedClientPart;
+			setClientPart(generatedClientPart);
+
+			form.clearErrors();
+			form.setValue("partial_key_server", serverPart, { shouldDirty: true });
+
+			if (validation.provider) {
+				form.setValue("provider", validation.provider, { shouldDirty: true });
+				if (!form.getValues("display_name")) {
+					form.setValue("display_name", `${validation.provider} Key`, {
+						shouldDirty: true,
 					});
 				}
 			}
-		} else {
-			form.setValue("partial_key_server", "", { shouldDirty: true });
+		} catch (error) {
+			if (error instanceof KeyValidationError) {
+				toast({
+					variant: "destructive",
+					title: "Invalid Key Format",
+					description: error.message,
+				});
+			}
+			clientPartRef.current = "";
 			setClientPart("");
+			form.setValue("partial_key_server", "", { shouldDirty: false });
 		}
 	};
 
-	const onSubmit = form.handleSubmit((data) => {
-		createProviderKey.execute(data);
-	});
+	const resetForm = () => {
+		setFormState({
+			isCreating: true,
+			isSuccess: false,
+			isSubmitting: false,
+		});
+		setClientPart("");
+		setSavedClientPart("");
+		clientPartRef.current = "";
+		setKeyValidation({ isValid: false });
+		form.reset({
+			display_name: "",
+			partial_key_server: "",
+			provider: ProviderType.OPENAI,
+			revalidatePath,
+		});
+	};
 
 	return (
 		<Form {...form}>
-			<form onSubmit={onSubmit}>
+			<form
+				onSubmit={form.handleSubmit((data) => createProviderKey.execute(data))}
+			>
 				<Card>
 					<CardHeader>
-						<CardTitle>Create Partial Key</CardTitle>
+						<CardTitle>
+							{formState.isSuccess
+								? "Save Your Client Key Part"
+								: "Add API Key"}
+						</CardTitle>
 						<CardDescription>
-							Paste your API key below to split it into server and client parts.
+							{formState.isSuccess
+								? "Copy and save this key part now - you won't see it again!"
+								: "Securely store your API key by splitting it into server and client parts."}
 						</CardDescription>
 					</CardHeader>
 
-					{savedClientPart && (
+					{formState.isSuccess ? (
 						<div className="mx-6 mb-4">
-							<Alert className="bg-yellow-50 border-yellow-200">
-								<AlertCircle className="h-4 w-4 text-yellow-600" />
+							<Alert className="border-yellow-500/20 bg-yellow-500/10 dark:border-yellow-500/30 dark:bg-yellow-500/20">
+								<AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
 								<div className="ml-2">
-									<div className="font-medium text-yellow-800 mb-1">
-										Copy Your Client Key Part
+									<div className="flex justify-between items-center mb-1">
+										<div className="font-medium text-foreground">
+											🔑 Copy Your Client Key Part
+										</div>
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={resetForm}
+											className="text-muted-foreground hover:text-foreground"
+										>
+											Add Another Key
+										</Button>
 									</div>
 									<div className="flex items-center gap-2">
 										<Input
 											readOnly
 											value={savedClientPart}
-											className="font-mono text-sm bg-white border-yellow-200"
+											className="font-mono text-sm bg-background border-border"
 										/>
 										<CopyToClipboard value={savedClientPart} />
 									</div>
-									<p className="mt-2 text-sm text-yellow-700">
-										⚠️ Make sure to copy this key part now. You won't be able to
-										see it again!
+									<p className="mt-2 text-sm text-muted-foreground">
+										⚠️ Important: Save this key part now. For security reasons,
+										you won't be able to see it again!
 									</p>
 								</div>
 							</Alert>
 						</div>
-					)}
-
-					<CardContent className="space-y-4">
-						<FormField
-							control={form.control}
-							name="display_name"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Name</FormLabel>
-									<FormControl>
-										<Input
-											placeholder={
-												keyValidation.provider
-													? `${keyValidation.provider} Key`
-													: "My Partial Key"
-											}
-											{...field}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						<FormField
-							control={form.control}
-							name="provider"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Provider</FormLabel>
-									<FormControl>
-										<Select
-											value={field.value}
-											onValueChange={field.onChange}
-											disabled={!!keyValidation.provider}
-										>
-											<SelectTrigger>
-												<SelectValue placeholder="Select a provider" />
-											</SelectTrigger>
-											<SelectContent>
-												{Object.values(ProviderType).map((provider) => (
-													<SelectItem key={provider} value={provider}>
-														{provider}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						<FormItem>
-							<FormLabel>API Key</FormLabel>
-							<FormControl>
-								<div className="relative">
-									<Input
-										type="password"
-										placeholder="Paste your API key here"
-										onChange={(e) => handleKeyInput(e.target.value)}
-										className={cn(
-											"pr-10",
-											keyValidation.error && "border-destructive",
-											keyValidation.isValid && "border-green-500",
-											"transition-colors duration-200",
-										)}
-									/>
-									{keyValidation.isValid && (
-										<Check className="absolute right-3 top-2.5 h-4 w-4 text-green-500 animate-in fade-in duration-200" />
+					) : (
+						<>
+							<CardContent className="space-y-4">
+								<FormField
+									control={form.control}
+									name="display_name"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Name</FormLabel>
+											<FormControl>
+												<Input
+													placeholder={
+														keyValidation.provider
+															? `${keyValidation.provider} Key`
+															: "My Partial Key"
+													}
+													{...field}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
 									)}
-								</div>
-							</FormControl>
-							{keyValidation.error && (
-								<Alert
-									variant="destructive"
-									className="mt-2 animate-in slide-in-from-top-1 duration-200"
-								>
-									<AlertCircle className="h-4 w-4" />
-									<AlertDescription>{keyValidation.error}</AlertDescription>
-								</Alert>
-							)}
-						</FormItem>
+								/>
 
-						<FormField
-							control={form.control}
-							name="is_active"
-							render={({ field: { onChange, ...field } }) => (
+								<FormField
+									control={form.control}
+									name="provider"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Provider</FormLabel>
+											<FormControl>
+												<Select
+													value={field.value}
+													onValueChange={field.onChange}
+													disabled={!!keyValidation.provider}
+												>
+													<SelectTrigger>
+														<SelectValue placeholder="Select a provider" />
+													</SelectTrigger>
+													<SelectContent>
+														{Object.values(ProviderType).map((provider) => (
+															<SelectItem key={provider} value={provider}>
+																{provider}
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
 								<FormItem>
-									<FormLabel>Active</FormLabel>
+									<FormLabel>API Key</FormLabel>
 									<FormControl>
-										<Switch checked={field.value} onChange={onChange} />
+										<div className="relative">
+											<Input
+												type="password"
+												placeholder="Paste your API key here"
+												onChange={(e) => handleKeyInput(e.target.value)}
+												className={cn(
+													"pr-10",
+													keyValidation.error && "border-destructive",
+													keyValidation.isValid && "border-green-500",
+													"transition-colors duration-200",
+												)}
+											/>
+											{keyValidation.isValid && (
+												<Check className="absolute right-3 top-2.5 h-4 w-4 text-green-500 animate-in fade-in duration-200" />
+											)}
+										</div>
 									</FormControl>
-									<FormMessage />
+									{keyValidation.error && (
+										<Alert
+											variant="destructive"
+											className="mt-2 animate-in slide-in-from-top-1 duration-200"
+										>
+											<AlertCircle className="h-4 w-4" />
+											<AlertDescription>{keyValidation.error}</AlertDescription>
+										</Alert>
+									)}
 								</FormItem>
-							)}
-						/>
-					</CardContent>
-
-					<CardFooter className="flex justify-end">
-						<Button
-							type="submit"
-							disabled={
-								createProviderKey.status === "executing" ||
-								!form.formState.isDirty
-							}
-						>
-							{createProviderKey.status === "executing" ? (
-								<>
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-									Creating...
-								</>
-							) : (
-								"Create Partial Key"
-							)}
-						</Button>
-					</CardFooter>
+							</CardContent>
+							<CardFooter className="flex justify-end">
+								<Button
+									type="submit"
+									disabled={
+										formState.isSubmitting ||
+										!form.formState.isDirty ||
+										!keyValidation.isValid
+									}
+								>
+									{formState.isSubmitting ? (
+										<>
+											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+											Creating...
+										</>
+									) : (
+										"Create Partial Key"
+									)}
+								</Button>
+							</CardFooter>
+						</>
+					)}
 				</Card>
 			</form>
 		</Form>
@@ -302,12 +371,17 @@ function CopyToClipboard({ value }: { value: string }) {
 		try {
 			await navigator.clipboard.writeText(value);
 			setCopied(true);
+			toast({
+				title: "✅ Copied!",
+				description: "The client key part has been copied to your clipboard.",
+				duration: 3000,
+			});
 			setTimeout(() => setCopied(false), 2000);
 		} catch (error) {
 			toast({
 				variant: "destructive",
 				title: "Failed to copy",
-				description: "Please try copying manually",
+				description: "Please try copying manually by selecting the text",
 			});
 		}
 	};
@@ -318,14 +392,13 @@ function CopyToClipboard({ value }: { value: string }) {
 			variant="outline"
 			size="icon"
 			onClick={onCopy}
-			className="h-8 w-8"
+			className={cn(
+				"h-8 w-8 transition-colors",
+				copied && "border-green-500 text-green-500",
+			)}
 			title={copied ? "Copied!" : "Copy to clipboard"}
 		>
-			{copied ? (
-				<Check className="h-4 w-4 text-green-500" />
-			) : (
-				<Copy className="h-4 w-4" />
-			)}
+			{copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
 		</Button>
 	);
 }

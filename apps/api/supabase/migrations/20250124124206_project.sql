@@ -1,6 +1,3 @@
--- Provider type enum
-create type provider_type as enum ('OPENAI', 'ANTHROPIC', 'GOOGLE', 'MISTRAL');
-
 -- Projects table
 create table public.projects (
     id uuid primary key default gen_random_uuid(),
@@ -8,11 +5,14 @@ create table public.projects (
     name text not null,
     description text not null,
     bundle_id text not null,
+    icon_url text,
     device_check_id uuid references public.device_checks(id) on delete restrict,
-    provider provider_type not null,
-    provider_key_partial text not null,
+    key_id uuid references public.provider_keys(id) on delete restrict,
 
     is_active boolean not null default true,
+
+    schema_config jsonb default '{}'::jsonb,
+
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
     constraint unique_team_bundle unique (team_id, bundle_id)
@@ -41,7 +41,3 @@ create trigger projects_updated_at before update
 -- Indexes
 create index idx_projects_team on public.projects(team_id);
 create index idx_projects_device_check on public.projects(device_check_id);
-
--- Add after projects table creation
-alter table public.projects
-add column schema_config jsonb default '{}'::jsonb;

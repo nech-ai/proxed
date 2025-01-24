@@ -1,3 +1,6 @@
+-- Provider type enum
+create type provider_type as enum ('OPENAI', 'ANTHROPIC');
+
 -- Partial keys
 create table public.provider_keys (
   id uuid primary key default gen_random_uuid (),

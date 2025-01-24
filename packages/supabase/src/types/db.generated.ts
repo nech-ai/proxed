@@ -54,42 +54,48 @@ export type Database = {
 				Row: {
 					bundle_id: string;
 					created_at: string;
+					default_user_prompt: string | null;
 					description: string;
 					device_check_id: string | null;
+					icon_url: string | null;
 					id: string;
 					is_active: boolean;
+					key_id: string | null;
 					name: string;
-					provider: Database["public"]["Enums"]["provider_type"];
-					provider_key_partial: string;
 					schema_config: Json | null;
+					system_prompt: string | null;
 					team_id: string;
 					updated_at: string;
 				};
 				Insert: {
 					bundle_id: string;
 					created_at?: string;
+					default_user_prompt?: string | null;
 					description: string;
 					device_check_id?: string | null;
+					icon_url?: string | null;
 					id?: string;
 					is_active?: boolean;
+					key_id?: string | null;
 					name: string;
-					provider: Database["public"]["Enums"]["provider_type"];
-					provider_key_partial: string;
 					schema_config?: Json | null;
+					system_prompt?: string | null;
 					team_id: string;
 					updated_at?: string;
 				};
 				Update: {
 					bundle_id?: string;
 					created_at?: string;
+					default_user_prompt?: string | null;
 					description?: string;
 					device_check_id?: string | null;
+					icon_url?: string | null;
 					id?: string;
 					is_active?: boolean;
+					key_id?: string | null;
 					name?: string;
-					provider?: Database["public"]["Enums"]["provider_type"];
-					provider_key_partial?: string;
 					schema_config?: Json | null;
+					system_prompt?: string | null;
 					team_id?: string;
 					updated_at?: string;
 				};
@@ -99,6 +105,13 @@ export type Database = {
 						columns: ["device_check_id"];
 						isOneToOne: false;
 						referencedRelation: "device_checks";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "projects_key_id_fkey";
+						columns: ["key_id"];
+						isOneToOne: false;
+						referencedRelation: "provider_keys";
 						referencedColumns: ["id"];
 					},
 					{
@@ -336,7 +349,7 @@ export type Database = {
 			};
 		};
 		Enums: {
-			provider_type: "OPENAI" | "ANTHROPIC" | "GOOGLE" | "MISTRAL";
+			provider_type: "OPENAI" | "ANTHROPIC";
 			team_role: "OWNER" | "MEMBER";
 		};
 		CompositeTypes: {

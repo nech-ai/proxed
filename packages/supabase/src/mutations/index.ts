@@ -186,7 +186,7 @@ export async function deleteDeviceCheck(supabase: Client, id: string) {
 type CreateProviderKeyParams = {
 	display_name: string;
 	partial_key_server: string;
-	provider: "OPENAI" | "ANTHROPIC" | "GOOGLE" | "MISTRAL";
+	provider: "OPENAI" | "ANTHROPIC";
 	team_id: string;
 };
 
@@ -222,8 +222,7 @@ type CreateProjectParams = {
 	deviceCheckId: string;
 	teamId: string;
 	bundleId: string;
-	provider: "OPENAI" | "ANTHROPIC" | "GOOGLE" | "MISTRAL";
-	providerKeyPartial: string;
+	keyId: string;
 	schemaConfig?: Record<string, any>;
 };
 
@@ -238,8 +237,7 @@ export async function createProject(
 			description: params.description,
 			bundle_id: params.bundleId,
 			device_check_id: params.deviceCheckId,
-			provider: params.provider,
-			provider_key_partial: params.providerKeyPartial,
+			key_id: params.keyId,
 			team_id: params.teamId,
 			schema_config: params.schemaConfig ?? {},
 		})

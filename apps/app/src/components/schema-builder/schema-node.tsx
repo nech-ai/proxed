@@ -246,9 +246,11 @@ export function SchemaNode({
 				{isExpanded &&
 					(schema.type === "object" || schema.type === "array") && (
 						<div className="mt-4 pl-4 border-l border-border space-y-3">
+							{/* @ts-expect-error */}
 							{schema.type === "string" && (
 								<StringControls schema={schema} onUpdate={onUpdate} />
 							)}
+							{/* @ts-expect-error */}
 							{schema.type === "number" && (
 								<NumberControls schema={schema} onUpdate={onUpdate} />
 							)}
@@ -266,6 +268,7 @@ export function SchemaNode({
 									depth={depth}
 								/>
 							)}
+							{/* @ts-expect-error */}
 							{schema.type === "enum" && (
 								<EnumControls schema={schema} onUpdate={onUpdate} />
 							)}

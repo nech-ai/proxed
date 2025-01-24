@@ -33,6 +33,7 @@ export function AddFieldDialog({ open, onClose, onAdd }: AddFieldDialogProps) {
 	const [description, setDescription] = useState("");
 
 	function handleAdd() {
+		// @ts-expect-error
 		const baseSchema: JsonSchema = {
 			type,
 			optional: false,

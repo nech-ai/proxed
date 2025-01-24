@@ -16,8 +16,7 @@ export const createProjectAction = authActionClient
 				name,
 				description,
 				bundleId,
-				provider,
-				providerKeyPartial,
+				keyId,
 				revalidatePath,
 			},
 			ctx: { supabase, user },
@@ -31,9 +30,8 @@ export const createProjectAction = authActionClient
 				description,
 				bundleId,
 				deviceCheckId,
-				provider,
-				providerKeyPartial,
 				teamId: user.team_id,
+				keyId,
 			});
 
 			revalidateTag(`projects_${user.team_id}`);

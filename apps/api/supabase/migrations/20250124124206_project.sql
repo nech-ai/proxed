@@ -9,6 +9,9 @@ create table public.projects (
     device_check_id uuid references public.device_checks(id) on delete restrict,
     key_id uuid references public.provider_keys(id) on delete restrict,
 
+    system_prompt text,
+    default_user_prompt text,
+
     is_active boolean not null default true,
 
     schema_config jsonb default '{}'::jsonb,

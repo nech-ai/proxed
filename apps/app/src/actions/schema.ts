@@ -107,7 +107,7 @@ export const createProviderKeySchema = z.object({
 		message: "Name must be at least 2 characters.",
 	}),
 	partial_key_server: z.string().min(1),
-	provider: z.enum(["OPENAI", "ANTHROPIC", "GOOGLE", "MISTRAL"]),
+	provider: z.enum(["OPENAI", "ANTHROPIC"]),
 	revalidatePath: z.string().optional(),
 });
 
@@ -120,8 +120,7 @@ export const createProjectSchema = z.object({
 	description: z.string().optional().default(""),
 	bundleId: z.string(),
 	deviceCheckId: z.string(),
-	provider: z.enum(["OPENAI", "ANTHROPIC", "GOOGLE", "MISTRAL"]),
-	providerKeyPartial: z.string(),
+	keyId: z.string(),
 	revalidatePath: z.string().optional(),
 });
 
@@ -147,12 +146,13 @@ export const updateProjectSchema = z.object({
 		.min(1, {
 			message: "Device Check is required",
 		})
-		.nullish()
-		.transform((v) => v || ""),
-	provider: z.enum(["OPENAI", "ANTHROPIC", "GOOGLE", "MISTRAL"]),
-	providerKeyPartial: z.string().min(1, {
-		message: "Provider key is required",
-	}),
+		.nullish(),
+	keyId: z
+		.string()
+		.min(1, {
+			message: "Provider key is required",
+		})
+		.nullish(),
 });
 
 export type UpdateProjectFormValues = z.infer<typeof updateProjectSchema>;

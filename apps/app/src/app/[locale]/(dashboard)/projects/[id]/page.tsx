@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getProject } from "@proxed/supabase/cached-queries";
+import { getProject, getProviderKeys } from "@proxed/supabase/cached-queries";
 import { ContentHeader } from "@/components/layout/content-header";
 import {
 	Card,
@@ -28,7 +28,7 @@ export default async function Page(props: {
 	const { id } = await props.params;
 	const { data: project } = await getProject(id);
 	const deviceChecks = await getDeviceChecks();
-
+	const keys = await getProviderKeys();
 	if (!project || !project.id) {
 		notFound();
 	}
@@ -55,7 +55,10 @@ export default async function Page(props: {
 				<div className="max-w-screen-xl mx-auto p-6 space-y-6">
 					<ProjectEditForm
 						project={project}
+						// @ts-expect-error
 						deviceChecks={deviceChecks?.data || []}
+						// @ts-expect-error
+						keys={keys?.data || []}
 					/>
 
 					<Card>

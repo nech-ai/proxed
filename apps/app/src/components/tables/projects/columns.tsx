@@ -35,12 +35,10 @@ export const columns: ColumnDef<ProjectOutput>[] = [
 		accessorFn: (row) => row.device_check?.name || "N/A",
 	},
 	{
-		header: "Provider",
-		accessorKey: "provider",
+		header: "Key ID",
+		accessorKey: "key_id",
 		enableSorting: true,
-		cell: ({ row }) => (
-			<Badge variant="outline">{row.original.provider.toLowerCase()}</Badge>
-		),
+		cell: ({ row }) => <Badge variant="outline">{row.original.key_id}</Badge>,
 	},
 	{
 		header: "Status",

@@ -36,10 +36,12 @@ import type { CreateProjectFormValues } from "@/actions/schema";
 
 interface CreateProjectDialogProps {
 	deviceChecks: Tables<"device_checks">[];
+	keys: Tables<"provider_keys">[];
 }
 
 export function CreateProjectDialog({
 	deviceChecks,
+	keys,
 }: CreateProjectDialogProps) {
 	const router = useRouter();
 	const form = useForm<CreateProjectFormValues>({
@@ -49,8 +51,7 @@ export function CreateProjectDialog({
 			description: "",
 			bundleId: "",
 			deviceCheckId: "",
-			provider: "OPENAI",
-			providerKeyPartial: "",
+			keyId: "",
 		},
 	});
 
@@ -144,37 +145,24 @@ export function CreateProjectDialog({
 
 						<FormField
 							control={form.control}
-							name="provider"
+							name="keyId"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Provider</FormLabel>
+									<FormLabel>Key</FormLabel>
 									<Select onValueChange={field.onChange} value={field.value}>
 										<FormControl>
 											<SelectTrigger>
-												<SelectValue placeholder="Select provider" />
+												<SelectValue placeholder="Select key" />
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
-											<SelectItem value="OPENAI">OpenAI</SelectItem>
-											<SelectItem value="ANTHROPIC">Anthropic</SelectItem>
-											<SelectItem value="GOOGLE">Google</SelectItem>
-											<SelectItem value="MISTRAL">Mistral</SelectItem>
+											{keys.map((key) => (
+												<SelectItem key={key.id} value={key.id}>
+													{key.display_name} ({key.provider})
+												</SelectItem>
+											))}
 										</SelectContent>
 									</Select>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						<FormField
-							control={form.control}
-							name="providerKeyPartial"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Provider Key</FormLabel>
-									<FormControl>
-										<Input type="password" placeholder="sk-..." {...field} />
-									</FormControl>
 									<FormMessage />
 								</FormItem>
 							)}

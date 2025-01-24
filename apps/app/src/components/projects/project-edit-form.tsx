@@ -50,27 +50,18 @@ import {
 	AlertDialogTrigger,
 } from "@proxed/ui/components/alert-dialog";
 import Link from "next/link";
-import { BrainCircuit, Bot, Sparkles, Blocks } from "lucide-react";
-import type { ComponentType } from "react";
+import {} from "lucide-react";
 
 interface ProjectEditFormProps {
 	project: Tables<"projects">;
 	deviceChecks: Tables<"device_checks">[];
+	keys: Tables<"provider_keys">[];
 }
-
-const PROVIDER_ICONS: Record<
-	UpdateProjectFormValues["provider"],
-	ComponentType
-> = {
-	OPENAI: Sparkles,
-	ANTHROPIC: Bot,
-	GOOGLE: BrainCircuit,
-	MISTRAL: Blocks,
-};
 
 export function ProjectEditForm({
 	project,
 	deviceChecks,
+	keys,
 }: ProjectEditFormProps) {
 	const { toast } = useToast();
 	const form = useForm<UpdateProjectFormValues>({
@@ -80,9 +71,8 @@ export function ProjectEditForm({
 			name: project.name,
 			description: project.description || "",
 			bundleId: project.bundle_id,
-			deviceCheckId: project.device_check_id || "",
-			provider: project.provider,
-			providerKeyPartial: project.provider_key_partial,
+			deviceCheckId: project.device_check_id,
+			keyId: project.key_id,
 		},
 	});
 
@@ -183,7 +173,7 @@ export function ProjectEditForm({
 										<FormItem>
 											<FormLabel>Device Check Configuration</FormLabel>
 											<Select
-												value={field.value}
+												value={field.value || ""}
 												onValueChange={field.onChange}
 											>
 												<FormControl>
@@ -232,12 +222,12 @@ export function ProjectEditForm({
 								<div className="grid gap-4 sm:grid-cols-2">
 									<FormField
 										control={form.control}
-										name="provider"
+										name="keyId"
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel>AI Provider</FormLabel>
 												<Select
-													value={field.value}
+													value={field.value || ""}
 													onValueChange={field.onChange}
 												>
 													<FormControl>
@@ -245,10 +235,6 @@ export function ProjectEditForm({
 															<SelectValue>
 																{field.value && (
 																	<div className="flex items-center gap-2">
-																		{(() => {
-																			const Icon = PROVIDER_ICONS[field.value];
-																			return <Icon className="h-4 w-4" />;
-																		})()}
 																		<span>{field.value}</span>
 																	</div>
 																)}
@@ -256,39 +242,19 @@ export function ProjectEditForm({
 														</SelectTrigger>
 													</FormControl>
 													<SelectContent>
-														{(
-															Object.keys(PROVIDER_ICONS) as Array<
-																keyof typeof PROVIDER_ICONS
-															>
-														).map((provider) => {
-															const Icon = PROVIDER_ICONS[provider];
+														{keys.map((key) => {
 															return (
-																<SelectItem key={provider} value={provider}>
+																<SelectItem key={key.id} value={key.id}>
 																	<div className="flex items-center gap-2">
-																		<Icon className="h-4 w-4" />
-																		<span>{provider}</span>
+																		<span>
+																			{key.display_name} ({key.provider})
+																		</span>
 																	</div>
 																</SelectItem>
 															);
 														})}
 													</SelectContent>
 												</Select>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={form.control}
-										name="providerKeyPartial"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>API Key</FormLabel>
-												<FormControl>
-													<Input type="password" {...field} />
-												</FormControl>
-												<FormDescription>
-													Your API key is stored securely and partially hidden
-												</FormDescription>
 												<FormMessage />
 											</FormItem>
 										)}

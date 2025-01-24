@@ -4,6 +4,7 @@ import type { Enums, Tables } from "./db.generated";
 
 export type TeamMembership = Tables<"team_memberships"> & {
 	user: Tables<"users">;
+	team: Tables<"teams">;
 };
 
 export type User = Tables<"users">;

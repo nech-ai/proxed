@@ -13,8 +13,7 @@ export const updateProjectAction = authActionClient
 			description: data.description,
 			bundle_id: data.bundleId,
 			device_check_id: data.deviceCheckId,
-			provider: data.provider,
-			provider_key_partial: data.providerKeyPartial,
+			key_id: data.keyId,
 		});
 
 		revalidateTag(`project_${data.id}`);

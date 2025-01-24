@@ -206,10 +206,9 @@ export function SearchFilter({ placeholder }: Props) {
 										after: new Date(),
 									}}
 									showOutsideDays={false}
-									// @ts-expect-error
 									selected={{
-										from: filters.start && new Date(filters.start),
-										to: filters.end && new Date(filters.end),
+										from: filters.start ? new Date(filters.start) : undefined,
+										to: filters.end ? new Date(filters.end) : undefined,
 									}}
 									onSelect={(range) => {
 										if (!range) return;

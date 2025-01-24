@@ -207,8 +207,8 @@ export async function getProjectsQuery(
 		"bundle_id",
 		"device_check_id",
 		"device_check:device_checks(id, name)",
-		"provider",
-		"provider_key_partial",
+		"key_id",
+		"key:provider_keys(id, name, provider)",
 		"created_at",
 		"updated_at",
 	];
@@ -226,6 +226,8 @@ export async function getProjectsQuery(
 			query.order("credential(name)", { ascending });
 		} else if (column === "created_by") {
 			query.order("created_by(full_name)", { ascending });
+		} else if (column === "key") {
+			query.order("key(display_name)", { ascending });
 		} else {
 			query.order(column, { ascending });
 		}

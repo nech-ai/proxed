@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { zodCodeToJson, jsonToZodCode } from "../code-converter";
 import { jsonToZod } from "../generator";
 

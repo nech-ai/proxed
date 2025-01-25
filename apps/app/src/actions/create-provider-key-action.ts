@@ -19,6 +19,9 @@ export const createProviderKeyAction = authActionClient
 			const { data: providerKey, error } = await createProviderKey(supabase, {
 				...data,
 				team_id: user.team_id,
+				display_name: data.display_name || "",
+				partial_key_server: data.partial_key_server || "",
+				provider: data.provider || "OPENAI",
 			});
 
 			if (error) {

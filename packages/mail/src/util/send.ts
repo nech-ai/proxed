@@ -1,4 +1,4 @@
-import { config } from "@config";
+import type { config } from "@config";
 import { getProvider } from "../provider";
 import type { mailTemplates } from "./templates";
 import { getTemplate } from "./templates";
@@ -11,12 +11,7 @@ export async function sendEmail<
 	context: Parameters<(typeof mailTemplates)[TemplateId]>[0];
 	locale?: keyof typeof config.i18n.locales;
 }) {
-	const {
-		to,
-		templateId,
-		context,
-		locale = config.i18n.defaultLocale,
-	} = params;
+	const { to, templateId, context } = params;
 
 	const { send } = await getProvider();
 

@@ -70,7 +70,6 @@ export async function Table({ filter, page, sort, query }: Props) {
 			meta={meta}
 			hasFilters={hasFilters}
 			page={page}
-			// @ts-expect-error
 			query={query}
 		/>
 	);

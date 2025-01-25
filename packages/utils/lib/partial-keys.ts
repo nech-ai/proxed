@@ -153,8 +153,6 @@ export function reassembleKey(serverPart: string, clientPart: string): string {
 		);
 	}
 
-	const salt = saltFromServer;
-
 	// Remove salt from both
 	const serverCore = serverPart.slice(0, serverPart.length - SALT_LENGTH);
 	const clientCore = clientPart.slice(0, clientPart.length - SALT_LENGTH);

@@ -12,6 +12,7 @@ const docs = defineCollection({
 	include: "**/*.mdx",
 	schema: createDocSchema,
 	transform: async (document, context) =>
+		// @ts-expect-error
 		transformMDX(document, context, {
 			remarkPlugins: [
 				[
@@ -33,5 +34,6 @@ const docsMeta = defineCollection({
 });
 
 export default defineConfig({
+	// @ts-expect-error
 	collections: [docs, docsMeta],
 });

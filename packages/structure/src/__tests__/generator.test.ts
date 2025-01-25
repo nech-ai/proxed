@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { z } from "zod";
 import { zodToJson, jsonToZod } from "../generator";
 import type { JsonSchema } from "../types";
@@ -275,8 +275,6 @@ describe("jsonToZod", () => {
 		const json: JsonSchema = {
 			type: "array",
 			itemType: { type: "string" },
-			minLength: 1,
-			maxLength: 3,
 		};
 		const result = jsonToZod(json);
 

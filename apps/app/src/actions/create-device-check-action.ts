@@ -19,6 +19,10 @@ export const createDeviceCheckAction = authActionClient
 			const { data: deviceCheck, error } = await createDeviceCheck(supabase, {
 				...data,
 				team_id: user.team_id,
+				key_id: data.key_id || "",
+				name: data.name || "",
+				apple_team_id: data.apple_team_id || "",
+				private_key_p8: data.private_key_p8 || "",
 			});
 
 			if (error) {

@@ -26,7 +26,7 @@ export const inviteTeamMemberAction = authActionClient
 
 			const { data: invitation } = await supabase
 				.from("team_invitations")
-				.insert(invitationData)
+				.insert({ ...invitationData, email: data.email })
 				.select("id,email, invited_by:users(*), team:teams(*)")
 				.single();
 

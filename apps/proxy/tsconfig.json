@@ -6,7 +6,10 @@
 			"@/*": ["./src/*"],
 			"@config": ["../../config"]
 		},
-		"strict": true
+		"strict": true,
+		"incremental": true,
+		"esModuleInterop": true,
+		"resolveJsonModule": true
 	},
 	"include": [
 		"next-env.d.ts",

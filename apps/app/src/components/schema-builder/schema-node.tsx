@@ -123,15 +123,15 @@ export function SchemaNode({
 			const newSchema = (() => {
 				switch (type) {
 					case "string":
-						return { ...baseProps, minLength: undefined, maxLength: undefined };
+						return { ...baseProps };
 					case "number":
-						return { ...baseProps, min: undefined, max: undefined, int: false };
+						return { ...baseProps };
 					case "array":
 						return { ...baseProps, itemType: { type: "string" } };
 					case "object":
 						return { ...baseProps, fields: {} };
 					case "enum":
-						return { ...baseProps, values: [] };
+						return { ...baseProps };
 					default:
 						return baseProps;
 				}

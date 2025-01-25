@@ -26,7 +26,7 @@ export const structuredResponseRouter = new Hono<{
 			},
 		}),
 		async (c) => {
-			const { teamId, projectId } = c.get("session");
+			const { projectId } = c.get("session");
 
 			const supabase = createClient();
 			const { data: project, error } = await getProjectQuery(

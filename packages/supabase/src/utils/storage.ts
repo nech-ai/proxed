@@ -86,7 +86,7 @@ export async function createFolder(
 
 	const { error, data } = await client.storage
 		.from(bucket)
-		.upload(fullPath, new File([], EMPTY_FOLDER_PLACEHOLDER_FILE_NAME));
+		.upload(fullPath, "");
 
 	if (error) {
 		throw Error(error.message);

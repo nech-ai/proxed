@@ -12,11 +12,9 @@ interface TableProps {
 }
 
 function Table({ data }: TableProps) {
-	const headers = data.headers.map((header, index) => (
-		<th key={header}>{header}</th>
-	));
+	const headers = data.headers.map((header) => <th key={header}>{header}</th>);
 
-	const rows = data.rows.map((row, rowIndex) => (
+	const rows = data.rows.map((row) => (
 		<tr key={row.join("-")}>
 			{row.map((cell, cellIndex) => (
 				<td key={`${cell}-${cellIndex}`}>{cell}</td>

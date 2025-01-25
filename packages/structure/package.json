@@ -6,9 +6,7 @@
 		"clean": "rm -rf .turbo node_modules",
 		"lint": "biome check .",
 		"format": "biome format --write .",
-		"typecheck": "tsc --noEmit",
-		"test": "vitest run",
-		"test:watch": "vitest"
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"zod": "^3.24.1"
@@ -21,9 +19,6 @@
 		"@types/node": "22.10.7",
 		"@types/react": "19.0.7",
 		"@types/react-dom": "19.0.3",
-		"@vitejs/plugin-react": "^4.3.4",
-		"tsconfig": "workspace:*",
-		"vite-tsconfig-paths": "^5.1.4",
-		"vitest": "^3.0.2"
+		"tsconfig": "workspace:*"
 	}
 }

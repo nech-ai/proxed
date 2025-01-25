@@ -27,10 +27,11 @@ type Props = {
 };
 
 const defaultSearch = {
-	name: null,
-	deviceCheck: null,
-	start: null,
-	end: null,
+	q: "",
+	name: "",
+	deviceCheck: "",
+	start: "",
+	end: "",
 };
 
 export function SearchFilter({ placeholder }: Props) {

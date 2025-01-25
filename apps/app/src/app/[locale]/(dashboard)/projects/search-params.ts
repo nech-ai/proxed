@@ -11,4 +11,5 @@ export const searchParamsCache = createSearchParamsCache({
 	end: parseAsString,
 	bundleId: parseAsString,
 	deviceCheck: parseAsString,
+	keyId: parseAsString,
 });

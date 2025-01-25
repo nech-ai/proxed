@@ -10,6 +10,10 @@ export type ProjectOutput = Database["public"]["Tables"]["projects"]["Row"] & {
 		id: string;
 		name: string;
 	} | null;
+	key: {
+		id: string;
+		display_name: string;
+	} | null;
 };
 
 export const columns: ColumnDef<ProjectOutput>[] = [
@@ -35,10 +39,12 @@ export const columns: ColumnDef<ProjectOutput>[] = [
 		accessorFn: (row) => row.device_check?.name || "N/A",
 	},
 	{
-		header: "Key ID",
-		accessorKey: "key_id",
+		header: "Key",
+		accessorKey: "key",
 		enableSorting: true,
-		cell: ({ row }) => <Badge variant="outline">{row.original.key_id}</Badge>,
+		cell: ({ row }) => (
+			<Badge variant="outline">{row.original.key?.display_name}</Badge>
+		),
 	},
 	{
 		header: "Status",

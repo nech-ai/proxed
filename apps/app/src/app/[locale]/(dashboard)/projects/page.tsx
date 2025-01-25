@@ -8,7 +8,10 @@ import { SearchFilter } from "@/components/tables/projects/search-filter";
 import { Table } from "@/components/tables/projects";
 import { ColumnVisibility } from "@/components/tables/projects/column-visibility";
 import { CreateProjectDialog } from "@/components/create-project-dialog";
-import { getDeviceChecks } from "@proxed/supabase/cached-queries";
+import {
+	getDeviceChecks,
+	getProviderKeys,
+} from "@proxed/supabase/cached-queries";
 
 export default async function Page(props: {
 	params: Promise<{
@@ -23,6 +26,7 @@ export default async function Page(props: {
 		end,
 		bundleId,
 		deviceCheck,
+		keyId,
 	} = searchParamsCache.parse(searchParams);
 
 	const filter = {
@@ -30,6 +34,7 @@ export default async function Page(props: {
 		end,
 		bundleId,
 		deviceCheck,
+		keyId,
 	};
 
 	// @ts-ignore
@@ -43,7 +48,7 @@ export default async function Page(props: {
 	});
 
 	const deviceChecks = await getDeviceChecks();
-
+	const keys = await getProviderKeys();
 	return (
 		<>
 			<ContentHeader>
@@ -52,8 +57,12 @@ export default async function Page(props: {
 					<SearchFilter placeholder="Search or type filter" />
 					<div className="flex items-center gap-2">
 						<ColumnVisibility />
-						{/* @ts-ignore */}
-						<CreateProjectDialog deviceChecks={deviceChecks?.data ?? []} />
+						<CreateProjectDialog
+							// @ts-ignore
+							deviceChecks={deviceChecks?.data ?? []}
+							// @ts-ignore
+							keys={keys?.data ?? []}
+						/>
 					</div>
 				</div>
 			</ContentHeader>

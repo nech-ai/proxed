@@ -190,6 +190,7 @@ export type GetProjectsParams = {
 		start?: string;
 		end?: string;
 		deviceCheckId?: string;
+		keyId?: string;
 	};
 };
 
@@ -198,7 +199,7 @@ export async function getProjectsQuery(
 	params: GetProjectsParams,
 ) {
 	const { from = 0, to, filter, sort, teamId } = params;
-	const { start, end, deviceCheckId } = filter || {};
+	const { start, end, deviceCheckId, keyId } = filter || {};
 	const columns = [
 		"id",
 		"name",
@@ -208,7 +209,7 @@ export async function getProjectsQuery(
 		"device_check_id",
 		"device_check:device_checks(id, name)",
 		"key_id",
-		"key:provider_keys(id, name, provider)",
+		"key:provider_keys(id, display_name, provider)",
 		"created_at",
 		"updated_at",
 	];
@@ -245,6 +246,10 @@ export async function getProjectsQuery(
 
 	if (deviceCheckId) {
 		query.eq("device_check_id", deviceCheckId);
+	}
+
+	if (keyId) {
+		query.eq("key_id", keyId);
 	}
 
 	const { data, count } = await query.range(from, to).throwOnError();

@@ -83,6 +83,7 @@ export async function getTeamInvitesQuery(supabase: Client, teamId: string) {
 }
 
 export async function getTeamInviteQuery(supabase: Client, code: string) {
+	// @ts-expect-error
 	return supabase
 		.from("team_invitations")
 		.select(

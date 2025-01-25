@@ -15,9 +15,7 @@
 		"zod": "^3.24.1"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
 		"@proxed/logger": "workspace:*",
-		"@types/node": "22.10.7",
 		"tsconfig": "workspace:*"
 	},
 	"name": "@proxed/proxy",

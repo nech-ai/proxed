@@ -14,8 +14,6 @@
 		"next": "15.1.5"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
-		"@types/node": "22.10.7",
 		"@types/react": "19.0.7",
 		"@types/react-dom": "19.0.3",
 		"tsconfig": "workspace:*"

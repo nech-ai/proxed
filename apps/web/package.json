@@ -60,7 +60,6 @@
 		"@shikijs/rehype": "^1.27.2",
 		"@tailwindcss/typography": "^0.5.16",
 		"@types/mdx": "^2.0.13",
-		"@types/node": "22.10.7",
 		"@types/react": "19.0.7",
 		"@types/react-dom": "19.0.3",
 		"markdown-toc": "^1.2.0",

@@ -154,3 +154,39 @@ export const updateProjectSchema = z.object({
 });
 
 export type UpdateProjectFormValues = z.infer<typeof updateProjectSchema>;
+
+export const filterExecutionsSchema = z.object({
+	projectId: z.string().optional().describe("The project ID to filter by"),
+	provider: z
+		.enum(["OPENAI", "ANTHROPIC"])
+		.optional()
+		.describe("The AI provider to filter by"),
+	model: z
+		.enum(["gpt-4o", "gpt-4o-mini", "claude-3-sonnet"])
+		.optional()
+		.describe("The model to filter by"),
+	finishReason: z
+		.enum([
+			"stop",
+			"length",
+			"content-filter",
+			"tool-calls",
+			"error",
+			"other",
+			"unknown",
+		])
+		.optional()
+		.describe("The finish reason to filter by"),
+	start: parseDateSchema
+		.optional()
+		.describe(
+			"The start date for execution creation date. Return ISO-8601 format.",
+		),
+	end: parseDateSchema
+		.optional()
+		.describe(
+			"The end date for execution creation date. If not provided, defaults to the current date. Return ISO-8601 format.",
+		),
+});
+
+export type FilterExecutionsFormValues = z.infer<typeof filterExecutionsSchema>;

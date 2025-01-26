@@ -277,6 +277,7 @@ export type GetExecutionsParams = {
 	to: number;
 	from: number;
 	sort?: [string, "asc" | "desc"];
+	searchQuery?: string;
 	filter?: {
 		start?: string;
 		end?: string;
@@ -330,6 +331,8 @@ export async function getExecutionsQuery(
 		"latency",
 		"response_code",
 		"error_message",
+		"completion_cost",
+		"prompt_cost",
 		"created_at",
 	];
 

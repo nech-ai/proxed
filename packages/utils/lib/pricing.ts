@@ -3,7 +3,14 @@ type ModelPricing = {
 	completion: number;
 };
 
-type OpenAIModel = "gpt-4o" | "gpt-4o-mini";
+type OpenAIModel =
+	| "gpt-4o"
+	| "gpt-4o-2024-11-20"
+	| "gpt-4o-2024-08-06"
+	| "gpt-4o-2024-05-13"
+	| "gpt-4o-mini"
+	| "gpt-4o-mini-2024-07-18";
+
 type AnthropicModel = "claude-3-sonnet";
 type SupportedModel = OpenAIModel | AnthropicModel;
 
@@ -12,12 +19,28 @@ type AnthropicModels = { [K in AnthropicModel]: ModelPricing };
 
 const OPENAI_MODELS: OpenAIModels = {
 	"gpt-4o": {
-		prompt: 0.01,
-		completion: 0.03,
+		prompt: 0.0025,
+		completion: 0.01,
+	},
+	"gpt-4o-2024-11-20": {
+		prompt: 0.0025,
+		completion: 0.01,
+	},
+	"gpt-4o-2024-08-06": {
+		prompt: 0.0025,
+		completion: 0.01,
+	},
+	"gpt-4o-2024-05-13": {
+		prompt: 0.005,
+		completion: 0.015,
 	},
 	"gpt-4o-mini": {
-		prompt: 0.001,
-		completion: 0.002,
+		prompt: 0.00015,
+		completion: 0.0006,
+	},
+	"gpt-4o-mini-2024-07-18": {
+		prompt: 0.00015,
+		completion: 0.0006,
 	},
 } as const;
 

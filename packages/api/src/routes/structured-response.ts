@@ -2,6 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import { type JsonSchema, jsonToZod } from "@proxed/structure";
 import { createClient } from "@proxed/supabase/api";
 import { getProjectQuery } from "@proxed/supabase/queries";
+import { createExecution } from "@proxed/supabase/mutations";
 import { generateObject } from "ai";
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
@@ -26,9 +27,10 @@ export const structuredResponseRouter = new Hono<{
 			},
 		}),
 		async (c) => {
-			const { projectId } = c.get("session");
+			const { projectId, teamId } = c.get("session");
 			const ip =
 				c.req.header("x-forwarded-for") ?? c.req.header("cf-connecting-ip");
+			const userAgent = c.req.header("user-agent");
 
 			const supabase = createClient();
 			const { data: project, error } = await getProjectQuery(
@@ -39,6 +41,11 @@ export const structuredResponseRouter = new Hono<{
 			if (error || !project) {
 				return c.json({ error: "Project not found" }, 404);
 			}
+
+			const deviceCheckId = project.device_check_id;
+			const keyId = project.key_id;
+
+			const startTime = Date.now();
 			try {
 				const { image } = await c.req.json();
 
@@ -50,7 +57,7 @@ export const structuredResponseRouter = new Hono<{
 					.data!;
 
 				const { object, usage, finishReason } = await generateObject({
-					model: openai("gpt-4o", { structuredOutputs: true }),
+					model: openai("gpt-4o-mini", { structuredOutputs: true }),
 					schema,
 					messages: [
 						{
@@ -74,13 +81,53 @@ export const structuredResponseRouter = new Hono<{
 					],
 					maxTokens: 1000,
 				});
+
+				const latency = Date.now() - startTime;
+
+				// Create execution record
+				await createExecution(supabase, {
+					team_id: teamId,
+					project_id: projectId,
+					device_check_id: deviceCheckId,
+					key_id: keyId,
+					ip,
+					user_agent: userAgent ?? undefined,
+					model: "gpt-4o-mini",
+					provider: "OPENAI",
+					prompt_tokens: usage.promptTokens,
+					completion_tokens: usage.completionTokens,
+					finish_reason: finishReason,
+					latency,
+					response_code: 200,
+					response: JSON.stringify(object),
+				});
+
 				return c.json(object);
 			} catch (error) {
 				console.error("Plant classification error:", error);
+				const latency = Date.now() - startTime;
 
-				const errorResponse = {
-					error: error,
-				};
+				// Create execution record for error case
+				await createExecution(supabase, {
+					team_id: teamId,
+					project_id: projectId,
+					device_check_id: deviceCheckId,
+					key_id: keyId,
+					ip,
+					user_agent: userAgent ?? undefined,
+					model: "gpt-4o",
+					provider: "OPENAI",
+					prompt_tokens: 0,
+					completion_tokens: 0,
+					finish_reason: "error",
+					latency,
+					response_code: 500,
+					error_message:
+						error instanceof Error ? error.message : "Unknown error",
+					error_code: error instanceof Error ? error.name : "UNKNOWN_ERROR",
+				});
+
+				const errorResponse = { error };
 				return c.json(errorResponse, 500);
 			}
 		},

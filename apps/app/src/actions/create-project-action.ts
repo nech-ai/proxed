@@ -11,14 +11,7 @@ export const createProjectAction = authActionClient
 	.schema(createProjectSchema)
 	.action(
 		async ({
-			parsedInput: {
-				deviceCheckId,
-				name,
-				description,
-				bundleId,
-				keyId,
-				revalidatePath,
-			},
+			parsedInput: { name, description, bundleId, revalidatePath },
 			ctx: { supabase, user },
 		}) => {
 			if (!user?.team_id) {
@@ -29,9 +22,7 @@ export const createProjectAction = authActionClient
 				name,
 				description,
 				bundleId,
-				deviceCheckId,
 				teamId: user.team_id,
-				keyId,
 			});
 
 			revalidateTag(`projects_${user.team_id}`);

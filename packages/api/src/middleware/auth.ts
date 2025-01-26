@@ -18,7 +18,7 @@ export const authMiddleware = createMiddleware<{
 
 	const { data: project, error } = await getProjectQuery(supabase, projectId);
 
-	if (error || !project || !project.device_check) {
+	if (error || !project?.device_check) {
 		return c.json({ error: "Project not found" }, 401);
 	}
 

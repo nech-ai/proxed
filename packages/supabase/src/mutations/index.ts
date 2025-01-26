@@ -1,5 +1,6 @@
 import { getUserQuery } from "../queries";
 import type { Client, TablesUpdate } from "../types/index";
+import { calculateCosts } from "@proxed/utils";
 
 export async function updateUser(
 	supabase: Client,
@@ -219,10 +220,8 @@ export async function deleteProviderKey(supabase: Client, id: string) {
 type CreateProjectParams = {
 	name: string;
 	description: string;
-	deviceCheckId: string;
 	teamId: string;
 	bundleId: string;
-	keyId: string;
 	schemaConfig?: Record<string, any>;
 };
 
@@ -236,8 +235,6 @@ export async function createProject(
 			name: params.name,
 			description: params.description,
 			bundle_id: params.bundleId,
-			device_check_id: params.deviceCheckId,
-			key_id: params.keyId,
 			team_id: params.teamId,
 			schema_config: params.schemaConfig ?? {},
 		})
@@ -264,4 +261,58 @@ export async function updateProject(
 	data: TablesUpdate<"projects">,
 ) {
 	return supabase.from("projects").update(data).eq("id", id).select().single();
+}
+
+type CreateExecutionParams = Omit<
+	{
+		team_id: string;
+		project_id: string;
+		device_check_id: string;
+		key_id: string;
+		ip: string;
+		user_agent?: string;
+		model: string;
+		provider: "OPENAI" | "ANTHROPIC";
+		prompt_tokens: number;
+		completion_tokens: number;
+		finish_reason:
+			| "stop"
+			| "length"
+			| "content-filter"
+			| "tool-calls"
+			| "error"
+			| "other"
+			| "unknown";
+		latency: number;
+		response_code: number;
+		prompt?: string;
+		response?: string;
+		error_message?: string;
+		error_code?: string;
+	},
+	"total_tokens" | "prompt_cost" | "completion_cost" | "total_cost"
+>;
+
+export async function createExecution(
+	supabase: Client,
+	params: CreateExecutionParams,
+) {
+	const costs = calculateCosts({
+		provider: params.provider,
+		model: params.model as any,
+		promptTokens: params.prompt_tokens,
+		completionTokens: params.completion_tokens,
+	});
+
+	return supabase
+		.from("executions")
+		.insert({
+			...params,
+			prompt_cost: costs.promptCost,
+			completion_cost: costs.completionCost,
+			total_cost: costs.totalCost,
+			total_tokens: params.prompt_tokens + params.completion_tokens,
+		})
+		.select()
+		.single();
 }

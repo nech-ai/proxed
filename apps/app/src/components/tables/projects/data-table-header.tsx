@@ -65,7 +65,7 @@ export function DataTableHeader({ table, loading }: Props) {
 				{renderSortHeader("description", "Description", "250px")}
 				{renderSortHeader("bundle_id", "Bundle ID", "150px")}
 				{renderSortHeader("device_check", "Device Check", "150px")}
-				{renderSortHeader("key_id", "Key ID", "100px")}
+				{renderSortHeader("key", "Key", "100px")}
 				{renderSortHeader("is_active", "Status", "100px")}
 				{renderSortHeader("created_at", "Created At", "150px")}
 				{isVisible("actions") && (

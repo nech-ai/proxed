@@ -50,6 +50,116 @@ export type Database = {
 					},
 				];
 			};
+			executions: {
+				Row: {
+					completion_cost: number;
+					completion_tokens: number;
+					created_at: string;
+					device_check_id: string;
+					error_code: string | null;
+					error_message: string | null;
+					finish_reason: Database["public"]["Enums"]["finish_reason"];
+					id: string;
+					ip: string;
+					key_id: string;
+					latency: number;
+					model: string;
+					project_id: string;
+					prompt: string | null;
+					prompt_cost: number;
+					prompt_tokens: number;
+					provider: Database["public"]["Enums"]["provider_type"];
+					response: string | null;
+					response_code: number;
+					team_id: string;
+					total_cost: number;
+					total_tokens: number;
+					updated_at: string;
+					user_agent: string | null;
+				};
+				Insert: {
+					completion_cost?: number;
+					completion_tokens: number;
+					created_at?: string;
+					device_check_id: string;
+					error_code?: string | null;
+					error_message?: string | null;
+					finish_reason: Database["public"]["Enums"]["finish_reason"];
+					id?: string;
+					ip: string;
+					key_id: string;
+					latency: number;
+					model: string;
+					project_id: string;
+					prompt?: string | null;
+					prompt_cost?: number;
+					prompt_tokens: number;
+					provider: Database["public"]["Enums"]["provider_type"];
+					response?: string | null;
+					response_code: number;
+					team_id: string;
+					total_cost?: number;
+					total_tokens: number;
+					updated_at?: string;
+					user_agent?: string | null;
+				};
+				Update: {
+					completion_cost?: number;
+					completion_tokens?: number;
+					created_at?: string;
+					device_check_id?: string;
+					error_code?: string | null;
+					error_message?: string | null;
+					finish_reason?: Database["public"]["Enums"]["finish_reason"];
+					id?: string;
+					ip?: string;
+					key_id?: string;
+					latency?: number;
+					model?: string;
+					project_id?: string;
+					prompt?: string | null;
+					prompt_cost?: number;
+					prompt_tokens?: number;
+					provider?: Database["public"]["Enums"]["provider_type"];
+					response?: string | null;
+					response_code?: number;
+					team_id?: string;
+					total_cost?: number;
+					total_tokens?: number;
+					updated_at?: string;
+					user_agent?: string | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "executions_device_check_id_fkey";
+						columns: ["device_check_id"];
+						isOneToOne: false;
+						referencedRelation: "device_checks";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "executions_key_id_fkey";
+						columns: ["key_id"];
+						isOneToOne: false;
+						referencedRelation: "provider_keys";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "executions_project_id_fkey";
+						columns: ["project_id"];
+						isOneToOne: false;
+						referencedRelation: "projects";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "executions_team_id_fkey";
+						columns: ["team_id"];
+						isOneToOne: false;
+						referencedRelation: "teams";
+						referencedColumns: ["id"];
+					},
+				];
+			};
 			projects: {
 				Row: {
 					bundle_id: string;
@@ -349,6 +459,14 @@ export type Database = {
 			};
 		};
 		Enums: {
+			finish_reason:
+				| "stop"
+				| "length"
+				| "content-filter"
+				| "tool-calls"
+				| "error"
+				| "other"
+				| "unknown";
 			provider_type: "OPENAI" | "ANTHROPIC";
 			team_role: "OWNER" | "MEMBER";
 		};

@@ -17,6 +17,9 @@
 	"[sql]": {
 		"editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc"
 	},
+	"bun.runtime": "/opt/homebrew/bin/bun",
+	"bun.debugTerminal.stopOnEntry": false,
+	"bun.test.filePattern": "**/*{.test.,.spec.,_test_,_spec_}{js,ts,tsx,jsx,mts,cts}",
 	"editor.codeActionsOnSave": {
 		"quickfix.biome": "explicit",
 		"source.organizeImports.biome": "explicit"

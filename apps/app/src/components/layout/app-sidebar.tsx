@@ -29,14 +29,14 @@ const data = {
 			icon: BarChartIcon,
 		},
 		{
+			title: "Executions",
+			url: "/executions",
+			icon: FileIcon,
+		},
+		{
 			title: "Projects",
 			url: "/projects",
 			icon: BriefcaseIcon,
-		},
-		{
-			title: "Logs",
-			url: "/logs",
-			icon: FileIcon,
 		},
 		{
 			title: "Settings",

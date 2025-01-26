@@ -27,6 +27,8 @@ export const structuredResponseRouter = new Hono<{
 		}),
 		async (c) => {
 			const { projectId } = c.get("session");
+			const ip =
+				c.req.header("x-forwarded-for") ?? c.req.header("cf-connecting-ip");
 
 			const supabase = createClient();
 			const { data: project, error } = await getProjectQuery(
@@ -41,13 +43,13 @@ export const structuredResponseRouter = new Hono<{
 				const { image } = await c.req.json();
 
 				if (!image) {
-					return c.json({ error: "Image base64 is required" }, 400);
+					return c.json({ error: "Image is required" }, 400);
 				}
 
 				const schema = jsonToZod(project.schema_config as unknown as JsonSchema)
 					.data!;
 
-				const { object } = await generateObject({
+				const { object, usage, finishReason } = await generateObject({
 					model: openai("gpt-4o", { structuredOutputs: true }),
 					schema,
 					messages: [

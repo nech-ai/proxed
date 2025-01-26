@@ -80,6 +80,6 @@ export async function generateMetadata(props: {
 
 	return {
 		title: `${page.data.title} | Proxed.AI`,
-		description: page.data.description,
+		description: page.data.description || "",
 	};
 }

@@ -18,31 +18,16 @@ import {
 } from "@proxed/ui/components/form";
 import { Input } from "@proxed/ui/components/input";
 import { Textarea } from "@proxed/ui/components/textarea";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@proxed/ui/components/select";
+import {} from "@proxed/ui/components/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { createProjectAction } from "@/actions/create-project-action";
 import { useRouter } from "next/navigation";
 import { PlusIcon } from "@radix-ui/react-icons";
-import type { Tables } from "@proxed/supabase/types";
 import { createProjectSchema } from "@/actions/schema";
 import type { CreateProjectFormValues } from "@/actions/schema";
 
-interface CreateProjectDialogProps {
-	deviceChecks: Tables<"device_checks">[];
-	keys: Tables<"provider_keys">[];
-}
-
-export function CreateProjectDialog({
-	deviceChecks,
-	keys,
-}: CreateProjectDialogProps) {
+export function CreateProjectDialog() {
 	const router = useRouter();
 	const form = useForm<CreateProjectFormValues>({
 		resolver: zodResolver(createProjectSchema),
@@ -50,8 +35,6 @@ export function CreateProjectDialog({
 			name: "",
 			description: "",
 			bundleId: "",
-			deviceCheckId: "",
-			keyId: "",
 		},
 	});
 
@@ -117,57 +100,6 @@ export function CreateProjectDialog({
 								</FormItem>
 							)}
 						/>
-
-						<FormField
-							control={form.control}
-							name="deviceCheckId"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Device Check</FormLabel>
-									<Select onValueChange={field.onChange} value={field.value}>
-										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Select device check" />
-											</SelectTrigger>
-										</FormControl>
-										<SelectContent>
-											{deviceChecks.map((deviceCheck) => (
-												<SelectItem key={deviceCheck.id} value={deviceCheck.id}>
-													{deviceCheck.name}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						<FormField
-							control={form.control}
-							name="keyId"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Key</FormLabel>
-									<Select onValueChange={field.onChange} value={field.value}>
-										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Select key" />
-											</SelectTrigger>
-										</FormControl>
-										<SelectContent>
-											{keys.map((key) => (
-												<SelectItem key={key.id} value={key.id}>
-													{key.display_name} ({key.provider})
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
 						<Button type="submit" className="w-full">
 							Create Project
 						</Button>

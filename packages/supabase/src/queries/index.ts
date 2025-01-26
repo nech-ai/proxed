@@ -266,8 +266,146 @@ export async function getProjectsQuery(
 export async function getProjectQuery(supabase: Client, projectId: string) {
 	return supabase
 		.from("projects")
-		.select("*, device_check:device_checks(*)")
+		.select("*, device_check:device_checks(*), key:provider_keys(*)")
 		.eq("id", projectId)
+		.throwOnError()
+		.single();
+}
+
+export type GetExecutionsParams = {
+	teamId: string;
+	to: number;
+	from: number;
+	sort?: [string, "asc" | "desc"];
+	filter?: {
+		start?: string;
+		end?: string;
+		projectId?: string;
+		deviceCheckId?: string;
+		keyId?: string;
+		provider?: "OPENAI" | "ANTHROPIC";
+		model?: string;
+		finishReason?:
+			| "stop"
+			| "length"
+			| "content-filter"
+			| "tool-calls"
+			| "error"
+			| "other"
+			| "unknown";
+	};
+};
+
+export async function getExecutionsQuery(
+	supabase: Client,
+	params: GetExecutionsParams,
+) {
+	const { from = 0, to, filter, sort, teamId } = params;
+	const {
+		start,
+		end,
+		projectId,
+		deviceCheckId,
+		keyId,
+		provider,
+		model,
+		finishReason,
+	} = filter || {};
+
+	const columns = [
+		"id",
+		"project_id",
+		"project:projects(id, name, bundle_id)",
+		"device_check_id",
+		"device_check:device_checks(id, name)",
+		"key_id",
+		"key:provider_keys(id, display_name)",
+		"model",
+		"provider",
+		"prompt_tokens",
+		"completion_tokens",
+		"total_tokens",
+		"total_cost",
+		"finish_reason",
+		"latency",
+		"response_code",
+		"error_message",
+		"created_at",
+	];
+
+	const query = supabase
+		.from("executions")
+		.select(columns.join(","), { count: "exact" })
+		.eq("team_id", teamId);
+
+	if (sort) {
+		const [column, value] = sort;
+		const ascending = value === "asc";
+		if (column === "project") {
+			query.order("project(name)", { ascending });
+		} else if (column === "device_check") {
+			query.order("device_check(name)", { ascending });
+		} else if (column === "key") {
+			query.order("key(display_name)", { ascending });
+		} else {
+			query.order(column, { ascending });
+		}
+	} else {
+		query.order("created_at", { ascending: false });
+	}
+
+	if (start && end) {
+		const fromDate = new UTCDate(start);
+		const toDate = new UTCDate(end);
+
+		query.gte("created_at", fromDate.toISOString());
+		query.lte("created_at", toDate.toISOString());
+	}
+
+	if (projectId) {
+		query.eq("project_id", projectId);
+	}
+
+	if (deviceCheckId) {
+		query.eq("device_check_id", deviceCheckId);
+	}
+
+	if (keyId) {
+		query.eq("key_id", keyId);
+	}
+
+	if (provider) {
+		query.eq("provider", provider);
+	}
+
+	if (model) {
+		query.eq("model", model);
+	}
+
+	if (finishReason) {
+		query.eq("finish_reason", finishReason);
+	}
+
+	const { data, count } = await query.range(from, to).throwOnError();
+
+	return {
+		meta: {
+			count,
+		},
+		data,
+	};
+}
+
+export async function getExecutionQuery(supabase: Client, executionId: string) {
+	return supabase
+		.from("executions")
+		.select(`
+      *,
+      project:projects(*),
+      device_check:device_checks(*),
+      key:provider_keys(*)
+    `)
+		.eq("id", executionId)
 		.throwOnError()
 		.single();
 }

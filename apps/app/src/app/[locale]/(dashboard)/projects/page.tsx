@@ -12,6 +12,7 @@ import {
 	getDeviceChecks,
 	getProviderKeys,
 } from "@proxed/supabase/cached-queries";
+import type { Tables } from "@proxed/supabase/types";
 
 export default async function Page(props: {
 	params: Promise<{
@@ -47,8 +48,15 @@ export default async function Page(props: {
 		query,
 	});
 
-	const deviceChecks = await getDeviceChecks();
-	const keys = await getProviderKeys();
+	const [deviceChecksData, keysData] = await Promise.all([
+		getDeviceChecks(),
+		getProviderKeys(),
+	]);
+
+	const deviceChecks =
+		deviceChecksData?.data ?? ([] as Tables<"device_checks">[]);
+	const keys = keysData?.data ?? ([] as Tables<"provider_keys">[]);
+
 	return (
 		<>
 			<ContentHeader>
@@ -57,12 +65,7 @@ export default async function Page(props: {
 					<SearchFilter placeholder="Search or type filter" />
 					<div className="flex items-center gap-2">
 						<ColumnVisibility />
-						<CreateProjectDialog
-							// @ts-ignore
-							deviceChecks={deviceChecks?.data ?? []}
-							// @ts-ignore
-							keys={keys?.data ?? []}
-						/>
+						<CreateProjectDialog />
 					</div>
 				</div>
 			</ContentHeader>

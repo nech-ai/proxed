@@ -17,6 +17,9 @@ import {
 	getTeamUserQuery,
 	getUserInvitesQuery,
 	getUserQuery,
+	type GetExecutionsParams,
+	getExecutionsQuery,
+	getExecutionQuery,
 } from "../queries";
 
 export const getSession = cache(async () => {
@@ -246,4 +249,32 @@ export const getProject = async (projectId: string) => {
 		{ tags: [`project_${projectId}`], revalidate: 30 },
 		// @ts-expect-error
 	)(projectId);
+};
+
+export const getExecutions = async (
+	params: Omit<GetExecutionsParams, "teamId">,
+) => {
+	const supabase = await createClient();
+
+	const user = await getUser();
+	const teamId = user?.data?.team_id;
+	if (!teamId) return null;
+
+	return unstable_cache(
+		async () => getExecutionsQuery(supabase, { ...params, teamId }),
+		["executions", teamId, JSON.stringify(params)],
+		{ tags: [`executions_${teamId}`], revalidate: 30 },
+		// @ts-expect-error
+	)(params);
+};
+
+export const getExecution = async (executionId: string) => {
+	const supabase = await createClient();
+
+	return unstable_cache(
+		async () => getExecutionQuery(supabase, executionId),
+		["execution", executionId],
+		{ tags: [`execution_${executionId}`], revalidate: 30 },
+		// @ts-expect-error
+	)(executionId);
 };

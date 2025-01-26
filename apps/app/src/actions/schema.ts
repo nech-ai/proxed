@@ -119,8 +119,6 @@ export const createProjectSchema = z.object({
 	name: z.string(),
 	description: z.string().optional().default(""),
 	bundleId: z.string(),
-	deviceCheckId: z.string(),
-	keyId: z.string(),
 	revalidatePath: z.string().optional(),
 });
 

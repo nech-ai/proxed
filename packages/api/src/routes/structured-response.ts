@@ -8,6 +8,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 import { authMiddleware } from "../middleware/auth";
 import type { AuthMiddlewareVariables } from "../types";
+import { reassembleKey } from "@proxed/utils/lib/partial-keys";
 
 export const structuredResponseRouter = new Hono<{
 	Variables: AuthMiddlewareVariables;
@@ -38,12 +39,21 @@ export const structuredResponseRouter = new Hono<{
 				projectId,
 			);
 
-			if (error || !project) {
+			if (error || !project || !project.key) {
 				return c.json({ error: "Project not found" }, 404);
 			}
 
 			const deviceCheckId = project.device_check_id;
 			const keyId = project.key_id;
+
+			const apiKey = c.req.header("X-Ai-Token");
+
+			try {
+				const fullKey = reassembleKey(project.key.partial_key_server, apiKey);
+			} catch (error) {
+				console.error("Error reassembling key:", error);
+				return c.json({ error: "Invalid API key" }, 401);
+			}
 
 			const startTime = Date.now();
 			try {

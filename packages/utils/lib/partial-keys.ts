@@ -1,8 +1,23 @@
-// Add at the top of the file
-const SALT_LENGTH = 8;
+interface CryptoProvider {
+	getRandomValues: (array: Uint8Array) => Uint8Array;
+}
+
+function getRandomValues(
+	length: number,
+	cryptoProvider: CryptoProvider,
+): string {
+	const array = new Uint8Array(length);
+	cryptoProvider.getRandomValues(array);
+	return Array.from(array)
+		.map((b) => b.toString(16).padStart(2, "0"))
+		.join("");
+}
+
+const SALT_LENGTH = 16;
+const MIN_KEY_LENGTH = 12; // Minimum key length after prefix
 const KEY_PATTERNS = {
-	ANTHROPIC: /^sk-ant-api\d*-/,
-	OPENAI: /^sk-.*?-?/,
+	ANTHROPIC: /^sk-ant-api\d{2}-[a-zA-Z0-9-]{24,}$/,
+	OPENAI: /^sk-(?:(?!proj-)[a-zA-Z0-9-]{20,}|proj-[a-zA-Z0-9-_]{20,})$/,
 } as const;
 
 export class KeyValidationError extends Error {
@@ -12,45 +27,45 @@ export class KeyValidationError extends Error {
 	}
 }
 
+export type KeyProvider = keyof typeof KEY_PATTERNS;
+export type ValidationErrorCode =
+	| "MISSING_KEY"
+	| "INVALID_FORMAT"
+	| "UNRECOGNIZED_PROVIDER"
+	| "KEY_TOO_SHORT";
+
 export interface KeyValidationResult {
 	isValid: boolean;
-	provider?: keyof typeof KEY_PATTERNS;
-	error?: string;
+	provider?: KeyProvider;
+	error?: {
+		code: ValidationErrorCode;
+		message: string;
+	};
 }
 
 export function validateApiKey(key: string): KeyValidationResult {
 	if (!key) {
-		return { isValid: false, error: "API key is required" };
+		return {
+			isValid: false,
+			error: {
+				code: "MISSING_KEY",
+				message: "API key is required",
+			},
+		};
 	}
 
-	// Check for Anthropic pattern
-	if (key.startsWith("sk-ant")) {
-		if (!KEY_PATTERNS.ANTHROPIC.test(key)) {
-			return {
-				isValid: false,
-				provider: "ANTHROPIC",
-				error:
-					"Invalid Anthropic API key format. Should start with 'sk-ant-api'",
-			};
+	for (const [provider, pattern] of Object.entries(KEY_PATTERNS)) {
+		if (pattern.test(key)) {
+			return { isValid: true, provider: provider as KeyProvider };
 		}
-		return { isValid: true, provider: "ANTHROPIC" };
-	}
-
-	// Check for OpenAI pattern
-	if (key.startsWith("sk-")) {
-		if (!KEY_PATTERNS.OPENAI.test(key)) {
-			return {
-				isValid: false,
-				provider: "OPENAI",
-				error: "Invalid OpenAI API key format. Should start with 'sk-'",
-			};
-		}
-		return { isValid: true, provider: "OPENAI" };
 	}
 
 	return {
 		isValid: false,
-		error: "Unrecognized API key format. Key should start with 'sk-'",
+		error: {
+			code: "UNRECOGNIZED_PROVIDER",
+			message: "Unrecognized API key format",
+		},
 	};
 }
 
@@ -69,19 +84,19 @@ export function extractPrefix(fullKey: string): {
 	}
 
 	// Check for known patterns
-	const anthropicMatch = fullKey.match(KEY_PATTERNS.ANTHROPIC);
+	const anthropicMatch = fullKey.match(/^(sk-ant-api\d{2}-)/);
 	if (anthropicMatch) {
 		return {
-			prefix: anthropicMatch[0],
-			leftover: fullKey.slice(anthropicMatch[0].length),
+			prefix: anthropicMatch[1],
+			leftover: fullKey.slice(anthropicMatch[1].length),
 		};
 	}
 
-	const openAIMatch = fullKey.match(KEY_PATTERNS.OPENAI);
+	const openAIMatch = fullKey.match(/^(sk-)/);
 	if (openAIMatch) {
 		return {
-			prefix: openAIMatch[0],
-			leftover: fullKey.slice(openAIMatch[0].length),
+			prefix: openAIMatch[1],
+			leftover: fullKey.slice(openAIMatch[1].length),
 		};
 	}
 
@@ -95,34 +110,30 @@ export function extractPrefix(fullKey: string): {
  * @returns Object containing serverPart and clientPart
  * @throws {Error} If the key is too short or invalid
  */
-export function splitKeyWithPrefix(fullKey: string): {
+export function splitKeyWithPrefix(
+	fullKey: string,
+	cryptoProvider: CryptoProvider,
+): {
 	serverPart: string;
 	clientPart: string;
 } {
-	if (!fullKey || typeof fullKey !== "string") {
-		throw new Error("Invalid key format: key must be a non-empty string");
-	}
-
 	const { prefix, leftover } = extractPrefix(fullKey);
 
-	if (leftover.length < 2) {
-		throw new KeyValidationError("Key leftover too short for splitting");
+	if (leftover.length < MIN_KEY_LENGTH) {
+		throw new KeyValidationError(
+			"Key must have at least 12 characters after prefix",
+		);
 	}
 
-	// 1. Generate random offset
-	const randOffset = Math.floor(Math.random() * (leftover.length - 1)) + 1;
+	const salt = getRandomValues(SALT_LENGTH / 2, cryptoProvider);
+	const randArray = new Uint8Array(1);
+	cryptoProvider.getRandomValues(randArray);
+	const randOffset = (randArray[0] % (leftover.length - 1)) + 1;
 
-	// 2. Generate random salt (length 8, for example)
-	const salt = crypto.randomUUID().slice(0, SALT_LENGTH);
-	// or use your own RNG
-
-	// 3. Build server portion
-	const serverPart = prefix + leftover.slice(0, randOffset) + salt;
-
-	// 4. Build client portion
-	const clientPart = leftover.slice(randOffset) + salt;
-
-	return { serverPart, clientPart };
+	return {
+		serverPart: `${prefix}${leftover.slice(0, randOffset)}${salt}`,
+		clientPart: `${leftover.slice(randOffset)}${salt}`,
+	};
 }
 
 /**
@@ -142,23 +153,27 @@ export function reassembleKey(serverPart: string, clientPart: string): string {
 		throw new Error("Invalid key parts: both parts must be non-empty strings");
 	}
 
-	// Both contain the salt at the end. The salt length is known (8 in our example).
+	if (serverPart.length < SALT_LENGTH || clientPart.length < SALT_LENGTH) {
+		throw new KeyValidationError("Invalid key parts: parts too short");
+	}
+
 	const saltFromServer = serverPart.slice(-SALT_LENGTH);
 	const saltFromClient = clientPart.slice(-SALT_LENGTH);
 
-	// Check if they match
 	if (saltFromServer !== saltFromClient) {
 		throw new KeyValidationError(
 			"Mismatch: salt does not match. Invalid partial keys.",
 		);
 	}
 
-	// Remove salt from both
-	const serverCore = serverPart.slice(0, serverPart.length - SALT_LENGTH);
-	const clientCore = clientPart.slice(0, clientPart.length - SALT_LENGTH);
+	const serverCore = serverPart.slice(0, -SALT_LENGTH);
+	const clientCore = clientPart.slice(0, -SALT_LENGTH);
+	const reconstructed = serverCore + clientCore;
 
-	// Full key = serverCore + clientCore
-	// Because serverCore includes the prefix + first randomOffset portion
-	// and clientCore includes the second portion
-	return serverCore + clientCore;
+	const validation = validateApiKey(reconstructed);
+	if (!validation.isValid) {
+		throw new KeyValidationError("Unrecognized API key format");
+	}
+
+	return reconstructed;
 }

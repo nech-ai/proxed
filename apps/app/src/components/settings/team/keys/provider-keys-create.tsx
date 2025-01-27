@@ -45,6 +45,11 @@ import { useState, useEffect, useRef } from "react";
 import { cn } from "@proxed/ui/utils";
 import { Alert, AlertDescription } from "@proxed/ui/components/alert";
 
+const cryptoProvider =
+	typeof window !== "undefined"
+		? window.crypto
+		: require("node:crypto").webcrypto;
+
 interface ProviderKeyCreateFormProps {
 	onSuccess?: () => void;
 	revalidatePath?: string;
@@ -154,7 +159,7 @@ export function ProviderKeyCreateForm({
 
 		try {
 			const { serverPart, clientPart: generatedClientPart } =
-				splitKeyWithPrefix(value);
+				splitKeyWithPrefix(value, cryptoProvider);
 			clientPartRef.current = generatedClientPart;
 			setClientPart(generatedClientPart);
 
@@ -332,7 +337,9 @@ export function ProviderKeyCreateForm({
 											className="mt-2 animate-in slide-in-from-top-1 duration-200"
 										>
 											<AlertCircle className="h-4 w-4" />
-											<AlertDescription>{keyValidation.error}</AlertDescription>
+											<AlertDescription>
+												{keyValidation.error.message}
+											</AlertDescription>
 										</Alert>
 									)}
 								</FormItem>

@@ -1,4 +1,4 @@
-import { openai } from "@ai-sdk/openai";
+import { createOpenAI } from "@ai-sdk/openai";
 import { type JsonSchema, jsonToZod } from "@proxed/structure";
 import { createClient } from "@proxed/supabase/api";
 import { getProjectQuery } from "@proxed/supabase/queries";
@@ -48,26 +48,27 @@ export const structuredResponseRouter = new Hono<{
 
 			const apiKey = c.req.header("X-Ai-Token");
 
-			try {
-				const fullKey = reassembleKey(project.key.partial_key_server, apiKey);
-			} catch (error) {
-				console.error("Error reassembling key:", error);
-				return c.json({ error: "Invalid API key" }, 401);
+			const { image } = await c.req.json();
+			if (!image) {
+				return c.json({ error: "Image is required" }, 400);
+			}
+
+			const { success, data: schema } = jsonToZod(
+				project.schema_config as unknown as JsonSchema,
+			);
+
+			if (!success) {
+				return c.json({ error: "Invalid schema" }, 400);
 			}
 
 			const startTime = Date.now();
 			try {
-				const { image } = await c.req.json();
-
-				if (!image) {
-					return c.json({ error: "Image is required" }, 400);
-				}
-
-				const schema = jsonToZod(project.schema_config as unknown as JsonSchema)
-					.data!;
+				const openaiClient = createOpenAI({
+					apiKey: reassembleKey(project.key.partial_key_server, apiKey),
+				});
 
 				const { object, usage, finishReason } = await generateObject({
-					model: openai("gpt-4o-mini", { structuredOutputs: true }),
+					model: openaiClient("gpt-4o-mini", { structuredOutputs: true }),
 					schema,
 					messages: [
 						{

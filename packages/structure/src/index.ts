@@ -1,5 +1,6 @@
 export { zodToJson, jsonToZod } from "./generator";
 export { jsonToZodCode, zodCodeToJson } from "./code-converter";
+export { jsonToSwiftCode } from "./swift-converter";
 export type {
 	JsonSchema,
 	ZodToJsonResult,
@@ -18,4 +19,5 @@ export type {
 	DateJsonSchema,
 	AnyJsonSchema,
 	UnknownJsonSchema,
+	SwiftCodeResult,
 } from "./types";

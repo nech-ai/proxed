@@ -14,9 +14,9 @@ import {
 	TabsList,
 	TabsTrigger,
 } from "@proxed/ui/components/tabs";
-import { CodeIcon, EyeIcon } from "lucide-react";
+import { CodeIcon, EyeIcon, SmartphoneIcon } from "lucide-react";
 import { SchemaBuilderWrapper } from "@/components/schema-builder/schema-builder-wrapper";
-import { jsonToZodCode } from "@proxed/structure";
+import { jsonToZodCode, jsonToSwiftCode } from "@proxed/structure";
 import type { JsonSchema } from "@proxed/structure";
 import { CodeView } from "@/components/schema-builder/code-view";
 import { ProjectEditForm } from "@/components/projects/project-edit-form";
@@ -38,10 +38,15 @@ export default async function Page(props: {
 		fields: {},
 	}) as JsonSchema;
 
-	const codeResult = jsonToZodCode(schemaConfig);
-	const generatedCode = codeResult.success
-		? codeResult.data
-		: "// Error generating code";
+	const zodCodeResult = jsonToZodCode(schemaConfig);
+	const generatedZodCode = zodCodeResult.success
+		? zodCodeResult.data
+		: "// Error generating Zod code";
+
+	const swiftCodeResult = jsonToSwiftCode(schemaConfig);
+	const generatedSwiftCode = swiftCodeResult.success
+		? swiftCodeResult.data
+		: "// Error generating Swift code";
 
 	return (
 		<div className="flex flex-col h-full">
@@ -75,9 +80,13 @@ export default async function Page(props: {
 										<EyeIcon className="h-4 w-4 mr-2" />
 										Visual Editor
 									</TabsTrigger>
-									<TabsTrigger value="code">
+									<TabsTrigger value="typescript">
 										<CodeIcon className="h-4 w-4 mr-2" />
-										Generated Schema
+										TypeScript
+									</TabsTrigger>
+									<TabsTrigger value="swift">
+										<SmartphoneIcon className="h-4 w-4 mr-2" />
+										Swift
 									</TabsTrigger>
 								</TabsList>
 								<TabsContent value="visual" className="mt-0">
@@ -86,8 +95,11 @@ export default async function Page(props: {
 										initialSchema={schemaConfig}
 									/>
 								</TabsContent>
-								<TabsContent value="code" className="mt-0">
-									<CodeView code={generatedCode || ""} />
+								<TabsContent value="typescript" className="mt-0">
+									<CodeView code={generatedZodCode} language="typescript" />
+								</TabsContent>
+								<TabsContent value="swift" className="mt-0">
+									<CodeView code={generatedSwiftCode} language="swift" />
 								</TabsContent>
 							</Tabs>
 						</CardContent>

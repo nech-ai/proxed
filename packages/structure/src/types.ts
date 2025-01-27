@@ -124,3 +124,9 @@ export interface ZodCodeToJsonResult {
 	data?: JsonSchema;
 	error?: string;
 }
+
+export interface SwiftCodeResult {
+	success: boolean;
+	data?: string;
+	error?: string;
+}

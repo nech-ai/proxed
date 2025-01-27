@@ -6,14 +6,16 @@ import { CopyIcon, CheckIcon } from "lucide-react";
 import { toast } from "sonner";
 import Prism from "prismjs";
 import "prismjs/components/prism-typescript";
+import "prismjs/components/prism-swift";
 import "prismjs/themes/prism-tomorrow.css";
 import { cn } from "@proxed/ui/utils";
 
 interface CodeViewProps {
 	code: string;
+	language?: "typescript" | "swift";
 }
 
-export function CodeView({ code }: CodeViewProps) {
+export function CodeView({ code, language = "typescript" }: CodeViewProps) {
 	const [isCopied, setIsCopied] = useState(false);
 
 	useEffect(() => {
@@ -42,7 +44,7 @@ export function CodeView({ code }: CodeViewProps) {
 					"scrollbar-thin scrollbar-track-background scrollbar-thumb-muted-foreground/20",
 				)}
 			>
-				<code className="language-typescript">{code}</code>
+				<code className={`language-${language}`}>{code}</code>
 			</pre>
 			<Button
 				size="icon"

@@ -21,7 +21,7 @@ export const structuredResponseRouter = new Hono<{
 			summary: "Structured Response",
 			description: "Returns a structured response",
 			responses: {
-				200: { description: "Plant analysis result" },
+				200: { description: "Structured response" },
 				400: { description: "Bad request" },
 				401: { description: "Unauthorized" },
 				500: { description: "Internal server error" },
@@ -68,20 +68,21 @@ export const structuredResponseRouter = new Hono<{
 				});
 
 				const { object, usage, finishReason } = await generateObject({
-					model: openaiClient("gpt-4o-mini", { structuredOutputs: true }),
+					model: openaiClient(project.model, { structuredOutputs: true }),
 					schema,
 					messages: [
 						{
 							role: "system",
-							content:
-								"You are a plant identification expert. If multiple plants are present in the image, analyze only the most prominent or closest plant to the camera. If you cannot identify the plant with high confidence, set isValid to false and provide generic or 'Unknown' values. If you can identify the plant, set isValid to true and provide detailed information.",
+							content: project.system_prompt,
 						},
 						{
 							role: "user",
 							content: [
 								{
 									type: "text",
-									text: "Analyze this plant image and provide detailed information about the most prominent or closest plant in the image. If you cannot identify the plant with confidence, set isValid to false.",
+									text:
+										project.default_user_prompt ??
+										"You are a helpful assistant.",
 								},
 								{
 									type: "image",
@@ -103,8 +104,8 @@ export const structuredResponseRouter = new Hono<{
 					key_id: keyId,
 					ip,
 					user_agent: userAgent ?? undefined,
-					model: "gpt-4o-mini",
-					provider: "OPENAI",
+					model: project.model,
+					provider: project.key.provider,
 					prompt_tokens: usage.promptTokens,
 					completion_tokens: usage.completionTokens,
 					finish_reason: finishReason,
@@ -126,8 +127,8 @@ export const structuredResponseRouter = new Hono<{
 					key_id: keyId,
 					ip,
 					user_agent: userAgent ?? undefined,
-					model: "gpt-4o",
-					provider: "OPENAI",
+					model: project.model,
+					provider: project.key.provider,
 					prompt_tokens: 0,
 					completion_tokens: 0,
 					finish_reason: "error",

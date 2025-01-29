@@ -12,6 +12,8 @@ create table public.projects (
     system_prompt text,
     default_user_prompt text,
 
+    model text,
+
     is_active boolean not null default true,
 
     schema_config jsonb default '{}'::jsonb,

@@ -50,7 +50,6 @@ import {
 	AlertDialogTrigger,
 } from "@proxed/ui/components/alert-dialog";
 import Link from "next/link";
-import {} from "lucide-react";
 
 interface ProjectEditFormProps {
 	project: Tables<"projects">;
@@ -73,6 +72,9 @@ export function ProjectEditForm({
 			bundleId: project.bundle_id,
 			deviceCheckId: project.device_check_id,
 			keyId: project.key_id,
+			systemPrompt: project.system_prompt || "",
+			defaultUserPrompt: project.default_user_prompt || "",
+			model: project.model || "",
 		},
 	});
 
@@ -95,6 +97,10 @@ export function ProjectEditForm({
 	const onSubmit = form.handleSubmit((data) => {
 		updateProject.execute(data);
 	});
+
+	// Get selected key's provider
+	const selectedKey = keys.find((k) => k.id === form.watch("keyId"));
+	const selectedProvider = selectedKey?.provider;
 
 	return (
 		<Form {...form}>
@@ -255,6 +261,96 @@ export function ProjectEditForm({
 														})}
 													</SelectContent>
 												</Select>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
+							</div>
+
+							{/* AI Configuration */}
+							<div className="space-y-4">
+								<div className="text-sm font-medium text-muted-foreground">
+									AI Configuration
+								</div>
+								<div className="grid gap-4">
+									<FormField
+										control={form.control}
+										name="model"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Model</FormLabel>
+												<Select
+													value={field.value}
+													onValueChange={field.onChange}
+													disabled={!selectedProvider}
+												>
+													<FormControl>
+														<SelectTrigger>
+															<SelectValue placeholder="Select a model" />
+														</SelectTrigger>
+													</FormControl>
+													<SelectContent>
+														{selectedProvider === "OPENAI" ? (
+															<>
+																<SelectItem value="gpt-4o">GPT-4o</SelectItem>
+																<SelectItem value="gpt-4o-mini">
+																	GPT-4o Mini
+																</SelectItem>
+															</>
+														) : selectedProvider === "ANTHROPIC" ? (
+															<SelectItem value="claude-3-sonnet">
+																Claude 3 Sonnet
+															</SelectItem>
+														) : (
+															<SelectItem value="" disabled>
+																Select a provider first
+															</SelectItem>
+														)}
+													</SelectContent>
+												</Select>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+
+									<FormField
+										control={form.control}
+										name="systemPrompt"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>System Prompt</FormLabel>
+												<FormControl>
+													<Textarea
+														placeholder="You are a helpful AI assistant..."
+														className="h-32 resize-none"
+														{...field}
+													/>
+												</FormControl>
+												<FormDescription>
+													Define the AI's behavior and context
+												</FormDescription>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+
+									<FormField
+										control={form.control}
+										name="defaultUserPrompt"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Default User Prompt</FormLabel>
+												<FormControl>
+													<Textarea
+														placeholder="Enter a default prompt..."
+														className="h-20 resize-none"
+														{...field}
+													/>
+												</FormControl>
+												<FormDescription>
+													Optional starting prompt for new conversations
+												</FormDescription>
 												<FormMessage />
 											</FormItem>
 										)}

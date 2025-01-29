@@ -14,6 +14,9 @@ export const updateProjectAction = authActionClient
 			bundle_id: data.bundleId,
 			device_check_id: data.deviceCheckId,
 			key_id: data.keyId,
+			system_prompt: data.systemPrompt,
+			default_user_prompt: data.defaultUserPrompt,
+			model: data.model,
 		});
 
 		revalidateTag(`project_${data.id}`);

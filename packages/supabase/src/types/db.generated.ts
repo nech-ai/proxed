@@ -171,6 +171,7 @@ export type Database = {
 					id: string;
 					is_active: boolean;
 					key_id: string | null;
+					model: string | null;
 					name: string;
 					schema_config: Json | null;
 					system_prompt: string | null;
@@ -187,6 +188,7 @@ export type Database = {
 					id?: string;
 					is_active?: boolean;
 					key_id?: string | null;
+					model?: string | null;
 					name: string;
 					schema_config?: Json | null;
 					system_prompt?: string | null;
@@ -203,6 +205,7 @@ export type Database = {
 					id?: string;
 					is_active?: boolean;
 					key_id?: string | null;
+					model?: string | null;
 					name?: string;
 					schema_config?: Json | null;
 					system_prompt?: string | null;

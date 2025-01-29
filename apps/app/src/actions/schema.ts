@@ -145,6 +145,13 @@ export const updateProjectSchema = z.object({
 			message: "Device Check is required",
 		})
 		.nullish(),
+	systemPrompt: z.string().min(1, {
+		message: "System prompt is required",
+	}),
+	defaultUserPrompt: z.string(),
+	model: z.string().min(1, {
+		message: "Model is required",
+	}),
 	keyId: z
 		.string()
 		.min(1, {

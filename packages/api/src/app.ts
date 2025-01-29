@@ -7,13 +7,22 @@ import { loggerMiddleware } from "./middleware/logger";
 import { healthRouter } from "./routes/health";
 import { structuredResponseRouter } from "./routes/structured-response";
 
-export const app = new Hono().basePath("/v1");
+const root = new Hono();
 
-app.use(loggerMiddleware);
-app.use(corsMiddleware);
+root.use(loggerMiddleware);
+root.use(corsMiddleware);
 
-app.route("/", healthRouter);
-app.route("/structured-response", structuredResponseRouter);
+const apiV1 = new Hono().basePath("/v1");
+apiV1.use(loggerMiddleware);
+apiV1.use(corsMiddleware);
+
+apiV1.route("/", healthRouter);
+apiV1.route("/structured-response", structuredResponseRouter);
+
+export const app = new Hono();
+
+app.route("/", root);
+app.route("/", apiV1);
 
 app.get(
 	"/structured-response",
@@ -34,11 +43,11 @@ app.get(
 );
 
 app.get(
-	"/docs",
+	"/",
 	apiReference({
 		theme: "saturn",
 		spec: {
-			url: "/v1/structured-response",
+			url: "/structured-response",
 		},
 	}),
 );

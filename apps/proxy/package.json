@@ -1,14 +1,14 @@
 {
 	"dependencies": {
-		"@ai-sdk/openai": "^1.1.0",
+		"@ai-sdk/openai": "^1.1.5",
 		"@proxed/proxy-api": "workspace:*",
 		"@proxed/structure": "workspace:*",
 		"@proxed/supabase": "workspace:*",
 		"@proxed/utils": "workspace:*",
-		"@sentry/nextjs": "^8.50.0",
+		"@sentry/nextjs": "^8.52.0",
 		"@supabase/sentry-js-integration": "^0.3.0",
-		"@supabase/supabase-js": "^2.47.16",
-		"ai": "^4.1.0",
+		"@supabase/supabase-js": "^2.48.1",
+		"ai": "^4.1.11",
 		"date-fns": "^4.1.0",
 		"next": "15.1.5",
 		"uuid": "^11.0.5",

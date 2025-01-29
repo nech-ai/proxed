@@ -4,7 +4,7 @@
 		"@react-email/render": "^1.0.4",
 		"lodash-es": "^4.17.21",
 		"next-intl": "^3.26.3",
-		"nodemailer": "^6.9.16",
+		"nodemailer": "^6.10.0",
 		"react": "19.0.0",
 		"react-dom": "19.0.0",
 		"react-email": "^3.0.6",

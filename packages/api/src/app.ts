@@ -13,7 +13,7 @@ app.use(loggerMiddleware);
 app.use(corsMiddleware);
 
 app.route("/", healthRouter);
-app.route("/openai", structuredResponseRouter);
+app.route("/structured-response", structuredResponseRouter);
 
 app.get(
 	"/openapi",
@@ -38,7 +38,7 @@ app.get(
 	apiReference({
 		theme: "saturn",
 		spec: {
-			url: "/api/openapi",
+			url: "/api/structured-response",
 		},
 	}),
 );

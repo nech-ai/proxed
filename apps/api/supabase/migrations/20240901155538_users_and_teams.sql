@@ -61,8 +61,7 @@ create table public.team_invitations (
 alter table public.team_invitations owner to postgres;
 
 -- function to create a team
-create
-or replace function public.create_team (name CHARACTER VARYING) returns uuid language plpgsql security definer
+create or replace function public.create_team (name CHARACTER VARYING) returns uuid language plpgsql security definer
 set
   search_path to 'public' as $$
 declare
@@ -78,23 +77,25 @@ $$;
 alter function public.create_team owner to postgres;
 
 -- helper functions for RLS policies
-create
-or replace function public.is_member_of (_user_id uuid, _team_id uuid) returns BOOLEAN as $$
+create or replace function public.is_member_of (_user_id uuid, _team_id uuid) returns BOOLEAN as $$
   select exists (
     select 1 from public.team_memberships
     where team_id = _team_id and user_id = _user_id
   );
-$$ language sql security definer;
+$$ language sql security definer
+set
+  search_path = 'public';
 
-create
-or replace function public.is_owner_of (_user_id uuid, _team_id uuid) returns BOOLEAN as $$
+create or replace function public.is_owner_of (_user_id uuid, _team_id uuid) returns BOOLEAN as $$
   select exists (
     select 1 from public.team_memberships
     where team_id = _team_id
     and user_id = _user_id
     and role = 'OWNER'
   );
-$$ language sql security definer;
+$$ language sql security definer
+set
+  search_path = 'public';
 
 -- enable row level security (rls)
 alter table public.users enable row level security;
@@ -158,13 +159,14 @@ grant all on function public.create_team ("name" CHARACTER VARYING) to authentic
 grant all on function public.create_team ("name" CHARACTER VARYING) to service_role;
 
 -- create a trigger to update the updated_at column
-create
-or replace function update_updated_at () returns trigger as $$
+create or replace function update_updated_at () returns trigger as $$
 begin
     new.updated_at = now();
     return new;
 end;
-$$ language plpgsql;
+$$ language plpgsql security definer
+set
+  search_path = 'public';
 
 create trigger users_updated_at before
 update on public.users for each row

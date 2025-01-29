@@ -50,6 +50,7 @@ import {
 	AlertDialogTrigger,
 } from "@proxed/ui/components/alert-dialog";
 import Link from "next/link";
+import { useState } from "react";
 
 interface ProjectEditFormProps {
 	project: Tables<"projects">;
@@ -77,6 +78,32 @@ export function ProjectEditForm({
 			model: project.model || "",
 		},
 	});
+
+	// Add state for tracking pending changes
+	const [pendingKeyChange, setPendingKeyChange] = useState<string | null>(null);
+	const [pendingDeviceCheckChange, setPendingDeviceCheckChange] = useState<
+		string | null
+	>(null);
+
+	const handleKeyChange = (value: string) => {
+		setPendingKeyChange(value);
+	};
+
+	const handleDeviceCheckChange = (value: string) => {
+		setPendingDeviceCheckChange(value);
+	};
+
+	const confirmChange = (type: "key" | "deviceCheck") => {
+		if (type === "key" && pendingKeyChange !== null) {
+			form.setValue("keyId", pendingKeyChange, { shouldDirty: true });
+			setPendingKeyChange(null);
+		} else if (type === "deviceCheck" && pendingDeviceCheckChange !== null) {
+			form.setValue("deviceCheckId", pendingDeviceCheckChange, {
+				shouldDirty: true,
+			});
+			setPendingDeviceCheckChange(null);
+		}
+	};
 
 	const updateProject = useAction(updateProjectAction, {
 		onSuccess: () => {
@@ -178,42 +205,75 @@ export function ProjectEditForm({
 									render={({ field }) => (
 										<FormItem>
 											<FormLabel>Device Check Configuration</FormLabel>
-											<Select
-												value={field.value || ""}
-												onValueChange={field.onChange}
-											>
-												<FormControl>
-													<SelectTrigger>
-														<SelectValue placeholder="Select a device check configuration" />
-													</SelectTrigger>
-												</FormControl>
-												<SelectContent>
-													{deviceChecks.length === 0 ? (
-														<div className="p-4 text-sm text-center space-y-2">
-															<p className="text-muted-foreground">
-																No device check configurations found
-															</p>
-															<Button asChild variant="link" className="p-0">
-																<Link href="/settings/team/device-check">
-																	Create a Device Check configuration
-																</Link>
-															</Button>
-														</div>
-													) : (
-														deviceChecks.map((dc) => (
-															<SelectItem key={dc.id} value={dc.id}>
-																<div className="flex flex-col">
-																	<span>{dc.name}</span>
+											<AlertDialog open={!!pendingDeviceCheckChange}>
+												<AlertDialogTrigger asChild>
+													<Select
+														value={field.value || ""}
+														onValueChange={handleDeviceCheckChange}
+													>
+														<FormControl>
+															<SelectTrigger>
+																<SelectValue placeholder="Select a device check configuration" />
+															</SelectTrigger>
+														</FormControl>
+														<SelectContent>
+															{deviceChecks.length === 0 ? (
+																<div className="p-4 text-sm text-center space-y-2">
+																	<p className="text-muted-foreground">
+																		No device check configurations found
+																	</p>
+																	<Button
+																		asChild
+																		variant="link"
+																		className="p-0"
+																	>
+																		<Link href="/settings/team/device-check">
+																			Create a Device Check configuration
+																		</Link>
+																	</Button>
 																</div>
-															</SelectItem>
-														))
-													)}
-												</SelectContent>
-											</Select>
-											<FormDescription>
-												Select the Device Check configuration to use for this
-												project
-											</FormDescription>
+															) : (
+																deviceChecks.map((dc) => (
+																	<SelectItem key={dc.id} value={dc.id}>
+																		<div className="flex flex-col">
+																			<span>{dc.name}</span>
+																		</div>
+																	</SelectItem>
+																))
+															)}
+														</SelectContent>
+													</Select>
+												</AlertDialogTrigger>
+												{pendingDeviceCheckChange && (
+													<AlertDialogContent>
+														<AlertDialogHeader>
+															<AlertDialogTitle>
+																Warning: Configuration Change
+															</AlertDialogTitle>
+															<AlertDialogDescription>
+																Changing the Device Check configuration will
+																affect all production apps using this project.
+																This change may disrupt service for existing
+																users. Are you sure you want to proceed?
+															</AlertDialogDescription>
+														</AlertDialogHeader>
+														<AlertDialogFooter>
+															<AlertDialogCancel
+																onClick={() =>
+																	setPendingDeviceCheckChange(null)
+																}
+															>
+																Cancel
+															</AlertDialogCancel>
+															<AlertDialogAction
+																onClick={() => confirmChange("deviceCheck")}
+															>
+																Confirm Change
+															</AlertDialogAction>
+														</AlertDialogFooter>
+													</AlertDialogContent>
+												)}
+											</AlertDialog>
 											<FormMessage />
 										</FormItem>
 									)}
@@ -232,35 +292,77 @@ export function ProjectEditForm({
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel>AI Provider</FormLabel>
-												<Select
-													value={field.value || ""}
-													onValueChange={field.onChange}
-												>
-													<FormControl>
-														<SelectTrigger>
-															<SelectValue>
-																{field.value && (
-																	<div className="flex items-center gap-2">
-																		<span>{field.value}</span>
-																	</div>
-																)}
-															</SelectValue>
-														</SelectTrigger>
-													</FormControl>
-													<SelectContent>
-														{keys.map((key) => {
-															return (
-																<SelectItem key={key.id} value={key.id}>
-																	<div className="flex items-center gap-2">
-																		<span>
-																			{key.display_name} ({key.provider})
-																		</span>
-																	</div>
-																</SelectItem>
-															);
-														})}
-													</SelectContent>
-												</Select>
+												<AlertDialog open={!!pendingKeyChange}>
+													<AlertDialogTrigger asChild>
+														<Select
+															value={field.value || ""}
+															onValueChange={handleKeyChange}
+														>
+															<FormControl>
+																<SelectTrigger>
+																	<SelectValue placeholder="Select a provider">
+																		{field.value && (
+																			<div className="flex items-center gap-2">
+																				<span>
+																					{
+																						keys.find(
+																							(k) => k.id === field.value,
+																						)?.display_name
+																					}
+																					(
+																					{
+																						keys.find(
+																							(k) => k.id === field.value,
+																						)?.provider
+																					}
+																					)
+																				</span>
+																			</div>
+																		)}
+																	</SelectValue>
+																</SelectTrigger>
+															</FormControl>
+															<SelectContent>
+																{keys.map((key) => (
+																	<SelectItem key={key.id} value={key.id}>
+																		<div className="flex items-center gap-2">
+																			<span>
+																				{key.display_name} ({key.provider})
+																			</span>
+																		</div>
+																	</SelectItem>
+																))}
+															</SelectContent>
+														</Select>
+													</AlertDialogTrigger>
+													{pendingKeyChange && (
+														<AlertDialogContent>
+															<AlertDialogHeader>
+																<AlertDialogTitle>
+																	Warning: Credentials Change
+																</AlertDialogTitle>
+																<AlertDialogDescription>
+																	Changing the AI Provider will affect all
+																	production apps using this project. This
+																	change may disrupt service for existing users.
+																	Are you sure you want to proceed?
+																</AlertDialogDescription>
+															</AlertDialogHeader>
+															<AlertDialogFooter>
+																<AlertDialogCancel
+																	onClick={() => setPendingKeyChange(null)}
+																>
+																	Cancel
+																</AlertDialogCancel>
+																<AlertDialogAction
+																	onClick={() => confirmChange("key")}
+																>
+																	Confirm Change
+																</AlertDialogAction>
+															</AlertDialogFooter>
+														</AlertDialogContent>
+													)}
+												</AlertDialog>
 												<FormMessage />
 											</FormItem>
 										)}

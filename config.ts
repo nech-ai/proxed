@@ -29,7 +29,7 @@ export const config = {
 		from: "hello@mail.proxed.ai",
 	},
 	ui: {
-		enabledThemes: ["light", "dark"],
+		enabledThemes: ["dark"],
 		defaultTheme: "dark",
 	},
 } as const satisfies Config;

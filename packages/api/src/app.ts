@@ -7,7 +7,7 @@ import { loggerMiddleware } from "./middleware/logger";
 import { healthRouter } from "./routes/health";
 import { structuredResponseRouter } from "./routes/structured-response";
 
-export const app = new Hono().basePath("/api");
+export const app = new Hono().basePath("/v1");
 
 app.use(loggerMiddleware);
 app.use(corsMiddleware);
@@ -16,7 +16,7 @@ app.route("/", healthRouter);
 app.route("/structured-response", structuredResponseRouter);
 
 app.get(
-	"/openapi",
+	"/structured-response",
 	openAPISpecs(app, {
 		documentation: {
 			info: {
@@ -38,7 +38,7 @@ app.get(
 	apiReference({
 		theme: "saturn",
 		spec: {
-			url: "/api/structured-response",
+			url: "/v1/structured-response",
 		},
 	}),
 );

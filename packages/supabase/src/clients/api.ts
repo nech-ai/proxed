@@ -4,7 +4,7 @@ import type { Database } from "../types/db";
 export const createClient = () =>
 	createSupabaseClient<Database>(
 		process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-		process.env.SUPABASE_SERVICE_KEY as string,
+		process.env.SUPABASE_SERVICE_ROLE_KEY as string,
 		{
 			global: {
 				headers: {

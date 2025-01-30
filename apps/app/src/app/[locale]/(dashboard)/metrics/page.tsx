@@ -19,7 +19,7 @@ const defaultValue = {
 export default async function Metrics({
 	searchParams,
 }: {
-	searchParams: { [key: string]: string | string[] | undefined };
+	searchParams: any;
 }) {
 	const { from, to } = await searchParams;
 	const chartType = "all";

@@ -20,6 +20,8 @@ import {
 	type GetExecutionsParams,
 	getExecutionsQuery,
 	getExecutionQuery,
+	type getExecutionMetricsParams,
+	getExecutionMetricsQuery,
 } from "../queries";
 
 export const getSession = cache(async () => {
@@ -277,4 +279,26 @@ export const getExecution = async (executionId: string) => {
 		{ tags: [`execution_${executionId}`], revalidate: 30 },
 		// @ts-expect-error
 	)(executionId);
+};
+
+export const getExecutionMetrics = async (
+	params: Omit<getExecutionMetricsParams, "teamId">,
+) => {
+	const supabase = await createClient();
+
+	const user = await getUser();
+	const teamId = user?.data?.team_id;
+	if (!teamId) return null;
+
+	return unstable_cache(
+		async () => {
+			return getExecutionMetricsQuery(supabase, { ...params, teamId });
+		},
+		["execution_metrics", teamId, params.type ?? "all"],
+		{
+			tags: [`job_metrics_${teamId}_${params.type ?? "all"}`],
+			revalidate: 30,
+		},
+		// @ts-expect-error
+	)(params);
 };

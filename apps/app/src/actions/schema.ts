@@ -197,3 +197,10 @@ export const filterExecutionsSchema = z.object({
 });
 
 export type FilterExecutionsFormValues = z.infer<typeof filterExecutionsSchema>;
+
+export const changeChartPeriodSchema = z.object({
+	from: z.string().optional(),
+	to: z.string().optional(),
+});
+
+export const changeChartTypeSchema = z.enum(["all"]);

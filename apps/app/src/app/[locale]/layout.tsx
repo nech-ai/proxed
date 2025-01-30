@@ -8,6 +8,7 @@ import NextTopLoader from "nextjs-toploader";
 import "@proxed/ui/globals.css";
 import { config } from "@config";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { I18nProviderClient } from "@/locales/client";
 
 export const metadata: Metadata = {
 	title: {
@@ -45,18 +46,19 @@ export default async function RootLayout({
 				)}
 			>
 				<NextTopLoader color="var(--colors-primary)" />
-
-				<ThemeProvider
-					attribute="class"
-					disableTransitionOnChange
-					enableSystem
-					defaultTheme={config.ui.defaultTheme}
-					themes={config.ui.enabledThemes}
-				>
-					<JotaiProvider>
-						<NuqsAdapter>{children}</NuqsAdapter>
-					</JotaiProvider>
-				</ThemeProvider>
+				<I18nProviderClient locale="en">
+					<ThemeProvider
+						attribute="class"
+						disableTransitionOnChange
+						enableSystem
+						defaultTheme={config.ui.defaultTheme}
+						themes={config.ui.enabledThemes}
+					>
+						<JotaiProvider>
+							<NuqsAdapter>{children}</NuqsAdapter>
+						</JotaiProvider>
+					</ThemeProvider>
+				</I18nProviderClient>
 				<Toaster />
 			</body>
 		</html>

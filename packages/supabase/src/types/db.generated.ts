@@ -446,6 +446,17 @@ export type Database = {
 				};
 				Returns: string;
 			};
+			get_executions_all: {
+				Args: {
+					p_team_id: string;
+					date_from: string;
+					date_to: string;
+				};
+				Returns: {
+					date: string;
+					execution_count: number;
+				}[];
+			};
 			is_member_of: {
 				Args: {
 					_user_id: string;

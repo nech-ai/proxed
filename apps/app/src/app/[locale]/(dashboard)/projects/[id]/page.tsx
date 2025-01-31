@@ -52,8 +52,8 @@ export default async function Page(props: {
 		<div className="flex flex-col h-full">
 			<PageHeader title={project.name} />
 
-			<main className="flex-1 overflow-auto">
-				<div className="max-w-screen-xl mx-auto p-6 space-y-6">
+			<main className="flex-1 overflow-auto bg-muted/5">
+				<div className="container mx-auto px-4 py-8 space-y-6">
 					<ProjectEditForm
 						project={project}
 						// @ts-expect-error

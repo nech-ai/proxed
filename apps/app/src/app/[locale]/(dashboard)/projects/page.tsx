@@ -75,12 +75,14 @@ export default async function Page(props: {
 				</div>
 			</PageHeader>
 
-			<main className="flex-1 overflow-auto bg-muted/5 w-full max-w-screen-xl mx-auto">
-				<ErrorBoundary errorComponent={ErrorFallback}>
-					<Suspense fallback={<Loading />} key={loadingKey}>
-						<Table filter={filter} page={page} sort={sort} query={query} />
-					</Suspense>
-				</ErrorBoundary>
+			<main className="flex-1 overflow-auto bg-muted/5">
+				<div className="container mx-auto px-4 py-8">
+					<ErrorBoundary errorComponent={ErrorFallback}>
+						<Suspense fallback={<Loading />} key={loadingKey}>
+							<Table filter={filter} page={page} sort={sort} query={query} />
+						</Suspense>
+					</ErrorBoundary>
+				</div>
 			</main>
 		</>
 	);

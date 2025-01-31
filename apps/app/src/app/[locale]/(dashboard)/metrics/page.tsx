@@ -35,8 +35,8 @@ export default async function Metrics({
 				title="Metrics"
 				description="Analytics and performance insights"
 			/>
-			<div className="container max-w-6xl px-4 py-8">
-				<ActionBlock title="Metrics">
+			<div className="container mx-auto px-4 py-8">
+				<ActionBlock title="Executions">
 					<div className="mb-6">
 						<ChartSelectors defaultValue={defaultValue} />
 					</div>

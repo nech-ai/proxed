@@ -1,4 +1,3 @@
-import { ContentHeader } from "@/components/layout/content-header";
 import { Loading } from "@/components/tables/executions/loading";
 import { ErrorFallback } from "@/components/error-fallback";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
@@ -7,6 +6,7 @@ import { searchParamsCache } from "./search-params";
 import { SearchFilter } from "@/components/tables/executions/search-filter";
 import { Table } from "@/components/tables/executions";
 import { ColumnVisibility } from "@/components/tables/executions/column-visibility";
+import { PageHeader } from "@/components/layout/page-header";
 
 export default async function Page(props: {
 	params: Promise<{
@@ -50,15 +50,20 @@ export default async function Page(props: {
 
 	return (
 		<>
-			<ContentHeader>
-				<div className="flex justify-between gap-4 flex-1 min-w-0 py-6">
-					<h1 className="text-lg font-semibold truncate">Executions</h1>
-					<SearchFilter placeholder="Search or type filter" />
-					<div className="flex items-center gap-2">
-						<ColumnVisibility />
+			<PageHeader
+				title="Executions"
+				description="View and manage all AI model executions"
+			>
+				<div className="flex items-center gap-3">
+					<div className="flex items-center gap-3">
+						<SearchFilter
+							placeholder="Search executions..."
+							className="w-full md:w-auto"
+						/>
+						<ColumnVisibility className="shrink-0" />
 					</div>
 				</div>
-			</ContentHeader>
+			</PageHeader>
 
 			<main className="flex-1 overflow-auto bg-muted/5 w-full max-w-screen-xl mx-auto">
 				<ErrorBoundary errorComponent={ErrorFallback}>

@@ -1,4 +1,3 @@
-import { ContentHeader } from "@/components/layout/content-header";
 import { Loading } from "@/components/tables/projects/loading";
 import { ErrorFallback } from "@/components/error-fallback";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
@@ -13,6 +12,7 @@ import {
 	getProviderKeys,
 } from "@proxed/supabase/cached-queries";
 import type { Tables } from "@proxed/supabase/types";
+import { PageHeader } from "@/components/layout/page-header";
 
 export default async function Page(props: {
 	params: Promise<{
@@ -59,16 +59,21 @@ export default async function Page(props: {
 
 	return (
 		<>
-			<ContentHeader>
-				<div className="flex justify-between gap-4 flex-1 min-w-0 py-6">
-					<h1 className="text-lg font-semibold truncate">Projects</h1>
-					<SearchFilter placeholder="Search or type filter" />
-					<div className="flex items-center gap-2">
-						<ColumnVisibility />
-						<CreateProjectDialog />
+			<PageHeader
+				title="Projects"
+				description="Manage your AI projects and configurations"
+			>
+				<div className="flex items-center gap-3">
+					<div className="flex items-center gap-3">
+						<SearchFilter
+							placeholder="Search projects..."
+							className="w-full md:w-auto"
+						/>
+						<ColumnVisibility className="shrink-0" />
 					</div>
+					<CreateProjectDialog />
 				</div>
-			</ContentHeader>
+			</PageHeader>
 
 			<main className="flex-1 overflow-auto bg-muted/5 w-full max-w-screen-xl mx-auto">
 				<ErrorBoundary errorComponent={ErrorFallback}>

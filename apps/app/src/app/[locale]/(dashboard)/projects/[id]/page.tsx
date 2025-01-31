@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { getProject, getProviderKeys } from "@proxed/supabase/cached-queries";
-import { ContentHeader } from "@/components/layout/content-header";
 import {
 	Card,
 	CardContent,
@@ -21,6 +20,7 @@ import type { JsonSchema } from "@proxed/structure";
 import { CodeView } from "@/components/schema-builder/code-view";
 import { ProjectEditForm } from "@/components/projects/project-edit-form";
 import { getDeviceChecks } from "@proxed/supabase/cached-queries";
+import { PageHeader } from "@/components/layout/page-header";
 
 export default async function Page(props: {
 	params: Promise<{ id: string }>;
@@ -50,11 +50,7 @@ export default async function Page(props: {
 
 	return (
 		<div className="flex flex-col h-full">
-			<ContentHeader>
-				<div className="flex justify-between gap-4 flex-1 min-w-0 py-6">
-					<h1 className="text-lg font-semibold truncate">{project.name}</h1>
-				</div>
-			</ContentHeader>
+			<PageHeader title={project.name} />
 
 			<main className="flex-1 overflow-auto">
 				<div className="max-w-screen-xl mx-auto p-6 space-y-6">

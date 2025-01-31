@@ -28,9 +28,11 @@ import { parseAsString, useQueryStates } from "nuqs";
 import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FilterList } from "./filter-list";
+import { Button } from "@proxed/ui/components/button";
 
 type Props = {
 	placeholder: string;
+	className?: string;
 };
 
 const defaultSearch = {
@@ -55,7 +57,7 @@ const finishReasons = [
 
 const models = ["gpt-4o", "gpt-4o-mini", "claude-3-sonnet"] as const;
 
-export function SearchFilter({ placeholder }: Props) {
+export function SearchFilter({ placeholder, className }: Props) {
 	const [prompt, setPrompt] = useState("");
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [streaming, setStreaming] = useState(false);
@@ -160,7 +162,7 @@ export function SearchFilter({ placeholder }: Props) {
 
 	return (
 		<DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-			<div className="flex items-center space-x-4">
+			<div className="flex items-center space-x-3">
 				<form
 					className="relative flex-1"
 					onSubmit={(e) => {
@@ -172,7 +174,12 @@ export function SearchFilter({ placeholder }: Props) {
 					<Input
 						ref={inputRef}
 						placeholder={placeholder}
-						className="h-10 w-full pr-10 pl-9 transition-all duration-200 focus:ring-2 md:w-[400px]"
+						className={cn(
+							"h-8 w-full md:w-[300px] pr-10 pl-9",
+							"transition-all duration-200",
+							"focus-visible:ring-1",
+							className,
+						)}
 						value={prompt}
 						onChange={handleSearch}
 						autoComplete="off"
@@ -182,17 +189,28 @@ export function SearchFilter({ placeholder }: Props) {
 					/>
 
 					<DropdownMenuTrigger asChild>
-						<button
-							onClick={() => setIsOpen((prev) => !prev)}
+						<Button
 							type="button"
+							variant="ghost"
+							size="sm"
 							className={cn(
-								"-translate-y-1/2 absolute top-1/2 right-3 z-10 h-4 w-4 text-muted-foreground transition-all duration-200 hover:text-foreground",
+								"absolute right-0 top-0 h-8 w-8 p-0",
+								"hover:bg-transparent",
 								hasValidFilters && "text-foreground",
 								isOpen && "text-foreground",
 							)}
 						>
 							<Filter className="h-4 w-4" />
-						</button>
+							{hasValidFilters && (
+								<span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+									{
+										Object.entries(filters).filter(
+											([key, value]) => value !== null && key !== "q",
+										).length
+									}
+								</span>
+							)}
+						</Button>
 					</DropdownMenuTrigger>
 				</form>
 
@@ -200,6 +218,7 @@ export function SearchFilter({ placeholder }: Props) {
 					filters={filters}
 					loading={streaming}
 					onRemove={setFilters}
+					className="hidden md:flex"
 				/>
 			</div>
 

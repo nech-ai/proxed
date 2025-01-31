@@ -24,6 +24,7 @@ import { FilterList } from "./filter-list";
 
 type Props = {
 	placeholder: string;
+	className?: string;
 };
 
 const defaultSearch = {
@@ -34,7 +35,7 @@ const defaultSearch = {
 	end: "",
 };
 
-export function SearchFilter({ placeholder }: Props) {
+export function SearchFilter({ placeholder, className }: Props) {
 	const [prompt, setPrompt] = useState("");
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [streaming, setStreaming] = useState(false);
@@ -149,7 +150,10 @@ export function SearchFilter({ placeholder }: Props) {
 					<Input
 						ref={inputRef}
 						placeholder={placeholder}
-						className="h-10 w-full pr-10 pl-9 transition-all duration-200 focus:ring-2 md:w-[400px]"
+						className={cn(
+							"h-10 w-full pr-10 pl-9 transition-all duration-200 focus:ring-2 md:w-[400px]",
+							className,
+						)}
 						value={prompt}
 						onChange={handleSearch}
 						autoComplete="off"

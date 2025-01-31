@@ -1,9 +1,11 @@
+"use client";
 import { Button } from "@proxed/ui/components/button";
 import { Skeleton } from "@proxed/ui/components/skeleton";
 import { format } from "date-fns";
 import { formatDateRange } from "little-date";
 import { XIcon } from "lucide-react";
 import { motion } from "motion/react";
+import { cn } from "@proxed/ui/utils";
 
 const listVariant = {
 	hidden: { y: 10, opacity: 0 },
@@ -26,9 +28,10 @@ type Props = {
 	filters: { [key: string]: string | null };
 	loading: boolean;
 	onRemove: (state: { [key: string]: string | null }) => void;
+	className?: string;
 };
 
-export function FilterList({ filters, loading, onRemove }: Props) {
+export function FilterList({ filters, loading, onRemove, className }: Props) {
 	const renderFilter = ({
 		key,
 		value,
@@ -54,7 +57,9 @@ export function FilterList({ filters, loading, onRemove }: Props) {
 			case "finishReason": {
 				return value ? value.charAt(0).toUpperCase() + value.slice(1) : null;
 			}
-
+			case "provider": {
+				return value;
+			}
 			default:
 				return null;
 		}
@@ -74,10 +79,10 @@ export function FilterList({ filters, loading, onRemove }: Props) {
 			variants={listVariant}
 			initial="hidden"
 			animate="show"
-			className="flex space-x-2"
+			className={cn("flex items-center gap-2", className)}
 		>
 			{loading && (
-				<div className="flex space-x-2">
+				<div className="flex gap-2">
 					<motion.li key="1" variants={itemVariant}>
 						<Skeleton className="h-8 w-[100px] rounded-full" />
 					</motion.li>
@@ -91,19 +96,19 @@ export function FilterList({ filters, loading, onRemove }: Props) {
 				Object.entries(filters)
 					.filter(([key, value]) => value !== null && key !== "end")
 					.map(([key, value]) => {
+						const filterValue = renderFilter({ key, value });
+						if (!filterValue) return null;
+
 						return (
 							<motion.li key={key} variants={itemVariant}>
 								<Button
-									className="group flex h-8 items-center space-x-1 rounded-full bg-secondary px-3 font-normal text-[#878787] hover:bg-secondary"
+									variant="secondary"
+									size="sm"
+									className="group flex h-8 items-center gap-1.5 rounded-full px-3 font-normal hover:bg-secondary/80"
 									onClick={() => handleOnRemove(key)}
 								>
-									<XIcon className="w-0 scale-0 transition-all group-hover:w-4 group-hover:scale-100" />
-									<span>
-										{renderFilter({
-											key,
-											value,
-										})}
-									</span>
+									<XIcon className="size-3 scale-0 transition-all group-hover:scale-100" />
+									<span className="text-sm">{filterValue}</span>
 								</Button>
 							</motion.li>
 						);

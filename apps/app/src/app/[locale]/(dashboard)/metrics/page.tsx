@@ -3,6 +3,7 @@ import { Charts } from "@/components/charts/charts";
 import { ActionBlock } from "@/components/shared/action-block";
 import { subWeeks } from "date-fns";
 import type { Metadata } from "next";
+import { PageHeader } from "@/components/layout/page-header";
 
 export const maxDuration = 30;
 
@@ -29,20 +30,26 @@ export default async function Metrics({
 	};
 
 	return (
-		<div className="container max-w-6xl px-4 py-8">
-			<ActionBlock title="Metrics">
-				<div className="mb-6">
-					<ChartSelectors defaultValue={defaultValue} />
-				</div>
-				<div className="mb-12">
-					<Charts
-						value={value}
-						defaultValue={defaultValue}
-						disabled={false}
-						type={chartType}
-					/>
-				</div>
-			</ActionBlock>
-		</div>
+		<>
+			<PageHeader
+				title="Metrics"
+				description="Analytics and performance insights"
+			/>
+			<div className="container max-w-6xl px-4 py-8">
+				<ActionBlock title="Metrics">
+					<div className="mb-6">
+						<ChartSelectors defaultValue={defaultValue} />
+					</div>
+					<div className="mb-12">
+						<Charts
+							value={value}
+							defaultValue={defaultValue}
+							disabled={false}
+							type={chartType}
+						/>
+					</div>
+				</ActionBlock>
+			</div>
+		</>
 	);
 }

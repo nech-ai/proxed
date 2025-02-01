@@ -16,8 +16,8 @@ export function Header() {
 	};
 
 	return (
-		<header className="sticky top-0 h-[var(--header-height)] z-50 p-0 bg-background/60 backdrop-blur">
-			<div className="flex justify-between items-center container mx-auto p-2">
+		<header className="sticky top-0 z-50 bg-background/80 backdrop-blur shadow-md">
+			<div className="flex justify-between items-center container mx-auto p-4">
 				<div className="flex items-center gap-8">
 					<Link
 						href="/"
@@ -57,7 +57,7 @@ export function Header() {
 						href="#"
 						className={cn(
 							buttonVariants({ variant: "ghost" }),
-							"h-8 rounded-lg tracking-tight font-medium",
+							"h-8 tracking-tight font-medium",
 						)}
 					>
 						Login
@@ -66,7 +66,7 @@ export function Header() {
 						href="#"
 						className={cn(
 							buttonVariants({ variant: "default" }),
-							"h-8 text-primary-foreground rounded-lg group tracking-tight font-medium",
+							"h-8 text-primary-foreground group tracking-tight font-medium",
 						)}
 					>
 						{siteConfig.cta}
@@ -76,7 +76,6 @@ export function Header() {
 					<MobileDrawer />
 				</div>
 			</div>
-			<hr className="absolute w-full bottom-0" />
 		</header>
 	);
 }

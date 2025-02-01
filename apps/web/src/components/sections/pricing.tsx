@@ -43,7 +43,7 @@ const Tabs = ({ activeTab, className, children }: TabsProps) => {
 
 const TabsList = ({ children }: TabsListProps) => {
 	return (
-		<div className="relative flex w-fit items-center rounded-full border p-1.5">
+		<div className="relative flex w-fit items-center border p-1.5">
 			{children}
 		</div>
 	);
@@ -59,7 +59,7 @@ const TabsTrigger = ({ onClick, children, isActive }: TabsTriggerProps) => {
 			{isActive && (
 				<motion.div
 					layoutId="active-tab"
-					className="absolute inset-0 rounded-full bg-accent"
+					className="absolute inset-0 bg-accent"
 					transition={{
 						duration: 0.2,
 						type: "spring",
@@ -149,7 +149,7 @@ function PricingTier({
 				<Button
 					size="lg"
 					className={cn(
-						"w-full rounded-none shadow-none",
+						"w-full shadow-none",
 						tier.popular
 							? "bg-primary text-primary-foreground hover:bg-secondary-foreground"
 							: "bg-muted text-foreground hover:bg-muted/80",
@@ -173,7 +173,7 @@ export function Pricing() {
 
 	return (
 		<Section id="pricing" title="Pricing">
-			<div className="border border-b-0 grid grid-rows-1">
+			<div className="grid grid-rows-1">
 				<div className="grid grid-rows-1 gap-y-10 p-10">
 					<div className="text-center">
 						<h2 className="text-3xl md:text-5xl font-bold tracking-tighter text-balance">

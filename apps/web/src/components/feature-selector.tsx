@@ -28,7 +28,7 @@ export const FeatureSelector: React.FC<FeatureSelectorProps> = ({
 							type="button"
 							key={option.id}
 							onClick={() => setSelectedIndex(index)}
-							className={`flex-shrink-0 w-64 md:w-full text-left p-4 mb-2 mr-2 last:mr-0 md:mr-0 rounded border border-border ${
+							className={`flex-shrink-0 w-64 md:w-full text-left p-4 mb-2 mr-2 last:mr-0 md:mr-0 border border-border ${
 								selectedIndex === index ? "bg-accent/70" : "hover:bg-muted/50"
 							}`}
 						>

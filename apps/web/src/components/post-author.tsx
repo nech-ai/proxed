@@ -27,7 +27,7 @@ export function PostAuthor({ author }: Props) {
 					width={32}
 					height={32}
 					alt={authorData.name}
-					className="rounded-full overflow-hidden"
+					className="overflow-hidden"
 					quality={90}
 				/>
 				<div className="flex flex-col">

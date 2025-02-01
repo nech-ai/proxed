@@ -9,7 +9,7 @@ import { Pricing } from "@/components/sections/pricing";
 
 export default function Page() {
 	return (
-		<main>
+		<main className="flex flex-col gap-12">
 			<Header />
 			<Hero />
 			<Examples />

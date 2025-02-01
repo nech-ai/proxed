@@ -111,7 +111,7 @@ export default async function Page(props: {
 
 						<div className="prose prose-invert prose-gray max-w-none">
 							{post.metadata.image && (
-								<div className="relative rounded-lg overflow-hidden border border-gray-800 flex justify-center">
+								<div className="relative overflow-hidden border border-gray-800 flex justify-center">
 									<Image
 										src={post.metadata.image}
 										alt={post.metadata.title}

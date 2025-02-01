@@ -4,7 +4,7 @@ import { siteConfig } from "@/lib/config";
 
 export function Footer() {
 	return (
-		<footer className="flex flex-col gap-y-5 rounded-lg px-7 py-5 container">
+		<footer className="flex flex-col gap-y-5 px-7 py-5 container">
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-x-2">
 					<Icons.logo className="h-5 w-5" />

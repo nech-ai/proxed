@@ -8,7 +8,7 @@ export default function NotFound() {
 			</h1>
 			<Link
 				href="/"
-				className="mt-8 inline-flex items-center justify-center rounded-lg border border-gray-800 bg-black/50 px-6 py-3 text-sm font-medium text-gray-300 backdrop-blur hover:bg-gray-900 hover:text-white transition-colors"
+				className="mt-8 inline-flex items-center justify-center border border-gray-800 bg-black/50 px-6 py-3 text-sm font-medium text-gray-300 backdrop-blur hover:bg-gray-900 hover:text-white transition-colors"
 			>
 				Back Home
 			</Link>

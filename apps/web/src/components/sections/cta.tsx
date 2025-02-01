@@ -4,7 +4,7 @@ import { Button } from "@proxed/ui/components/button";
 export function CTA() {
 	return (
 		<Section id="cta">
-			<div className="border overflow-hidden relative text-center py-16 mx-auto">
+			<div className="overflow-hidden relative text-center py-16 mx-auto">
 				<p className="max-w-3xl text-foreground mb-6 text-balance mx-auto font-medium text-3xl">
 					Ready to build your next AI wrapper?
 				</p>

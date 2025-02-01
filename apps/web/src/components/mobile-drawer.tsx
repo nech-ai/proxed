@@ -35,10 +35,7 @@ export function MobileDrawer() {
 				<DrawerFooter className="flex flex-col gap-2">
 					<Link
 						href="/login"
-						className={cn(
-							buttonVariants({ variant: "ghost" }),
-							"rounded-full w-full",
-						)}
+						className={cn(buttonVariants({ variant: "ghost" }), "w-full")}
 					>
 						Login
 					</Link>
@@ -46,7 +43,7 @@ export function MobileDrawer() {
 						href="#"
 						className={cn(
 							buttonVariants({ variant: "default" }),
-							"text-white rounded-full group w-full",
+							"text-white group w-full",
 						)}
 					>
 						{siteConfig.cta}

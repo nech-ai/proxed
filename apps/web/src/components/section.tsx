@@ -31,16 +31,18 @@ const Section = forwardRef<HTMLElement, SectionProps>(
 
 		return (
 			<section id={id} ref={ref}>
-				<div className={cn("relative mx-auto container", className)}>
+				<div
+					className={cn(
+						"relative w-full max-w-[1400px] mx-auto border border-border px-0",
+						className,
+					)}
+				>
 					{(title || subtitle || description) && (
 						<div
-							className={cn(
-								alignmentClass,
-								"relative mx-auto border-x border-t overflow-hidden p-2 py-8 md:p-12",
-							)}
+							className={cn(alignmentClass, "relative w-full overflow-hidden")}
 						>
 							{title && (
-								<h2 className="text-sm text-muted-foreground text-balance font-semibold tracking-tigh uppercase">
+								<h2 className="text-sm py-6 text-muted-foreground text-balance font-semibold tracking-tigh uppercase">
 									{title}
 								</h2>
 							)}
@@ -62,11 +64,11 @@ const Section = forwardRef<HTMLElement, SectionProps>(
 							{description && (
 								<p
 									className={cn(
-										"mt-6 text-lg leading-8 text-muted-foreground text-balance max-w-2xl",
+										"mt-4 text-base leading-7 text-muted-foreground text-balance",
 										align === "center"
-											? "mx-auto"
+											? "text-center"
 											: align === "right"
-												? "ml-auto"
+												? "text-right"
 												: "",
 									)}
 								>

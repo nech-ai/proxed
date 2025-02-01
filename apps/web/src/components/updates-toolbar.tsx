@@ -116,7 +116,7 @@ export function UpdatesToolbar({
 		<Dialog>
 			<div className="fixed right-4 bottom-0 top-0 flex-col items-center justify-center hidden md:flex">
 				<TooltipProvider delayDuration={20}>
-					<div className="flex flex-col items-center backdrop-blur-xl bg-black/50 p-2 border border-gray-800 space-y-4 rounded-full">
+					<div className="flex flex-col items-center backdrop-blur-xl bg-black/50 p-2 border border-gray-800 space-y-4">
 						<Tooltip>
 							<TooltipTrigger>
 								<DialogTrigger asChild>
@@ -124,7 +124,7 @@ export function UpdatesToolbar({
 								</DialogTrigger>
 							</TooltipTrigger>
 							<TooltipContent
-								className="py-1 px-3 rounded-sm"
+								className="py-1 px-3"
 								sideOffset={25}
 								side="right"
 							>
@@ -144,7 +144,7 @@ export function UpdatesToolbar({
 									</button>
 								</TooltipTrigger>
 								<TooltipContent
-									className="py-1 px-3 rounded-sm"
+									className="py-1 px-3"
 									sideOffset={25}
 									side="right"
 								>
@@ -164,7 +164,7 @@ export function UpdatesToolbar({
 									</button>
 								</TooltipTrigger>
 								<TooltipContent
-									className="py-1 px-3 rounded-sm"
+									className="py-1 px-3"
 									sideOffset={25}
 									side="right"
 								>

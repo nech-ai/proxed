@@ -63,7 +63,7 @@ export default function Page() {
 									width={450}
 									height={290}
 									alt="Alex Vakhitov"
-									className="rounded-lg border border-gray-800/50"
+									className="border border-gray-800/50"
 									priority
 								/>
 							</div>

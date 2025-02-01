@@ -15,12 +15,12 @@ function HeroPill() {
 	return (
 		<motion.a
 			href="/updates/starting"
-			className="flex w-auto items-center space-x-2 rounded-full bg-primary/20 px-2 py-1 ring-1 ring-accent whitespace-pre"
+			className="flex w-auto items-center space-x-2 bg-primary/20 px-2 py-1 ring-1 ring-accent whitespace-pre"
 			initial={{ opacity: 0, y: -20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.8, ease }}
 		>
-			<div className="w-fit rounded-full bg-accent px-2 py-0.5 text-left text-xs font-medium text-primary sm:text-sm">
+			<div className="w-fit bg-accent px-2 py-0.5 text-left text-xs font-medium text-primary sm:text-sm">
 				🛠️ New
 			</div>
 			<p className="text-xs font-medium text-primary sm:text-sm">
@@ -100,7 +100,7 @@ function HeroCTA() {
 					href="#"
 					className={cn(
 						buttonVariants({ variant: "default" }),
-						"w-full sm:w-auto text-background flex gap-2 rounded-lg",
+						"w-full sm:w-auto text-background flex gap-2",
 					)}
 				>
 					{siteConfig.hero.cta}
@@ -147,7 +147,7 @@ export function Hero() {
 
 	return (
 		<Section id="hero">
-			<div className="relative grid grid-cols-1 lg:grid-cols-2 gap-x-8 w-full p-6 lg:p-12 border-x overflow-hidden">
+			<div className="relative grid grid-cols-1 lg:grid-cols-2 gap-x-8 w-full p-6 lg:p-12 overflow-hidden">
 				<div className="flex flex-col justify-start items-start lg:col-span-1">
 					<HeroPill />
 					<HeroTitles />

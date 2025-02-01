@@ -1,6 +1,5 @@
 import { getBlogPosts } from "@/lib/blog";
 import type { MetadataRoute } from "next";
-import { docsSource } from "./docs-source";
 
 export const baseUrl = "https://proxed.ai";
 
@@ -15,10 +14,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		lastModified: new Date().toISOString().split("T")[0],
 	}));
 
-	const docs = docsSource.getPages().map((page) => ({
-		url: new URL(`/docs/${page.slugs.join("/")}`, baseUrl).href,
-		lastModified: new Date(),
-	}));
-
-	return [...routes, ...blogs, ...docs];
+	return [...routes, ...blogs];
 }

@@ -8,10 +8,6 @@ export default function robots() {
 			},
 			{
 				userAgent: "*",
-				allow: "/docs",
-			},
-			{
-				userAgent: "*",
 				disallow: "/og/*",
 			},
 		],

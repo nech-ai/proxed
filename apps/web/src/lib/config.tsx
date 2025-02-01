@@ -128,7 +128,7 @@ export const siteConfig = {
 		links: [
 			{ text: "About", url: "/about" },
 			{ text: "Updates", url: "/updates" },
-			{ text: "Docs", url: "/docs" },
+			{ text: "Docs", url: "https://docs.proxed.ai" },
 			{ text: "Privacy Policy", url: "/legal/privacy" },
 			{ text: "Terms of Service", url: "/legal/terms" },
 			{ text: "Cookie Policy", url: "/legal/cookies" },

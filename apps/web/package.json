@@ -12,7 +12,6 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@fumadocs/content-collections": "^1.1.7",
 		"@proxed/analytics": "workspace:*",
 		"@proxed/ui": "workspace:*",
 		"@proxed/utils": "workspace:*",
@@ -53,9 +52,6 @@
 		"vaul": "^1.1.2"
 	},
 	"devDependencies": {
-		"@content-collections/core": "^0.8.0",
-		"@content-collections/mdx": "^0.2.0",
-		"@content-collections/next": "^0.2.4",
 		"@mdx-js/mdx": "^3.1.0",
 		"@shikijs/rehype": "^1.29.1",
 		"@tailwindcss/typography": "^0.5.16",

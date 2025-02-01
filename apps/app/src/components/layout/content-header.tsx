@@ -17,7 +17,7 @@ export function ContentHeader({ children, className }: ContentHeaderProps) {
 
 	return (
 		<div className={cn("border-b bg-background sticky top-0 z-10", className)}>
-			<header className="flex h-14 items-center container mx-auto px-4">
+			<header className="flex h-14 items-center container mx-auto px-2 sm:px-4">
 				<div className="flex items-center gap-4 flex-1 min-w-0">
 					{isMobile && (
 						<>

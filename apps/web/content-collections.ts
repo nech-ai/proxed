@@ -1,7 +1,7 @@
 import { defineCollection, defineConfig } from "@content-collections/core";
 import {
-	createDocSchema,
 	createMetaSchema,
+	createDocSchema,
 	transformMDX,
 } from "@fumadocs/content-collections/configuration";
 import { remarkImage } from "fumadocs-core/mdx-plugins";
@@ -25,8 +25,8 @@ const docs = defineCollection({
 		}),
 });
 
-const docsMeta = defineCollection({
-	name: "docsMeta",
+const metas = defineCollection({
+	name: "meta",
 	directory: "content/docs",
 	include: "**/meta.json",
 	parser: "json",
@@ -35,5 +35,5 @@ const docsMeta = defineCollection({
 
 export default defineConfig({
 	// @ts-expect-error
-	collections: [docs, docsMeta],
+	collections: [docs, metas],
 });

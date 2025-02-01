@@ -132,7 +132,7 @@ export function ProjectEditForm({
 	return (
 		<Form {...form}>
 			<form onSubmit={onSubmit}>
-				<Card>
+				<Card className="bg-card shadow-lg rounded-lg">
 					<CardHeader>
 						<CardTitle>Project Settings</CardTitle>
 						<CardDescription>
@@ -141,13 +141,13 @@ export function ProjectEditForm({
 					</CardHeader>
 
 					<CardContent>
-						<div className="grid gap-6">
+						<div className="space-y-8">
 							{/* Basic Information */}
-							<div className="space-y-4">
-								<div className="text-sm font-medium text-muted-foreground">
+							<div>
+								<div className="text-lg font-semibold border-b pb-2 text-foreground">
 									Basic Information
 								</div>
-								<div className="grid gap-4 sm:grid-cols-2">
+								<div className="grid gap-4 sm:grid-cols-2 mt-4">
 									<FormField
 										control={form.control}
 										name="name"
@@ -175,117 +175,121 @@ export function ProjectEditForm({
 										)}
 									/>
 								</div>
-								<FormField
-									control={form.control}
-									name="description"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Description</FormLabel>
-											<FormControl>
-												<Textarea
-													placeholder="Describe your project..."
-													className="h-20 resize-none"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+								<div className="mt-4">
+									<FormField
+										control={form.control}
+										name="description"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Description</FormLabel>
+												<FormControl>
+													<Textarea
+														placeholder="Describe your project..."
+														className="h-20 resize-none"
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
 							</div>
 
 							{/* Device Check Integration */}
-							<div className="space-y-4">
-								<div className="text-sm font-medium text-muted-foreground">
+							<div>
+								<div className="text-lg font-semibold border-b pb-2 text-foreground">
 									Device Check Integration
 								</div>
-								<FormField
-									control={form.control}
-									name="deviceCheckId"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Device Check Configuration</FormLabel>
-											<AlertDialog open={!!pendingDeviceCheckChange}>
-												<AlertDialogTrigger asChild>
-													<Select
-														value={field.value || ""}
-														onValueChange={handleDeviceCheckChange}
-													>
-														<FormControl>
-															<SelectTrigger>
-																<SelectValue placeholder="Select a device check configuration" />
-															</SelectTrigger>
-														</FormControl>
-														<SelectContent>
-															{deviceChecks.length === 0 ? (
-																<div className="p-4 text-sm text-center space-y-2">
-																	<p className="text-muted-foreground">
-																		No device check configurations found
-																	</p>
-																	<Button
-																		asChild
-																		variant="link"
-																		className="p-0"
-																	>
-																		<Link href="/settings/team/device-check">
-																			Create a Device Check configuration
-																		</Link>
-																	</Button>
-																</div>
-															) : (
-																deviceChecks.map((dc) => (
-																	<SelectItem key={dc.id} value={dc.id}>
-																		<div className="flex flex-col">
-																			<span>{dc.name}</span>
-																		</div>
-																	</SelectItem>
-																))
-															)}
-														</SelectContent>
-													</Select>
-												</AlertDialogTrigger>
-												{pendingDeviceCheckChange && (
-													<AlertDialogContent>
-														<AlertDialogHeader>
-															<AlertDialogTitle>
-																Warning: Configuration Change
-															</AlertDialogTitle>
-															<AlertDialogDescription>
-																Changing the Device Check configuration will
-																affect all production apps using this project.
-																This change may disrupt service for existing
-																users. Are you sure you want to proceed?
-															</AlertDialogDescription>
-														</AlertDialogHeader>
-														<AlertDialogFooter>
-															<AlertDialogCancel
-																onClick={() =>
-																	setPendingDeviceCheckChange(null)
-																}
-															>
-																Cancel
-															</AlertDialogCancel>
-															<AlertDialogAction
-																onClick={() => confirmChange("deviceCheck")}
-															>
-																Confirm Change
-															</AlertDialogAction>
-														</AlertDialogFooter>
-													</AlertDialogContent>
-												)}
-											</AlertDialog>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+								<div className="grid gap-4 sm:grid-cols-2 mt-4">
+									<FormField
+										control={form.control}
+										name="deviceCheckId"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Device Check Configuration</FormLabel>
+												<AlertDialog open={!!pendingDeviceCheckChange}>
+													<AlertDialogTrigger asChild>
+														<Select
+															value={field.value || ""}
+															onValueChange={handleDeviceCheckChange}
+														>
+															<FormControl>
+																<SelectTrigger className="w-full rounded-md border border-input px-3 py-2 bg-card text-foreground focus:ring focus:ring-ring">
+																	<SelectValue placeholder="Select a device check configuration" />
+																</SelectTrigger>
+															</FormControl>
+															<SelectContent>
+																{deviceChecks.length === 0 ? (
+																	<div className="p-4 text-sm text-center space-y-2">
+																		<p className="text-muted-foreground">
+																			No device check configurations found
+																		</p>
+																		<Button
+																			asChild
+																			variant="link"
+																			className="p-0"
+																		>
+																			<Link href="/settings/team/device-check">
+																				Create a Device Check configuration
+																			</Link>
+																		</Button>
+																	</div>
+																) : (
+																	deviceChecks.map((dc) => (
+																		<SelectItem key={dc.id} value={dc.id}>
+																			<div className="flex flex-col">
+																				<span>{dc.name}</span>
+																			</div>
+																		</SelectItem>
+																	))
+																)}
+															</SelectContent>
+														</Select>
+													</AlertDialogTrigger>
+													{pendingDeviceCheckChange && (
+														<AlertDialogContent>
+															<AlertDialogHeader>
+																<AlertDialogTitle>
+																	Warning: Configuration Change
+																</AlertDialogTitle>
+																<AlertDialogDescription>
+																	Changing the Device Check configuration will
+																	affect all production apps using this project.
+																	This change may disrupt service for existing
+																	users. Are you sure you want to proceed?
+																</AlertDialogDescription>
+															</AlertDialogHeader>
+															<AlertDialogFooter>
+																<AlertDialogCancel
+																	onClick={() =>
+																		setPendingDeviceCheckChange(null)
+																	}
+																>
+																	Cancel
+																</AlertDialogCancel>
+																<AlertDialogAction
+																	onClick={() => confirmChange("deviceCheck")}
+																>
+																	Confirm Change
+																</AlertDialogAction>
+															</AlertDialogFooter>
+														</AlertDialogContent>
+													)}
+												</AlertDialog>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
 							</div>
 
 							{/* AI Provider Settings */}
-							<div className="space-y-4">
-								<div className="text-sm font-medium text-muted-foreground">
+							<div>
+								<div className="text-lg font-semibold border-b pb-2 text-foreground">
 									AI Provider Settings
 								</div>
-								<div className="grid gap-4 sm:grid-cols-2">
+								<div className="grid gap-4 sm:grid-cols-2 mt-4">
 									<FormField
 										control={form.control}
 										name="keyId"
@@ -299,7 +303,7 @@ export function ProjectEditForm({
 															onValueChange={handleKeyChange}
 														>
 															<FormControl>
-																<SelectTrigger>
+																<SelectTrigger className="w-full rounded-md border border-input px-3 py-2 bg-card text-foreground focus:ring focus:ring-ring">
 																	<SelectValue placeholder="Select a provider">
 																		{field.value && (
 																			<div className="flex items-center gap-2">
@@ -371,11 +375,11 @@ export function ProjectEditForm({
 							</div>
 
 							{/* AI Configuration */}
-							<div className="space-y-4">
-								<div className="text-sm font-medium text-muted-foreground">
+							<div>
+								<div className="text-lg font-semibold border-b pb-2 text-foreground">
 									AI Configuration
 								</div>
-								<div className="grid gap-4">
+								<div className="grid gap-4 sm:grid-cols-2 mt-4">
 									<FormField
 										control={form.control}
 										name="model"
@@ -388,7 +392,7 @@ export function ProjectEditForm({
 													disabled={!selectedProvider}
 												>
 													<FormControl>
-														<SelectTrigger>
+														<SelectTrigger className="w-full rounded-md border border-input px-3 py-2 bg-card text-foreground focus:ring focus:ring-ring">
 															<SelectValue placeholder="Select a model" />
 														</SelectTrigger>
 													</FormControl>
@@ -415,7 +419,8 @@ export function ProjectEditForm({
 											</FormItem>
 										)}
 									/>
-
+								</div>
+								<div className="grid gap-4 mt-4">
 									<FormField
 										control={form.control}
 										name="systemPrompt"

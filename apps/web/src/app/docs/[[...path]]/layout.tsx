@@ -1,26 +1,12 @@
+import { docsSource } from "@/app/docs-source";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
-import { docsSource } from "../../docs-source";
+import type { ReactNode } from "react";
+import { baseOptions } from "@/app/docs/layout.config";
 
-export default function DocumentationLayout({
-	children,
-}: Readonly<{
-	children: React.ReactNode;
-}>) {
+export default function Layout({ children }: { children: ReactNode }) {
 	return (
-		<div className="pt-[4.5rem]">
-			<DocsLayout
-				tree={docsSource.pageTree}
-				disableThemeSwitch
-				nav={{
-					title: <strong>Documentation</strong>,
-					url: "/docs",
-				}}
-				sidebar={{
-					defaultOpenLevel: 1,
-				}}
-			>
-				{children}
-			</DocsLayout>
-		</div>
+		<DocsLayout tree={docsSource.pageTree} {...baseOptions}>
+			{children}
+		</DocsLayout>
 	);
 }

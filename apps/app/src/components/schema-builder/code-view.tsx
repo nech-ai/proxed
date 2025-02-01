@@ -12,15 +12,26 @@ import { cn } from "@proxed/ui/utils";
 
 interface CodeViewProps {
 	code: string;
-	language?: "typescript" | "swift";
+	language?: "typescript" | "swift" | "json";
 }
 
 export function CodeView({ code, language = "typescript" }: CodeViewProps) {
 	const [isCopied, setIsCopied] = useState(false);
 
+	const formattedCode =
+		language === "json"
+			? (() => {
+					try {
+						return JSON.stringify(JSON.parse(code), null, 2);
+					} catch {
+						return code;
+					}
+				})()
+			: code;
+
 	useEffect(() => {
 		Prism.highlightAll();
-	}, [code]);
+	}, [formattedCode]);
 
 	const handleCopy = async () => {
 		try {
@@ -44,7 +55,7 @@ export function CodeView({ code, language = "typescript" }: CodeViewProps) {
 					"scrollbar-thin scrollbar-track-background scrollbar-thumb-muted-foreground/20",
 				)}
 			>
-				<code className={`language-${language}`}>{code}</code>
+				<code className={`language-${language}`}>{formattedCode}</code>
 			</pre>
 			<Button
 				size="icon"

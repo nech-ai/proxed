@@ -47,13 +47,7 @@ export default async function RootLayout({
 			>
 				<NextTopLoader color="var(--colors-primary)" />
 				<I18nProviderClient locale="en">
-					<ThemeProvider
-						attribute="class"
-						disableTransitionOnChange
-						enableSystem
-						defaultTheme={config.ui.defaultTheme}
-						themes={config.ui.enabledThemes}
-					>
+					<ThemeProvider forcedTheme={config.ui.defaultTheme}>
 						<JotaiProvider>
 							<NuqsAdapter>{children}</NuqsAdapter>
 						</JotaiProvider>

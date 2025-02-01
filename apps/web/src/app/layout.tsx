@@ -8,6 +8,7 @@ import "@proxed/ui/globals.css";
 import { generateMetadata, jsonLd } from "@/lib/metadata";
 import { I18nProvider as FumadocsI18nProvider } from "fumadocs-ui/i18n";
 import { RootProvider as FumadocsRootProvider } from "fumadocs-ui/provider";
+import { config } from "@config";
 
 export const metadata = generateMetadata();
 export const viewport: Viewport = {
@@ -56,11 +57,7 @@ export default function RootLayout({
 					"min-h-screen bg-background antialiased w-full mx-auto scroll-smooth font-sans",
 				)}
 			>
-				<ThemeProvider
-					attribute="class"
-					defaultTheme="dark"
-					enableSystem={false}
-				>
+				<ThemeProvider forcedTheme={config.ui.defaultTheme}>
 					<FumadocsRootProvider>
 						<FumadocsI18nProvider locale="en">
 							{children}

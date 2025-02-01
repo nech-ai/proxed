@@ -50,7 +50,7 @@ export type Config = {
 		from: string;
 	};
 	ui: {
-		enabledThemes: Array<"light" | "dark">;
+		enabledThemes: Array<"dark">;
 		defaultTheme: Config["ui"]["enabledThemes"][number];
 	};
 };

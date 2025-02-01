@@ -11,7 +11,7 @@
 	"dependencies": {
 		"@openpanel/nextjs": "^1.0.7",
 		"@vercel/functions": "^1.6.0",
-		"next": "15.1.5"
+		"next": "15.1.6"
 	},
 	"devDependencies": {
 		"@types/react": "19.0.7",

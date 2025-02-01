@@ -7,11 +7,10 @@ import { siteConfig } from "@/lib/config";
 import { cn } from "@proxed/ui/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { parseAsBoolean, useQueryState } from "nuqs";
+import { CtaButton } from "../cta-button";
 
 export function Header() {
 	const pathname = usePathname();
-	const [_, setIsModalOpen] = useQueryState("dialog", parseAsBoolean);
 
 	const isActive = (path: string) => {
 		return pathname === path;
@@ -63,13 +62,7 @@ export function Header() {
 						>
 							Login
 						</Button>
-						<Button
-							variant="default"
-							className="h-8 text-primary-foreground group tracking-tight font-medium"
-							onClick={() => setIsModalOpen(true)}
-						>
-							{siteConfig.cta}
-						</Button>
+						<CtaButton />
 					</div>
 					<div className="mt-2 cursor-pointer block lg:hidden">
 						<MobileDrawer />

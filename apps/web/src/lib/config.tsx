@@ -94,7 +94,7 @@ export const siteConfig = {
 				"Rate Limiting",
 				"Real-Time Logs",
 			],
-			popular: true,
+			popular: false,
 			cta: "Get Started",
 		},
 		{

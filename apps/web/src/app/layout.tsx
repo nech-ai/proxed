@@ -36,15 +36,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html
-			lang="en"
-			suppressHydrationWarning
-			className={cn(
-				"min-h-screen bg-black text-white antialiased",
-				sansFont.variable,
-				monoFont.variable,
-			)}
-		>
+		<html lang="en" suppressHydrationWarning>
 			<head>
 				<PlausibleProvider domain="proxed.ai" />
 				<script
@@ -57,7 +49,9 @@ export default function RootLayout({
 			</head>
 			<body
 				className={cn(
-					"min-h-screen bg-background antialiased w-full mx-auto scroll-smooth font-sans",
+					"min-h-screen bg-black text-white antialiased",
+					sansFont.variable,
+					monoFont.variable,
 				)}
 			>
 				<ThemeProvider forcedTheme={config.ui.defaultTheme}>

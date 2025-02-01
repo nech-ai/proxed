@@ -9,6 +9,7 @@ import { cn } from "@proxed/ui/utils";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { useState } from "react";
+import { parseAsBoolean, useQueryState } from "nuqs";
 
 interface TabsProps {
 	activeTab: string;
@@ -88,6 +89,7 @@ function PricingTier({
 	tier: (typeof siteConfig.pricing)[0];
 	billingCycle: "monthly" | "yearly";
 }) {
+	const [_, setIsModalOpen] = useQueryState("dialog", parseAsBoolean);
 	return (
 		<div
 			className={cn(
@@ -148,8 +150,9 @@ function PricingTier({
 
 				<Button
 					size="lg"
+					onClick={() => setIsModalOpen(true)}
 					className={cn(
-						"w-full shadow-none",
+						"w-full shadow-none py-4",
 						tier.popular
 							? "bg-primary text-primary-foreground hover:bg-secondary-foreground"
 							: "bg-muted text-foreground hover:bg-muted/80",

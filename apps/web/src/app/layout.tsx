@@ -1,4 +1,3 @@
-import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@proxed/ui/utils";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -6,9 +5,9 @@ import PlausibleProvider from "next-plausible";
 import type { Viewport } from "next";
 import "@proxed/ui/globals.css";
 import { generateMetadata, jsonLd } from "@/lib/metadata";
-import { I18nProvider as FumadocsI18nProvider } from "fumadocs-ui/i18n";
-import { RootProvider as FumadocsRootProvider } from "fumadocs-ui/provider";
 import { config } from "@config";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { SubscribeModal } from "@/components/subscribe-modal";
 
 export const metadata = generateMetadata();
 export const viewport: Viewport = {
@@ -40,7 +39,11 @@ export default function RootLayout({
 		<html
 			lang="en"
 			suppressHydrationWarning
-			className={`${sansFont.variable} ${monoFont.variable}`}
+			className={cn(
+				"min-h-screen bg-black text-white antialiased",
+				sansFont.variable,
+				monoFont.variable,
+			)}
 		>
 			<head>
 				<PlausibleProvider domain="proxed.ai" />
@@ -58,12 +61,10 @@ export default function RootLayout({
 				)}
 			>
 				<ThemeProvider forcedTheme={config.ui.defaultTheme}>
-					<FumadocsRootProvider>
-						<FumadocsI18nProvider locale="en">
-							{children}
-							<TailwindIndicator />
-						</FumadocsI18nProvider>
-					</FumadocsRootProvider>
+					<NuqsAdapter>
+						{children}
+						<SubscribeModal />
+					</NuqsAdapter>
 				</ThemeProvider>
 			</body>
 		</html>

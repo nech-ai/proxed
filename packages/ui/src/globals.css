@@ -30,6 +30,14 @@
 		--chart-4: 250 70% 58%;
 		--chart-5: 265 75% 52%;
 	}
+
+	/* Add disabled styling for buttons and inputs */
+	button:disabled,
+	input:disabled,
+	select:disabled,
+	textarea:disabled {
+		@apply opacity-50 cursor-not-allowed;
+	}
 }
 
 @layer base {

@@ -26,7 +26,7 @@ export const config = {
 	},
 	mailing: {
 		provider: "console",
-		from: "hello@mail.proxed.ai",
+		from: "ProxedAI <hello@mail.proxed.ai>",
 	},
 	ui: {
 		enabledThemes: ["dark"],

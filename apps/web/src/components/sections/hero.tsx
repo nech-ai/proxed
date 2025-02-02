@@ -2,12 +2,11 @@
 
 import { AuroraText } from "@/components/aurora-text";
 import { siteConfig } from "@/lib/config";
-import { buttonVariants } from "@proxed/ui/components/button";
-import { cn } from "@proxed/ui/utils";
+import { Button } from "@proxed/ui/components/button";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Section } from "../section";
+import { useSubscribeModal } from "@/context/subscribe-modal-context";
 
 const ease = [0.16, 1, 0.3, 1];
 
@@ -88,6 +87,7 @@ function HeroTitles() {
 }
 
 function HeroCTA() {
+	const { openModal } = useSubscribeModal();
 	return (
 		<div className="relative mt-6">
 			<motion.div
@@ -96,15 +96,9 @@ function HeroCTA() {
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ delay: 0.8, duration: 0.8, ease }}
 			>
-				<Link
-					href="#"
-					className={cn(
-						buttonVariants({ variant: "default" }),
-						"w-full sm:w-auto text-background flex gap-2",
-					)}
-				>
+				<Button onClick={openModal} className="w-full sm:w-auto">
 					{siteConfig.hero.cta}
-				</Link>
+				</Button>
 			</motion.div>
 			<motion.p
 				className="mt-3 text-sm text-muted-foreground text-left"

@@ -13,7 +13,7 @@
 		--popover-foreground: 220 13% 98%;
 
 		/* Primary action colors */
-		--primary: 150 25% 55%; /* Grayish lichen */
+		--primary: 207 84% 66%; /* Bright blue #61AFEF (97, 175, 239) */
 		--primary-foreground: 220 17% 6%;
 
 		/* Supporting colors */
@@ -29,14 +29,14 @@
 		--destructive-foreground: 220 13% 98%;
 		--border: 220 13% 15%; /* Neutral borders */
 		--input: 220 13% 15%;
-		--ring: 150 25% 55%; /* Matches primary */
+		--ring: 207 84% 66%; /* Matches primary */
 
-		/* Chart colors - Muted greens and grays */
-		--chart-1: 150 25% 55%; /* Grayish lichen */
-		--chart-2: 160 20% 50%; /* Muted sage */
-		--chart-3: 140 15% 45%; /* Gray forest */
-		--chart-4: 170 20% 40%; /* Desaturated teal */
-		--chart-5: 180 15% 35%; /* Cool gray */
+		/* Chart colors - Blue variations */
+		--chart-1: 207 84% 66%; /* Main blue #61AFEF */
+		--chart-2: 207 84% 60%; /* Slightly darker */
+		--chart-3: 207 84% 54%; /* Darker */
+		--chart-4: 207 84% 48%; /* Much darker */
+		--chart-5: 207 84% 42%; /* Darkest */
 	}
 
 	/* Add disabled styling for buttons and inputs */

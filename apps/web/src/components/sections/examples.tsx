@@ -82,7 +82,7 @@ export async function Examples() {
 			...feature,
 			code: await codeToHtml(feature.code, {
 				lang: "swift",
-				theme: "github-dark",
+				theme: "one-dark-pro",
 			}),
 		})),
 	);

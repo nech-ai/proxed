@@ -70,7 +70,7 @@ const ToolTipContent = ({ payload = [] }: { payload?: any[] }) => {
 			<div className="p-4">
 				<div className="mb-2 flex justify-between">
 					<div className="flex items-center justify-center space-x-2">
-						<div className="h-[8px] w-[8px] rounded-full bg-[#121212] dark:bg-[#F5F5F3]" />
+						<div className="h-[8px] w-[8px] rounded-full bg-primary" />
 						<p className="font-medium text-[13px]">
 							{formatAmount({
 								maximumFractionDigits: 0,
@@ -95,7 +95,7 @@ const ToolTipContent = ({ payload = [] }: { payload?: any[] }) => {
 
 				<div className="flex justify-between">
 					<div className="flex items-center justify-center space-x-2">
-						<div className="h-[8px] w-[8px] rounded-full bg-[#C6C6C6] dark:bg-[#606060]" />
+						<div className="h-[8px] w-[8px] rounded-full bg-[#606060] dark:bg-[#A0A0A0]" />
 						<p className="font-medium text-[13px]">
 							{formatAmount({
 								amount: previous?.payload?.previous.value || 0,
@@ -185,11 +185,7 @@ export function BarChart({ data, height = 290 }: BarChartProps) {
 						{data?.result?.map((entry, index) => (
 							<Cell
 								key={`cell-${index.toString()}`}
-								className={cn(
-									"fill-[#41191A]",
-									+entry.previous.value > 0 &&
-										"fill-[#C6C6C6] dark:fill-[#323232]",
-								)}
+								className={cn("fill-[#606060] dark:fill-[#A0A0A0]")}
 							/>
 						))}
 					</Bar>
@@ -198,11 +194,7 @@ export function BarChart({ data, height = 290 }: BarChartProps) {
 						{data?.result?.map((entry, index) => (
 							<Cell
 								key={`cell-${index.toString()}`}
-								className={cn(
-									"fill-[#FF3638]",
-									+entry.current.value > 0 &&
-										"fill-[#121212] dark:fill-[#F5F5F3]",
-								)}
+								className={cn("fill-primary")}
 							/>
 						))}
 					</Bar>

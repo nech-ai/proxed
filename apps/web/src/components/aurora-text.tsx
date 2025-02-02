@@ -12,12 +12,7 @@ export function AuroraText({
 	children: React.ReactNode;
 }) {
 	return (
-		<span
-			className={cn(
-				"relative overflow-hidden inline-flex bg-background",
-				className,
-			)}
-		>
+		<span className={cn("relative overflow-hidden inline-flex", className)}>
 			{children}
 			<div className="aurora absolute inset-0 pointer-events-none mix-blend-lighten dark:mix-blend-darken">
 				{[...Array(5)].map((_, i) => (
@@ -112,6 +107,21 @@ export function AuroraText({
             right: 25%;
           }
         }
+        @keyframes aurora-5 {
+          0%,
+          100% {
+            top: 50%;
+            left: 25%;
+          }
+          50% {
+            top: 25%;
+            left: 50%;
+          }
+          75% {
+            top: 50%;
+            left: 75%;
+          }
+        }
       `}</style>
 		</span>
 	);
@@ -119,10 +129,11 @@ export function AuroraText({
 
 function getInitialPosition(index: number): React.CSSProperties {
 	const positions = [
-		{ top: "-50%" },
-		{ right: 0, top: 0 },
-		{ left: 0, bottom: 0 },
-		{ right: 0, bottom: "-50%" },
+		{ top: "-50%", right: "-10%" },
+		{ right: "-10%", top: "0" },
+		{ left: "-10%", bottom: "0" },
+		{ right: "-10%", bottom: "-50%" },
+		{ left: "50%", top: "0" },
 	];
 	return positions[index] || {};
 }

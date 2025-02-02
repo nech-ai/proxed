@@ -9,7 +9,7 @@ import { cn } from "@proxed/ui/utils";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { useState } from "react";
-import { parseAsBoolean, useQueryState } from "nuqs";
+import { useSubscribeModal } from "@/context/subscribe-modal-context";
 
 interface TabsProps {
 	activeTab: string;
@@ -89,7 +89,7 @@ function PricingTier({
 	tier: (typeof siteConfig.pricing)[0];
 	billingCycle: "monthly" | "yearly";
 }) {
-	const [_, setIsModalOpen] = useQueryState("dialog", parseAsBoolean);
+	const { openModal } = useSubscribeModal();
 	return (
 		<div
 			className={cn(
@@ -150,7 +150,7 @@ function PricingTier({
 
 				<Button
 					size="lg"
-					onClick={() => setIsModalOpen(true)}
+					onClick={openModal}
 					className={cn(
 						"w-full shadow-none py-4",
 						tier.popular

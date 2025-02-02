@@ -2,10 +2,10 @@
 
 import { Section } from "@/components/section";
 import { Button } from "@proxed/ui/components/button";
-import { parseAsBoolean, useQueryState } from "nuqs";
+import { useSubscribeModal } from "@/context/subscribe-modal-context";
 
 export function CTA() {
-	const [_, setIsModalOpen] = useQueryState("dialog", parseAsBoolean);
+	const { openModal } = useSubscribeModal();
 
 	return (
 		<Section id="cta">
@@ -19,10 +19,7 @@ export function CTA() {
 				</p>
 
 				<div className="flex justify-center">
-					<Button
-						className="flex items-center gap-2"
-						onClick={() => setIsModalOpen(true)}
-					>
+					<Button className="flex items-center gap-2" onClick={openModal}>
 						Get started in minutes!
 					</Button>
 				</div>

@@ -6,10 +6,11 @@ import type { Viewport } from "next";
 import "@proxed/ui/globals.css";
 import { generateMetadata, jsonLd } from "@/lib/metadata";
 import { config } from "@config";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { SubscribeModalProvider } from "@/context/subscribe-modal-context";
 import { SubscribeModal } from "@/components/subscribe-modal";
 
 export const metadata = generateMetadata();
+
 export const viewport: Viewport = {
 	colorScheme: "dark",
 	themeColor: [
@@ -55,10 +56,10 @@ export default function RootLayout({
 				)}
 			>
 				<ThemeProvider forcedTheme={config.ui.defaultTheme}>
-					<NuqsAdapter>
+					<SubscribeModalProvider>
 						{children}
 						<SubscribeModal />
-					</NuqsAdapter>
+					</SubscribeModalProvider>
 				</ThemeProvider>
 			</body>
 		</html>

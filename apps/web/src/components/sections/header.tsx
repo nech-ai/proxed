@@ -8,6 +8,7 @@ import { cn } from "@proxed/ui/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CtaButton } from "../cta-button";
+import { Suspense } from "react";
 
 export function Header() {
 	const pathname = usePathname();
@@ -62,7 +63,9 @@ export function Header() {
 						>
 							Login
 						</Button>
-						<CtaButton />
+						<Suspense fallback={null}>
+							<CtaButton />
+						</Suspense>
 					</div>
 					<div className="mt-2 cursor-pointer block lg:hidden">
 						<MobileDrawer />

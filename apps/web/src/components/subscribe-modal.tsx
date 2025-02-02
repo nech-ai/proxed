@@ -6,14 +6,17 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@proxed/ui/components/dialog";
+import { useSubscribeModal } from "@/context/subscribe-modal-context";
 import { SubscribeInput } from "./subscribe-form";
-import { parseAsBoolean, useQueryState } from "nuqs";
 
 export function SubscribeModal() {
-	const [isOpen, setIsOpen] = useQueryState("dialog", parseAsBoolean);
+	const { isOpen, openModal, closeModal } = useSubscribeModal();
 
 	return (
-		<Dialog open={isOpen} onOpenChange={setIsOpen}>
+		<Dialog
+			open={isOpen}
+			onOpenChange={(open) => (open ? openModal() : closeModal())}
+		>
 			<DialogContent className="bg-background/95 border border-border backdrop-blur-lg">
 				<DialogHeader>
 					<DialogTitle className="text-2xl font-bold text-center">
@@ -25,7 +28,7 @@ export function SubscribeModal() {
 						Be among the first to experience ProxedAI and secure your AI
 						wrapper.
 					</p>
-					<SubscribeInput onSuccess={() => setIsOpen(false)} />
+					<SubscribeInput onSuccess={closeModal} />
 				</div>
 			</DialogContent>
 		</Dialog>

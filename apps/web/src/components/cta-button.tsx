@@ -2,16 +2,16 @@
 
 import { siteConfig } from "@/lib/config";
 import { Button } from "@proxed/ui/components/button";
-import { useQueryState, parseAsBoolean } from "nuqs";
+import { useSubscribeModal } from "@/context/subscribe-modal-context";
 
 export function CtaButton() {
-	const [_, setIsModalOpen] = useQueryState("dialog", parseAsBoolean);
+	const { openModal } = useSubscribeModal();
 
 	return (
 		<Button
 			variant="default"
 			className="h-8 text-primary-foreground group tracking-tight font-medium"
-			onClick={() => setIsModalOpen(true)}
+			onClick={openModal}
 		>
 			{siteConfig.cta}
 		</Button>

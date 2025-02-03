@@ -20,10 +20,8 @@ export const featureOptions: FeatureOption[] = [
 		code: `import DeviceCheck
 
 actor SimpleAPIIntegrator {
-	// API integration configuration
-	let projectId = "<your-project-id>"  // Proxed project ID
 	let apiKey = "<your-api-key>"        // Partial API key (we don't store the full key)
-	let endpoint = "https://api.proxed.ai/v1/vision"  // API endpoint
+	let endpoint = "https://api.proxed.ai/v1/vision/<your-project-id>"  // API endpoint
 
 	func sendImage(image: UIImage) async throws {
 		guard let imageData = image.jpegData(compressionQuality: 0.9) else {
@@ -34,10 +32,9 @@ actor SimpleAPIIntegrator {
 
 		var request = URLRequest(url: URL(string: endpoint)!)
 		request.httpMethod = "POST"
-		request.setValue(apiKey, forHTTPHeaderField: "proxed-api-key")
-		request.setValue(projectId, forHTTPHeaderField: "proxed-project-id")
+		request.setValue(apiKey, forHTTPHeaderField: "x-ai-key")
 		if let token = token {
-			request.setValue(token, forHTTPHeaderField: "device-check-token")
+			request.setValue(token, forHTTPHeaderField: "x-device-token")
 		}
 		request.httpBody = try JSONEncoder().encode(["image": base64Image])
 
@@ -47,7 +44,7 @@ actor SimpleAPIIntegrator {
 			fatalError("Failed to send image")
 		}
 
-		// Decode structured AI response from received data
+		// Decode structured AI response which you build in the project settings from received data
 		let plantResponse = try JSONDecoder().decode(PlantResponse.self, from: data)
 		print("Plant Response:", plantResponse)
 	}

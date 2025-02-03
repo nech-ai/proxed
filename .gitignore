@@ -17,6 +17,9 @@ next-env.d.ts
 .expo/
 dist/
 
+# fuma docs
+.source/
+
 # production
 build
 

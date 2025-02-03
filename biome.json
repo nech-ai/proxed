@@ -44,7 +44,8 @@
 			".turbo",
 			"node_modules/*",
 			".content-collections",
-			"dist"
+			"dist",
+			".source"
 		]
 	},
 	"javascript": {

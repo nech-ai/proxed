@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { Tables } from "@proxed/supabase/types";
 import axios from "axios";
 import jwt from "jsonwebtoken";
+import { logger } from "@proxed/logger";
 
 export async function verifyDeviceCheckToken(
 	deviceToken: Buffer,
@@ -43,7 +44,7 @@ export async function verifyDeviceCheckToken(
 		// If Apple responds with success status 200, token is valid
 		return response.status === 200;
 	} catch (error: any) {
-		console.error("error", error.response.data);
+		logger.error("verifyDeviceCheckToken error", error.response?.data || error);
 		return false;
 	}
 }

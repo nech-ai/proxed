@@ -9,8 +9,8 @@ export const authMiddleware = createMiddleware<{
 }>(async (c, next) => {
 	const supabase = await createClient();
 
-	const deviceToken = c.req.header("X-Device-Token");
-	const projectId = c.req.header("X-Project-Id");
+	const deviceToken = c.req.header("x-device-token");
+	const projectId = c.req.param("projectId") || c.req.header("x-project-id");
 
 	if (!deviceToken || !projectId) {
 		return c.json({ error: "Missing device token or project id" }, 401);

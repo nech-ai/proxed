@@ -1,0 +1,84 @@
+---
+description: Supabase config
+globs: ./apps/api/supabase/**/*, ./packages/supabase/**/*.ts
+---
+## SQL and Supabase Standards:
+- Table and Column Naming:
+  - Use snake_case for all identifiers
+  - Use plural for table names (users, posts, teams)
+  - Use singular for column names (user_id, post_id)
+  - Prefix foreign keys with referenced table name (user_id, team_id)
+  - Use timestamptz for all timestamp fields
+  - Name primary keys as 'id'
+
+- Schema Organization:
+  - Place all tables in public schema
+  - Place helper functions in public schema
+  - Use ENUM types for fixed sets of values
+  - Define constraints inline with table creation
+  - Group related tables and functions together
+
+- Data Types and Constraints:
+  - Use uuid for primary and foreign keys
+  - Use text instead of varchar
+  - Add NOT NULL constraint where appropriate
+  - Include created_at and updated_at timestamps
+  - Use gen_random_uuid() for UUID generation
+  - Add appropriate unique constraints
+  - Define CHECK constraints inline
+
+- Indexes:
+  - Name indexes with pattern: idx_[table]_[column(s)]
+  - Create indexes for foreign keys
+  - Create indexes for frequently queried columns
+  - Add composite indexes for common query patterns
+
+- Row Level Security (RLS):
+  - Enable RLS on all tables
+  - Use full path for fields (public.table_name.column)
+  - Create explicit policies for all operations
+  - Name policies descriptively: "allow [operation] for [role/condition]"
+  - Use security definer for helper functions
+  - Implement separate policies for SELECT, INSERT, UPDATE, DELETE
+
+- Triggers and Functions:
+  - Use before triggers for data modifications
+  - Name triggers as [table]_[event]_[action]
+  - Create reusable helper functions for common checks
+  - Use security definer when accessing auth.uid()
+  - Implement updated_at triggers for all tables
+
+- Foreign Keys:
+  - Always specify ON DELETE behavior
+  - Use CASCADE for parent-child relationships
+  - Reference tables using public schema prefix
+
+- Migration Standards:
+  - Order operations logically:
+    1. Types and enums
+    2. Tables
+    3. Functions
+    4. RLS
+    5. Policies
+    6. Indexes
+    7. Triggers
+  - Include rollback logic where necessary
+  - Use explicit schema references
+  - Group related changes in single migration
+
+- Security Best Practices:
+  - Never trust client input
+  - Use parameterized queries
+  - Implement proper access control
+  - Validate data at database level
+  - Use security definer judiciously
+  - Always enable RLS
+  - Audit sensitive operations
+
+- Performance Considerations:
+  - Create appropriate indexes
+  - Use efficient data types
+  - Implement proper constraints
+  - Consider query patterns
+  - Use materialized views for complex queries
+  - Monitor and optimize slow queries

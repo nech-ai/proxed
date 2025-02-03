@@ -17,9 +17,7 @@
 		"GOOGLE_API_KEY",
 		"PROJECT_ID",
 		"GOOGLE_CLIENT_ID",
-		"GOOGLE_SECRET",
-		"RESEND_AUDIENCE_ID",
-		"RESEND_API_KEY"
+		"GOOGLE_SECRET"
 	],
 	"ui": "stream",
 	"tasks": {

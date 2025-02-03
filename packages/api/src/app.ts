@@ -6,6 +6,7 @@ import { corsMiddleware } from "./middleware/cors";
 import { loggerMiddleware } from "./middleware/logger";
 import { healthRouter } from "./routes/health";
 import { structuredResponseRouter } from "./routes/structured-response";
+import { logger } from "@proxed/logger";
 
 const root = new Hono();
 
@@ -51,5 +52,10 @@ app.get(
 		},
 	}),
 );
+
+app.onError((err, c) => {
+	logger.error("Unhandled error in app", err);
+	return c.json({ error: "Internal server error" }, 500);
+});
 
 export type AppRouter = typeof app;

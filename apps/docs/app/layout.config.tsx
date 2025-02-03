@@ -4,4 +4,5 @@ export const baseOptions: BaseLayoutProps = {
 	nav: {
 		title: "proxed.ai",
 	},
+	githubUrl: "https://github.com/nech-ai/proxed",
 };

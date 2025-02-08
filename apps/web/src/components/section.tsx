@@ -39,10 +39,13 @@ const Section = forwardRef<HTMLElement, SectionProps>(
 				>
 					{(title || subtitle || description) && (
 						<div
-							className={cn(alignmentClass, "relative w-full overflow-hidden")}
+							className={cn(
+								alignmentClass,
+								"relative w-full overflow-hidden py-4",
+							)}
 						>
 							{title && (
-								<h2 className="text-sm py-6 text-muted-foreground text-balance font-semibold tracking-tigh uppercase">
+								<h2 className="text-sm font-medium uppercase tracking-wider text-primary">
 									{title}
 								</h2>
 							)}
@@ -50,9 +53,9 @@ const Section = forwardRef<HTMLElement, SectionProps>(
 							{subtitle && (
 								<h3
 									className={cn(
-										"mx-0 mt-4 max-w-lg text-5xl text-balance font-bold sm:max-w-none sm:text-4xl md:text-5xl lg:text-6xl leading-[1.2] tracking-tighter text-foreground lowercase",
+										"mt-4 text-4xl font-medium tracking-tight text-foreground md:text-5xl",
 										align === "center"
-											? "mx-auto"
+											? "mx-auto max-w-[800px]"
 											: align === "right"
 												? "ml-auto"
 												: "",
@@ -64,11 +67,11 @@ const Section = forwardRef<HTMLElement, SectionProps>(
 							{description && (
 								<p
 									className={cn(
-										"mt-4 text-base leading-7 text-muted-foreground text-balance",
+										"mt-6 text-lg text-muted-foreground",
 										align === "center"
-											? "text-center"
+											? "mx-auto max-w-[600px]"
 											: align === "right"
-												? "text-right"
+												? "ml-auto"
 												: "",
 									)}
 								>

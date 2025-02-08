@@ -6,6 +6,7 @@ import { Footer } from "@/components/sections/footer";
 import { Header } from "@/components/sections/header";
 import { Hero } from "@/components/sections/hero";
 import { Pricing } from "@/components/sections/pricing";
+import { ProblemSolution } from "@/components/sections/problem-solution";
 
 export default function Page() {
 	return (
@@ -13,6 +14,7 @@ export default function Page() {
 			<Header />
 			<Hero />
 			<Examples />
+			<ProblemSolution />
 			<Features />
 			<Pricing />
 			<Community />

@@ -46,7 +46,7 @@ function HeroTitles() {
 	return (
 		<div className="flex w-full max-w-3xl flex-col overflow-hidden pt-8">
 			<motion.h1
-				className="text-left text-4xl font-semibold leading-tighter text-foreground sm:text-5xl md:text-6xl tracking-tighter"
+				className="text-left text-3xl font-semibold leading-tight text-foreground sm:text-4xl md:text-5xl tracking-tighter"
 				initial={{ filter: "blur(10px)", opacity: 0, y: 50 }}
 				animate={{ filter: "blur(0px)", opacity: 1, y: 0 }}
 				transition={{
@@ -65,13 +65,13 @@ function HeroTitles() {
 						ease,
 					}}
 				>
-					<AuroraText className="leading-normal">
+					<AuroraText className="leading-tight">
 						{siteConfig.hero.title}
 					</AuroraText>
 				</motion.span>
 			</motion.h1>
 			<motion.p
-				className="text-left max-w-xl leading-normal text-muted-foreground sm:text-lg sm:leading-normal text-balance"
+				className="text-left mt-4 max-w-2xl leading-relaxed text-muted-foreground sm:text-lg sm:leading-relaxed text-balance"
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{

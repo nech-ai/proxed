@@ -36,13 +36,15 @@ export function Article({ data, firstPost }: Props) {
 
 				<div className="prose prose-invert prose-gray max-w-none">
 					{data.metadata.image && (
-						<Image
-							src={data.metadata.image}
-							alt={data.metadata.title}
-							width={680}
-							height={442}
-							className="transition-transform hover:scale-105 duration-500 object-cover"
-						/>
+						<div className="relative overflow-hidden border border-gray-800 flex justify-center">
+							<Image
+								src={data.metadata.image}
+								alt={data.metadata.title}
+								width={680}
+								height={442}
+								className="transition-transform hover:scale-105 duration-500 object-cover"
+							/>
+						</div>
 					)}
 
 					<CustomMDX source={data.content} />

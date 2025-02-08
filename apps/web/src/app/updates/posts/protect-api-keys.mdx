@@ -1,0 +1,43 @@
+---
+title: "Why You Need to Protect AI API Keys in Your App"
+publishedAt: "2025-02-05"
+summary: "Understanding the critical importance of securing API keys in mobile applications and why traditional approaches fall short"
+image: "/images/starting.png"
+tag: "Security"
+---
+
+Anyone building AI-powered mobile apps needs to handle API keys carefully. Let's dive into why this is crucial and what can go wrong if you don't.
+
+<br />
+### Easy to Extract from Apps
+
+Mobile apps can be downloaded and reverse-engineered by anyone—attackers can decompile your iOS app and extract hardcoded secrets like API keys. Even if you don't hardcode the key, any method of embedding it in the app (like in a hidden file or string) is vulnerable. In one real incident, a developer's OpenAI key was stolen and used to run up unauthorized requests because it was retrievable from the app's client-side code. Simply put: if the key lives in the app, determined hackers will find it.
+
+<br />
+### Network Interception Risks
+
+Even if you fetch the API key from a server at runtime instead of shipping it in the app, the key still has to travel to the device. A Man-in-the-Middle (MITM) attack could potentially intercept the key during transit if the connection isn't absolutely secure. Tools like proxy debuggers or rooted devices can sniff out API keys from network calls if not properly protected. Once a key is intercepted, an attacker can use it on their own system.
+
+<br />
+### Unauthorized Usage & Abuse
+
+When an API key is exposed, bad actors can use it to impersonate your app's traffic and call the API themselves. This may result in:
+- Fraudulent activities
+- Exhausted rate limits
+- Huge bills on pay-per-use plans
+- Potential data breaches
+- Denial of service
+
+For example, attackers might script thousands of requests with your key, consuming your quota or triggering a denial of service. If your AI API returns sensitive data, a leaked key could even let outsiders extract private data from your backend.
+
+<br />
+### "Secret Key" is Not a Security Solution
+
+Some newcomers think "I'll hide the API key in the app" as a security measure. In reality, that's security by obscurity—not effective. If the client app alone knows the secret, it can be extracted. We need a better strategy than simply trusting a static key in the app.
+
+<br />
+### The Solution
+
+The best practice is to never ship or expose the secret key in your client app. Instead, you'll want to keep the key on a secure server and have your app communicate with that server. But even then, how do you ensure only your genuine app can talk to your server and use the key? That's where Apple's DeviceCheck comes in.
+
+This is exactly why we're building Proxed—to help developers properly secure their AI API keys using DeviceCheck and other best practices. Stay tuned for more posts about our approach to solving this critical security challenge.

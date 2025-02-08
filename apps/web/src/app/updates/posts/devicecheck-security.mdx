@@ -1,0 +1,47 @@
+---
+title: "How Apple DeviceCheck Helps Secure API Keys in iOS Apps"
+publishedAt: "2025-02-06"
+summary: "Learn how Apple's DeviceCheck can add an extra layer of security to protect your AI API keys from unauthorized access"
+image: "/images/starting.png"
+tag: "Security"
+---
+
+Apple's DeviceCheck is a service that lets you verify if a request truly comes from an authentic iOS device running your app. In other words, DeviceCheck allows your backend to ask Apple for proof that an API call is from a legitimate iPhone/iPad and not from an emulator or malicious script.
+
+<br />
+### What is DeviceCheck?
+
+It's an Apple framework that provides a device-specific token and a server API to validate that token. When your iOS app uses DeviceCheck, it generates a cryptographic token unique to that device. Your server can send this token to Apple's DeviceCheck API to verify it. Apple essentially vouches that "Yes, this token came from a real iOS device with a valid app installation".
+
+<br />
+### Verifying Legitimate Devices
+
+When your iOS app uses DeviceCheck, it generates a cryptographic token unique to that device. Your server can send this token to Apple's DeviceCheck API to verify it. This helps confirm the request isn't coming from a spoofed environment. For example, one developer used DeviceCheck to ensure an HTTP request "actually originated from a mobile device" by verifying the token with Apple before proceeding.
+
+<br />
+### Blocking Scripted Abuse
+
+Without DeviceCheck, an attacker could potentially mimic API calls by crafting requests to your server or API endpoint directly. With DeviceCheck, those requests would fail because the attacker wouldn't have a valid device token from Apple. Only actual iOS devices running your app can obtain a valid token. This significantly raises the bar for anyone trying to abuse your API key from outside the app. It's no longer enough to steal the API key; they'd also need a jailbroken device or a way to fake Apple's device attestation (which is non-trivial).
+
+<br />
+### Persisting Device State
+
+DeviceCheck also allows you to store two bits of data per device on Apple's servers. These bits persist even if the user deletes and reinstalls the app. You can use them to:
+- Mark devices as suspicious
+- Blocklist abusive devices
+- Track device reputation
+- Remember and ban malicious devices at the hardware level
+
+For instance, if you detect a certain device has abused your API (maybe by bypassing usage limits), you could set a bit for that device via DeviceCheck. Later, when that device attempts requests, your server can read those bits and refuse the request if the device was flagged.
+
+<br />
+### Lightweight Attestation
+
+DeviceCheck is not as heavy as Apple's full App Attest (which provides even stronger app integrity guarantees). However, DeviceCheck is easier to implement and supports older iOS versions. It provides a reasonable balance for many apps: it ensures the device is valid and allows basic tracking of device reputation.
+
+<br />
+### The Complete Solution
+
+While DeviceCheck is powerful, it's most effective when combined with other security measures. At Proxed, we're building a complete solution that integrates DeviceCheck with our secure API proxy and other best practices. This creates multiple layers of protection for your AI API keys.
+
+Stay tuned for our next post where we'll dive into the technical implementation details of integrating DeviceCheck with a proxy server.

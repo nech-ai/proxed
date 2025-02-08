@@ -21,7 +21,7 @@ export function Article({ data, firstPost }: Props) {
 	return (
 		<article
 			key={data.slug}
-			className="relative pt-28 mb-20 -mt-28 backdrop-blur-xl group"
+			className="relative mb-8 backdrop-blur-xl group"
 			id={data.slug}
 		>
 			<ArticleInView slug={data.slug} firstPost={firstPost} />
@@ -39,9 +39,9 @@ export function Article({ data, firstPost }: Props) {
 						<Image
 							src={data.metadata.image}
 							alt={data.metadata.title}
-							width={980}
-							height={637}
-							className="mb-12 transition-transform group-hover:scale-[1.02]"
+							width={680}
+							height={442}
+							className="transition-transform hover:scale-105 duration-500 object-cover"
 						/>
 					)}
 

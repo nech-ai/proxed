@@ -1,0 +1,96 @@
+---
+title: "Step-by-Step: Implementing DeviceCheck with an API Proxy"
+publishedAt: "2025-02-07"
+summary: "A practical guide to implementing Apple's DeviceCheck with an API proxy to secure your AI API keys"
+image: "/images/starting.png"
+tag: "Engineering"
+---
+
+Let's walk through how to implement DeviceCheck with an API proxy to protect your AI API keys. Instead of your app calling the AI service directly with the key, your app will call your own server, which holds the real API key and can perform DeviceCheck validation.
+
+<br />
+### 1. Set Up DeviceCheck in Apple Developer Account
+
+First, enable DeviceCheck for your app:
+- Turn on the DeviceCheck capability for your App ID in your Apple Developer account
+- Generate a DeviceCheck private key (.p8 key file) in the Apple Developer portal
+- Make note of the key ID and your Apple Team ID—these will be used by your server
+
+<br />
+### 2. Integrate DeviceCheck in Your iOS App
+
+In your Xcode project, import the DeviceCheck framework and generate a device token before making API calls:
+
+```swift
+guard DCDevice.current.isSupported else {
+    // DeviceCheck not supported (e.g., running in Simulator)
+    return
+}
+
+DCDevice.current.generateToken { token, error in
+    guard let token = token else {
+        print("DeviceCheck token error: \(error?.localizedDescription ?? "unknown error")")
+        return
+    }
+    let tokenData = token.base64EncodedString()
+    // include tokenData in your request to the server
+}
+```
+
+This code checks that DeviceCheck is available (it won't be on simulators or very old devices), then asynchronously generates a token. The token is base64-encoded for transmission.
+
+<br />
+### 3. Call Your API Proxy Instead of the AI API
+
+Design your app to send requests to your own backend service rather than directly to the AI provider. For example:
+- Instead of calling OpenAI directly: `api.openai.com/v1/chat/completions`
+- Call your proxy: `https://yourserver.com/api/chat`
+
+Include the DeviceCheck token in this request (as HTTP headers or JSON payload). Remember: never send the actual API key to the app.
+
+<br />
+### 4. Verify the DeviceCheck Token on the Server
+
+When your server receives the request:
+- Validate the DeviceCheck token using Apple's server API
+- Create a JWT with your Team ID and private key
+- Send Apple's endpoint:
+  - The device token
+  - Your app's bundle ID
+  - The JWT for authentication
+- Reject the request if validation fails
+
+<br />
+### 5. Execute the AI API Request Server-Side
+
+If DeviceCheck validation succeeds:
+- Make the actual API call to the AI service from your server
+- Use the API key that's securely stored on the server
+- The key never leaves your server
+- Your server maintains full control
+
+<br />
+### 6. Return the Response to the App
+
+Simply send the AI service's response back to your iOS app through the proxy. From the app's perspective, it just made a request to your backend and got results.
+
+<br />
+### 7. (Optional) Utilize DeviceCheck's Device Flags
+
+For extra security:
+- Use DeviceCheck's two bits of device state to record trust or abuse
+- Flag devices that exceed usage limits or show suspicious behavior
+- Check these flags in future requests
+- Refuse service to flagged devices
+- This creates persistent blocking at the hardware level
+
+<br />
+### The Security Loop
+
+This implementation creates a secure loop:
+1. iOS app proves legitimacy with DeviceCheck
+2. Server verifies proof with Apple
+3. Only then does server use the API key
+4. Attackers can't bypass without a valid device token
+
+At Proxed, we're implementing this exact flow in our proxy service, making it easy for developers to secure their AI API keys without building this infrastructure themselves. Stay tuned for our next post where we'll explore advanced DeviceCheck patterns and edge cases.

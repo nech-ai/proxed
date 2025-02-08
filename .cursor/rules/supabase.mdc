@@ -1,84 +1,324 @@
 ---
 description: Supabase config
-globs: ./apps/api/supabase/**/*, ./packages/supabase/**/*.ts
+globs: ./apps/api/supabase/migrations/**/*
 ---
-## SQL and Supabase Standards:
-- Table and Column Naming:
-  - Use snake_case for all identifiers
-  - Use plural for table names (users, posts, teams)
-  - Use singular for column names (user_id, post_id)
-  - Prefix foreign keys with referenced table name (user_id, team_id)
-  - Use timestamptz for all timestamp fields
-  - Name primary keys as 'id'
+# Postgres SQL Style Guide
 
-- Schema Organization:
-  - Place all tables in public schema
-  - Place helper functions in public schema
-  - Use ENUM types for fixed sets of values
-  - Define constraints inline with table creation
-  - Group related tables and functions together
+## General
 
-- Data Types and Constraints:
-  - Use uuid for primary and foreign keys
-  - Use text instead of varchar
-  - Add NOT NULL constraint where appropriate
-  - Include created_at and updated_at timestamps
-  - Use gen_random_uuid() for UUID generation
-  - Add appropriate unique constraints
-  - Define CHECK constraints inline
+- Use lowercase for SQL reserved words to maintain consistency and readability.
+- Employ consistent, descriptive identifiers for tables, columns, and other database objects.
+- Use white space and indentation to enhance the readability of your code.
+- Store dates in ISO 8601 format (`yyyy-mm-ddThh:mm:ss.sssss`).
+- Include comments for complex logic, using '/* ... */' for block comments and '--' for line comments.
 
-- Indexes:
-  - Name indexes with pattern: idx_[table]_[column(s)]
-  - Create indexes for foreign keys
-  - Create indexes for frequently queried columns
-  - Add composite indexes for common query patterns
+## Naming Conventions
 
-- Row Level Security (RLS):
-  - Enable RLS on all tables
-  - Use full path for fields (public.table_name.column)
-  - Create explicit policies for all operations
-  - Name policies descriptively: "allow [operation] for [role/condition]"
-  - Use security definer for helper functions
-  - Implement separate policies for SELECT, INSERT, UPDATE, DELETE
+- Avoid SQL reserved words and ensure names are unique and under 63 characters.
+- Use snake_case for tables and columns.
+- Prefer plurals for table names
+- Prefer singular names for columns.
 
-- Triggers and Functions:
-  - Use before triggers for data modifications
-  - Name triggers as [table]_[event]_[action]
-  - Create reusable helper functions for common checks
-  - Use security definer when accessing auth.uid()
-  - Implement updated_at triggers for all tables
+## Tables
 
-- Foreign Keys:
-  - Always specify ON DELETE behavior
-  - Use CASCADE for parent-child relationships
-  - Reference tables using public schema prefix
+- Avoid prefixes like 'tbl_' and ensure no table name matches any of its column names.
+- Always add an `id` column of type `identity generated always` unless otherwise specified.
+- Create all tables in the `public` schema unless otherwise specified.
+- Always add the schema to SQL queries for clarity.
+- Always add a comment to describe what the table does. The comment can be up to 1024 characters.
 
-- Migration Standards:
-  - Order operations logically:
-    1. Types and enums
-    2. Tables
-    3. Functions
-    4. RLS
-    5. Policies
-    6. Indexes
-    7. Triggers
-  - Include rollback logic where necessary
-  - Use explicit schema references
-  - Group related changes in single migration
+## Columns
 
-- Security Best Practices:
-  - Never trust client input
-  - Use parameterized queries
-  - Implement proper access control
-  - Validate data at database level
-  - Use security definer judiciously
-  - Always enable RLS
-  - Audit sensitive operations
+- Use singular names and avoid generic names like 'id'.
+- For references to foreign tables, use the singular of the table name with the `_id` suffix. For example `user_id` to reference the `users` table
+- Always use lowercase except in cases involving acronyms or when readability would be enhanced by an exception.
 
-- Performance Considerations:
-  - Create appropriate indexes
-  - Use efficient data types
-  - Implement proper constraints
-  - Consider query patterns
-  - Use materialized views for complex queries
-  - Monitor and optimize slow queries
+#### Examples:
+
+```sql
+create table books (
+  id bigint generated always as identity primary key,
+  title text not null,
+  author_id bigint references authors (id)
+);
+comment on table books is 'A list of all the books in the library.';
+```
+
+
+## Queries
+
+- When the query is shorter keep it on just a few lines. As it gets larger start adding newlines for readability
+- Add spaces for readability.
+
+Smaller queries:
+
+
+```sql
+select *
+from employees
+where end_date is null;
+
+update employees
+set end_date = '2023-12-31'
+where employee_id = 1001;
+```
+
+Larger queries:
+
+```sql
+select
+  first_name,
+  last_name
+from
+  employees
+where
+  start_date between '2021-01-01' and '2021-12-31'
+and
+  status = 'employed';
+```
+
+
+### Joins and Subqueries
+
+- Format joins and subqueries for clarity, aligning them with related SQL clauses.
+- Prefer full table names when referencing tables. This helps for readability.
+
+```sql
+select
+  employees.employee_name,
+  departments.department_name
+from
+  employees
+join
+  departments on employees.department_id = departments.department_id
+where
+  employees.start_date > '2022-01-01';
+```
+
+## Aliases
+
+- Use meaningful aliases that reflect the data or transformation applied, and always include the 'as' keyword for clarity.
+
+```sql
+select count(*) as total_employees
+from employees
+where end_date is null;
+```
+
+
+## Complex queries and CTEs
+
+- If a query is extremely complex, prefer a CTE.
+- Make sure the CTE is clear and linear. Prefer readability over performance.
+- Add comments to each block.
+
+```sql
+with department_employees as (
+  -- Get all employees and their departments
+  select
+    employees.department_id,
+    employees.first_name,
+    employees.last_name,
+    departments.department_name
+  from
+    employees
+  join
+    departments on employees.department_id = departments.department_id
+),
+employee_counts as (
+  -- Count how many employees in each department
+  select
+    department_name,
+    count(*) as num_employees
+  from
+    department_employees
+  group by
+    department_name
+)
+select
+  department_name,
+  num_employees
+from
+  employee_counts
+order by
+  department_name;
+```
+
+# Database: Create functions
+
+You're a Supabase Postgres expert in writing database functions. Generate **high-quality PostgreSQL functions** that adhere to the following best practices:
+
+## General Guidelines
+
+1. **Default to `SECURITY INVOKER`:**
+
+   - Functions should run with the permissions of the user invoking the function, ensuring safer access control.
+   - Use `SECURITY DEFINER` only when explicitly required and explain the rationale.
+
+2. **Set the `search_path` Configuration Parameter:**
+
+   - Always set `search_path` to an empty string (`set search_path = '';`).
+   - This avoids unexpected behavior and security risks caused by resolving object references in untrusted or unintended schemas.
+   - Use fully qualified names (e.g., `schema_name.table_name`) for all database objects referenced within the function.
+
+3. **Adhere to SQL Standards and Validation:**
+   - Ensure all queries within the function are valid PostgreSQL SQL queries and compatible with the specified context (ie. Supabase).
+
+## Best Practices
+
+1. **Minimize Side Effects:**
+
+   - Prefer functions that return results over those that modify data unless they serve a specific purpose (e.g., triggers).
+
+2. **Use Explicit Typing:**
+
+   - Clearly specify input and output types, avoiding ambiguous or loosely typed parameters.
+
+3. **Default to Immutable or Stable Functions:**
+
+   - Where possible, declare functions as `IMMUTABLE` or `STABLE` to allow better optimization by PostgreSQL. Use `VOLATILE` only if the function modifies data or has side effects.
+
+4. **Triggers (if Applicable):**
+   - If the function is used as a trigger, include a valid `CREATE TRIGGER` statement that attaches the function to the desired table and event (e.g., `BEFORE INSERT`).
+
+## Example Templates
+
+### Simple Function with `SECURITY INVOKER`
+
+```sql
+create or replace function my_schema.hello_world()
+returns text
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  return 'hello world';
+end;
+$$;
+```
+
+### Function with Parameters and Fully Qualified Object Names
+
+```sql
+create or replace function public.calculate_total_price(order_id bigint)
+returns numeric
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  total numeric;
+begin
+  select sum(price * quantity)
+  into total
+  from public.order_items
+  where order_id = calculate_total_price.order_id;
+
+  return total;
+end;
+$$;
+```
+
+### Function as a Trigger
+
+```sql
+create or replace function my_schema.update_updated_at()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  -- Update the "updated_at" column on row modification
+  new.updated_at := now();
+  return new;
+end;
+$$;
+
+create trigger update_updated_at_trigger
+before update on my_schema.my_table
+for each row
+execute function my_schema.update_updated_at();
+```
+
+### Function with Error Handling
+
+```sql
+create or replace function my_schema.safe_divide(numerator numeric, denominator numeric)
+returns numeric
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  if denominator = 0 then
+    raise exception 'Division by zero is not allowed';
+  end if;
+
+  return numerator / denominator;
+end;
+$$;
+```
+
+### Immutable Function for Better Optimization
+
+```sql
+create or replace function my_schema.full_name(first_name text, last_name text)
+returns text
+language sql
+security invoker
+set search_path = ''
+immutable
+as $$
+  select first_name || ' ' || last_name;
+$$;
+```
+
+# Database: Create migration
+
+You are a Postgres Expert who loves creating secure database schemas.
+
+This project uses the migrations provided by the Supabase CLI.
+
+## Creating a migration file
+
+Given the context of the user's message, create a database migration file inside the folder `supabase/migrations/`.
+
+The file MUST following this naming convention:
+
+The file MUST be named in the format `YYYYMMDDHHmmss_short_description.sql` with proper casing for months, minutes, and seconds in UTC time:
+
+1. `YYYY` - Four digits for the year (e.g., `2024`).
+2. `MM` - Two digits for the month (01 to 12).
+3. `DD` - Two digits for the day of the month (01 to 31).
+4. `HH` - Two digits for the hour in 24-hour format (00 to 23).
+5. `mm` - Two digits for the minute (00 to 59).
+6. `ss` - Two digits for the second (00 to 59).
+7. Add an appropriate description for the migration.
+
+For example:
+
+```
+20240906123045_create_profiles.sql
+```
+
+
+## SQL Guidelines
+
+Write Postgres-compatible SQL code for Supabase migration files that:
+
+- Includes a header comment with metadata about the migration, such as the purpose, affected tables/columns, and any special considerations.
+- Includes thorough comments explaining the purpose and expected behavior of each migration step.
+- Write all SQL in lowercase.
+- Add copious comments for any destructive SQL commands, including truncating, dropping, or column alterations.
+- When creating a new table, you MUST enable Row Level Security (RLS) even if the table is intended for public access.
+- When creating RLS Policies
+  - Ensure the policies cover all relevant access scenarios (e.g. select, insert, update, delete) based on the table's purpose and data sensitivity.
+  - If the table  is intended for public access the policy can simply return `true`.
+  - RLS Policies should be granular: one policy for `select`, one for `insert` etc) and for each supabase role (`anon` and `authenticated`). DO NOT combine Policies even if the functionality is the same for both roles.
+  - Include comments explaining the rationale and intended behavior of each security policy
+
+The generated SQL code should be production-ready, well-documented, and aligned with Supabase's best practices.
+
+

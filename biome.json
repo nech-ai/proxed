@@ -23,7 +23,7 @@
 			},
 			"correctness": {
 				"useExhaustiveDependencies": "off",
-				"noUnusedImports": "error"
+				"noUnusedImports": "off"
 			},
 			"style": {
 				"noNonNullAssertion": "off",

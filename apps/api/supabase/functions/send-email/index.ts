@@ -1,69 +1,101 @@
-import { NewUser } from "@proxed/mailing/emails/NewUser";
-import React from "react";
-import { render } from "react-email/components";
-import { Resend } from "resend";
-import { Webhook } from "standardwebhooks";
+import { render } from "npm:@react-email/components@0.0.22";
+import React from "npm:react@18.3.1";
+import { Resend } from "npm:resend@4.0.1";
+
+import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
+import { ForgotPassword } from "./_templates/ForgotPassword.tsx";
+import { MagicLink } from "./_templates/MagicLink.tsx";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY") as string);
 const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") as string;
 
 Deno.serve(async (req) => {
-	if (req.method !== "POST") {
-		return new Response("not allowed", { status: 400 });
-	}
-
 	const payload = await req.text();
 	const headers = Object.fromEntries(req.headers);
 	const wh = new Webhook(hookSecret);
 
 	const {
 		user,
-		email_data: { token, token_hash, redirect_to, email_action_type },
+		email_data: { token, email_action_type, token_hash },
 	} = wh.verify(payload, headers) as {
 		user: {
 			email: string;
+			user_metadata?: {
+				full_name?: string;
+			};
 		};
 		email_data: {
 			token: string;
-			token_hash: string;
 			redirect_to: string;
 			email_action_type: string;
 			site_url: string;
+			token_hash: string;
 			token_new: string;
 			token_hash_new: string;
 		};
 	};
 
+	const displayName = user.user_metadata?.full_name || user.email;
+
 	switch (email_action_type) {
-		case "signup": {
+		case "recovery":
+		case "reset_password": {
+			const verifyUrl = new URL("https://api.proxed.ai/auth/v1/verify");
+			verifyUrl.searchParams.set("token", token_hash);
+			verifyUrl.searchParams.set("type", "recovery");
+			verifyUrl.searchParams.set(
+				"redirect_to",
+				"https://app.proxed.ai/api/auth/callback?next=/auth/reset-password",
+			);
 			const html = await render(
-				React.createElement(NewUser, {
-					url: redirect_to,
-					name: user.email,
+				React.createElement(ForgotPassword, {
+					url: verifyUrl.toString(),
+					name: displayName,
 					otp: token,
 				}),
 			);
 
 			await resend.emails.send({
-				from: "Proxed.AI <hello@mail.proxed.ai>",
+				from: "Proxed.AI <no-reply@mail.proxed.ai>",
 				to: [user.email],
-				subject: "Welcome to Proxed.AI!",
+				subject: "Reset your password",
 				html,
 			});
 
 			break;
 		}
+		case "login":
+		case "magiclink": {
+			const verifyUrl = new URL("https://api.proxed.ai/auth/v1/verify");
+			verifyUrl.searchParams.set("token", token_hash);
+			verifyUrl.searchParams.set("type", "magiclink");
+			verifyUrl.searchParams.set(
+				"redirect_to",
+				"https://app.proxed.ai/api/auth/callback",
+			);
 
-		// Add other email actions here
-		// case 'reset_password':
-		// case 'magic_link':
+			const html = await render(
+				React.createElement(MagicLink, {
+					url: verifyUrl.toString(),
+					name: displayName,
+					otp: token,
+				}),
+			);
+
+			await resend.emails.send({
+				from: "Proxed.AI <no-reply@mail.proxed.ai>",
+				to: [user.email],
+				subject: "Login to Proxed.AI",
+				html,
+			});
+			break;
+		}
 		default:
-			throw new Error("Invalid email action type");
+			throw new Error(`Invalid email action type: ${email_action_type}`);
 	}
 
 	const responseHeaders = new Headers();
 	responseHeaders.set("Content-Type", "application/json");
-
 	return new Response(JSON.stringify({}), {
 		status: 200,
 		headers: responseHeaders,

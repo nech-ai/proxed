@@ -1,3 +1,5 @@
 export default {
-	welcome: "Hello {name}!",
+	chart_type: {
+		all: "All",
+	},
 } as const;

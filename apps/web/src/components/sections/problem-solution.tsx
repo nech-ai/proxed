@@ -99,7 +99,6 @@ export function ProblemSolution() {
 			<Section
 				id="problem"
 				title="The Challenge"
-				subtitle={problemSolution.problem.title}
 				description={problemSolution.problem.description}
 			>
 				<div className="my-8">
@@ -115,7 +114,6 @@ export function ProblemSolution() {
 			<Section
 				id="solution"
 				title="The Solution"
-				subtitle={problemSolution.solution.title}
 				description={problemSolution.solution.description}
 			>
 				<div className="my-8">

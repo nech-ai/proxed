@@ -103,7 +103,7 @@ export function UpdatesToolbar({
 
 	const handleOnShare = () => {
 		const popup = popupCenter({
-			url: `https://twitter.com/intent/tweet?text=${currentPost?.title} https://nech.ai/updates/${currentPost?.slug}`,
+			url: `https://twitter.com/intent/tweet?text=${currentPost?.title} https://proxed.ai/updates/${currentPost?.slug}`,
 			title: currentPost?.title ?? "",
 			w: 800,
 			h: 400,
@@ -183,7 +183,7 @@ export function UpdatesToolbar({
 					</DialogHeader>
 
 					<div className="grid gap-6 py-4">
-						<CopyInput value={`https://nech.ai${pathname}`} />
+						<CopyInput value={`https://proxed.ai${pathname}`} />
 						<Button
 							className="w-full flex items-center space-x-2 h-10 bg-black hover:bg-gray-900 border border-gray-800"
 							onClick={handleOnShare}

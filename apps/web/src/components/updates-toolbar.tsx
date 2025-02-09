@@ -15,7 +15,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@proxed/ui/components/tooltip";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FaXTwitter } from "react-icons/fa6";
 import { CopyInput } from "./copy-input";
@@ -65,36 +65,50 @@ export function UpdatesToolbar({
 	posts,
 }: { posts: { slug: string; title: string }[] }) {
 	const pathname = usePathname();
+	const router = useRouter();
 	const currentIndex = posts.findIndex((a) => pathname.endsWith(a.slug)) ?? 0;
+	const isDetailView = pathname.split("/").length > 3;
 
 	const currentPost = posts[currentIndex];
 
+	const scrollToPost = (postSlug: string) => {
+		const element = document.getElementById(postSlug);
+		if (!element) return;
+
+		const header = document.querySelector("header");
+		const headerHeight = header?.offsetHeight || 0;
+		const elementPosition =
+			element.getBoundingClientRect().top + window.scrollY;
+
+		window.scrollTo({
+			top: elementPosition - headerHeight - 24, // 24px extra padding
+			behavior: "smooth",
+		});
+	};
+
 	const handlePrev = () => {
 		if (currentIndex > 0) {
-			const nextPost = posts[currentIndex - 1];
-			if (!nextPost) {
-				return;
+			const prevPost = posts[currentIndex - 1];
+			if (!prevPost) return;
+
+			if (isDetailView) {
+				router.push(`/updates/${prevPost.slug}`);
+			} else {
+				scrollToPost(prevPost.slug);
 			}
-			const element = document.getElementById(nextPost?.slug);
-			element?.scrollIntoView({
-				behavior: "smooth",
-			});
 		}
 	};
 
 	const handleNext = () => {
 		if (currentIndex !== posts.length - 1) {
 			const nextPost = posts[currentIndex + 1];
+			if (!nextPost) return;
 
-			if (!nextPost) {
-				return;
+			if (isDetailView) {
+				router.push(`/updates/${nextPost.slug}`);
+			} else {
+				scrollToPost(nextPost.slug);
 			}
-
-			const element = document.getElementById(nextPost?.slug);
-
-			element?.scrollIntoView({
-				behavior: "smooth",
-			});
 		}
 	};
 
@@ -174,6 +188,46 @@ export function UpdatesToolbar({
 						</div>
 					</div>
 				</TooltipProvider>
+			</div>
+
+			{/* Mobile version */}
+			<div className="fixed bottom-0 left-0 right-0 md:hidden">
+				<div className="flex items-center justify-between backdrop-blur-xl bg-black/50 px-4 py-3 border-t border-gray-800">
+					<button
+						type="button"
+						className={cn(
+							"flex items-center space-x-1.5 px-3 py-1.5 rounded-md border border-gray-800 bg-black/50",
+							currentIndex === 0 && "opacity-50",
+						)}
+						onClick={handlePrev}
+						disabled={currentIndex === 0}
+					>
+						<ChevronUpIcon className="h-4 w-4" />
+						<span className="text-xs">Previous</span>
+					</button>
+
+					<DialogTrigger asChild>
+						<button
+							type="button"
+							className="p-1.5 rounded-md border border-gray-800 bg-black/50"
+						>
+							<ShareIcon size={16} className="text-[#606060]" />
+						</button>
+					</DialogTrigger>
+
+					<button
+						type="button"
+						className={cn(
+							"flex items-center space-x-1.5 px-3 py-1.5 rounded-md border border-gray-800 bg-black/50",
+							currentIndex === posts.length - 1 && "opacity-50",
+						)}
+						onClick={handleNext}
+						disabled={currentIndex === posts.length - 1}
+					>
+						<span className="text-xs">Next</span>
+						<ChevronDownIcon className="h-4 w-4" />
+					</button>
+				</div>
 			</div>
 
 			<DialogContent className="sm:max-w-[425px] bg-[#0C0C0C] border-gray-800">

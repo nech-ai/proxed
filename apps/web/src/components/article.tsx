@@ -12,6 +12,7 @@ type Props = {
 			tag: string;
 			title: string;
 			image?: string;
+			publishedAt: string;
 		};
 		content: string;
 	};
@@ -19,20 +20,35 @@ type Props = {
 
 export function Article({ data, firstPost }: Props) {
 	return (
-		<article
-			key={data.slug}
-			className="relative mb-8 backdrop-blur-xl group"
+		<div
 			id={data.slug}
+			className="border border-gray-800 bg-black/50 p-8 backdrop-blur first:mt-0 mt-16"
 		>
-			<ArticleInView slug={data.slug} firstPost={firstPost} />
+			<article className="space-y-6">
+				<ArticleInView slug={data.slug} firstPost={firstPost} />
 
-			<div className="border border-gray-800 bg-black/50 p-8 backdrop-blur transition-colors hover:border-gray-700">
-				<PostStatus status={data.metadata.tag} />
-				<Link className="mb-6 block group" href={`/updates/${data.slug}`}>
-					<h2 className="font-medium text-3xl mb-6 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent transition-opacity group-hover:opacity-80">
-						{data.metadata.title}
-					</h2>
-				</Link>
+				<header className="space-y-4">
+					<PostStatus status={data.metadata.tag} />
+					<Link
+						className="group/title"
+						href={`/updates/${data.slug}`}
+						prefetch={firstPost}
+					>
+						<h2 className="font-medium text-4xl bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+							{data.metadata.title}
+						</h2>
+					</Link>
+					<time
+						dateTime={data.metadata.publishedAt}
+						className="text-sm text-gray-400 block"
+					>
+						{new Date(data.metadata.publishedAt).toLocaleDateString("en-US", {
+							year: "numeric",
+							month: "long",
+							day: "numeric",
+						})}
+					</time>
+				</header>
 
 				<div className="prose prose-invert prose-gray max-w-none">
 					{data.metadata.image && (
@@ -42,14 +58,17 @@ export function Article({ data, firstPost }: Props) {
 								alt={data.metadata.title}
 								width={680}
 								height={442}
-								className="transition-transform hover:scale-105 duration-500 object-cover"
+								className="transition-transform group-hover:scale-105 duration-500 object-cover"
+								loading={firstPost ? "eager" : "lazy"}
+								sizes="(min-width: 1280px) 680px, (min-width: 1024px) 580px, (min-width: 768px) 480px, 100vw"
 							/>
 						</div>
 					)}
-
-					<CustomMDX source={data.content} />
+					<div className="mt-6">
+						<CustomMDX source={data.content} />
+					</div>
 				</div>
-			</div>
-		</article>
+			</article>
+		</div>
 	);
 }

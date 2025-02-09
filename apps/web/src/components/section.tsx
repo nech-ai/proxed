@@ -13,11 +13,12 @@ interface SectionProps {
 	children?: React.ReactNode;
 	className?: string;
 	align?: "left" | "center" | "right";
+	noBorder?: boolean;
 }
 
 const Section = forwardRef<HTMLElement, SectionProps>(
 	(
-		{ id, title, subtitle, description, children, className, align },
+		{ id, title, subtitle, description, children, className, align, noBorder },
 		forwardedRef,
 	) => {
 		const internalRef = useRef<HTMLElement>(null);
@@ -33,7 +34,8 @@ const Section = forwardRef<HTMLElement, SectionProps>(
 			<section id={id} ref={ref}>
 				<div
 					className={cn(
-						"relative w-full max-w-[1400px] mx-auto border border-border px-0",
+						"relative w-full max-w-[1400px] mx-auto",
+						!noBorder && "border border-border",
 						className,
 					)}
 				>

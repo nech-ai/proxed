@@ -70,7 +70,7 @@ export default async function Page(props: {
 	}
 
 	return (
-		<div className="flex justify-center py-4 md:py-12">
+		<div className="flex justify-center py-12">
 			<script
 				type="application/ld+json"
 				suppressHydrationWarning
@@ -89,7 +89,7 @@ export default async function Page(props: {
 				}}
 			/>
 
-			<Section id={post.slug}>
+			<Section id={post.slug} className="flex-1" noBorder>
 				<div className="border border-gray-800 bg-black/50 p-8 backdrop-blur">
 					<article className="space-y-6">
 						<div className="space-y-4">

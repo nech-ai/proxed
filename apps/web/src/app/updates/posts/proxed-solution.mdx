@@ -13,19 +13,19 @@ Implementing an API proxy with DeviceCheck from scratch can be complex. That's w
 
 Instead of building your own backend from scratch, you can leverage our managed proxy (or host it yourself) which is built with key security in mind. Our solution provides:
 - Ready-made secure proxy infrastructure
-- iOS SDK with DeviceCheck integration
+- DeviceCheck integration
 - Comprehensive security features out of the box
 - Simple developer experience
 
 <br />
 ### Secure Key Management
 
-We protect your API keys using a unique split-key approach:
+We protect your API keys using a split-key approach:
 - Keys are never exposed in your mobile app
 - Keys never travel over the network
-- Your app only uses a project-specific identifier
-- Even if someone decompiles your app, they get at most a fragment
-- Our cloud never has your full provider key
+- Your app only uses a project-specific identifiers
+- Even if someone decompiles your app, they get at most a fragment of your provider key
+- Our backend never has your full provider key without your permission
 - Only partial provider keys are stored on our servers
 
 This drastically reduces the risk of key compromise while maintaining security.
@@ -34,7 +34,6 @@ This drastically reduces the risk of key compromise while maintaining security.
 ### Built-in DeviceCheck Verification
 
 Every request through Proxed.AI includes automatic DeviceCheck verification:
-- SDK handles token generation automatically
 - Backend verifies tokens with Apple
 - No need to implement server-side logic yourself
 - Requests only go through from valid iOS clients
@@ -48,18 +47,17 @@ Beyond basic security, we provide comprehensive protection:
 - Usage tracking for monitoring
 - Cost monitoring out-of-the-box
 - Real-time logs and analytics
-- Unusual activity detection
+- Unusual activity detection (coming soon)
 - Customizable usage limits
-- Automatic cost prevention
+- Automatic cost prevention (coming soon)
 
 <br />
 ### Easy Integration
 
 From a developer's perspective, using Proxed.AI is straightforward:
-1. Install our iOS SDK
-2. Configure your project and endpoint
-3. Replace direct API calls with Proxed.AI calls
-4. Let us handle:
+1. Configure your project and endpoint
+2. Replace direct API calls with Proxed.AI calls
+3. Let us handle:
    - Device verification
    - Key management
    - Response formatting
@@ -73,7 +71,6 @@ We believe in transparency and community:
 - Free during beta period
 - Self-hosting option available
 - Community-driven development
-- Regular security audits
 - Continuous improvements
 
 <br />

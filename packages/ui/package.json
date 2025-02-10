@@ -21,12 +21,13 @@
 		"tsconfig": "workspace:*"
 	},
 	"exports": {
-		"./globals.css": "./src/globals.css",
+		"./globals.css": "./src/styles/globals.css",
+		"./styles/*": "./src/styles/*.css",
 		"./tailwind.config": "./tailwind.config.ts",
 		"./postcss": "./postcss.config.js",
 		".": "./src/index.ts",
-		"./utils": "./src/utils/index.ts",
-		"./lib": "./src/lib/index.ts",
+		"./utils": "./src/lib/utils.ts",
+		"./lib/*": "./src/lib/*.ts",
 		"./hooks/*": "./src/hooks/*.tsx",
 		"./icons": "./src/icons/index.tsx",
 		"./components/*": "./src/components/*.tsx"

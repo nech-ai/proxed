@@ -5,16 +5,16 @@
 	"tsx": true,
 	"tailwind": {
 		"config": "tailwind.config.ts",
-		"css": "src/globals.css",
+		"css": "src/styles/globals.css",
 		"baseColor": "slate",
 		"cssVariables": true
 	},
 	"iconLibrary": "lucide",
 	"aliases": {
 		"components": "@proxed/ui/components",
+		"utils": "@proxed/ui/lib/utils",
 		"hooks": "@proxed/ui/hooks",
 		"lib": "@proxed/ui/lib",
-		"ui": "@proxed/ui/components",
-		"utils": "@proxed/ui/utils"
+		"ui": "@proxed/ui/components"
 	}
 }

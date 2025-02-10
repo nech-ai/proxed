@@ -1,5 +1,5 @@
 import { ThemeProvider } from "@/components/theme-provider";
-import { cn } from "@proxed/ui/utils";
+import { cn } from "@proxed/ui/lib/utils";
 import { Geist, Geist_Mono } from "next/font/google";
 import PlausibleProvider from "next-plausible";
 import type { Viewport } from "next";

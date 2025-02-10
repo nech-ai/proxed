@@ -6,7 +6,7 @@ import {
 	DialogDescription,
 	DialogHeader,
 	DialogTitle,
-} from "@proxed/ui/components/dialog";
+} from "@/components/dialog";
 import { useSubscribeModal } from "@/context/subscribe-modal-context";
 import { SubscribeInput } from "./subscribe-form";
 

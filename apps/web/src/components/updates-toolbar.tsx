@@ -8,7 +8,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "@proxed/ui/components/dialog";
+} from "@/components/dialog";
 import {
 	Tooltip,
 	TooltipContent,

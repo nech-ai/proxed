@@ -1,4 +1,4 @@
-name: Preview Deployment - Proxy
+name: Production Deployment - Proxy
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PROXY }}
@@ -12,7 +12,7 @@ on:
       - apps/proxy/**
       - packages/**
 jobs:
-  deploy-preview:
+  deploy-production:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,8 +28,10 @@ jobs:
       - name: 🧪 Run unit tests
         run: bun run test
       - name: 📥 Pull Vercel environment
-        run: bunx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗️ Build project
-        run: bunx vercel build --token=${{ secrets.VERCEL_TOKEN }}
-      - name: 🚀 Deploy preview
-        run: bunx vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: 🚀 Deploy to production
+        run: |
+          bunx vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
+          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` api.proxed.ai

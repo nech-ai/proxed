@@ -11,11 +11,11 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: bun install
-      - name: Run Lint
+      - name: 🔦 Run linter
         run: bun lint
-      - name: Run TypeScript
+      - name: 🪐 Check TypeScript
         run: bun typecheck
   test:
     name: Run tests
@@ -25,9 +25,9 @@ jobs:
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: bun install
-      - name: Run tests
+      - name: 🧪 Run tests
         run: bun test
 
   monorepo-lint:
@@ -35,4 +35,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: QuiiBz/sherif@v1
+      - name: 🔍 Run monorepo lint
+        uses: QuiiBz/sherif@v1

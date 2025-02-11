@@ -240,5 +240,143 @@ export type validationSchemaType = z.infer<typeof validationSchema>;
 `;
 			expect(result).toBe(expected);
 		});
+
+		test("should handle complex plant schema with required", () => {
+			const plantSchema = `import { z } from "zod";
+
+export const mySchema = z.object({
+  isValid: z.boolean().describe("Whether the plant was successfully identified"),
+  scientificName: z.string().describe("Scientific name if identified, 'Unknown' if not"),
+  commonNames: z.array(z.string()).describe("Common names if identified, empty array if not"),
+  family: z.string().describe("Plant family if identified, 'Unknown' if not"),
+  characteristics: z.object({
+    leafType: z.string(),
+    height: z.string(),
+    growth: z.string(),
+    toxicity: z.object({
+      toxic: z.boolean(),
+      toxicTo: z.array(z.string()),
+      symptoms: z.array(z.string()),
+    }),
+  }),
+  growingConditions: z.object({
+    light: z.string(),
+    soil: z.string(),
+    water: z.string(),
+    temperature: z.string(),
+    humidity: z.string(),
+  }),
+  careTips: z.object({
+    watering: z.string(),
+    fertilizing: z.string(),
+    pruning: z.string(),
+    commonProblems: z.array(z.string()),
+  }),
+  interestingFacts: z.array(z.string()),
+}).required();`;
+
+			const ast = parser.parse(plantSchema);
+			const jsonSchema = parser.toJsonSchema(ast);
+
+			const expectedSchema: JsonSchema = {
+				type: "object",
+				fields: {
+					isValid: {
+						type: "boolean",
+						description: "Whether the plant was successfully identified"
+					},
+					scientificName: {
+						type: "string",
+						description: "Scientific name if identified, 'Unknown' if not"
+					},
+					commonNames: {
+						type: "array",
+						itemType: { type: "string" },
+						description: "Common names if identified, empty array if not"
+					},
+					family: {
+						type: "string",
+						description: "Plant family if identified, 'Unknown' if not"
+					},
+					characteristics: {
+						type: "object",
+						fields: {
+							leafType: { type: "string" },
+							height: { type: "string" },
+							growth: { type: "string" },
+							toxicity: {
+								type: "object",
+								fields: {
+									toxic: { type: "boolean" },
+									toxicTo: { type: "array", itemType: { type: "string" } },
+									symptoms: { type: "array", itemType: { type: "string" } }
+								}
+							}
+						}
+					},
+					growingConditions: {
+						type: "object",
+						fields: {
+							light: { type: "string" },
+							soil: { type: "string" },
+							water: { type: "string" },
+							temperature: { type: "string" },
+							humidity: { type: "string" }
+						}
+					},
+					careTips: {
+						type: "object",
+						fields: {
+							watering: { type: "string" },
+							fertilizing: { type: "string" },
+							pruning: { type: "string" },
+							commonProblems: { type: "array", itemType: { type: "string" } }
+						}
+					},
+					interestingFacts: { type: "array", itemType: { type: "string" } }
+				}
+			};
+
+			expect(jsonSchema).toEqual(expectedSchema);
+
+			// Test round-trip conversion
+			const regeneratedCode = parser.fromJsonSchema(jsonSchema, "mySchema");
+			const expectedCode = `import { z } from "zod";
+
+export const mySchema = z.object({
+  isValid: z.boolean().describe("Whether the plant was successfully identified"),
+  scientificName: z.string().describe("Scientific name if identified, 'Unknown' if not"),
+  commonNames: z.array(z.string()).describe("Common names if identified, empty array if not"),
+  family: z.string().describe("Plant family if identified, 'Unknown' if not"),
+  characteristics: z.object({
+  leafType: z.string(),
+  height: z.string(),
+  growth: z.string(),
+  toxicity: z.object({
+  toxic: z.boolean(),
+  toxicTo: z.array(z.string()),
+  symptoms: z.array(z.string())
+})
+}),
+  growingConditions: z.object({
+  light: z.string(),
+  soil: z.string(),
+  water: z.string(),
+  temperature: z.string(),
+  humidity: z.string()
+}),
+  careTips: z.object({
+  watering: z.string(),
+  fertilizing: z.string(),
+  pruning: z.string(),
+  commonProblems: z.array(z.string())
+}),
+  interestingFacts: z.array(z.string())
+});
+
+export type mySchemaType = z.infer<typeof mySchema>;
+`;
+			expect(regeneratedCode).toBe(expectedCode);
+		});
 	});
 });

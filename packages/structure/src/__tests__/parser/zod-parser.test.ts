@@ -214,17 +214,17 @@ export type statusSchemaType = z.infer<typeof statusSchema>;
 				fields: {
 					isValid: {
 						type: "boolean",
-						description: "Whether the plant was successfully identified"
+						description: "Whether the plant was successfully identified",
 					},
 					score: {
 						type: "number",
-						description: "Score: 0-100%"
+						description: "Score: 0-100%",
 					},
 					notes: {
 						type: "string",
-						description: "User's notes & special chars"
-					}
-				}
+						description: "User's notes & special chars",
+					},
+				},
 			};
 
 			const result = parser.fromJsonSchema(schema, "validationSchema");
@@ -283,20 +283,20 @@ export const mySchema = z.object({
 				fields: {
 					isValid: {
 						type: "boolean",
-						description: "Whether the plant was successfully identified"
+						description: "Whether the plant was successfully identified",
 					},
 					scientificName: {
 						type: "string",
-						description: "Scientific name if identified, 'Unknown' if not"
+						description: "Scientific name if identified, 'Unknown' if not",
 					},
 					commonNames: {
 						type: "array",
 						itemType: { type: "string" },
-						description: "Common names if identified, empty array if not"
+						description: "Common names if identified, empty array if not",
 					},
 					family: {
 						type: "string",
-						description: "Plant family if identified, 'Unknown' if not"
+						description: "Plant family if identified, 'Unknown' if not",
 					},
 					characteristics: {
 						type: "object",
@@ -309,10 +309,10 @@ export const mySchema = z.object({
 								fields: {
 									toxic: { type: "boolean" },
 									toxicTo: { type: "array", itemType: { type: "string" } },
-									symptoms: { type: "array", itemType: { type: "string" } }
-								}
-							}
-						}
+									symptoms: { type: "array", itemType: { type: "string" } },
+								},
+							},
+						},
 					},
 					growingConditions: {
 						type: "object",
@@ -321,8 +321,8 @@ export const mySchema = z.object({
 							soil: { type: "string" },
 							water: { type: "string" },
 							temperature: { type: "string" },
-							humidity: { type: "string" }
-						}
+							humidity: { type: "string" },
+						},
 					},
 					careTips: {
 						type: "object",
@@ -330,11 +330,11 @@ export const mySchema = z.object({
 							watering: { type: "string" },
 							fertilizing: { type: "string" },
 							pruning: { type: "string" },
-							commonProblems: { type: "array", itemType: { type: "string" } }
-						}
+							commonProblems: { type: "array", itemType: { type: "string" } },
+						},
 					},
-					interestingFacts: { type: "array", itemType: { type: "string" } }
-				}
+					interestingFacts: { type: "array", itemType: { type: "string" } },
+				},
 			};
 
 			expect(jsonSchema).toEqual(expectedSchema);

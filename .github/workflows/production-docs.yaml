@@ -6,7 +6,7 @@ env:
   TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
 on:
   push:
-    branches-ignore:
+    branches:
       - main
     paths:
       - apps/docs/**

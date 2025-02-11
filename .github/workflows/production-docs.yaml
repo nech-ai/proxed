@@ -10,7 +10,6 @@ on:
       - main
     paths:
       - apps/docs/**
-      - packages/**
 jobs:
   deploy-production:
     runs-on: ubuntu-latest

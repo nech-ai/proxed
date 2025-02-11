@@ -1,5 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { type JsonSchema, jsonToZod } from "@proxed/structure";
+import { ZodParser, type JsonSchema } from "@proxed/structure";
 import { createClient } from "@proxed/supabase/api";
 import { getProjectQuery } from "@proxed/supabase/queries";
 import { createExecution } from "@proxed/supabase/mutations";
@@ -51,10 +51,11 @@ async function handleStructuredResponse(
 	const { image } = result.data;
 
 	// Convert project schema config using jsonToZod
-	const { success: schemaSuccess, data: schema } = jsonToZod(
+	const parser = new ZodParser();
+	const schema = parser.convertJsonSchemaToZodValidator(
 		project.schema_config as unknown as JsonSchema,
 	);
-	if (!schemaSuccess) {
+	if (!schema) {
 		return c.json({ error: "Invalid schema" }, 400);
 	}
 

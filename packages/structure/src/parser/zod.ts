@@ -13,7 +13,8 @@ import type {
 	ExportNamedDeclaration,
 	Expression,
 } from "./types/zod";
-import type { ValidationResult, JsonSchema } from "../types";
+import type { ValidationResult, JsonSchema, SchemaResult } from "../types";
+import { z } from "zod";
 
 const ZOD_TOKEN_PATTERNS = [
 	// Keywords
@@ -356,92 +357,137 @@ export class ZodParser extends BaseParser<ExportNamedDeclaration> {
 		return `import { z } from "zod";\n\nexport const ${name} = ${zodCode};\n\nexport type ${name}Type = z.infer<typeof ${name}>;\n`;
 	}
 
-	convertJsonSchemaToZod(schema: JsonSchema): string {
-		let code = "";
+	convertJsonSchemaToZod(schema: JsonSchema): SchemaResult<string> {
+		try {
+			const zodCode = this.jsonSchemaToZodString(schema);
+			return {
+				success: true,
+				data: zodCode,
+			};
+		} catch (error) {
+			return {
+				success: false,
+				errors: [
+					{
+						path: [],
+						message: error instanceof Error ? error.message : "Unknown error",
+					},
+				],
+			};
+		}
+	}
+
+	private jsonSchemaToZodString(schema: JsonSchema, indentLevel = 0): string {
+		const indent = "  ".repeat(indentLevel);
+		let zodStr = "z";
+
 		switch (schema.type) {
 			case "string": {
-				code = "z.string()";
-				if ("minLength" in schema && schema.minLength !== undefined)
-					code += `.min(${schema.minLength})`;
-				if ("maxLength" in schema && schema.maxLength !== undefined)
-					code += `.max(${schema.maxLength})`;
-				if ("email" in schema && schema.email) code += ".email()";
-				if ("url" in schema && schema.url) code += ".url()";
-				if ("uuid" in schema && schema.uuid) code += ".uuid()";
-				if ("regex" in schema && schema.regex)
-					code += `.regex(new RegExp("${schema.regex}"))`;
+				zodStr += ".string()";
+				if (schema.minLength !== undefined)
+					zodStr += `.min(${schema.minLength})`;
+				if (schema.maxLength !== undefined)
+					zodStr += `.max(${schema.maxLength})`;
+				if (schema.regex) zodStr += `.regex(/${schema.regex}/)`;
+				if (schema.email) zodStr += ".email()";
+				if (schema.url) zodStr += ".url()";
+				if (schema.uuid) zodStr += ".uuid()";
 				break;
 			}
+
 			case "number": {
-				code = "z.number()";
-				if ("min" in schema && schema.min !== undefined)
-					code += `.min(${schema.min})`;
-				if ("max" in schema && schema.max !== undefined)
-					code += `.max(${schema.max})`;
-				if ("int" in schema && schema.int) code += ".int()";
+				zodStr += schema.int ? ".number().int()" : ".number()";
+				if (schema.min !== undefined) zodStr += `.min(${schema.min})`;
+				if (schema.max !== undefined) zodStr += `.max(${schema.max})`;
 				break;
 			}
-			case "boolean":
-				code = "z.boolean()";
+
+			case "boolean": {
+				zodStr += ".boolean()";
 				break;
-			case "date":
-				code = "z.date()";
+			}
+
+			case "array": {
+				zodStr += `.array(${this.jsonSchemaToZodString(schema.itemType, indentLevel)})`;
+				if (schema.minItems !== undefined) zodStr += `.min(${schema.minItems})`;
+				if (schema.maxItems !== undefined) zodStr += `.max(${schema.maxItems})`;
 				break;
-			case "array":
-				code = `z.array(${this.convertJsonSchemaToZod(schema.itemType)})`;
-				break;
+			}
+
 			case "object": {
 				const fields = Object.entries(schema.fields)
-					.map(
-						([key, value]) => `  ${key}: ${this.convertJsonSchemaToZod(value)}`,
-					)
+					.map(([key, value]) => {
+						const fieldSchema = this.jsonSchemaToZodString(
+							value,
+							indentLevel + 1,
+						);
+						return `${indent}  ${key}: ${fieldSchema}`;
+					})
 					.join(",\n");
-				code = `z.object({\n${fields}\n})`;
+				zodStr += `.object({\n${fields}\n${indent}})`;
 				break;
 			}
-			case "union":
-				code = `z.union([${schema.variants.map((v) => this.convertJsonSchemaToZod(v)).join(", ")}])`;
+
+			case "union": {
+				const variants = schema.variants
+					.map((v) => this.jsonSchemaToZodString(v, indentLevel))
+					.join(", ");
+				zodStr += `.union([${variants}])`;
 				break;
-			case "intersection":
-				code = schema.allOf
-					.map((s) => this.convertJsonSchemaToZod(s))
-					.join(".and(");
+			}
+
+			case "intersection": {
+				const types = schema.allOf
+					.map((t) => this.jsonSchemaToZodString(t, indentLevel))
+					.join(", ");
+				zodStr += `.intersection([${types}])`;
 				break;
-			case "enum":
-				code = `z.enum([${schema.values.map((v) => `"${v}"`).join(", ")}])`;
+			}
+
+			case "enum": {
+				const values = schema.values.map((v) => `"${v}"`).join(", ");
+				zodStr += `.enum([${values}])`;
 				break;
-			case "literal":
-				code = `z.literal(${typeof schema.value === "string" ? `"${schema.value}"` : schema.value})`;
+			}
+
+			case "literal": {
+				zodStr += `.literal(${typeof schema.value === "string" ? `"${schema.value}"` : schema.value})`;
 				break;
-			case "any":
-				code = "z.any()";
+			}
+
+			case "date": {
+				zodStr += ".date()";
 				break;
-			case "unknown":
-				code = "z.unknown()";
+			}
+
+			case "any": {
+				zodStr += ".any()";
 				break;
+			}
+
+			case "unknown": {
+				zodStr += ".unknown()";
+				break;
+			}
+
 			default:
 				throw new Error(
-					`Unsupported schema type: ${(schema as { type: string }).type}`,
+					`Unsupported schema type: ${(schema as JsonSchema).type}`,
 				);
 		}
 
-		if (schema.optional) {
-			code += ".optional()";
-		}
-		if (schema.nullable) {
-			code += ".nullable()";
-		}
-		if (schema.description) {
-			// If the description contains double quotes, use single quotes to wrap it
-			const hasDoubleQuotes = schema.description.includes('"');
-			const quote = hasDoubleQuotes ? "'" : '"';
-			code += `.describe(${quote}${schema.description}${quote})`;
-		}
+		if (schema.optional) zodStr += ".optional()";
+		if (schema.nullable) zodStr += ".nullable()";
+		if (schema.description) zodStr += `.describe("${schema.description}")`;
 		if (schema.defaultValue !== undefined) {
-			code += `.default(${JSON.stringify(schema.defaultValue)})`;
+			const defaultVal =
+				typeof schema.defaultValue === "string"
+					? `"${schema.defaultValue}"`
+					: schema.defaultValue;
+			zodStr += `.default(${defaultVal})`;
 		}
 
-		return code;
+		return zodStr;
 	}
 
 	private convertExpressionToJsonSchema(expr: Expression): JsonSchema {
@@ -614,5 +660,138 @@ export class ZodParser extends BaseParser<ExportNamedDeclaration> {
 		}
 
 		throw new Error("Invalid schema expression");
+	}
+
+	createValidator(jsonSchema: JsonSchema): string {
+		const zodCode = this.fromJsonSchema(jsonSchema, "schema");
+		return `
+import { z } from "zod";
+
+${zodCode}
+
+export type SchemaType = z.infer<typeof schema>;
+export const validate = (data: unknown) => schema.safeParse(data);
+export const validateOrThrow = (data: unknown) => schema.parse(data);
+export default schema;
+`;
+	}
+
+	convertJsonSchemaToZodValidator(schema: JsonSchema): z.ZodType {
+		switch (schema.type) {
+			case "string": {
+				let validator = z.string();
+				if (schema.minLength !== undefined)
+					validator = validator.min(schema.minLength);
+				if (schema.maxLength !== undefined)
+					validator = validator.max(schema.maxLength);
+				if (schema.regex) validator = validator.regex(new RegExp(schema.regex));
+				if (schema.email) validator = validator.email();
+				if (schema.url) validator = validator.url();
+				if (schema.uuid) validator = validator.uuid();
+				return this.applyCommonValidators(validator, schema);
+			}
+
+			case "number": {
+				let validator = z.number();
+				if (schema.int) validator = validator.int();
+				if (schema.min !== undefined) validator = validator.min(schema.min);
+				if (schema.max !== undefined) validator = validator.max(schema.max);
+				return this.applyCommonValidators(validator, schema);
+			}
+
+			case "boolean": {
+				return this.applyCommonValidators(z.boolean(), schema);
+			}
+
+			case "array": {
+				const validator = z.array(
+					this.convertJsonSchemaToZodValidator(schema.itemType),
+				);
+				if (schema.minItems !== undefined) validator.min(schema.minItems);
+				if (schema.maxItems !== undefined) validator.max(schema.maxItems);
+				return this.applyCommonValidators(validator, schema);
+			}
+
+			case "object": {
+				const shape: Record<string, z.ZodType> = {};
+				for (const [key, value] of Object.entries(schema.fields)) {
+					shape[key] = this.convertJsonSchemaToZodValidator(value);
+				}
+				return this.applyCommonValidators(z.object(shape), schema);
+			}
+
+			case "union": {
+				if (schema.variants.length < 2) {
+					throw new Error("Union must have at least 2 variants");
+				}
+				const validators = schema.variants.map((v) =>
+					this.convertJsonSchemaToZodValidator(v),
+				);
+				return this.applyCommonValidators(
+					z.union([validators[0], validators[1], ...validators.slice(2)]),
+					schema,
+				);
+			}
+
+			case "intersection": {
+				if (schema.allOf.length < 2) {
+					throw new Error("Intersection must have at least 2 types");
+				}
+				const validators = schema.allOf.map((v) =>
+					this.convertJsonSchemaToZodValidator(v),
+				);
+				return this.applyCommonValidators(
+					validators.reduce((acc, curr) => acc.and(curr)),
+					schema,
+				);
+			}
+
+			case "enum": {
+				if (schema.values.length === 0) {
+					throw new Error("Enum must have at least one value");
+				}
+				return this.applyCommonValidators(
+					z.enum([schema.values[0], ...schema.values.slice(1)] as [
+						string,
+						...string[],
+					]),
+					schema,
+				);
+			}
+
+			case "literal": {
+				return this.applyCommonValidators(z.literal(schema.value), schema);
+			}
+
+			case "date": {
+				return this.applyCommonValidators(z.date(), schema);
+			}
+
+			case "any": {
+				return this.applyCommonValidators(z.any(), schema);
+			}
+
+			case "unknown": {
+				return this.applyCommonValidators(z.unknown(), schema);
+			}
+
+			default:
+				throw new Error(
+					`Unsupported schema type: ${(schema as JsonSchema).type}`,
+				);
+		}
+	}
+
+	private applyCommonValidators<T extends z.ZodType>(
+		validator: T,
+		schema: JsonSchema,
+	): z.ZodType {
+		let result: z.ZodType = validator;
+		if (schema.optional) result = result.optional();
+		if (schema.nullable) result = result.nullable();
+		if (schema.description) result = result.describe(schema.description);
+		if (schema.defaultValue !== undefined)
+			result = result.default(schema.defaultValue);
+		return result;
 	}
 }

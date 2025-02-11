@@ -10,7 +10,7 @@ on:
       - main
     paths:
       - apps/web/**
-      - packages/**
+      - packages/ui/**
 jobs:
   deploy-preview:
     runs-on: ubuntu-latest

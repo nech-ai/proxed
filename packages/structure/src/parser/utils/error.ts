@@ -1,4 +1,4 @@
-import type { Position } from "../types";
+import type { Position } from "../types/base";
 
 export class ParserError extends Error {
 	constructor(

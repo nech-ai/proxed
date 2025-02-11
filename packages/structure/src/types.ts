@@ -14,6 +14,23 @@ export type SchemaType =
 	| "any"
 	| "unknown";
 
+export interface ValidationError {
+	path: string[];
+	message: string;
+}
+
+export interface SchemaResult<T> {
+	success: boolean;
+	data?: T;
+	errors?: ValidationError[];
+}
+
+export interface ValidationOptions {
+	strict?: boolean;
+	coerce?: boolean;
+	maxDepth?: number;
+}
+
 export interface BaseJsonSchema {
 	type: SchemaType;
 	description?: string;
@@ -101,32 +118,83 @@ export type JsonSchema =
 	| AnyJsonSchema
 	| UnknownJsonSchema;
 
-export type ZodToJsonResult = {
-	success: boolean;
-	data?: JsonSchema;
-	error?: string;
-};
-
-export type JsonToZodResult = {
-	success: boolean;
-	data?: z.ZodTypeAny;
-	error?: string;
-};
-
-export interface ZodCodeResult {
-	success: boolean;
-	data?: string;
-	error?: string;
+// Type Guards
+export function isObjectSchema(schema: JsonSchema): schema is ObjectJsonSchema {
+	return schema.type === "object";
 }
 
-export interface ZodCodeToJsonResult {
-	success: boolean;
-	data?: JsonSchema;
-	error?: string;
+export function isArraySchema(schema: JsonSchema): schema is ArrayJsonSchema {
+	return schema.type === "array";
 }
 
-export interface SwiftCodeResult {
+export function isStringSchema(schema: JsonSchema): schema is StringJsonSchema {
+	return schema.type === "string";
+}
+
+export function isNumberSchema(schema: JsonSchema): schema is NumberJsonSchema {
+	return schema.type === "number";
+}
+
+export function isUnionSchema(schema: JsonSchema): schema is UnionJsonSchema {
+	return schema.type === "union";
+}
+
+export function isIntersectionSchema(
+	schema: JsonSchema,
+): schema is IntersectionJsonSchema {
+	return schema.type === "intersection";
+}
+
+export type ZodToJsonResult = SchemaResult<JsonSchema>;
+export type JsonToZodResult = SchemaResult<z.ZodTypeAny>;
+export type ZodCodeResult = SchemaResult<string>;
+export type ZodCodeToJsonResult = SchemaResult<JsonSchema>;
+export type SwiftCodeResult = SchemaResult<string>;
+export type SwiftCodeToJsonResult = SchemaResult<JsonSchema>;
+
+export interface SwiftProperty {
+	name: string;
+	type: string;
+	optional: boolean;
+	isArray: boolean;
+	defaultValue?: string;
+}
+
+export interface SwiftStruct {
+	name: string;
+	properties: SwiftProperty[];
+	nestedTypes?: SwiftStruct[];
+	codingKeys?: string[];
+}
+
+export interface SchemaConverter<T> {
+	toJson(input: string): Promise<JsonSchemaResult>;
+	fromJson(schema: JsonSchema): Promise<CodeGenerationResult<T>>;
+	validate(input: string, schema: JsonSchema): Promise<ValidationResult>;
+}
+
+export interface CodeGenerationResult<T> {
 	success: boolean;
-	data?: string;
-	error?: string;
+	data?: T;
+	errors?: Array<{
+		path: string[];
+		message: string;
+	}>;
+}
+
+export interface ValidationResult {
+	success: boolean;
+	errors?: Array<{
+		path: string[];
+		message: string;
+	}>;
+}
+
+export interface JsonSchemaResult {
+	success: boolean;
+	data?: JsonSchema;
+	errors?: Array<{
+		path: string[];
+		message: string;
+	}>;
 }

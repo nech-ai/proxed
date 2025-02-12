@@ -98,27 +98,13 @@ export class ZodParser extends BaseParser<ExportNamedDeclaration> {
 
 		this.expectToken("punctuation", ")");
 
-		const expr: CallExpression = {
+		return {
 			type: "CallExpression",
 			callee,
 			arguments: args,
 			start: startPos,
 			end: this.getCurrentPosition().column,
 		};
-
-		// Handle chained calls like .min(3).max(10)
-		const next = this.peek();
-		if (next?.type === "punctuation" && next.value === ".") {
-			const memberExpr = this.parseMemberExpression({
-				type: "Identifier",
-				name: "result",
-				start: expr.start,
-				end: expr.end,
-			});
-			return this.parseCallExpression(memberExpr);
-		}
-
-		return expr;
 	}
 
 	private parseObjectExpression(): ObjectExpression {
@@ -587,6 +573,15 @@ export type ${name}Type = z.infer<typeof ${name}>;
 
 				// Handle required method
 				if (method === "required") {
+					if (baseSchema.type === "object") {
+						// Make all fields required
+						const fields: Record<string, JsonSchema> = {};
+						for (const [key, field] of Object.entries(baseSchema.fields)) {
+							const { optional, ...rest } = field;
+							fields[key] = rest;
+						}
+						return { ...baseSchema, fields };
+					}
 					const { optional, ...rest } = baseSchema;
 					return rest;
 				}
@@ -596,74 +591,46 @@ export type ${name}Type = z.infer<typeof ${name}>;
 					return { ...baseSchema, description: String(arg.value) };
 				}
 
-				const applyNumericModifier = (
-					schema: JsonSchema,
-					prop: string,
-					value: unknown,
-				): JsonSchema => {
-					if (isLiteral(arg) && typeof arg.value === "number") {
-						return { ...schema, [prop]: arg.value };
-					}
-					return schema;
-				};
-
-				const applyBooleanModifier = (
-					schema: JsonSchema,
-					prop: string,
-				): JsonSchema => {
-					return { ...schema, [prop]: true };
-				};
-
-				// Apply method modifiers to the base schema
+				// Handle number modifiers
 				if (baseSchema.type === "number") {
-					switch (method) {
-						case "int":
-							return applyBooleanModifier(baseSchema, "int");
-						case "min":
-						case "max":
-							return applyNumericModifier(
-								baseSchema,
-								method,
-								isLiteral(arg) ? arg.value : undefined,
-							);
+					if (method === "int") {
+						return { ...baseSchema, int: true };
+					}
+					if (method === "min" && isLiteral(arg)) {
+						return { ...baseSchema, min: Number(arg.value) };
+					}
+					if (method === "max" && isLiteral(arg)) {
+						return { ...baseSchema, max: Number(arg.value) };
 					}
 				}
 
+				// Handle string modifiers
 				if (baseSchema.type === "string") {
-					switch (method) {
-						case "email":
-						case "url":
-						case "uuid":
-							return applyBooleanModifier(baseSchema, method);
-						case "min":
-						case "max":
-							return applyNumericModifier(
-								baseSchema,
-								`${method}Length`,
-								isLiteral(arg) ? arg.value : undefined,
-							);
-						case "regex":
-							if (isLiteral(arg) && typeof arg.value === "string") {
-								return { ...baseSchema, regex: arg.value };
-							}
+					if (method === "email") {
+						return { ...baseSchema, email: true };
+					}
+					if (method === "url") {
+						return { ...baseSchema, url: true };
+					}
+					if (method === "uuid") {
+						return { ...baseSchema, uuid: true };
+					}
+					if (method === "min" && isLiteral(arg)) {
+						return { ...baseSchema, minLength: Number(arg.value) };
+					}
+					if (method === "max" && isLiteral(arg)) {
+						return { ...baseSchema, maxLength: Number(arg.value) };
 					}
 				}
 
-				if (baseSchema.type === "array") {
-					switch (method) {
-						case "min":
-						case "max":
-							return applyNumericModifier(
-								baseSchema,
-								`${method}Items`,
-								isLiteral(arg) ? arg.value : undefined,
-							);
-					}
+				// Handle optional modifier
+				if (method === "optional") {
+					return { ...baseSchema, optional: true };
 				}
 
-				const schema = this.handleZodMethod(method, expr.arguments, object);
-				if (schema) {
-					return schema;
+				// Handle nullable modifier
+				if (method === "nullable") {
+					return { ...baseSchema, nullable: true };
 				}
 
 				return baseSchema;
@@ -712,8 +679,7 @@ export type ${name}Type = z.infer<typeof ${name}>;
 		if (expr.type === "ObjectExpression") {
 			const fields: Record<string, JsonSchema> = {};
 			for (const prop of expr.properties) {
-				const value = this.convertExpressionToJsonSchema(prop.value);
-				fields[prop.key.name] = value;
+				fields[prop.key.name] = this.convertExpressionToJsonSchema(prop.value);
 			}
 			return { type: "object", fields };
 		}
@@ -738,7 +704,7 @@ export type ${name}Type = z.infer<typeof ${name}>;
 			}
 		}
 
-		throw new Error("Invalid schema expression");
+		throw new Error(`Invalid schema expression of type: ${expr.type}`);
 	}
 
 	private handleZodMethod(

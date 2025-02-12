@@ -22,11 +22,11 @@ jobs:
       - name: 📦 Install dependencies
         run: bun install
       - name: 🔦 Run linter
-        run: bun run lint --filter=@proxed/proxy
+        run: bun lint --filter=@proxed/proxy
       - name: 🪐 Check TypeScript
-        run: bun run typecheck --filter=@proxed/proxy
+        run: bun typecheck --filter=@proxed/proxy
       - name: 🧪 Run unit tests
-        run: bun run test
+        run: bun test
       - name: 📥 Pull Vercel environment
         run: bunx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗️ Build project

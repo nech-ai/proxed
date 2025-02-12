@@ -1,7 +1,7 @@
-import { describe, test, expect, beforeEach } from "../setup";
-import { ZodParser } from "../../parser/zod";
-import { testCases, expectedSchemas, expectJsonSchema } from "../setup";
-import type { JsonSchema } from "../../types";
+import { describe, test, expect, beforeEach } from "bun:test";
+import { ZodParser } from "../parser/zod";
+import { testCases, expectedSchemas, expectJsonSchema } from "./setup";
+import type { JsonSchema } from "../types";
 
 describe("ZodParser", () => {
 	let parser: ZodParser;
@@ -139,9 +139,9 @@ export type contactSchemaType = z.infer<typeof contactSchema>;
 export const userSchema = z.object({
   name: z.string(),
   address: z.object({
-  street: z.string(),
-  city: z.string()
-})
+    street: z.string(),
+    city: z.string()
+  })
 });
 
 export type userSchemaType = z.infer<typeof userSchema>;

@@ -12,7 +12,11 @@ export type SchemaType =
 	| "literal"
 	| "date"
 	| "any"
-	| "unknown";
+	| "unknown"
+	| "record"
+	| "branded"
+	| "promise"
+	| "lazy";
 
 export interface ValidationError {
 	path: string[];
@@ -37,16 +41,41 @@ export interface BaseJsonSchema {
 	optional?: boolean;
 	nullable?: boolean;
 	defaultValue?: unknown;
+	errorMap?: Record<string, string | ((params: any) => string)>;
+	refinements?: Array<{
+		message?: string;
+		code?: string;
+		validation: string;
+	}>;
+	transformations?: Array<{
+		transform: string;
+	}>;
+	preprocess?: {
+		type: "string" | "number" | "boolean" | "date";
+		coerce: boolean;
+	};
 }
 
 export interface StringJsonSchema extends BaseJsonSchema {
 	type: "string";
 	minLength?: number;
 	maxLength?: number;
+	length?: number;
 	regex?: string;
 	email?: boolean;
 	url?: boolean;
 	uuid?: boolean;
+	cuid?: boolean;
+	cuid2?: boolean;
+	ulid?: boolean;
+	emoji?: boolean;
+	ip?: boolean;
+	datetime?: boolean;
+	startsWith?: string;
+	endsWith?: string;
+	trim?: boolean;
+	toLowerCase?: boolean;
+	toUpperCase?: boolean;
 }
 
 export interface NumberJsonSchema extends BaseJsonSchema {
@@ -54,6 +83,13 @@ export interface NumberJsonSchema extends BaseJsonSchema {
 	min?: number;
 	max?: number;
 	int?: boolean;
+	finite?: boolean;
+	safe?: boolean;
+	positive?: boolean;
+	negative?: boolean;
+	nonpositive?: boolean;
+	nonnegative?: boolean;
+	multipleOf?: number;
 }
 
 export interface BooleanJsonSchema extends BaseJsonSchema {
@@ -65,11 +101,21 @@ export interface ArrayJsonSchema extends BaseJsonSchema {
 	itemType: JsonSchema;
 	minItems?: number;
 	maxItems?: number;
+	length?: number;
+	nonempty?: boolean;
 }
 
 export interface ObjectJsonSchema extends BaseJsonSchema {
 	type: "object";
 	fields: Record<string, JsonSchema>;
+	strict?: boolean;
+	strip?: boolean;
+	catchall?: JsonSchema;
+	partial?: boolean;
+	deepPartial?: boolean;
+	pick?: string[];
+	omit?: string[];
+	extend?: JsonSchema;
 }
 
 export interface UnionJsonSchema extends BaseJsonSchema {
@@ -104,6 +150,28 @@ export interface UnknownJsonSchema extends BaseJsonSchema {
 	type: "unknown";
 }
 
+export interface RecordJsonSchema extends BaseJsonSchema {
+	type: "record";
+	keySchema: JsonSchema;
+	valueSchema: JsonSchema;
+}
+
+export interface BrandedJsonSchema extends BaseJsonSchema {
+	type: "branded";
+	brand: string;
+	baseSchema: JsonSchema;
+}
+
+export interface PromiseJsonSchema extends BaseJsonSchema {
+	type: "promise";
+	valueSchema: JsonSchema;
+}
+
+export interface LazyJsonSchema extends BaseJsonSchema {
+	type: "lazy";
+	getter: string;
+}
+
 export type JsonSchema =
 	| StringJsonSchema
 	| NumberJsonSchema
@@ -116,7 +184,11 @@ export type JsonSchema =
 	| LiteralJsonSchema
 	| DateJsonSchema
 	| AnyJsonSchema
-	| UnknownJsonSchema;
+	| UnknownJsonSchema
+	| RecordJsonSchema
+	| BrandedJsonSchema
+	| PromiseJsonSchema
+	| LazyJsonSchema;
 
 // Type Guards
 export function isObjectSchema(schema: JsonSchema): schema is ObjectJsonSchema {

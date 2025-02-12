@@ -1,6 +1,6 @@
-import { describe, test, expect } from "../setup";
-import { SwiftParser } from "../../parser/swift";
-import type { JsonSchema } from "../../types";
+import { describe, test, expect } from "bun:test";
+import { SwiftParser } from "../parser/swift";
+import type { JsonSchema } from "../types";
 
 describe("SwiftParser", () => {
 	describe("parse", () => {

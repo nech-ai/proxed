@@ -353,28 +353,13 @@ export class ZodParser extends BaseParser<ExportNamedDeclaration> {
 	}
 
 	fromJsonSchema(schema: JsonSchema, name: string): string {
-		const zodCode = this.convertJsonSchemaToZod(schema);
-		return `import { z } from "zod";\n\nexport const ${name} = ${zodCode};\n\nexport type ${name}Type = z.infer<typeof ${name}>;\n`;
-	}
+		const zodCode = this.jsonSchemaToZodString(schema);
+		return `import { z } from "zod";
 
-	convertJsonSchemaToZod(schema: JsonSchema): SchemaResult<string> {
-		try {
-			const zodCode = this.jsonSchemaToZodString(schema);
-			return {
-				success: true,
-				data: zodCode,
-			};
-		} catch (error) {
-			return {
-				success: false,
-				errors: [
-					{
-						path: [],
-						message: error instanceof Error ? error.message : "Unknown error",
-					},
-				],
-			};
-		}
+export const ${name} = ${zodCode};
+
+export type ${name}Type = z.infer<typeof ${name}>;
+`;
 	}
 
 	private jsonSchemaToZodString(schema: JsonSchema, indentLevel = 0): string {
@@ -388,17 +373,38 @@ export class ZodParser extends BaseParser<ExportNamedDeclaration> {
 					zodStr += `.min(${schema.minLength})`;
 				if (schema.maxLength !== undefined)
 					zodStr += `.max(${schema.maxLength})`;
+				if (schema.length !== undefined) zodStr += `.length(${schema.length})`;
 				if (schema.regex) zodStr += `.regex(/${schema.regex}/)`;
 				if (schema.email) zodStr += ".email()";
 				if (schema.url) zodStr += ".url()";
 				if (schema.uuid) zodStr += ".uuid()";
+				if (schema.cuid) zodStr += ".cuid()";
+				if (schema.cuid2) zodStr += ".cuid2()";
+				if (schema.ulid) zodStr += ".ulid()";
+				if (schema.emoji) zodStr += ".emoji()";
+				if (schema.ip) zodStr += ".ip()";
+				if (schema.datetime) zodStr += ".datetime()";
+				if (schema.startsWith) zodStr += `.startsWith("${schema.startsWith}")`;
+				if (schema.endsWith) zodStr += `.endsWith("${schema.endsWith}")`;
+				if (schema.trim) zodStr += ".trim()";
+				if (schema.toLowerCase) zodStr += ".toLowerCase()";
+				if (schema.toUpperCase) zodStr += ".toUpperCase()";
 				break;
 			}
 
 			case "number": {
-				zodStr += schema.int ? ".number().int()" : ".number()";
+				zodStr += ".number()";
+				if (schema.int) zodStr += ".int()";
 				if (schema.min !== undefined) zodStr += `.min(${schema.min})`;
 				if (schema.max !== undefined) zodStr += `.max(${schema.max})`;
+				if (schema.finite) zodStr += ".finite()";
+				if (schema.safe) zodStr += ".safe()";
+				if (schema.positive) zodStr += ".positive()";
+				if (schema.negative) zodStr += ".negative()";
+				if (schema.nonpositive) zodStr += ".nonpositive()";
+				if (schema.nonnegative) zodStr += ".nonnegative()";
+				if (schema.multipleOf !== undefined)
+					zodStr += `.multipleOf(${schema.multipleOf})`;
 				break;
 			}
 
@@ -411,6 +417,8 @@ export class ZodParser extends BaseParser<ExportNamedDeclaration> {
 				zodStr += `.array(${this.jsonSchemaToZodString(schema.itemType, indentLevel)})`;
 				if (schema.minItems !== undefined) zodStr += `.min(${schema.minItems})`;
 				if (schema.maxItems !== undefined) zodStr += `.max(${schema.maxItems})`;
+				if (schema.length !== undefined) zodStr += `.length(${schema.length})`;
+				if (schema.nonempty) zodStr += ".nonempty()";
 				break;
 			}
 
@@ -421,10 +429,23 @@ export class ZodParser extends BaseParser<ExportNamedDeclaration> {
 							value,
 							indentLevel + 1,
 						);
-						return `${indent}  ${key}: ${fieldSchema}`;
+						return `${key}: ${fieldSchema}`;
 					})
+					.map((line) => `${indent}  ${line}`)
 					.join(",\n");
 				zodStr += `.object({\n${fields}\n${indent}})`;
+				if (schema.strict) zodStr += ".strict()";
+				if (schema.strip) zodStr += ".strip()";
+				if (schema.catchall)
+					zodStr += `.catchall(${this.jsonSchemaToZodString(schema.catchall, indentLevel)})`;
+				if (schema.partial) zodStr += ".partial()";
+				if (schema.deepPartial) zodStr += ".deepPartial()";
+				if (schema.pick)
+					zodStr += `.pick([${schema.pick.map((p) => `"${p}"`).join(", ")}])`;
+				if (schema.omit)
+					zodStr += `.omit([${schema.omit.map((p) => `"${p}"`).join(", ")}])`;
+				if (schema.extend)
+					zodStr += `.extend(${this.jsonSchemaToZodString(schema.extend, indentLevel)})`;
 				break;
 			}
 
@@ -470,12 +491,33 @@ export class ZodParser extends BaseParser<ExportNamedDeclaration> {
 				break;
 			}
 
+			case "record": {
+				zodStr += `.record(${this.jsonSchemaToZodString(schema.keySchema, indentLevel)}, ${this.jsonSchemaToZodString(schema.valueSchema, indentLevel)})`;
+				break;
+			}
+
+			case "branded": {
+				zodStr += `${this.jsonSchemaToZodString(schema.baseSchema, indentLevel)}.brand("${schema.brand}")`;
+				break;
+			}
+
+			case "promise": {
+				zodStr += `.promise(${this.jsonSchemaToZodString(schema.valueSchema, indentLevel)})`;
+				break;
+			}
+
+			case "lazy": {
+				zodStr += `.lazy(() => ${schema.getter})`;
+				break;
+			}
+
 			default:
 				throw new Error(
 					`Unsupported schema type: ${(schema as JsonSchema).type}`,
 				);
 		}
 
+		// Apply common modifiers
 		if (schema.optional) zodStr += ".optional()";
 		if (schema.nullable) zodStr += ".nullable()";
 		if (schema.description) zodStr += `.describe("${schema.description}")`;
@@ -487,29 +529,67 @@ export class ZodParser extends BaseParser<ExportNamedDeclaration> {
 			zodStr += `.default(${defaultVal})`;
 		}
 
+		// Apply refinements
+		if (schema.refinements) {
+			for (const refinement of schema.refinements) {
+				zodStr += `.refine(${refinement.validation}`;
+				if (refinement.message || refinement.code) {
+					zodStr += `, { message: "${refinement.message || ""}", code: "${refinement.code || ""}" }`;
+				}
+				zodStr += ")";
+			}
+		}
+
+		// Apply transformations
+		if (schema.transformations) {
+			for (const transformation of schema.transformations) {
+				zodStr += `.transform(${transformation.transform})`;
+			}
+		}
+
+		// Apply preprocessing
+		if (schema.preprocess) {
+			zodStr += `.preprocess((val) => {
+				if (typeof val !== "${schema.preprocess.type}") {
+					return ${schema.preprocess.coerce ? `${schema.preprocess.type}(val)` : "val"};
+				}
+				return val;
+			})`;
+		}
+
 		return zodStr;
 	}
 
 	private convertExpressionToJsonSchema(expr: Expression): JsonSchema {
 		if (expr.type === "CallExpression") {
-			const callee = expr.callee as MemberExpression;
-			if (callee.type !== "MemberExpression") {
-				throw new Error("Invalid schema expression");
-			}
+			const callee = expr.callee;
 
 			// Handle method chaining
-			const object = callee.object;
-			if (
-				object.type === "MemberExpression" ||
-				object.type === "CallExpression"
-			) {
-				const baseSchema = this.convertExpressionToJsonSchema(object);
+			if (callee.type === "MemberExpression") {
+				const object = callee.object;
 				const method = callee.property.name;
+
+				// Handle root level z.object() call
+				if (object.type === "Identifier" && object.name === "z") {
+					const schema = this.handleZodMethod(method, expr.arguments, object);
+					if (schema) {
+						return schema;
+					}
+				}
+
+				// Handle method chaining on objects
+				const baseSchema = this.convertExpressionToJsonSchema(object);
 				const arg = expr.arguments[0];
 
 				const isLiteral = (expr: Expression | undefined): expr is Literal => {
 					return expr?.type === "Literal";
 				};
+
+				// Handle required method
+				if (method === "required") {
+					const { optional, ...rest } = baseSchema;
+					return rest;
+				}
 
 				// Handle describe method
 				if (method === "describe" && isLiteral(arg)) {
@@ -581,85 +661,169 @@ export class ZodParser extends BaseParser<ExportNamedDeclaration> {
 					}
 				}
 
+				const schema = this.handleZodMethod(method, expr.arguments, object);
+				if (schema) {
+					return schema;
+				}
+
 				return baseSchema;
 			}
 
-			const method = callee.property.name;
-			let schema: JsonSchema;
-
-			switch (method) {
-				case "object": {
-					const objArg = expr.arguments[0] as ObjectExpression;
-					if (!objArg || objArg.type !== "ObjectExpression") {
-						schema = { type: "object", fields: {} };
-					} else {
-						const fields: Record<string, JsonSchema> = {};
-						for (const prop of objArg.properties) {
-							fields[prop.key.name] = this.convertExpressionToJsonSchema(
-								prop.value,
-							);
-						}
-						schema = { type: "object", fields };
-					}
-					break;
+			// Handle direct function calls
+			if (callee.type === "Identifier") {
+				const schema = this.handleZodMethod(
+					callee.name,
+					expr.arguments,
+					callee,
+				);
+				if (schema) {
+					return schema;
 				}
-
-				case "string":
-					schema = { type: "string" };
-					break;
-				case "number":
-					schema = { type: "number" };
-					break;
-				case "boolean":
-					schema = { type: "boolean" };
-					break;
-				case "date":
-					schema = { type: "date" };
-					break;
-				case "int":
-					schema = { type: "number", int: true };
-					break;
-
-				case "array": {
-					const itemType = expr.arguments[0]
-						? this.convertExpressionToJsonSchema(expr.arguments[0])
-						: { type: "any" as const };
-					schema = { type: "array", itemType };
-					break;
-				}
-
-				case "enum": {
-					const enumArg = expr.arguments[0] as ArrayExpression;
-					if (!enumArg || enumArg.type !== "ArrayExpression") {
-						throw new Error("Expected array of enum values");
-					}
-					const values = enumArg.elements.map((el) => {
-						if (el.type !== "Literal") {
-							throw new Error("Enum values must be literals");
-						}
-						return String(el.value);
-					});
-					schema = { type: "enum", values };
-					break;
-				}
-
-				case "describe": {
-					const arg = expr.arguments[0];
-					if (arg?.type !== "Literal") {
-						throw new Error("Expected string literal in describe()");
-					}
-					schema = { type: "any", description: String(arg.value) };
-					break;
-				}
-
-				default:
-					throw new Error(`Unsupported schema type: ${method}`);
 			}
 
-			return schema;
+			return this.convertExpressionToJsonSchema(callee);
+		}
+
+		if (expr.type === "MemberExpression") {
+			const object = expr.object;
+			const method = expr.property.name;
+
+			// Handle z.string(), z.number(), etc.
+			if (object.type === "Identifier" && object.name === "z") {
+				const schema = this.handleZodMethod(method, [], object);
+				if (schema) {
+					return schema;
+				}
+			}
+
+			// Handle nested member expressions
+			const baseSchema = this.convertExpressionToJsonSchema(object);
+			const schema = this.handleZodMethod(method, [], object);
+			if (schema) {
+				return schema;
+			}
+			return baseSchema;
+		}
+
+		if (expr.type === "Identifier" && expr.name === "z") {
+			return { type: "any" };
+		}
+
+		if (expr.type === "ObjectExpression") {
+			const fields: Record<string, JsonSchema> = {};
+			for (const prop of expr.properties) {
+				const value = this.convertExpressionToJsonSchema(prop.value);
+				fields[prop.key.name] = value;
+			}
+			return { type: "object", fields };
+		}
+
+		if (expr.type === "ArrayExpression") {
+			if (expr.elements.length === 0) {
+				return { type: "array", itemType: { type: "any" } };
+			}
+			const itemType = this.convertExpressionToJsonSchema(expr.elements[0]);
+			return { type: "array", itemType };
+		}
+
+		if (expr.type === "Literal") {
+			if (typeof expr.value === "string") {
+				return { type: "string" };
+			}
+			if (typeof expr.value === "number") {
+				return { type: "number" };
+			}
+			if (typeof expr.value === "boolean") {
+				return { type: "boolean" };
+			}
 		}
 
 		throw new Error("Invalid schema expression");
+	}
+
+	private handleZodMethod(
+		method: string,
+		args: Expression[],
+		object: Expression,
+	): JsonSchema | undefined {
+		switch (method) {
+			case "object": {
+				const objArg = args[0] as ObjectExpression;
+				if (!objArg || objArg.type !== "ObjectExpression") {
+					return { type: "object", fields: {} };
+				}
+				const fields: Record<string, JsonSchema> = {};
+				for (const prop of objArg.properties) {
+					const value = this.convertExpressionToJsonSchema(prop.value);
+					fields[prop.key.name] = value;
+				}
+				return { type: "object", fields };
+			}
+
+			case "string":
+				return { type: "string" };
+
+			case "number":
+				return { type: "number" };
+
+			case "boolean":
+				return { type: "boolean" };
+
+			case "date":
+				return { type: "date" };
+
+			case "array": {
+				const itemType = args[0]
+					? this.convertExpressionToJsonSchema(args[0])
+					: { type: "any" as const };
+				return { type: "array", itemType };
+			}
+
+			case "enum": {
+				const enumArg = args[0] as ArrayExpression;
+				if (!enumArg || enumArg.type !== "ArrayExpression") {
+					throw new Error("Expected array of enum values");
+				}
+				const values = enumArg.elements.map((el) => {
+					if (el.type !== "Literal") {
+						throw new Error("Enum values must be literals");
+					}
+					return String(el.value);
+				});
+				return { type: "enum", values };
+			}
+
+			case "union": {
+				const variants = args.map((arg) =>
+					this.convertExpressionToJsonSchema(arg),
+				);
+				return { type: "union", variants };
+			}
+
+			case "intersection": {
+				const allOf = args.map((arg) =>
+					this.convertExpressionToJsonSchema(arg),
+				);
+				return { type: "intersection", allOf };
+			}
+
+			case "literal": {
+				const arg = args[0];
+				if (!arg || arg.type !== "Literal") {
+					throw new Error("Expected literal value");
+				}
+				return { type: "literal", value: arg.value };
+			}
+
+			case "any":
+				return { type: "any" };
+
+			case "unknown":
+				return { type: "unknown" };
+
+			default:
+				return undefined;
+		}
 	}
 
 	createValidator(jsonSchema: JsonSchema): string {

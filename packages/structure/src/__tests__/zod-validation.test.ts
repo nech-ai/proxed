@@ -1,4 +1,3 @@
-import type { z } from "zod";
 import { ZodParser } from "../parser/zod";
 import type { JsonSchema } from "../types";
 import { expect, test, describe, afterAll, beforeAll } from "bun:test";

@@ -1,7 +1,5 @@
-import { afterEach, expect, describe, test, beforeEach } from "bun:test";
+import { expect } from "bun:test";
 import type { JsonSchema } from "../types";
-
-export { describe, test, expect, beforeEach, afterEach };
 
 // Test utilities
 export function expectJsonSchema(actual: JsonSchema, expected: JsonSchema) {

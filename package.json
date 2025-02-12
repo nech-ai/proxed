@@ -18,7 +18,6 @@
 		"supabase:migrate": "dotenv -c -- bun run --cwd apps/api migrate",
 		"supabase:migration:create": "dotenv -c -- bun run --cwd apps/api migration:create",
 		"supabase:generate": "dotenv -c -- bun run --cwd apps/api generate",
-		"test": "turbo test --parallel",
 		"format": "biome format --write .",
 		"lint": "turbo lint && manypkg check",
 		"typecheck": "turbo typecheck"

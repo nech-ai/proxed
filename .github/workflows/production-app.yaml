@@ -1,0 +1,37 @@
+name: Production Deployment - App
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_APP }}
+  TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - apps/app/**
+      - packages/**
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: 📦 Install dependencies
+        run: bun install
+      - name: 🔦 Run linter
+        run: bun lint --filter=@proxed/app
+      - name: 🪐 Check TypeScript
+        run: bun typecheck --filter=@proxed/app
+      - name: 🧪 Run unit tests
+        run: bun test
+      - name: 📥 Pull Vercel environment
+        run: bunx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: 🏗️ Build project
+        run: bunx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: 🚀 Deploy to production
+        run: |
+          bunx vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
+          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` app.proxed.ai

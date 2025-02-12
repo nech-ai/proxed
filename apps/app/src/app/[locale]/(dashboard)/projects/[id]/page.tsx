@@ -15,7 +15,7 @@ import {
 } from "@proxed/ui/components/tabs";
 import { CodeIcon, EyeIcon, SmartphoneIcon } from "lucide-react";
 import { SchemaBuilderWrapper } from "@/components/schema-builder/schema-builder-wrapper";
-import { jsonToZodCode, jsonToSwiftCode } from "@proxed/structure";
+import { ZodParser, SwiftParser } from "@proxed/structure";
 import type { JsonSchema } from "@proxed/structure";
 import { CodeView } from "@/components/schema-builder/code-view";
 import { ProjectEditForm } from "@/components/projects/project-edit-form";
@@ -38,15 +38,11 @@ export default async function Page(props: {
 		fields: {},
 	}) as JsonSchema;
 
-	const zodCodeResult = jsonToZodCode(schemaConfig);
-	const generatedZodCode = zodCodeResult.success
-		? zodCodeResult.data
-		: "// Error generating Zod code";
+	const zodParser = new ZodParser();
+	const swiftParser = new SwiftParser("");
 
-	const swiftCodeResult = jsonToSwiftCode(schemaConfig);
-	const generatedSwiftCode = swiftCodeResult.success
-		? swiftCodeResult.data
-		: "// Error generating Swift code";
+	const generatedZodCode = zodParser.fromJsonSchema(schemaConfig, "schema");
+	const generatedSwiftCode = swiftParser.fromJsonSchema(schemaConfig, "Schema");
 
 	return (
 		<div className="flex flex-col h-full">

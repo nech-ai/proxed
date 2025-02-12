@@ -3,6 +3,8 @@
 		"lokalise.i18n-ally",
 		"bradlc.vscode-tailwindcss",
 		"biomejs.biome",
-		"ReneSaarsoo.sql-formatter-vsc"
+		"ReneSaarsoo.sql-formatter-vsc",
+		"expo.vscode-expo-tools",
+		"yoavbls.pretty-ts-errors"
 	]
 }

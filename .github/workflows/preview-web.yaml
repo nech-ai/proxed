@@ -1,0 +1,33 @@
+name: Preview Deployment - Web
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
+  TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
+on:
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - apps/web/**
+      - packages/ui/**
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: 📦 Install dependencies
+        run: bun install
+      - name: 🔦 Run linter
+        run: bun run lint --filter=@proxed/web
+      - name: 🪐 Check TypeScript
+        run: bun run typecheck --filter=@proxed/web
+      - name: 📥 Pull Vercel environment
+        run: bunx vercel env pull .env --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - name: 🏗️ Build project
+        run: bunx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: 🚀 Deploy preview
+        run: bunx vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}

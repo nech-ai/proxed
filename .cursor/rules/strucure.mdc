@@ -1,6 +1,6 @@
 ---
 description: Project strtrucure.
-globs: *
+globs: *.ts, *.tsx
 ---
 
 # Project structure
@@ -13,6 +13,7 @@ globs: *
   - /docs (@proxed/docs): Fumadocs application with all documents 
 - ./packages: contains all sharable code between all apps
   - /ui (@proxed/ui): ui application, contains all shadcn components, global.css with colors, tailwindcss configuration  
+  - /supabase (@proxed/supabase): contains all sharable queries, cached queries and mutations. Also contails all types for database
 
 
 # Code standards:
@@ -128,3 +129,7 @@ Use TypeScript, Node.js, Next.js App Router, React, Shadcn UI, Radix UI and Tail
   - Avoid for data fetching or state management.
 
 ## Follow Next.js docs for Data Fetching, Rendering, and Routing.
+
+## Unti tests:
+- use "bun:test" for writing test
+- "bun:test" is fully compatable with vitest and jest

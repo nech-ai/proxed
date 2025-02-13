@@ -29,7 +29,7 @@ const TEST_KEYS = {
 		"sk-proj-F49cxGjD9148EXIeoRUmwwBsRmvDhygQzzYzds-TbUZ0tFJ0Qxyvz5x4VAGCei89XbHIGDEe",
 	INVALID_SHORT: "sk-abc",
 	MALFORMED: "invalid-key-format",
-};
+} as const;
 
 describe("API Key Utilities", () => {
 	describe("validateApiKey", () => {
@@ -79,6 +79,22 @@ describe("API Key Utilities", () => {
 				error: { code: "UNRECOGNIZED_PROVIDER" },
 			});
 		});
+
+		test("should validate and extract metadata from key", () => {
+			const { serverPart, clientPart } = splitKeyWithPrefix(
+				TEST_KEYS.OPENAI,
+				testCrypto,
+			);
+			const reconstructed = reassembleKey(serverPart, clientPart);
+			const result = validateApiKey(reconstructed);
+
+			expect(result.isValid).toBe(true);
+			expect(result.provider).toBe("OPENAI");
+			expect(result.metadata).toBeDefined();
+			expect(result.metadata?.version).toBe(1);
+			expect(result.metadata?.timestamp).toBeDefined();
+			expect(result.metadata?.splitId).toBeDefined();
+		});
 	});
 
 	describe("extractPrefix", () => {
@@ -99,6 +115,20 @@ describe("API Key Utilities", () => {
 			expect(prefix).toBe("");
 			expect(leftover).toBe(TEST_KEYS.MALFORMED);
 		});
+
+		test("should handle keys with metadata", () => {
+			const { serverPart, clientPart } = splitKeyWithPrefix(
+				TEST_KEYS.OPENAI,
+				testCrypto,
+			);
+			const reconstructed = reassembleKey(serverPart, clientPart);
+			const { prefix, leftover } = extractPrefix(reconstructed);
+
+			expect(prefix).toStartWith("sk-");
+			expect(leftover.length).toBeGreaterThan(0);
+			// Metadata should be stripped
+			expect(leftover).not.toContain(".");
+		});
 	});
 
 	describe("splitKeyWithPrefix", () => {
@@ -108,7 +138,9 @@ describe("API Key Utilities", () => {
 				testCrypto,
 			);
 			const reconstructed = reassembleKey(serverPart, clientPart);
-			expect(reconstructed).toBe(TEST_KEYS.ANTHROPIC);
+			// Remove metadata for comparison
+			const [baseKey] = reconstructed.split(".");
+			expect(baseKey).toBe(TEST_KEYS.ANTHROPIC);
 		});
 
 		test("should split and reassemble OpenAI key", () => {
@@ -117,7 +149,9 @@ describe("API Key Utilities", () => {
 				testCrypto,
 			);
 			const reconstructed = reassembleKey(serverPart, clientPart);
-			expect(reconstructed).toBe(TEST_KEYS.OPENAI);
+			// Remove metadata for comparison
+			const [baseKey] = reconstructed.split(".");
+			expect(baseKey).toBe(TEST_KEYS.OPENAI);
 		});
 
 		test("should throw for short keys", () => {
@@ -131,20 +165,27 @@ describe("API Key Utilities", () => {
 			const splits2 = splitKeyWithPrefix(TEST_KEYS.ANTHROPIC, testCrypto);
 			expect(splits1).not.toEqual(splits2);
 
-			// Both should reconstruct to same key
-			expect(reassembleKey(splits1.serverPart, splits1.clientPart)).toBe(
-				TEST_KEYS.ANTHROPIC,
+			// Both should reconstruct to same base key
+			const reconstructed1 = reassembleKey(
+				splits1.serverPart,
+				splits1.clientPart,
 			);
-			expect(reassembleKey(splits2.serverPart, splits2.clientPart)).toBe(
-				TEST_KEYS.ANTHROPIC,
+			const reconstructed2 = reassembleKey(
+				splits2.serverPart,
+				splits2.clientPart,
 			);
+			const [baseKey1] = reconstructed1.split(".");
+			const [baseKey2] = reconstructed2.split(".");
+			expect(baseKey1).toBe(TEST_KEYS.ANTHROPIC);
+			expect(baseKey2).toBe(TEST_KEYS.ANTHROPIC);
 		});
 
 		test("should handle minimum length keys", () => {
 			const minKey = `sk-${"a".repeat(20)}`;
 			const { serverPart, clientPart } = splitKeyWithPrefix(minKey, testCrypto);
 			const reconstructed = reassembleKey(serverPart, clientPart);
-			expect(reconstructed).toBe(minKey);
+			const [baseKey] = reconstructed.split(".");
+			expect(baseKey).toBe(minKey);
 		});
 
 		test("should verify salt length is correct", () => {
@@ -152,9 +193,17 @@ describe("API Key Utilities", () => {
 				TEST_KEYS.OPENAI,
 				testCrypto,
 			);
+			const [clientKeyPart] = clientPart.split(".");
 			expect(serverPart.slice(-16).length).toBe(16);
-			expect(clientPart.slice(-16).length).toBe(16);
-			expect(serverPart.slice(-16)).toBe(clientPart.slice(-16));
+			expect(clientKeyPart.slice(-16).length).toBe(16);
+			expect(serverPart.slice(-16)).toBe(clientKeyPart.slice(-16));
+		});
+
+		test("should include metadata in client part", () => {
+			const { clientPart } = splitKeyWithPrefix(TEST_KEYS.OPENAI, testCrypto);
+			const [, metadata] = clientPart.split(".");
+			expect(metadata).toBeDefined();
+			expect(metadata.length).toBe(32); // 8 + 16 + 8 characters
 		});
 	});
 
@@ -164,15 +213,17 @@ describe("API Key Utilities", () => {
 				TEST_KEYS.OPENAI,
 				testCrypto,
 			);
-			expect(() => reassembleKey(serverPart, `${clientPart}x`)).toThrow(
-				"salt does not match",
-			);
+			const [clientKeyPart, metadata] = clientPart.split(".");
+			expect(() =>
+				reassembleKey(serverPart, `${clientKeyPart}x.${metadata}`),
+			).toThrow("salt does not match");
 		});
 
 		test("should validate reconstructed key", () => {
 			// Use matching salt but invalid key structure
-			const maliciousServer = "sk-invalid-abc|deadbeefdeadbeef"; // Changed to include valid prefix
-			const maliciousClient = "1234deadbeefdeadbeef"; // Same salt
+			const maliciousServer = "sk-invalid-abc|deadbeefdeadbeef";
+			const maliciousClient =
+				"1234deadbeefdeadbeef.0000000100000000000000000000abcd";
 			expect(() => reassembleKey(maliciousServer, maliciousClient)).toThrow(
 				"Unrecognized API key format",
 			);
@@ -190,6 +241,17 @@ describe("API Key Utilities", () => {
 			expect(() => reassembleKey("sk-part1-123", "part2-456")).toThrow(
 				"Invalid key parts: parts too short",
 			);
+		});
+
+		test("should preserve metadata during reassembly", () => {
+			const { serverPart, clientPart } = splitKeyWithPrefix(
+				TEST_KEYS.OPENAI,
+				testCrypto,
+			);
+			const reconstructed = reassembleKey(serverPart, clientPart);
+			const [, metadata] = reconstructed.split(".");
+			expect(metadata).toBeDefined();
+			expect(metadata.length).toBe(32);
 		});
 	});
 });

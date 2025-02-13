@@ -65,9 +65,15 @@ async function handleStructuredResponse(
 	const apiKey = c.req.header("x-ai-key");
 
 	const startTime = Date.now();
+
+	const [fullApiKey] = reassembleKey(
+		project.key.partial_key_server,
+		apiKey,
+	).split(".");
+
 	try {
 		const openaiClient = createOpenAI({
-			apiKey: reassembleKey(project.key.partial_key_server, apiKey),
+			apiKey: fullApiKey,
 		});
 
 		const { object, usage, finishReason } = await generateObject({

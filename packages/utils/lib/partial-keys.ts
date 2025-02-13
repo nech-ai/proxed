@@ -19,15 +19,15 @@ function getRandomValues(
 		.join("");
 }
 
-const SALT_LENGTH = 16;
-const MIN_KEY_LENGTH = 12;
-const CURRENT_VERSION = 1;
-const METADATA_LENGTH = 32; // 8 chars for version, 16 for timestamp, 8 for splitId
+export const SALT_LENGTH = 16;
+export const MIN_KEY_LENGTH = 12;
+export const CURRENT_VERSION = 1;
+export const METADATA_LENGTH = 32; // 8 chars for version, 16 for timestamp, 8 for splitId
 
 const KEY_PATTERNS = {
 	ANTHROPIC: /^sk-ant-api\d{2}-[a-zA-Z0-9-]{24,}(?:\.[a-f0-9]{32})?$/,
 	OPENAI:
-		/^sk-(?:(?!proj-)[a-zA-Z0-9-]{20,}|proj-[a-zA-Z0-9-_]{20,})(?:\.[a-f0-9]{32})?$/,
+		/^sk-(?:(?!proj-)[a-zA-Z0-9-]{20,}|proj-[a-zA-Z0-9-_]{20,}|proj-[a-zA-Z0-9-_+]{20,})(?:\.[a-f0-9]{32})?$/,
 } as const;
 
 export class KeyValidationError extends Error {

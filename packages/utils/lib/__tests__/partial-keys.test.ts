@@ -5,6 +5,8 @@ import {
 	reassembleKey,
 	KeyValidationError,
 	extractPrefix,
+	SALT_LENGTH,
+	METADATA_LENGTH,
 } from "../partial-keys";
 
 // Create a test crypto provider
@@ -27,6 +29,8 @@ const TEST_KEYS = {
 	OPENAI: "sk-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOP",
 	OPENAI_PROJECT:
 		"sk-proj-F49cxGjD9148EXIeoRUmwwBsRmvDhygQzzYzds-TbUZ0tFJ0Qxyvz5x4VAGCei89XbHIGDEe",
+	OPENAI_PROJECT_COMPLEX:
+		"sk-proj-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 	INVALID_SHORT: "sk-abc",
 	MALFORMED: "invalid-key-format",
 } as const;
@@ -67,6 +71,14 @@ describe("API Key Utilities", () => {
 
 			const validProjectResult = validateApiKey(TEST_KEYS.OPENAI_PROJECT);
 			expect(validProjectResult).toEqual({
+				isValid: true,
+				provider: "OPENAI",
+			});
+		});
+
+		test("should validate complex OpenAI project keys", () => {
+			const validResult = validateApiKey(TEST_KEYS.OPENAI_PROJECT_COMPLEX);
+			expect(validResult).toEqual({
 				isValid: true,
 				provider: "OPENAI",
 			});
@@ -152,6 +164,36 @@ describe("API Key Utilities", () => {
 			// Remove metadata for comparison
 			const [baseKey] = reconstructed.split(".");
 			expect(baseKey).toBe(TEST_KEYS.OPENAI);
+		});
+
+		test("should split and reassemble OpenAI project key", () => {
+			const { serverPart, clientPart } = splitKeyWithPrefix(
+				TEST_KEYS.OPENAI_PROJECT,
+				testCrypto,
+			);
+			const reconstructed = reassembleKey(serverPart, clientPart);
+			// Remove metadata for comparison
+			const [baseKey] = reconstructed.split(".");
+			expect(baseKey).toBe(TEST_KEYS.OPENAI_PROJECT);
+		});
+
+		test("should split and reassemble complex OpenAI project key", () => {
+			const { serverPart, clientPart } = splitKeyWithPrefix(
+				TEST_KEYS.OPENAI_PROJECT_COMPLEX,
+				testCrypto,
+			);
+			const reconstructed = reassembleKey(serverPart, clientPart);
+			// Remove metadata for comparison
+			const [baseKey] = reconstructed.split(".");
+			expect(baseKey).toBe(TEST_KEYS.OPENAI_PROJECT_COMPLEX);
+
+			// Also verify the parts structure
+			expect(serverPart).toStartWith("sk-proj-");
+			expect(serverPart.length).toBeGreaterThan(SALT_LENGTH);
+			const [clientKeyPart, metadata] = clientPart.split(".");
+			expect(clientKeyPart.length).toBeGreaterThan(SALT_LENGTH);
+			expect(metadata).toBeDefined();
+			expect(metadata.length).toBe(METADATA_LENGTH);
 		});
 
 		test("should throw for short keys", () => {

@@ -2,6 +2,12 @@ interface CryptoProvider {
 	getRandomValues: (array: Uint8Array) => Uint8Array;
 }
 
+interface TokenMetadata {
+	version: number;
+	timestamp: number;
+	splitId: string;
+}
+
 function getRandomValues(
 	length: number,
 	cryptoProvider: CryptoProvider,
@@ -14,10 +20,14 @@ function getRandomValues(
 }
 
 const SALT_LENGTH = 16;
-const MIN_KEY_LENGTH = 12; // Minimum key length after prefix
+const MIN_KEY_LENGTH = 12;
+const CURRENT_VERSION = 1;
+const METADATA_LENGTH = 32; // 8 chars for version, 16 for timestamp, 8 for splitId
+
 const KEY_PATTERNS = {
-	ANTHROPIC: /^sk-ant-api\d{2}-[a-zA-Z0-9-]{24,}$/,
-	OPENAI: /^sk-(?:(?!proj-)[a-zA-Z0-9-]{20,}|proj-[a-zA-Z0-9-_]{20,})$/,
+	ANTHROPIC: /^sk-ant-api\d{2}-[a-zA-Z0-9-]{24,}(?:\.[a-f0-9]{32})?$/,
+	OPENAI:
+		/^sk-(?:(?!proj-)[a-zA-Z0-9-]{20,}|proj-[a-zA-Z0-9-_]{20,})(?:\.[a-f0-9]{32})?$/,
 } as const;
 
 export class KeyValidationError extends Error {
@@ -32,15 +42,38 @@ export type ValidationErrorCode =
 	| "MISSING_KEY"
 	| "INVALID_FORMAT"
 	| "UNRECOGNIZED_PROVIDER"
-	| "KEY_TOO_SHORT";
+	| "KEY_TOO_SHORT"
+	| "INVALID_VERSION";
 
 export interface KeyValidationResult {
 	isValid: boolean;
 	provider?: KeyProvider;
+	metadata?: TokenMetadata;
 	error?: {
 		code: ValidationErrorCode;
 		message: string;
 	};
+}
+
+function encodeMetadata(metadata: TokenMetadata): string {
+	const version = metadata.version.toString(16).padStart(8, "0");
+	const timestamp = metadata.timestamp.toString(16).padStart(16, "0");
+	const splitId = metadata.splitId;
+	return `${version}${timestamp}${splitId}`;
+}
+
+function decodeMetadata(encoded: string): TokenMetadata | null {
+	if (encoded.length !== METADATA_LENGTH) return null;
+
+	try {
+		const version = Number.parseInt(encoded.slice(0, 8), 16);
+		const timestamp = Number.parseInt(encoded.slice(8, 24), 16);
+		const splitId = encoded.slice(24);
+
+		return { version, timestamp, splitId };
+	} catch {
+		return null;
+	}
 }
 
 export function validateApiKey(key: string): KeyValidationResult {
@@ -54,8 +87,17 @@ export function validateApiKey(key: string): KeyValidationResult {
 		};
 	}
 
+	// Split key and metadata
+	const [baseKey, metadataPart] = key.split(".");
+
 	for (const [provider, pattern] of Object.entries(KEY_PATTERNS)) {
 		if (pattern.test(key)) {
+			if (metadataPart) {
+				const metadata = decodeMetadata(metadataPart);
+				if (metadata) {
+					return { isValid: true, provider: provider as KeyProvider, metadata };
+				}
+			}
 			return { isValid: true, provider: provider as KeyProvider };
 		}
 	}
@@ -83,25 +125,26 @@ export function extractPrefix(fullKey: string): {
 		throw new Error("Invalid key format: key must be a non-empty string");
 	}
 
-	// Check for known patterns
-	const anthropicMatch = fullKey.match(/^(sk-ant-api\d{2}-)/);
+	// Remove metadata if present
+	const [baseKey] = fullKey.split(".");
+
+	const anthropicMatch = baseKey.match(/^(sk-ant-api\d{2}-)/);
 	if (anthropicMatch) {
 		return {
 			prefix: anthropicMatch[1],
-			leftover: fullKey.slice(anthropicMatch[1].length),
+			leftover: baseKey.slice(anthropicMatch[1].length),
 		};
 	}
 
-	const openAIMatch = fullKey.match(/^(sk-)/);
+	const openAIMatch = baseKey.match(/^(sk-)/);
 	if (openAIMatch) {
 		return {
 			prefix: openAIMatch[1],
-			leftover: fullKey.slice(openAIMatch[1].length),
+			leftover: baseKey.slice(openAIMatch[1].length),
 		};
 	}
 
-	// Default: no prefix
-	return { prefix: "", leftover: fullKey };
+	return { prefix: "", leftover: baseKey };
 }
 
 /**
@@ -130,10 +173,19 @@ export function splitKeyWithPrefix(
 	cryptoProvider.getRandomValues(randArray);
 	const randOffset = (randArray[0] % (leftover.length - 1)) + 1;
 
-	return {
-		serverPart: `${prefix}${leftover.slice(0, randOffset)}${salt}`,
-		clientPart: `${leftover.slice(randOffset)}${salt}`,
+	// Generate metadata
+	const splitId = getRandomValues(4, cryptoProvider);
+	const metadata: TokenMetadata = {
+		version: CURRENT_VERSION,
+		timestamp: Date.now(),
+		splitId,
 	};
+	const encodedMetadata = encodeMetadata(metadata);
+
+	const serverPart = `${prefix}${leftover.slice(0, randOffset)}${salt}`;
+	const clientPart = `${leftover.slice(randOffset)}${salt}.${encodedMetadata}`;
+
+	return { serverPart, clientPart };
 }
 
 /**
@@ -153,12 +205,15 @@ export function reassembleKey(serverPart: string, clientPart: string): string {
 		throw new Error("Invalid key parts: both parts must be non-empty strings");
 	}
 
-	if (serverPart.length < SALT_LENGTH || clientPart.length < SALT_LENGTH) {
+	// Split metadata from client part if present
+	const [clientKeyPart, metadataPart] = clientPart.split(".");
+
+	if (serverPart.length < SALT_LENGTH || clientKeyPart.length < SALT_LENGTH) {
 		throw new KeyValidationError("Invalid key parts: parts too short");
 	}
 
 	const saltFromServer = serverPart.slice(-SALT_LENGTH);
-	const saltFromClient = clientPart.slice(-SALT_LENGTH);
+	const saltFromClient = clientKeyPart.slice(-SALT_LENGTH);
 
 	if (saltFromServer !== saltFromClient) {
 		throw new KeyValidationError(
@@ -167,13 +222,18 @@ export function reassembleKey(serverPart: string, clientPart: string): string {
 	}
 
 	const serverCore = serverPart.slice(0, -SALT_LENGTH);
-	const clientCore = clientPart.slice(0, -SALT_LENGTH);
+	const clientCore = clientKeyPart.slice(0, -SALT_LENGTH);
 	const reconstructed = serverCore + clientCore;
 
-	const validation = validateApiKey(reconstructed);
+	// Add metadata back if present
+	const finalKey = metadataPart
+		? `${reconstructed}.${metadataPart}`
+		: reconstructed;
+
+	const validation = validateApiKey(finalKey);
 	if (!validation.isValid) {
 		throw new KeyValidationError("Unrecognized API key format");
 	}
 
-	return reconstructed;
+	return finalKey;
 }

@@ -1,0 +1,170 @@
+---
+title: "Secure Token Generation: Zero-Trust Key Management for iOS"
+publishedAt: "2025-02-13"
+summary: "How Proxed implements secure API key management using client-side computation, split-key architecture, and Apple's DeviceCheck"
+image: "/images/how-token-creation-work.png"
+tag: "Engineering"
+---
+
+At Proxed, we've developed a unique approach to API key security that combines split-key architecture with Apple's DeviceCheck system. This ensures your API keys remain secure even if any single component is compromised.
+
+<br />
+### The Challenge
+
+Traditional API key management approaches have several vulnerabilities:
+- Complete keys stored on servers create single points of failure
+- Keys exposed in mobile apps can be extracted through reverse engineering
+- Difficult to track and control key usage effectively
+- No way to verify legitimate device usage
+
+<br />
+### Our Solution: Multi-Layer Security
+
+We've built a system that combines three security layers:
+1. **Split-Key Architecture**: Keys are split between server and client
+2. **Apple DeviceCheck**: Cryptographic verification of legitimate iOS devices
+3. **Metadata Tracking**: Version control and usage monitoring
+
+This approach ensures:
+- No complete key exists in any single location
+- Only genuine iOS devices can make requests
+- Every key usage is tracked and auditable
+
+<br />
+### Token Structure
+
+Our token structure is designed for security and traceability:
+
+![Token Structure](/images/token-structure.png)
+
+<br />
+### How It Works
+
+The process combines client-side key splitting with device verification:
+
+1. **Key Splitting** (Client-Side):
+   - Generate cryptographic salt (16 chars)
+   - Create random split point in the key
+   - Add version and metadata
+   - Split key into server and client parts
+
+2. **Device Verification** (iOS Only):
+   - Generate DeviceCheck token
+   - Get cryptographic validation from Apple
+   - Include token with every API request
+
+3. **Request Flow**:
+   ```swift
+   // Generate DeviceCheck token
+   DCDevice.current.generateToken { token, error in
+       guard let token = token else {
+           print("DeviceCheck error: \(error?.localizedDescription ?? "unknown")")
+           return
+       }
+
+       // Make API request with token and client part
+       let url = URL(string: "https://api.proxed.ai/v1/structured-response")!
+       var request = URLRequest(url: url)
+       request.httpMethod = "POST"
+
+       // Set required headers
+       request.setValue("application/json", forHTTPHeaderField: "content-type")
+       request.setValue(clientPart, forHTTPHeaderField: "x-ai-key")
+       request.setValue(token.base64EncodedString(), forHTTPHeaderField: "x-device-token")
+       request.setValue(projectId, forHTTPHeaderField: "x-project-id")
+
+       // Request payload
+       let payload = [...]
+       request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+       // Make the request
+       URLSession.shared.dataTask(with: request) { data, response, error in
+           if let error = error {
+               print("Request error: \(error.localizedDescription)")
+               return
+           }
+
+           guard let data = data,
+                 let json = try? JSONSerialization.jsonObject(with: data) else {
+               print("Invalid response")
+               return
+           }
+
+           // Handle the AI response
+           print("Response: \(json)")
+       }.resume()
+   }
+   ```
+
+<br />
+### Security Process
+
+Here's the complete verification flow:
+
+![Security Process](/images/api-process.png)
+
+<br />
+### Security Features
+
+Our implementation includes multiple security layers:
+
+1. **Split-Key Protection**:
+   - Server part stored securely in our infrastructure
+   - Client part stored on device with metadata
+   - Both parts required for key reconstruction
+   - Key reassembled only during request processing
+
+2. **Device Verification**:
+   - Every request requires valid DeviceCheck token
+   - Tokens cryptographically signed by Apple
+   - Prevents non-iOS device access
+   - Automatic device validation
+
+3. **Audit & Control**:
+   - Version tracking for key rotation
+   - Usage monitoring per device
+   - Suspicious activity detection
+   - Granular access control
+
+<br />
+### Implementation Example
+
+Here's a real-world example of how the keys are split:
+
+```typescript
+// Original API key
+sk-abc123...xyz789
+
+// After splitting
+serverPart: "sk-abc1deadbeef"              // Stored on Proxed
+clientPart: "23...xyz789deadbeef.00000001000169df12345678"
+                                          ^       ^        ^
+                                       version timestamp splitId
+```
+
+<br />
+### Getting Started
+
+To implement this security system:
+1. Create a Proxed account
+2. Configure your iOS app with DeviceCheck
+3. Generate and split your API keys
+4. Make API calls using our SDK
+
+We handle all the complexity of:
+- Key splitting and reassembly
+- Device verification
+- Usage tracking
+- Security monitoring
+
+<br />
+### Future Enhancements
+
+We're actively developing:
+- Automated key rotation
+- Enhanced usage analytics
+- Advanced threat detection
+- Multi-provider key management
+- Additional platform support
+
+Stay tuned for our next post about advanced key management strategies and best practices for secure key rotation.

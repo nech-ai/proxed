@@ -5,13 +5,6 @@ import { createClient } from "@proxed/supabase/client";
 import { Alert, AlertDescription } from "@proxed/ui/components/alert";
 import { Button } from "@proxed/ui/components/button";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@proxed/ui/components/card";
-import {
 	Form,
 	FormControl,
 	FormField,
@@ -20,18 +13,16 @@ import {
 } from "@proxed/ui/components/form";
 import { Input } from "@proxed/ui/components/input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-	AlertTriangleIcon,
-	ArrowRightIcon,
-	EyeIcon,
-	EyeOffIcon,
-} from "lucide-react";
+import { AlertTriangleIcon, ArrowRightIcon, Loader2Icon } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { AuthCard } from "./auth-card";
+import { PasswordInput } from "./password-input";
+import { SocialAuth } from "./social-auth";
 import { TeamInvitationInfo } from "./team-invitation-info";
 
 const formSchema = z.object({
@@ -59,8 +50,6 @@ export function SignupForm() {
 			password: "",
 		},
 	});
-
-	const [showPassword, setShowPassword] = useState(false);
 
 	const invitationCode = searchParams.get("invitationCode");
 	const redirectTo = invitationCode
@@ -103,112 +92,93 @@ export function SignupForm() {
 	};
 
 	return (
-		<Card className="mx-auto max-w-sm">
-			<CardHeader>
-				<CardTitle className="text-2xl">Sign up</CardTitle>
-				<CardDescription>Create your account</CardDescription>
-			</CardHeader>
-			<CardContent>
-				{invitationCode && <TeamInvitationInfo className="mb-6" />}
+		<AuthCard title="Sign up" description="Create your account">
+			{invitationCode && <TeamInvitationInfo className="mb-6" />}
 
-				<Form {...form}>
-					<form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-						{form.formState.isSubmitted &&
-							form.formState.errors.root?.message && (
-								<Alert variant="destructive">
-									<AlertTriangleIcon className="size-4" />
-									<AlertDescription>
-										{form.formState.errors.root.message}
-									</AlertDescription>
-								</Alert>
+			<Form {...form}>
+				<form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+					{form.formState.isSubmitted &&
+						form.formState.errors.root?.message && (
+							<Alert variant="destructive">
+								<AlertTriangleIcon className="size-4" />
+								<AlertDescription>
+									{form.formState.errors.root.message}
+								</AlertDescription>
+							</Alert>
+						)}
+
+					<div className="grid gap-4">
+						<FormField
+							control={form.control}
+							name="name"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Name</FormLabel>
+									<FormControl>
+										<Input {...field} autoComplete="name" />
+									</FormControl>
+								</FormItem>
 							)}
+						/>
 
-						<div className="grid gap-4">
-							<FormField
-								control={form.control}
-								name="name"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Name</FormLabel>
-										<FormControl>
-											<Input {...field} autoComplete="name" />
-										</FormControl>
-									</FormItem>
-								)}
-							/>
+						<FormField
+							control={form.control}
+							name="email"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Email</FormLabel>
+									<FormControl>
+										<Input {...field} autoComplete="email" />
+									</FormControl>
+								</FormItem>
+							)}
+						/>
 
-							<FormField
-								control={form.control}
-								name="email"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Email</FormLabel>
-										<FormControl>
-											<Input {...field} autoComplete="email" />
-										</FormControl>
-									</FormItem>
-								)}
-							/>
+						<FormField
+							control={form.control}
+							name="password"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Password</FormLabel>
+									<FormControl>
+										<PasswordInput {...field} autoComplete="new-password" />
+									</FormControl>
+								</FormItem>
+							)}
+						/>
 
-							<FormField
-								control={form.control}
-								name="password"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Password</FormLabel>
-										<FormControl>
-											<div className="relative">
-												<Input
-													type={showPassword ? "text" : "password"}
-													className="pr-10"
-													{...field}
-													autoComplete="new-password"
-												/>
-												<button
-													type="button"
-													onClick={() => setShowPassword(!showPassword)}
-													className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
-												>
-													{showPassword ? (
-														<EyeOffIcon className="size-4" />
-													) : (
-														<EyeIcon className="size-4" />
-													)}
-												</button>
-											</div>
-										</FormControl>
-									</FormItem>
-								)}
-							/>
+						<Button
+							className="w-full"
+							type="submit"
+							disabled={form.formState.isSubmitting}
+						>
+							{form.formState.isSubmitting && (
+								<Loader2Icon className="mr-2 size-4 animate-spin" />
+							)}
+							Sign up
+						</Button>
 
-							<Button
-								className="w-full"
-								type="submit"
-								disabled={form.formState.isSubmitting}
+						<div className="text-center text-sm">
+							<span className="text-muted-foreground">
+								Already have an account?{" "}
+							</span>
+							<Link
+								href={`/login${
+									invitationCode
+										? `?invitationCode=${invitationCode}&email=${email}`
+										: ""
+								}`}
+								className="hover:underline"
 							>
-								Sign up
-							</Button>
-
-							<div className="text-center text-sm">
-								<span className="text-muted-foreground">
-									Already have an account?{" "}
-								</span>
-								<Link
-									href={`/login${
-										invitationCode
-											? `?invitationCode=${invitationCode}&email=${email}`
-											: ""
-									}`}
-									className="hover:underline"
-								>
-									Sign in
-									<ArrowRightIcon className="ml-1 inline size-3 align-middle" />
-								</Link>
-							</div>
+								Sign in
+								<ArrowRightIcon className="ml-1 inline size-3 align-middle" />
+							</Link>
 						</div>
-					</form>
-				</Form>
-			</CardContent>
-		</Card>
+
+						<SocialAuth />
+					</div>
+				</form>
+			</Form>
+		</AuthCard>
 	);
 }

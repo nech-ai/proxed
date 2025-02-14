@@ -19,13 +19,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@proxed/ui/components/card";
+import { AuthCard } from "./auth-card";
 
 const formSchema = z.object({
 	email: z.string().email(),
@@ -69,61 +63,56 @@ export function ForgotPasswordForm() {
 	};
 
 	return (
-		<Card className="mx-auto max-w-sm">
-			<CardHeader>
-				<CardTitle className="text-2xl">Forgot Password</CardTitle>
-				<CardDescription>
-					Enter your email to reset your password
-				</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<Form {...form}>
-					<form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-						{form.formState.isSubmitted && form.formState.errors.root && (
-							<Alert variant="destructive">
-								<AlertTriangleIcon className="size-4" />
-								<AlertDescription>
-									{form.formState.errors.root.message}
-								</AlertDescription>
-							</Alert>
-						)}
+		<AuthCard
+			title="Forgot Password"
+			description="Enter your email to reset your password"
+		>
+			<Form {...form}>
+				<form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+					{form.formState.isSubmitted && form.formState.errors.root && (
+						<Alert variant="destructive">
+							<AlertTriangleIcon className="size-4" />
+							<AlertDescription>
+								{form.formState.errors.root.message}
+							</AlertDescription>
+						</Alert>
+					)}
 
-						<div className="grid gap-4">
-							<FormField
-								control={form.control}
-								name="email"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Email</FormLabel>
-										<FormControl>
-											<Input {...field} type="email" autoComplete="email" />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
+					<div className="grid gap-4">
+						<FormField
+							control={form.control}
+							name="email"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Email</FormLabel>
+									<FormControl>
+										<Input {...field} type="email" autoComplete="email" />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
-							<Button
-								className="w-full"
-								type="submit"
-								disabled={form.formState.isSubmitting}
-							>
-								Send Reset Link
-							</Button>
+						<Button
+							className="w-full"
+							type="submit"
+							disabled={form.formState.isSubmitting}
+						>
+							Send Reset Link
+						</Button>
 
-							<div className="text-center text-sm">
-								<span className="text-muted-foreground">
-									Remember your password?{" "}
-								</span>
-								<Link href="/login" className="hover:underline">
-									Sign in
-									<ArrowRightIcon className="ml-1 inline size-3 align-middle" />
-								</Link>
-							</div>
+						<div className="text-center text-sm">
+							<span className="text-muted-foreground">
+								Remember your password?{" "}
+							</span>
+							<Link href="/login" className="hover:underline">
+								Sign in
+								<ArrowRightIcon className="ml-1 inline size-3 align-middle" />
+							</Link>
 						</div>
-					</form>
-				</Form>
-			</CardContent>
-		</Card>
+					</div>
+				</form>
+			</Form>
+		</AuthCard>
 	);
 }

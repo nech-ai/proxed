@@ -2,19 +2,21 @@
 
 import { Tabs, TabsList, TabsTrigger } from "@proxed/ui/components/tabs";
 
+type SigninMode = "password" | "magic-link";
+
 export default function SigninModeSwitch({
 	activeMode,
 	onChangeAction,
 	className,
 }: {
-	activeMode: "password" | "magic-link";
-	onChangeAction: (mode: string) => void;
+	activeMode: SigninMode;
+	onChangeAction: (mode: SigninMode) => void;
 	className?: string;
 }) {
 	return (
 		<Tabs
 			value={activeMode}
-			onValueChange={onChangeAction}
+			onValueChange={(value) => onChangeAction(value as SigninMode)}
 			className={className}
 		>
 			<TabsList className="w-full">

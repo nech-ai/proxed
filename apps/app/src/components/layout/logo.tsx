@@ -10,12 +10,12 @@ export function Logo({
 	return (
 		<span
 			className={cn(
-				"flex items-center font-semibold text-foreground leading-none",
+				"flex items-center justify-center font-semibold text-foreground leading-none",
 				className,
 			)}
 		>
 			<svg
-				className="group size-9 text-primary dark:invert"
+				className="group size-12 text-primary dark:invert"
 				viewBox="0 0 1024 1024"
 			>
 				<path
@@ -34,9 +34,7 @@ export function Logo({
 				/>
 			</svg>
 
-			{withLabel && (
-				<span className="ml-3 hidden text-lg md:block">proxed.ai</span>
-			)}
+			{withLabel && <span className="ml-3 text-lg md:block">proxed.ai</span>}
 		</span>
 	);
 }

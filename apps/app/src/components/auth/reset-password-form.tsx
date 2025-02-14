@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { AuthCard } from "./auth-card";
 
 const formSchema = z
 	.object({
@@ -65,14 +66,9 @@ export function ResetPasswordForm() {
 	};
 
 	return (
-		<div className="mx-auto w-full max-w-[400px]">
-			<h1 className="font-extrabold text-3xl md:text-4xl">Reset Password</h1>
-			<p className="mt-4 mb-6 text-muted-foreground">Enter your new password</p>
-
-			<hr className="my-8" />
-
+		<AuthCard title="Reset Password" description="Enter your new password">
 			<Form {...form}>
-				<form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+				<form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
 					{form.formState.isSubmitted &&
 						form.formState.errors.root?.message && (
 							<Alert variant="destructive">
@@ -83,80 +79,82 @@ export function ResetPasswordForm() {
 							</Alert>
 						)}
 
-					<FormField
-						control={form.control}
-						name="password"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>New Password</FormLabel>
-								<FormControl>
-									<div className="relative">
-										<Input
-											type={showPassword ? "text" : "password"}
-											className="pr-10"
-											{...field}
-											autoComplete="new-password"
-										/>
-										<button
-											type="button"
-											onClick={() => setShowPassword(!showPassword)}
-											className="absolute inset-y-0 right-0 flex items-center pr-4 text-primary text-xl"
-										>
-											{showPassword ? (
-												<EyeOffIcon className="size-4" />
-											) : (
-												<EyeIcon className="size-4" />
-											)}
-										</button>
-									</div>
-								</FormControl>
-							</FormItem>
-						)}
-					/>
+					<div className="grid gap-4">
+						<FormField
+							control={form.control}
+							name="password"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>New Password</FormLabel>
+									<FormControl>
+										<div className="relative">
+											<Input
+												type={showPassword ? "text" : "password"}
+												className="pr-10"
+												{...field}
+												autoComplete="new-password"
+											/>
+											<button
+												type="button"
+												onClick={() => setShowPassword(!showPassword)}
+												className="absolute inset-y-0 right-0 flex items-center pr-4 text-primary text-xl"
+											>
+												{showPassword ? (
+													<EyeOffIcon className="size-4" />
+												) : (
+													<EyeIcon className="size-4" />
+												)}
+											</button>
+										</div>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
 
-					<FormField
-						control={form.control}
-						name="confirmPassword"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Confirm Password</FormLabel>
-								<FormControl>
-									<div className="relative">
-										<Input
-											type={showConfirmPassword ? "text" : "password"}
-											className="pr-10"
-											{...field}
-											autoComplete="new-password"
-										/>
-										<button
-											type="button"
-											onClick={() =>
-												setShowConfirmPassword(!showConfirmPassword)
-											}
-											className="absolute inset-y-0 right-0 flex items-center pr-4 text-primary text-xl"
-										>
-											{showConfirmPassword ? (
-												<EyeOffIcon className="size-4" />
-											) : (
-												<EyeIcon className="size-4" />
-											)}
-										</button>
-									</div>
-								</FormControl>
-							</FormItem>
-						)}
-					/>
+						<FormField
+							control={form.control}
+							name="confirmPassword"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Confirm Password</FormLabel>
+									<FormControl>
+										<div className="relative">
+											<Input
+												type={showConfirmPassword ? "text" : "password"}
+												className="pr-10"
+												{...field}
+												autoComplete="new-password"
+											/>
+											<button
+												type="button"
+												onClick={() =>
+													setShowConfirmPassword(!showConfirmPassword)
+												}
+												className="absolute inset-y-0 right-0 flex items-center pr-4 text-primary text-xl"
+											>
+												{showConfirmPassword ? (
+													<EyeOffIcon className="size-4" />
+												) : (
+													<EyeIcon className="size-4" />
+												)}
+											</button>
+										</div>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
 
-					<Button
-						className="w-full"
-						variant="secondary"
-						type="submit"
-						disabled={form.formState.isSubmitting}
-					>
-						Update Password
-					</Button>
+						<Button
+							className="w-full"
+							variant="secondary"
+							type="submit"
+							disabled={form.formState.isSubmitting}
+						>
+							Update Password
+						</Button>
+					</div>
 				</form>
 			</Form>
-		</div>
+		</AuthCard>
 	);
 }

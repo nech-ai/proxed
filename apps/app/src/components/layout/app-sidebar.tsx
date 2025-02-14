@@ -59,7 +59,9 @@ export function AppSidebar({ teamMemberships, user }: AppSidebarProps) {
 		<Sidebar collapsible="icon">
 			<SidebarHeader>
 				<div className="flex w-full items-center justify-between">
-					<Logo withLabel={false} />
+					<div className="flex w-14 items-center justify-center">
+						<Logo className="w-8" withLabel={false} />
+					</div>
 					{open && <SidebarTrigger />}
 				</div>
 			</SidebarHeader>

@@ -21,13 +21,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@proxed/ui/components/card";
+import { AuthCard } from "./auth-card";
 
 const REGEXP_ONLY_DIGITS_AND_CHARS = /^[0-9]*$/;
 
@@ -40,7 +34,7 @@ const tokenSchema = z.object({
 
 type TokenSchema = z.infer<typeof tokenSchema>;
 
-export function TokenVerificationCard() {
+export function TokenVerificationForm() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const router = useRouter();
@@ -138,61 +132,56 @@ export function TokenVerificationCard() {
 	}
 
 	return (
-		<Card className="mx-auto max-w-sm">
-			<CardHeader>
-				<CardTitle className="text-2xl">{getHeaderText()}</CardTitle>
-				<CardDescription>
-					{getDescriptionText()} <span className="font-medium">{email}</span>
-				</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-						{error && (
-							<Alert variant="destructive">
-								<AlertDescription>{error}</AlertDescription>
-							</Alert>
-						)}
+		<AuthCard
+			title={getHeaderText()}
+			description={`${getDescriptionText()} ${email}`}
+		>
+			<Form {...form}>
+				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+					{error && (
+						<Alert variant="destructive">
+							<AlertDescription>{error}</AlertDescription>
+						</Alert>
+					)}
 
-						<div className="grid gap-4">
-							<FormField
-								control={form.control}
-								name="token"
-								render={({ field: { onChange, ...field } }) => (
-									<FormItem>
-										<FormLabel>Verification Code</FormLabel>
-										<FormControl>
-											<InputOTP
-												maxLength={6}
-												pattern={REGEXP_ONLY_DIGITS_AND_CHARS.source}
-												{...field}
-												onChange={(value) => onChange(value)}
-												disabled={isLoading}
-												className="w-full justify-center gap-2"
-											>
-												<InputOTPGroup className="w-full gap-2">
-													{Array.from({ length: 6 }).map((_, index) => (
-														<InputOTPSlot
-															key={index}
-															index={index}
-															className="h-12 flex-1 rounded-md border text-lg"
-														/>
-													))}
-												</InputOTPGroup>
-											</InputOTP>
-										</FormControl>
-									</FormItem>
-								)}
-							/>
+					<div className="grid gap-4">
+						<FormField
+							control={form.control}
+							name="token"
+							render={({ field: { onChange, ...field } }) => (
+								<FormItem>
+									<FormLabel>Verification Code</FormLabel>
+									<FormControl>
+										<InputOTP
+											maxLength={6}
+											pattern={REGEXP_ONLY_DIGITS_AND_CHARS.source}
+											{...field}
+											onChange={(value) => onChange(value)}
+											disabled={isLoading}
+											className="w-full justify-center gap-2"
+										>
+											<InputOTPGroup className="w-full gap-2">
+												{Array.from({ length: 6 }).map((_, index) => (
+													<InputOTPSlot
+														key={index}
+														index={index}
+														className="h-12 flex-1 rounded-md border text-lg"
+													/>
+												))}
+											</InputOTPGroup>
+										</InputOTP>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
 
-							<Button className="w-full" disabled={isLoading} type="submit">
-								{isLoading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
-								Verify Token
-							</Button>
-						</div>
-					</form>
-				</Form>
-			</CardContent>
-		</Card>
+						<Button className="w-full" disabled={isLoading} type="submit">
+							{isLoading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
+							Verify Token
+						</Button>
+					</div>
+				</form>
+			</Form>
+		</AuthCard>
 	);
 }

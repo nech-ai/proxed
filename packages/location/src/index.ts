@@ -1,20 +1,20 @@
 import { headers } from "next/headers";
-import { EU_COUNTRY_CODES } from "./eu-countries";
+import { EU_COUNTRY_CODES, Headers } from "./constants";
 import regions from "./regions.json";
 
 export async function getCountryCode() {
 	const headersList = await headers();
-	return headersList.get("x-vercel-ip-country") || "GB";
+	return headersList.get(Headers.CountryCode) || "GB";
 }
 
 export async function getRegionCode() {
 	const headersList = await headers();
-	return headersList.get("x-vercel-ip-country-region") || "UNK";
+	return headersList.get(Headers.RegionCode) || "UNK";
 }
 
 export async function getCity() {
 	const headersList = await headers();
-	return headersList.get("x-vercel-ip-city") || "Unknown";
+	return headersList.get(Headers.City) || "Unknown";
 }
 
 export async function getRegion() {
@@ -26,12 +26,12 @@ export async function getRegion() {
 
 export async function getTimezone() {
 	const headersList = await headers();
-	return headersList.get("x-vercel-ip-timezone") || "Europe/London";
+	return headersList.get(Headers.Timezone) || "Europe/London";
 }
 
 export async function getLocale() {
 	const headersList = await headers();
-	return headersList.get("x-vercel-ip-locale") || "en-US";
+	return headersList.get(Headers.Locale) || "en-US";
 }
 
 export async function isEU() {

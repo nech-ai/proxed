@@ -65,6 +65,8 @@ export type Database = {
 					ip: string;
 					key_id: string | null;
 					latency: number;
+					latitude: number | null;
+					longitude: number | null;
 					model: string;
 					project_id: string;
 					prompt: string | null;
@@ -94,6 +96,8 @@ export type Database = {
 					ip: string;
 					key_id?: string | null;
 					latency: number;
+					latitude?: number | null;
+					longitude?: number | null;
 					model: string;
 					project_id: string;
 					prompt?: string | null;
@@ -123,6 +127,8 @@ export type Database = {
 					ip?: string;
 					key_id?: string | null;
 					latency?: number;
+					latitude?: number | null;
+					longitude?: number | null;
 					model?: string;
 					project_id?: string;
 					prompt?: string | null;

@@ -11,8 +11,47 @@ import type { AuthMiddlewareVariables } from "../types";
 import { reassembleKey } from "@proxed/utils/lib/partial-keys";
 import { z } from "zod";
 import { logger } from "@proxed/logger";
-import { getCity, getRegionCode } from "@proxed/location";
-import { getCountryCode } from "@proxed/location";
+import { Headers } from "@proxed/location/constants";
+
+type CommonExecutionParams = {
+	teamId: string;
+	projectId: string;
+	deviceCheckId: string;
+	keyId: string;
+	ip: string | undefined;
+	userAgent: string | undefined;
+	model: string;
+	provider: "OPENAI" | "ANTHROPIC";
+	c: Context;
+};
+
+const getCommonExecutionParams = ({
+	teamId,
+	projectId,
+	deviceCheckId,
+	keyId,
+	ip,
+	userAgent,
+	model,
+	provider,
+	c,
+}: CommonExecutionParams) => ({
+	team_id: teamId,
+	project_id: projectId,
+	device_check_id: deviceCheckId,
+	key_id: keyId,
+	ip,
+	user_agent: userAgent ?? undefined,
+	model,
+	provider,
+	country_code: c.req.header(Headers.CountryCode),
+	region_code: c.req.header(Headers.RegionCode),
+	city: c.req.header(Headers.City),
+	longitude:
+		Number.parseFloat(c.req.header(Headers.Longitude) ?? "0") || undefined,
+	latitude:
+		Number.parseFloat(c.req.header(Headers.Latitude) ?? "0") || undefined,
+});
 
 // MARK: - Handle Structured Response
 async function handleStructuredResponse(
@@ -73,6 +112,18 @@ async function handleStructuredResponse(
 		apiKey,
 	).split(".");
 
+	const commonParams = getCommonExecutionParams({
+		teamId,
+		projectId,
+		deviceCheckId,
+		keyId,
+		ip,
+		userAgent,
+		model: project.model,
+		provider: project.key.provider,
+		c,
+	});
+
 	try {
 		const openaiClient = createOpenAI({
 			apiKey: fullApiKey,
@@ -106,25 +157,14 @@ async function handleStructuredResponse(
 
 		const latency = Date.now() - startTime;
 
-		// Create execution record
 		await createExecution(supabase, {
-			team_id: teamId,
-			project_id: projectId,
-			device_check_id: deviceCheckId,
-			key_id: keyId,
-			ip,
-			user_agent: userAgent ?? undefined,
-			model: project.model,
-			provider: project.key.provider,
+			...commonParams,
 			prompt_tokens: usage.promptTokens,
 			completion_tokens: usage.completionTokens,
 			finish_reason: finishReason,
 			latency,
 			response_code: 200,
 			response: JSON.stringify(object),
-			country_code: await getCountryCode(),
-			region_code: await getRegionCode(),
-			city: await getCity(),
 		});
 
 		return c.json(object);
@@ -132,16 +172,8 @@ async function handleStructuredResponse(
 		logger.error("Structured response error:", error);
 		const latency = Date.now() - startTime;
 
-		// Create execution record for error case
 		await createExecution(supabase, {
-			team_id: teamId,
-			project_id: projectId,
-			device_check_id: deviceCheckId,
-			key_id: keyId,
-			ip,
-			user_agent: userAgent ?? undefined,
-			model: project.model,
-			provider: project.key.provider,
+			...commonParams,
 			prompt_tokens: 0,
 			completion_tokens: 0,
 			finish_reason: "error",

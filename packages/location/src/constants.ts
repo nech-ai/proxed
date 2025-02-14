@@ -1,3 +1,13 @@
+export const Headers = {
+	CountryCode: "x-vercel-ip-country",
+	RegionCode: "x-vercel-ip-country-region",
+	City: "x-vercel-ip-city",
+	Timezone: "x-vercel-ip-timezone",
+	Locale: "x-vercel-ip-locale",
+	Longitude: "x-vercel-ip-longitude",
+	Latitude: "x-vercel-ip-latitude",
+};
+
 export const EU_COUNTRY_CODES = [
 	"AT",
 	"BE",

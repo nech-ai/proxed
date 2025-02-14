@@ -23,7 +23,9 @@ ALTER TABLE public.executions
 ALTER TABLE public.executions
   ADD COLUMN country_code TEXT,
   ADD COLUMN region_code TEXT,
-  ADD COLUMN city TEXT;
+  ADD COLUMN city TEXT,
+  ADD COLUMN longitude DOUBLE PRECISION,
+  ADD COLUMN latitude DOUBLE PRECISION;
 
 -- Add index for location queries
 CREATE INDEX idx_executions_location ON public.executions (country_code, region_code);

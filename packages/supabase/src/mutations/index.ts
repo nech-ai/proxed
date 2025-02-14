@@ -292,6 +292,8 @@ type CreateExecutionParams = Omit<
 		country_code?: string;
 		region_code?: string;
 		city?: string;
+		longitude?: number;
+		latitude?: number;
 	},
 	"total_tokens" | "prompt_cost" | "completion_cost" | "total_cost"
 >;

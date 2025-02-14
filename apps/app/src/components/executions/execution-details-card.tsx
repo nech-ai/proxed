@@ -9,6 +9,7 @@ import {
 import type { Tables } from "@proxed/supabase/types";
 import { CodeView } from "@/components/schema-builder/code-view";
 import { ExecutionMetrics } from "@/components/executions/execution-metrics";
+import { getLocationInfo } from "@proxed/location/client";
 
 type Execution = Tables<"executions"> & {
 	project: Tables<"projects">;
@@ -21,6 +22,10 @@ interface ExecutionDetailsCardProps {
 }
 
 export function ExecutionDetailsCard({ execution }: ExecutionDetailsCardProps) {
+	const locationInfo = getLocationInfo(
+		execution.country_code,
+		execution.region_code,
+	);
 	return (
 		<Card>
 			<CardHeader>
@@ -61,6 +66,13 @@ export function ExecutionDetailsCard({ execution }: ExecutionDetailsCardProps) {
 							<div>
 								<p className="text-sm text-muted-foreground">IP Address</p>
 								<p className="text-base">{execution.ip}</p>
+							</div>
+							<div>
+								<p className="text-sm text-muted-foreground">Location</p>
+								<p className="text-base">
+									{locationInfo.flag} {locationInfo.country},{" "}
+									{locationInfo.region}, {execution.city || "Unknown"}
+								</p>
 							</div>
 							<div>
 								<p className="text-sm text-muted-foreground">User Agent</p>

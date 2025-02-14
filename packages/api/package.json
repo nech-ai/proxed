@@ -9,6 +9,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@proxed/location": "workspace:*",
 		"@proxed/logger": "workspace:*",
 		"@proxed/structure": "workspace:*",
 		"@proxed/supabase": "workspace:*",

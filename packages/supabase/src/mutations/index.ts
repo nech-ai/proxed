@@ -289,6 +289,9 @@ type CreateExecutionParams = Omit<
 		response?: string;
 		error_message?: string;
 		error_code?: string;
+		country_code?: string;
+		region_code?: string;
+		city?: string;
 	},
 	"total_tokens" | "prompt_cost" | "completion_cost" | "total_cost"
 >;

@@ -1,10 +1,21 @@
 import { createClient } from "@proxed/supabase/server";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { Cookies } from "@/utils/constants";
+import { addYears } from "date-fns";
 
 export async function GET(request: Request) {
+	const cookieStore = await cookies();
 	const { searchParams, origin } = new URL(request.url);
 	const code = searchParams.get("code");
 	const next = searchParams.get("next") ?? "/";
+	const provider = searchParams.get("provider");
+
+	if (provider) {
+		cookieStore.set(Cookies.PreferredSignInProvider, provider, {
+			expires: addYears(new Date(), 1),
+		});
+	}
 
 	if (code) {
 		const supabase = await createClient();

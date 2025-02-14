@@ -11,6 +11,8 @@ import type { AuthMiddlewareVariables } from "../types";
 import { reassembleKey } from "@proxed/utils/lib/partial-keys";
 import { z } from "zod";
 import { logger } from "@proxed/logger";
+import { getCity, getRegionCode } from "@proxed/location";
+import { getCountryCode } from "@proxed/location";
 
 // MARK: - Handle Structured Response
 async function handleStructuredResponse(
@@ -120,6 +122,9 @@ async function handleStructuredResponse(
 			latency,
 			response_code: 200,
 			response: JSON.stringify(object),
+			country_code: await getCountryCode(),
+			region_code: await getRegionCode(),
+			city: await getCity(),
 		});
 
 		return c.json(object);

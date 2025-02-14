@@ -204,3 +204,5 @@ export const changeChartPeriodSchema = z.object({
 });
 
 export const changeChartTypeSchema = z.enum(["all"]);
+
+export const trackingConsentSchema = z.boolean();

@@ -36,13 +36,17 @@ type FormValues = z.infer<typeof formSchema>;
 const linkClasses = "hover:underline text-sm text-muted-foreground";
 const textClasses = "text-center text-muted-foreground text-sm";
 
-export function LoginForm() {
+export function LoginForm({
+	preferredSignInProvider,
+}: {
+	preferredSignInProvider: string | null;
+}) {
 	const supabase = createClient();
 	const { setApiErrorsToForm } = useFormErrors();
 	const router = useRouter();
 
 	const [signinMode, setSigninMode] = useState<"password" | "magic-link">(
-		"password",
+		preferredSignInProvider === "otp" ? "magic-link" : "password",
 	);
 
 	const searchParams = useSearchParams();
@@ -82,6 +86,7 @@ export function LoginForm() {
 				if (signInError) throw signInError;
 				router.push(redirectTo);
 			} else {
+				redirectSearchParams.append("provider", "otp");
 				const { error: signInError } = await supabase.auth.signInWithOtp({
 					email,
 					options: {

@@ -20,6 +20,7 @@ export function SocialAuth({ className }: SocialAuthProps) {
 
 	const handleGoogleSignin = () => {
 		const redirectSearchParams = new URLSearchParams();
+		redirectSearchParams.set("provider", "google");
 		redirectSearchParams.set("redirectTo", redirectTo);
 		if (invitationCode) {
 			redirectSearchParams.set("invitationCode", invitationCode);

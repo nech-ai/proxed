@@ -52,16 +52,18 @@ export type Database = {
 			};
 			executions: {
 				Row: {
+					city: string | null;
 					completion_cost: number;
 					completion_tokens: number;
+					country_code: string | null;
 					created_at: string;
-					device_check_id: string;
+					device_check_id: string | null;
 					error_code: string | null;
 					error_message: string | null;
 					finish_reason: Database["public"]["Enums"]["finish_reason"];
 					id: string;
 					ip: string;
-					key_id: string;
+					key_id: string | null;
 					latency: number;
 					model: string;
 					project_id: string;
@@ -69,6 +71,7 @@ export type Database = {
 					prompt_cost: number;
 					prompt_tokens: number;
 					provider: Database["public"]["Enums"]["provider_type"];
+					region_code: string | null;
 					response: string | null;
 					response_code: number;
 					team_id: string;
@@ -78,16 +81,18 @@ export type Database = {
 					user_agent: string | null;
 				};
 				Insert: {
+					city?: string | null;
 					completion_cost?: number;
 					completion_tokens: number;
+					country_code?: string | null;
 					created_at?: string;
-					device_check_id: string;
+					device_check_id?: string | null;
 					error_code?: string | null;
 					error_message?: string | null;
 					finish_reason: Database["public"]["Enums"]["finish_reason"];
 					id?: string;
 					ip: string;
-					key_id: string;
+					key_id?: string | null;
 					latency: number;
 					model: string;
 					project_id: string;
@@ -95,6 +100,7 @@ export type Database = {
 					prompt_cost?: number;
 					prompt_tokens: number;
 					provider: Database["public"]["Enums"]["provider_type"];
+					region_code?: string | null;
 					response?: string | null;
 					response_code: number;
 					team_id: string;
@@ -104,16 +110,18 @@ export type Database = {
 					user_agent?: string | null;
 				};
 				Update: {
+					city?: string | null;
 					completion_cost?: number;
 					completion_tokens?: number;
+					country_code?: string | null;
 					created_at?: string;
-					device_check_id?: string;
+					device_check_id?: string | null;
 					error_code?: string | null;
 					error_message?: string | null;
 					finish_reason?: Database["public"]["Enums"]["finish_reason"];
 					id?: string;
 					ip?: string;
-					key_id?: string;
+					key_id?: string | null;
 					latency?: number;
 					model?: string;
 					project_id?: string;
@@ -121,6 +129,7 @@ export type Database = {
 					prompt_cost?: number;
 					prompt_tokens?: number;
 					provider?: Database["public"]["Enums"]["provider_type"];
+					region_code?: string | null;
 					response?: string | null;
 					response_code?: number;
 					team_id?: string;

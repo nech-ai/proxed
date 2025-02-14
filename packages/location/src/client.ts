@@ -12,7 +12,7 @@ export function getLocationInfo(
 	};
 	const regionInfo =
 		(regions as Record<string, Record<string, string>>)[countryCode]?.[
-			regionCode
+			`${countryCode}-${regionCode}`
 		] || "Unknown";
 
 	return {

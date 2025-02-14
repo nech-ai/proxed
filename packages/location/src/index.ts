@@ -9,7 +9,7 @@ export async function getCountryCode() {
 
 export async function getRegionCode() {
 	const headersList = await headers();
-	return headersList.get("x-vercel-ip-region") || "UNK";
+	return headersList.get("x-vercel-ip-country-region") || "UNK";
 }
 
 export async function getCity() {

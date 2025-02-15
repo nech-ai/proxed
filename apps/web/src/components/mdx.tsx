@@ -3,31 +3,44 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { highlight } from "sugar-high";
+import { cn } from "@proxed/ui/utils";
 
-interface TableProps {
-	data: {
-		headers: string[];
-		rows: string[][];
-	};
+interface TableData {
+	headers: string[];
+	rows: string[][];
 }
 
-function Table({ data }: TableProps) {
-	const headers = data.headers.map((header) => <th key={header}>{header}</th>);
+interface TableProps {
+	data: TableData;
+	className?: string;
+}
 
-	const rows = data.rows.map((row) => (
-		<tr key={row.join("-")}>
-			{row.map((cell, cellIndex) => (
-				<td key={`${cell}-${cellIndex}`}>{cell}</td>
-			))}
-		</tr>
-	));
-
+function Table({ data, className }: TableProps) {
 	return (
-		<table>
+		<table className={cn("w-full border-collapse", className)}>
 			<thead>
-				<tr>{headers}</tr>
+				<tr>
+					{data.headers.map((header) => (
+						<th key={header} className="text-left p-2 border-b border-border">
+							{header}
+						</th>
+					))}
+				</tr>
 			</thead>
-			<tbody>{rows}</tbody>
+			<tbody>
+				{data.rows.map((row, rowIndex) => (
+					<tr key={`row-${rowIndex}`}>
+						{row.map((cell, cellIndex) => (
+							<td
+								key={`${cell}-${cellIndex}`}
+								className="p-2 border-b border-border"
+							>
+								{cell}
+							</td>
+						))}
+					</tr>
+				))}
+			</tbody>
 		</table>
 	);
 }
@@ -35,40 +48,64 @@ function Table({ data }: TableProps) {
 interface CustomLinkProps
 	extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
 	href: string;
+	className?: string;
 }
 
-function CustomLink({ href, ...props }: CustomLinkProps) {
+function CustomLink({ href, className, ...props }: CustomLinkProps) {
+	const linkClass = cn(
+		"text-primary hover:text-primary/80 underline-offset-4 transition-colors",
+		className,
+	);
+
 	if (href.startsWith("/")) {
 		return (
-			<Link href={href} {...props}>
+			<Link href={href} className={linkClass} {...props}>
 				{props.children}
 			</Link>
 		);
 	}
 
 	if (href.startsWith("#")) {
-		return <a href={href} {...props} />;
+		return <a href={href} className={linkClass} {...props} />;
 	}
 
-	return <a href={href} target="_blank" rel="noopener noreferrer" {...props} />;
+	return (
+		<a
+			href={href}
+			target="_blank"
+			rel="noopener noreferrer"
+			className={linkClass}
+			{...props}
+		/>
+	);
 }
 
 interface RoundedImageProps extends React.ComponentProps<typeof Image> {
 	alt: string;
+	className?: string;
 }
 
-function RoundedImage(props: RoundedImageProps) {
-	return <Image {...props} />;
+function RoundedImage({ className, ...props }: RoundedImageProps) {
+	return (
+		<Image className={cn("rounded-lg overflow-hidden", className)} {...props} />
+	);
 }
 
-interface CodeProps {
+interface CodeProps extends React.HTMLAttributes<HTMLElement> {
 	children: string;
+	className?: string;
 }
 
-function Code({ children, ...props }: CodeProps) {
+function Code({ children, className, ...props }: CodeProps) {
 	const codeHTML = highlight(children);
-	// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
-	return <code dangerouslySetInnerHTML={{ __html: codeHTML }} {...props} />;
+	return (
+		<code
+			className={cn("font-mono text-sm", className)}
+			// biome-ignore lint/security/noDangerouslySetInnerHtml: Code is sanitized by sugar-high
+			dangerouslySetInnerHTML={{ __html: codeHTML }}
+			{...props}
+		/>
+	);
 }
 
 function slugify(str: string): string {
@@ -82,35 +119,52 @@ function slugify(str: string): string {
 		.replace(/\-\-+/g, "-");
 }
 
-function createHeading(level: number) {
-	const Heading = ({ children }: { children: React.ReactNode }) => {
-		const slug = slugify(children as string);
+interface HeadingProps {
+	children: React.ReactNode;
+	className?: string;
+}
 
-		return React.createElement(
-			`h${level}`,
-			{ id: slug },
-			[
-				React.createElement("a", {
-					href: `#${slug}`,
-					key: `link-${slug}`,
-					className: "anchor",
-				}),
-			],
-			children,
+function createHeading(level: 1 | 2 | 3 | 4 | 5 | 6) {
+	const Heading = ({ children, className }: HeadingProps) => {
+		const slug = slugify(children as string);
+		const Tag = `h${level}` as const;
+
+		return (
+			<Tag
+				id={slug}
+				className={cn("group flex whitespace-pre-wrap", className)}
+			>
+				<a
+					href={`#${slug}`}
+					className="absolute -ml-10 mt-1 flex items-center opacity-0 border-0 group-hover:opacity-100"
+					aria-label={`Link to ${children}`}
+				>
+					<div className="w-6 h-6 text-gray-400 ring-1 ring-gray-400/30 rounded-md flex items-center justify-center hover:text-gray-700 hover:ring-gray-700/30 dark:text-gray-300 dark:ring-gray-700/30 dark:hover:text-gray-200 dark:hover:ring-gray-700">
+						#
+					</div>
+				</a>
+				{children}
+			</Tag>
 		);
 	};
 
 	Heading.displayName = `Heading${level}`;
-
 	return Heading;
 }
 
 interface IframeProps extends React.IframeHTMLAttributes<HTMLIFrameElement> {
 	src: string;
+	className?: string;
 }
 
-function Iframe({ src, ...props }: IframeProps) {
-	return <iframe src={src} {...props} />;
+function Iframe({ src, className, ...props }: IframeProps) {
+	return (
+		<iframe
+			src={src}
+			className={cn("w-full rounded-lg border border-border", className)}
+			{...props}
+		/>
+	);
 }
 
 const components = {
@@ -125,18 +179,25 @@ const components = {
 	code: Code,
 	Table,
 	iframe: Iframe,
-};
+} as const;
 
 interface CustomMDXProps {
 	source: string;
-	components?: Record<string, React.ComponentType<unknown>>;
+	components?: Partial<typeof components>;
+	className?: string;
 }
 
-export function CustomMDX(props: CustomMDXProps) {
+export function CustomMDX({
+	source,
+	components: customComponents,
+	className,
+}: CustomMDXProps) {
 	return (
-		<MDXRemote
-			{...props}
-			components={{ ...components, ...(props.components || {}) }}
-		/>
+		<div className={cn("mdx", className)}>
+			<MDXRemote
+				source={source}
+				components={{ ...components, ...(customComponents || {}) }}
+			/>
+		</div>
 	);
 }

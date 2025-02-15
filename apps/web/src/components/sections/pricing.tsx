@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { useState } from "react";
 import { useSubscribeModal } from "@/context/subscribe-modal-context";
+import { GradientText } from "../gradient-text";
 
 interface TabsProps {
 	activeTab: string;
@@ -93,73 +94,69 @@ function PricingTier({
 	return (
 		<div
 			className={cn(
-				"outline-focus transition-transform-background relative z-10 box-border grid h-full w-full overflow-hidden text-foreground motion-reduce:transition-none lg:border-r border-t last:border-r-0",
+				"relative z-10 box-border grid h-full w-full overflow-hidden text-foreground transition-transform-background motion-reduce:transition-none border-t lg:border-r last:border-r-0",
 				tier.popular ? "bg-primary/5" : "text-foreground",
 			)}
 		>
 			<div className="flex flex-col h-full">
-				<CardHeader className="border-b p-4 grid grid-rows-2 h-fit">
-					<CardTitle className="flex items-center justify-between">
-						<span className="text-sm font-medium text-muted-foreground">
+				<CardHeader className="p-8">
+					<CardTitle className="flex flex-col space-y-8">
+						<GradientText as="span" className="text-lg font-medium">
 							{tier.name}
-						</span>
-						{tier.popular && (
-							<Badge
-								variant="secondary"
-								className="bg-primary text-primary-foreground hover:bg-secondary-foreground"
+						</GradientText>
+						<div>
+							<motion.div
+								key={tier.price[billingCycle]}
+								initial={{
+									opacity: 0,
+									x: billingCycle === "yearly" ? -10 : 10,
+									filter: "blur(5px)",
+								}}
+								animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+								transition={{
+									duration: 0.25,
+									ease: [0.4, 0, 0.2, 1],
+								}}
 							>
-								Most Popular
-							</Badge>
-						)}
+								<GradientText as="span" className="text-5xl font-bold">
+									{tier.price[billingCycle]}
+								</GradientText>
+								<span className="text-sm font-medium text-muted-foreground">
+									/{tier.frequency[billingCycle]}
+								</span>
+							</motion.div>
+							<p className="mt-4 text-base text-muted-foreground">
+								{tier.description}
+							</p>
+						</div>
 					</CardTitle>
-					<div className="pt-2 text-3xl font-bold">
-						<motion.div
-							key={tier.price[billingCycle]}
-							initial={{
-								opacity: 0,
-								x: billingCycle === "yearly" ? -10 : 10,
-								filter: "blur(5px)",
-							}}
-							animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-							transition={{
-								duration: 0.25,
-								ease: [0.4, 0, 0.2, 1],
-							}}
-						>
-							{tier.price[billingCycle]}
-							<span className="text-sm font-medium text-muted-foreground">
-								/ {tier.frequency[billingCycle]}
-							</span>
-						</motion.div>
-					</div>
-					<p className="text-[15px] font-medium text-muted-foreground">
-						{tier.description}
-					</p>
 				</CardHeader>
 
-				<CardContent className="flex-grow p-4 pt-5">
-					<ul className="space-y-2">
+				<CardContent className="flex-grow px-8 pb-8">
+					<ul className="space-y-4">
 						{tier.features.map((feature, featureIndex) => (
 							<li key={featureIndex} className="flex items-center">
-								<Check className="mr-2 size-4 text-green-500" />
-								<span className="font-medium">{feature}</span>
+								<Check className="mr-3 size-5 text-green-500" />
+								<span className="text-base">{feature}</span>
 							</li>
 						))}
 					</ul>
 				</CardContent>
 
-				<Button
-					size="lg"
-					onClick={openModal}
-					className={cn(
-						"w-full shadow-none py-4",
-						tier.popular
-							? "bg-primary text-primary-foreground hover:bg-secondary-foreground"
-							: "bg-muted text-foreground hover:bg-muted/80",
-					)}
-				>
-					{tier.cta}
-				</Button>
+				<div className="p-8 pt-0">
+					<Button
+						size="lg"
+						onClick={openModal}
+						className={cn(
+							"w-full py-6 text-base font-medium",
+							tier.popular
+								? "bg-primary text-primary-foreground hover:bg-primary/90"
+								: "bg-muted text-foreground hover:bg-muted/80",
+						)}
+					>
+						{tier.cta}
+					</Button>
+				</div>
 			</div>
 		</div>
 	);
@@ -175,19 +172,14 @@ export function Pricing() {
 	};
 
 	return (
-		<Section id="pricing" title="Pricing">
+		<Section
+			id="pricing"
+			title="Pricing"
+			subtitle="Start Building for Free"
+			description="Access all features at no cost during our Beta period, then choose the plan that fits you best."
+		>
 			<div className="grid grid-rows-1">
 				<div className="grid grid-rows-1 gap-y-10 p-10">
-					<div className="text-center">
-						<h2 className="text-3xl md:text-5xl font-bold tracking-tighter text-balance">
-							Start Building for Free
-						</h2>
-
-						<p className="mt-6 text-balance text-muted-foreground">
-							Access all features at <strong>no cost</strong> during our Beta
-							period, then choose the plan that fits you best.
-						</p>
-					</div>
 					<Tabs
 						activeTab={billingCycle}
 						setActiveTab={handleTabChange}

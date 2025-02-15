@@ -3,46 +3,59 @@
 import { motion } from "framer-motion";
 import { CheckIcon } from "lucide-react";
 import { CopyIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { cn } from "@proxed/ui/lib/utils";
+
+const COPY_TIMEOUT = 2000;
+
+interface CopyIconAnimationProps {
+	show: boolean;
+	icon: React.ReactNode;
+	className?: string;
+}
+
+function CopyIconAnimation({ show, icon, className }: CopyIconAnimationProps) {
+	return (
+		<motion.div
+			className={cn("absolute -left-4 top-0.5", className)}
+			initial={{ opacity: 0, scale: 0 }}
+			animate={{ opacity: show ? 1 : 0, scale: show ? 1 : 0 }}
+		>
+			{icon}
+		</motion.div>
+	);
+}
 
 export function PostCopyURL() {
 	const [isCopied, setCopied] = useState(false);
 
-	const handleClipboard = async () => {
+	const handleClipboard = useCallback(async () => {
 		try {
-			setCopied(true);
-
 			await navigator.clipboard.writeText(window.location.href);
-
-			setTimeout(() => {
-				setCopied(false);
-			}, 2000);
-		} catch {}
-	};
+			setCopied(true);
+			setTimeout(() => setCopied(false), COPY_TIMEOUT);
+		} catch (error) {
+			console.error("Failed to copy URL:", error);
+		}
+	}, []);
 
 	return (
 		<button
 			type="button"
 			onClick={handleClipboard}
-			className="relative flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
+			className="group relative flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
+			aria-label={isCopied ? "Link copied" : "Copy link"}
+			title="Copy link to clipboard"
 		>
-			<motion.div
-				className="absolute -left-4 top-0.5"
-				initial={{ opacity: 1, scale: 1 }}
-				animate={{ opacity: isCopied ? 0 : 1, scale: isCopied ? 0 : 1 }}
-			>
-				<CopyIcon className="h-4 w-4" />
-			</motion.div>
-
-			<motion.div
-				className="absolute -left-4 top-0.5"
-				initial={{ opacity: 0, scale: 0 }}
-				animate={{ opacity: isCopied ? 1 : 0, scale: isCopied ? 1 : 0 }}
-			>
-				<CheckIcon className="h-4 w-4 text-green-400" />
-			</motion.div>
-
-			<span className="text-xs ml-2">Copy link</span>
+			<CopyIconAnimation
+				show={!isCopied}
+				icon={<CopyIcon className="h-4 w-4" />}
+			/>
+			<CopyIconAnimation
+				show={isCopied}
+				icon={<CheckIcon className="h-4 w-4 text-green-400" />}
+			/>
+			<span className="text-xs ml-2 group-hover:text-white">Copy link</span>
 		</button>
 	);
 }

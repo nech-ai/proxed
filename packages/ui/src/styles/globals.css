@@ -37,6 +37,11 @@
 		--chart-3: 207 84% 54%; /* Darker */
 		--chart-4: 207 84% 48%; /* Much darker */
 		--chart-5: 207 84% 42%; /* Darkest */
+		--color-1: 0 100% 63%;
+		--color-2: 270 100% 63%;
+		--color-3: 210 100% 63%;
+		--color-4: 195 100% 63%;
+		--color-5: 90 100% 63%;
 	}
 
 	/* Add disabled styling for buttons and inputs */
@@ -106,24 +111,6 @@
 }
 
 /* Animations */
-@keyframes marquee {
-	from {
-		transform: translateX(0);
-	}
-	to {
-		transform: translateX(calc(-100% - var(--gap)));
-	}
-}
-
-@keyframes marquee-vertical {
-	from {
-		transform: translateY(0);
-	}
-	to {
-		transform: translateY(calc(-100% - var(--gap)));
-	}
-}
-
 @keyframes border-beam {
 	100% {
 		offset-distance: 100%;
@@ -137,15 +124,5 @@
 	}
 	50% {
 		transform: translate(-50%, -50%) scale(0.9);
-	}
-}
-
-@keyframes orbit {
-	0% {
-		transform: rotate(0deg) translateY(calc(var(--radius) * 1px)) rotate(0deg);
-	}
-	100% {
-		transform: rotate(360deg) translateY(calc(var(--radius) * 1px))
-			rotate(-360deg);
 	}
 }

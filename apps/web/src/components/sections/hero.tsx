@@ -1,25 +1,30 @@
 "use client";
 
-import { AuroraText } from "@/components/aurora-text";
+import { Section } from "@/components/section";
 import { siteConfig } from "@/lib/config";
 import { Button } from "@proxed/ui/components/button";
 import { motion } from "framer-motion";
-import { lazy, Suspense, useEffect, useState } from "react";
-import { Section } from "../section";
+import { useCallback, useEffect, useState } from "react";
 import { useSubscribeModal } from "@/context/subscribe-modal-context";
+// @ts-ignore
+import Spline from "@splinetool/react-spline";
+import { GradientText } from "../gradient-text";
 
-const ease = [0.16, 1, 0.3, 1];
+const ANIMATION_CONFIG = {
+	ease: [0.16, 1, 0.3, 1],
+	duration: 0.8,
+} as const;
 
 function HeroPill() {
 	return (
 		<motion.a
 			href="/updates/starting"
-			className="flex w-auto items-center space-x-2 bg-primary/20 px-2 py-1 ring-1 ring-accent whitespace-pre"
+			className="group flex w-auto items-center space-x-2 bg-primary/20 px-3 py-1.5 ring-1 ring-accent rounded-full hover:bg-primary/30 transition-colors"
 			initial={{ opacity: 0, y: -20 }}
 			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.8, ease }}
+			transition={ANIMATION_CONFIG}
 		>
-			<div className="w-fit bg-accent px-2 py-0.5 text-left text-xs font-medium text-primary sm:text-sm">
+			<div className="w-fit bg-accent px-2 py-0.5 rounded-full text-left text-xs font-medium text-primary sm:text-sm">
 				🛠️ New
 			</div>
 			<p className="text-xs font-medium text-primary sm:text-sm">
@@ -28,7 +33,7 @@ function HeroPill() {
 			<svg
 				width="12"
 				height="12"
-				className="ml-1"
+				className="ml-1 transition-transform group-hover:translate-x-1"
 				viewBox="0 0 12 12"
 				fill="none"
 				xmlns="http://www.w3.org/2000/svg"
@@ -46,13 +51,12 @@ function HeroTitles() {
 	return (
 		<div className="flex w-full max-w-3xl flex-col overflow-hidden pt-8">
 			<motion.h1
-				className="text-left text-3xl font-semibold leading-tight text-foreground sm:text-4xl md:text-5xl tracking-tighter"
+				className="text-left text-3xl font-semibold leading-tight text-foreground sm:text-4xl md:text-5xl lg:text-6xl tracking-tighter"
 				initial={{ filter: "blur(10px)", opacity: 0, y: 50 }}
 				animate={{ filter: "blur(0px)", opacity: 1, y: 0 }}
 				transition={{
-					duration: 1,
-					ease,
-					staggerChildren: 0.2,
+					duration: ANIMATION_CONFIG.duration,
+					ease: ANIMATION_CONFIG.ease,
 				}}
 			>
 				<motion.span
@@ -60,24 +64,22 @@ function HeroTitles() {
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{
-						duration: 0.8,
+						...ANIMATION_CONFIG,
 						delay: 0.5,
-						ease,
 					}}
 				>
-					<AuroraText className="leading-tight">
+					<GradientText as="h1" className="leading-tight">
 						{siteConfig.hero.title}
-					</AuroraText>
+					</GradientText>
 				</motion.span>
 			</motion.h1>
 			<motion.p
-				className="text-left mt-4 max-w-2xl leading-relaxed text-muted-foreground sm:text-lg sm:leading-relaxed text-balance"
+				className="text-left mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl sm:leading-relaxed text-balance"
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{
+					...ANIMATION_CONFIG,
 					delay: 0.6,
-					duration: 0.8,
-					ease,
 				}}
 			>
 				{siteConfig.hero.description}
@@ -88,81 +90,79 @@ function HeroTitles() {
 
 function HeroCTA() {
 	const { openModal } = useSubscribeModal();
+
 	return (
-		<div className="relative mt-6">
+		<div className="relative mt-8">
 			<motion.div
 				className="flex w-full max-w-2xl flex-col items-start justify-start space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0"
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
-				transition={{ delay: 0.8, duration: 0.8, ease }}
+				transition={{ ...ANIMATION_CONFIG, delay: 0.8 }}
 			>
-				<Button onClick={openModal} className="w-full sm:w-auto">
+				<Button
+					onClick={openModal}
+					className="w-full sm:w-auto h-12 px-8 text-base"
+					size="lg"
+				>
 					{siteConfig.hero.cta}
 				</Button>
 			</motion.div>
 			<motion.p
-				className="mt-3 text-sm text-muted-foreground text-left"
+				className="mt-4 text-sm text-muted-foreground text-left max-w-xl"
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
-				transition={{ delay: 1.0, duration: 0.8 }}
+				transition={{ ...ANIMATION_CONFIG, delay: 1.0 }}
 			>
 				{siteConfig.hero.ctaDescription}
 			</motion.p>
 		</div>
 	);
 }
-const LazySpline = lazy(() => import("@splinetool/react-spline"));
 
 export function Hero() {
 	const [showSpline, setShowSpline] = useState(false);
 	const [isMobile, setIsMobile] = useState(false);
 
-	useEffect(() => {
-		const checkMobile = () => {
-			setIsMobile(window.innerWidth < 1024); // Assuming 1024px is the breakpoint for lg
-		};
-
-		checkMobile();
-		window.addEventListener("resize", checkMobile);
-
-		return () => window.removeEventListener("resize", checkMobile);
+	const checkMobile = useCallback(() => {
+		setIsMobile(window.innerWidth < 1024);
 	}, []);
 
 	useEffect(() => {
-		// Don't show on mobile
-		if (!isMobile) {
-			const timer = setTimeout(() => {
-				setShowSpline(true);
-			}, 1000);
+		checkMobile();
+		window.addEventListener("resize", checkMobile);
+		return () => window.removeEventListener("resize", checkMobile);
+	}, [checkMobile]);
 
+	useEffect(() => {
+		if (!isMobile) {
+			const timer = setTimeout(() => setShowSpline(true), 1000);
 			return () => clearTimeout(timer);
 		}
 	}, [isMobile]);
 
 	return (
-		<Section id="hero">
-			<div className="relative grid grid-cols-1 lg:grid-cols-2 gap-x-8 w-full p-6 lg:p-12 overflow-hidden">
-				<div className="flex flex-col justify-start items-start lg:col-span-1">
+		<Section id="hero" className="overflow-hidden">
+			<div className="relative grid grid-cols-1 lg:grid-cols-2 gap-x-8 w-full p-6 lg:p-12">
+				<div className="flex flex-col justify-start items-start lg:col-span-1 z-10">
 					<HeroPill />
 					<HeroTitles />
 					<HeroCTA />
 				</div>
 				{!isMobile && (
 					<div className="relative lg:h-full lg:col-span-1">
-						<Suspense>
-							{showSpline && (
-								<motion.div
-									initial={{ opacity: 0 }}
-									animate={{ opacity: 1 }}
-									transition={{ duration: 0.8, delay: 1 }}
-								>
-									<LazySpline
-										scene="/cube.splinecode"
-										className="absolute inset-0 w-full h-full origin-top-left flex items-center justify-center"
-									/>
-								</motion.div>
-							)}
-						</Suspense>
+						{showSpline && (
+							<motion.div
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								transition={{ duration: 0.8, delay: 1 }}
+								className="absolute inset-0"
+							>
+								<Spline
+									scene="/cube.splinecode"
+									className="w-full h-full origin-top-left"
+								/>
+							</motion.div>
+						)}
 					</div>
 				)}
 			</div>

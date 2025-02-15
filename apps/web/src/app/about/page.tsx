@@ -1,4 +1,5 @@
 import { Section } from "@/components/section";
+import { GradientText } from "@/components/gradient-text";
 import { generateMetadata } from "@/lib/metadata";
 import Image from "next/image";
 
@@ -14,15 +15,21 @@ export default function Page() {
 		<div className="flex justify-center py-12">
 			<Section id="about">
 				<div className="border p-8 backdrop-blur">
-					<h1 className="font-medium text-center text-5xl mb-16 leading-snug bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+					<GradientText
+						as="h1"
+						className="font-medium text-center text-5xl mb-16 leading-snug"
+					>
 						Building the Future of AI Access
-					</h1>
+					</GradientText>
 
 					<div className="space-y-12">
 						<section>
-							<h3 className="font-medium text-xl mb-4 bg-gradient-to-r from-purple-400 to-purple-200 bg-clip-text text-transparent">
+							<GradientText
+								as="h3"
+								className="font-medium text-xl mb-4 from-purple-400 to-purple-200"
+							>
 								Our Mission
-							</h3>
+							</GradientText>
 							<p className="text-gray-400 leading-relaxed">
 								Proxed.ai was created to solve a common issue: while AI
 								continues to revolutionise industries, integrating it securely
@@ -35,9 +42,12 @@ export default function Page() {
 						</section>
 
 						<section>
-							<h3 className="font-medium text-xl mb-4 bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
+							<GradientText
+								as="h3"
+								className="font-medium text-xl mb-4 from-yellow-400 to-yellow-200"
+							>
 								Open Source First
-							</h3>
+							</GradientText>
 							<p className="text-gray-400 leading-relaxed mb-12">
 								At its core, Proxed.ai is open source. We believe AI tooling
 								should be transparent, community-driven, and built to address

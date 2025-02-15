@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Section } from "@/components/section";
+import { GradientText } from "@/components/gradient-text";
 
 export async function generateStaticParams() {
 	const posts = getBlogPosts();
@@ -94,9 +95,9 @@ export default async function Page(props: {
 					<article className="space-y-6">
 						<div className="space-y-4">
 							<PostStatus status={post.metadata.tag} />
-							<h1 className="font-medium text-4xl bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+							<GradientText as="h1" className="font-medium text-4xl">
 								{post.metadata.title}
-							</h1>
+							</GradientText>
 							<time className="text-sm text-gray-400 block">
 								{new Date(post.metadata.publishedAt).toLocaleDateString(
 									"en-US",

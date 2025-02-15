@@ -1,98 +1,143 @@
 "use client";
 
-import FlickeringGrid from "@/components/ui/flickering-grid";
 import { cn } from "@proxed/ui/utils";
+import { motion } from "framer-motion";
 import type React from "react";
 import { forwardRef, useRef } from "react";
+import { GradientText } from "./gradient-text";
 
-interface SectionProps {
+type Alignment = "left" | "center" | "right";
+
+interface SectionProps extends React.HTMLAttributes<HTMLElement> {
 	id?: string;
 	title?: string;
 	subtitle?: string;
 	description?: string;
-	children?: React.ReactNode;
-	className?: string;
-	align?: "left" | "center" | "right";
+	align?: Alignment;
 	noBorder?: boolean;
+	className?: string;
+	fadeIn?: boolean;
 }
 
-const Section = forwardRef<HTMLElement, SectionProps>(
-	(
-		{ id, title, subtitle, description, children, className, align, noBorder },
-		forwardedRef,
-	) => {
-		const internalRef = useRef<HTMLElement>(null);
-		const ref = forwardedRef || internalRef;
-		const alignmentClass =
+const FADE_IN_ANIMATION = {
+	initial: { opacity: 0, y: 20 },
+	animate: { opacity: 1, y: 0 },
+	transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+} as const;
+
+function getAlignmentClasses(align: Alignment = "center") {
+	return {
+		container: cn(
+			"w-full",
 			align === "left"
 				? "text-left"
 				: align === "right"
 					? "text-right"
-					: "text-center";
+					: "text-center",
+		),
+		subtitle: cn(
+			"mt-4 text-4xl font-medium tracking-tight md:text-5xl pb-8",
+			align === "center"
+				? "mx-auto max-w-[800px]"
+				: align === "right"
+					? "ml-auto"
+					: "",
+		),
+		description: cn(
+			"mt-6 text-lg text-muted-foreground",
+			align === "center"
+				? "mx-auto max-w-[600px]"
+				: align === "right"
+					? "ml-auto"
+					: "",
+		),
+	};
+}
+
+function SectionHeader({
+	title,
+	subtitle,
+	description,
+	align,
+	fadeIn,
+}: Omit<SectionProps, "children" | "className" | "noBorder">) {
+	if (!title && !subtitle && !description) return null;
+
+	const classes = getAlignmentClasses(align);
+	const HeaderContent = () => (
+		<div
+			className={cn(classes.container, "relative w-full overflow-hidden py-4")}
+		>
+			{title && (
+				<h2 className="text-sm font-medium uppercase tracking-wider text-primary">
+					{title}
+				</h2>
+			)}
+			{subtitle && (
+				<GradientText as="h3" className={classes.subtitle}>
+					{subtitle}
+				</GradientText>
+			)}
+			{description && <p className={classes.description}>{description}</p>}
+		</div>
+	);
+
+	if (fadeIn) {
+		return (
+			<motion.div {...FADE_IN_ANIMATION}>
+				<HeaderContent />
+			</motion.div>
+		);
+	}
+
+	return <HeaderContent />;
+}
+
+const Section = forwardRef<HTMLElement, SectionProps>(
+	(
+		{
+			id,
+			title,
+			subtitle,
+			description,
+			children,
+			className,
+			align,
+			noBorder,
+			fadeIn = true,
+			...props
+		},
+		forwardedRef,
+	) => {
+		const internalRef = useRef<HTMLElement>(null);
+		const ref = forwardedRef || internalRef;
+
+		const Content = () => (
+			<div
+				className={cn(
+					"relative w-full max-w-[1400px] mx-auto",
+					!noBorder && "border border-border",
+					className,
+				)}
+			>
+				<SectionHeader
+					title={title}
+					subtitle={subtitle}
+					description={description}
+					align={align}
+					fadeIn={fadeIn}
+				/>
+				{fadeIn ? (
+					<motion.div {...FADE_IN_ANIMATION}>{children}</motion.div>
+				) : (
+					children
+				)}
+			</div>
+		);
 
 		return (
-			<section id={id} ref={ref}>
-				<div
-					className={cn(
-						"relative w-full max-w-[1400px] mx-auto",
-						!noBorder && "border border-border",
-						className,
-					)}
-				>
-					{(title || subtitle || description) && (
-						<div
-							className={cn(
-								alignmentClass,
-								"relative w-full overflow-hidden py-4",
-							)}
-						>
-							{title && (
-								<h2 className="text-sm font-medium uppercase tracking-wider text-primary">
-									{title}
-								</h2>
-							)}
-
-							{subtitle && (
-								<h3
-									className={cn(
-										"mt-4 text-4xl font-medium tracking-tight text-foreground md:text-5xl",
-										align === "center"
-											? "mx-auto max-w-[800px]"
-											: align === "right"
-												? "ml-auto"
-												: "",
-									)}
-								>
-									{subtitle}
-								</h3>
-							)}
-							{description && (
-								<p
-									className={cn(
-										"mt-6 text-lg text-muted-foreground",
-										align === "center"
-											? "mx-auto max-w-[600px]"
-											: align === "right"
-												? "ml-auto"
-												: "",
-									)}
-								>
-									{description}
-								</p>
-							)}
-							<div className="pointer-events-none absolute bottom-0 left-0 right-0 h-full w-full bg-gradient-to-t from-background dark:from-background -z-10 from-50%" />
-							<FlickeringGrid
-								squareSize={4}
-								gridGap={4}
-								color="#6B7280"
-								maxOpacity={0.2}
-								flickerChance={0.1}
-								className="-z-20 absolute inset-0 size-full"
-							/>
-						</div>
-					)}
-					{children}
-				</div>
+			<section id={id} ref={ref} className={cn("w-full", className)} {...props}>
+				<Content />
 			</section>
 		);
 	},

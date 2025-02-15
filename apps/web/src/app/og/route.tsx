@@ -8,10 +8,6 @@ export const runtime = "edge";
 export async function GET(req: NextRequest) {
 	const { searchParams } = req.nextUrl;
 	const postTitle = searchParams.get("title") || siteConfig.description;
-	const font = fetch(
-		new URL("../../assets/fonts/Inter-SemiBold.ttf", import.meta.url),
-	).then((res) => res.arrayBuffer());
-	const fontData = await font;
 
 	return new ImageResponse(
 		<div
@@ -90,13 +86,6 @@ export async function GET(req: NextRequest) {
 		{
 			width: 1200,
 			height: 630,
-			fonts: [
-				{
-					name: "Inter",
-					data: fontData,
-					style: "normal",
-				},
-			],
 		},
 	);
 }

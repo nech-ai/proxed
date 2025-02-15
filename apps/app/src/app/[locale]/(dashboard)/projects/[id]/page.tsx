@@ -22,6 +22,20 @@ import { ProjectEditForm } from "@/components/projects/project-edit-form";
 import { getDeviceChecks } from "@proxed/supabase/cached-queries";
 import { PageHeader } from "@/components/layout/page-header";
 
+export async function generateMetadata(props: {
+	params: Promise<{ id: string }>;
+}) {
+	const { id } = await props.params;
+	const { data: project } = await getProject(id);
+	if (!project || !project.id) {
+		notFound();
+	}
+
+	return {
+		title: `${project.name} | Proxed`,
+	};
+}
+
 export default async function Page(props: {
 	params: Promise<{ id: string }>;
 }) {

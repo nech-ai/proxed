@@ -24,6 +24,7 @@ import { AuthCard } from "./auth-card";
 import { PasswordInput } from "./password-input";
 import { SocialAuth } from "./social-auth";
 import { TeamInvitationInfo } from "./team-invitation-info";
+import { AuthErrorAlert } from "./auth-error-alert";
 
 const formSchema = z.object({
 	name: z.string().min(1),
@@ -93,6 +94,7 @@ export function SignupForm() {
 
 	return (
 		<AuthCard title="Sign up" description="Create your account">
+			<AuthErrorAlert params={Object.fromEntries(searchParams)} />
 			{invitationCode && <TeamInvitationInfo className="mb-6" />}
 
 			<Form {...form}>

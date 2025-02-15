@@ -4,7 +4,7 @@ import { getDeviceChecks } from "@proxed/supabase/cached-queries";
 
 export async function generateMetadata() {
 	return {
-		title: "Device Checks",
+		title: "Device Checks | Proxed",
 	};
 }
 

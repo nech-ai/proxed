@@ -1,7 +1,21 @@
-import { getExecution } from "@proxed/supabase/cached-queries";
+import { getExecution, getProject } from "@proxed/supabase/cached-queries";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { ExecutionDetailsCard } from "@/components/executions/execution-details-card";
+
+export async function generateMetadata(props: {
+	params: Promise<{ id: string }>;
+}) {
+	const { id } = await props.params;
+	const { data: execution } = await getExecution(id);
+	if (!execution || !execution.id) {
+		notFound();
+	}
+
+	return {
+		title: `Execution #${execution.id} | Proxed`,
+	};
+}
 
 export default async function Page(props: {
 	params: Promise<{ id: string }>;

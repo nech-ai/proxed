@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 
 export async function generateMetadata() {
 	return {
-		title: "Team Settings",
+		title: "Team Settings | Proxed",
 	};
 }
 

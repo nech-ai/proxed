@@ -8,7 +8,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-	title: "Teams | Proxed.AI",
+	title: "Teams | Proxed",
 };
 
 export default async function TeamsPage() {

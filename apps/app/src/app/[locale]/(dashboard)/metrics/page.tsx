@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/layout/page-header";
 export const maxDuration = 30;
 
 export const metadata: Metadata = {
-	title: "Metrics",
+	title: "Metrics | Proxed",
 };
 
 const defaultValue = {

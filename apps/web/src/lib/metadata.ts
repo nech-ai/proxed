@@ -79,7 +79,7 @@ export function generateMetadata({
 			description: description || defaultDescription,
 			images: [{ url: ogImage }],
 			creator: "@vahaah",
-			site: "@proxed_ai",
+			site: "@vahaah",
 		},
 		robots: {
 			index: !noIndex,
@@ -143,7 +143,7 @@ export const jsonLd = {
 		"@type": "Organization",
 		name: "Proxed.AI",
 		url: "https://proxed.ai",
-		sameAs: ["https://github.com/proxed-ai/proxed", "https://x.com/proxed_ai"],
+		sameAs: ["https://github.com/nech-ai/proxed", "https://x.com/vahaah"],
 	},
 	category: "AI Security & Development Tools",
 	applicationSubCategory: "Secure iOS SDK for AI Models",

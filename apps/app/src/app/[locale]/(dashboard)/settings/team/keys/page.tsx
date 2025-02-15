@@ -4,7 +4,7 @@ import { getProviderKeys } from "@proxed/supabase/cached-queries";
 
 export async function generateMetadata() {
 	return {
-		title: "Partial Keys",
+		title: "Partial Keys | Proxed",
 	};
 }
 

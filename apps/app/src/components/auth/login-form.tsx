@@ -25,6 +25,7 @@ import { PasswordInput } from "./password-input";
 import SigninModeSwitch from "./signin-mode-switch";
 import { SocialAuth } from "./social-auth";
 import { TeamInvitationInfo } from "./team-invitation-info";
+import { AuthErrorAlert } from "./auth-error-alert";
 
 const formSchema = z.object({
 	email: z.string().email(),
@@ -105,6 +106,7 @@ export function LoginForm({
 
 	return (
 		<AuthCard title="Sign in" description="Sign in to your account">
+			<AuthErrorAlert params={Object.fromEntries(searchParams)} />
 			{invitationCode && <TeamInvitationInfo className="mb-6" />}
 
 			<Form {...form}>

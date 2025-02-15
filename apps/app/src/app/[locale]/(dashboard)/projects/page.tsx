@@ -13,6 +13,11 @@ import {
 } from "@proxed/supabase/cached-queries";
 import type { Tables } from "@proxed/supabase/types";
 import { PageHeader } from "@/components/layout/page-header";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+	title: "Projects | Proxed",
+};
 
 export default async function Page(props: {
 	params: Promise<{

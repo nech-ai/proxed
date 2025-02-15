@@ -7,6 +7,11 @@ import { SearchFilter } from "@/components/tables/executions/search-filter";
 import { Table } from "@/components/tables/executions";
 import { ColumnVisibility } from "@/components/tables/executions/column-visibility";
 import { PageHeader } from "@/components/layout/page-header";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+	title: "Executions | Proxed",
+};
 
 export default async function Page(props: {
 	params: Promise<{

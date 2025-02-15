@@ -189,7 +189,7 @@ export const siteConfig = {
 			},
 			{
 				icon: <Icons.twitter className="h-5 w-5" />,
-				url: "https://x.com/proxed_ai",
+				url: "https://x.com/vahaah",
 			},
 		],
 		links: [

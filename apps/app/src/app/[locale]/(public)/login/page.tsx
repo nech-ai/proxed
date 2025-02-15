@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { Cookies } from "@/utils/constants";
 
 export const metadata: Metadata = {
-	title: "Login",
+	title: "Login | Proxed",
 };
 
 export default async function Page() {

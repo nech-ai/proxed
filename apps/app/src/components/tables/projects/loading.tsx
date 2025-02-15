@@ -23,9 +23,17 @@ export function Loading({ isEmpty }: { isEmpty?: boolean }) {
 						<TableRow key={row.id} className="group h-[45px]">
 							{/* Name */}
 							<TableCell className="w-[200px]">
-								<Skeleton
-									className={cn("h-3.5 w-[60%]", isEmpty && "animate-none")}
-								/>
+								<div className="flex items-center gap-2">
+									<Skeleton
+										className={cn("h-3.5 w-[60%]", isEmpty && "animate-none")}
+									/>
+									<Skeleton
+										className={cn(
+											"h-4 w-4 rounded-full",
+											isEmpty && "animate-none",
+										)}
+									/>
+								</div>
 							</TableCell>
 
 							{/* Description */}
@@ -50,6 +58,16 @@ export function Loading({ isEmpty }: { isEmpty?: boolean }) {
 							</TableCell>
 
 							{/* Provider */}
+							<TableCell className="w-[100px]">
+								<Skeleton
+									className={cn(
+										"h-5 w-[60px] rounded-full",
+										isEmpty && "animate-none",
+									)}
+								/>
+							</TableCell>
+
+							{/* Test Mode */}
 							<TableCell className="w-[100px]">
 								<Skeleton
 									className={cn(

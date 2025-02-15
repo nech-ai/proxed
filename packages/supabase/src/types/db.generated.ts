@@ -191,6 +191,8 @@ export type Database = {
 					schema_config: Json | null;
 					system_prompt: string | null;
 					team_id: string;
+					test_key: string | null;
+					test_mode: boolean | null;
 					updated_at: string;
 				};
 				Insert: {
@@ -208,6 +210,8 @@ export type Database = {
 					schema_config?: Json | null;
 					system_prompt?: string | null;
 					team_id: string;
+					test_key?: string | null;
+					test_mode?: boolean | null;
 					updated_at?: string;
 				};
 				Update: {
@@ -225,6 +229,8 @@ export type Database = {
 					schema_config?: Json | null;
 					system_prompt?: string | null;
 					team_id?: string;
+					test_key?: string | null;
+					test_mode?: boolean | null;
 					updated_at?: string;
 				};
 				Relationships: [

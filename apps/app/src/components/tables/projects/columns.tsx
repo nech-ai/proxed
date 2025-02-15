@@ -4,6 +4,8 @@ import { Badge } from "@proxed/ui/components/badge";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ActionsCell } from "./actions-cell";
+import { AlertTriangleIcon } from "lucide-react";
+import { cn } from "@proxed/ui/lib/utils";
 
 export type ProjectOutput = Database["public"]["Tables"]["projects"]["Row"] & {
 	device_check: {
@@ -21,6 +23,21 @@ export const columns: ColumnDef<ProjectOutput>[] = [
 		header: "Name",
 		accessorKey: "name",
 		enableSorting: true,
+		cell: ({ row }) => (
+			<div className="flex items-center gap-2">
+				<span
+					className={cn(
+						row.original.test_mode &&
+							"text-yellow-600 dark:text-yellow-400 font-medium",
+					)}
+				>
+					{row.getValue("name")}
+				</span>
+				{row.original.test_mode && (
+					<AlertTriangleIcon className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+				)}
+			</div>
+		),
 	},
 	{
 		header: "Description",
@@ -45,6 +62,20 @@ export const columns: ColumnDef<ProjectOutput>[] = [
 		cell: ({ row }) => (
 			<Badge variant="outline">{row.original.key?.display_name}</Badge>
 		),
+	},
+	{
+		header: "Test Mode",
+		accessorKey: "test_mode",
+		enableSorting: true,
+		cell: ({ row }) =>
+			row.original.test_mode ? (
+				<Badge
+					variant="outline"
+					className="border-yellow-500 text-yellow-600 dark:text-yellow-400"
+				>
+					Enabled
+				</Badge>
+			) : null,
 	},
 	{
 		header: "Status",

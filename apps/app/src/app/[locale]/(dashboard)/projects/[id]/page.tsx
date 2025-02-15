@@ -21,6 +21,13 @@ import { CodeView } from "@/components/schema-builder/code-view";
 import { ProjectEditForm } from "@/components/projects/project-edit-form";
 import { getDeviceChecks } from "@proxed/supabase/cached-queries";
 import { PageHeader } from "@/components/layout/page-header";
+import { ProjectTestMode } from "@/components/projects/project-test-mode";
+import {
+	Alert,
+	AlertDescription,
+	AlertTitle,
+} from "@proxed/ui/components/alert";
+import { AlertTriangleIcon } from "lucide-react";
 
 export async function generateMetadata(props: {
 	params: Promise<{ id: string }>;
@@ -64,6 +71,20 @@ export default async function Page(props: {
 
 			<main className="flex-1 overflow-auto bg-muted/5">
 				<div className="container mx-auto px-4 py-8 space-y-6 max-w-4xl">
+					{project.test_mode && (
+						<Alert
+							variant="default"
+							className="bg-yellow-500/15 border-yellow-500 text-yellow-900 dark:text-yellow-200"
+						>
+							<AlertTriangleIcon className="h-4 w-4" />
+							<AlertTitle>Test Mode Enabled</AlertTitle>
+							<AlertDescription>
+								This project is in test mode. Apple DeviceCheck validation will
+								be bypassed for requests with the correct test key header.
+							</AlertDescription>
+						</Alert>
+					)}
+
 					<ProjectEditForm
 						project={project}
 						// @ts-expect-error
@@ -110,6 +131,8 @@ export default async function Page(props: {
 							</Tabs>
 						</CardContent>
 					</Card>
+
+					<ProjectTestMode project={project} />
 				</div>
 			</main>
 		</div>

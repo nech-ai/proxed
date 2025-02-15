@@ -162,6 +162,16 @@ export const updateProjectSchema = z.object({
 
 export type UpdateProjectFormValues = z.infer<typeof updateProjectSchema>;
 
+export const toggleProjectTestModeSchema = z.object({
+	projectId: z.string(),
+	testMode: z.boolean(),
+	revalidatePath: z.string().optional(),
+});
+
+export type ToggleProjectTestModeFormValues = z.infer<
+	typeof toggleProjectTestModeSchema
+>;
+
 export const filterExecutionsSchema = z.object({
 	projectId: z.string().optional().describe("The project ID to filter by"),
 	provider: z

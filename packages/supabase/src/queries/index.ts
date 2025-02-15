@@ -216,6 +216,7 @@ export async function getProjectsQuery(
 		"device_check:device_checks(id, name)",
 		"key_id",
 		"key:provider_keys(id, display_name, provider)",
+		"test_mode",
 		"created_at",
 		"updated_at",
 	];

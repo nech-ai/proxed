@@ -10,16 +10,31 @@ export const authMiddleware = createMiddleware<{
 	const supabase = await createClient();
 
 	const deviceToken = c.req.header("x-device-token");
+	const testKey = c.req.header("x-proxed-test-key");
 	const projectId = c.req.param("projectId") || c.req.header("x-project-id");
 
-	if (!deviceToken || !projectId) {
-		return c.json({ error: "Missing device token or project id" }, 401);
+	if (!projectId) {
+		return c.json({ error: "Missing project id" }, 401);
 	}
 
 	const { data: project, error } = await getProjectQuery(supabase, projectId);
 
-	if (error || !project?.device_check) {
+	if (error) {
 		return c.json({ error: "Project not found" }, 401);
+	}
+
+	// Check test mode first
+	if (project.test_mode && testKey === project.test_key) {
+		c.set("session", {
+			teamId: project.team_id,
+			projectId,
+		});
+		await next();
+		return;
+	}
+
+	if (!deviceToken || !project?.device_check) {
+		return c.json({ error: "Missing device token" }, 401);
 	}
 
 	try {

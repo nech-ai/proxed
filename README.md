@@ -3,7 +3,7 @@
 <p align="center">
   <h1 align="center"><b>Proxed.AI</b></h1>
   <p align="center">
-    Run your business smarter
+    Secure AI Integration for iOS Apps
     <br />
     <br />
     <a href="https://proxed.ai">Landing</a>

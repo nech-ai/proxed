@@ -25,7 +25,7 @@ jobs:
       - name: 🪐 Check TypeScript
         run: bun run typecheck --filter=@proxed/docs
       - name: 📥 Pull Vercel environment
-        run: bunx vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗️ Build project
         run: bunx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🚀 Deploy to production

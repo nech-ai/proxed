@@ -1,0 +1,97 @@
+---
+title: Local Setup
+description: |
+  How to setup your local development environment for Proxed.AI
+---
+
+# Local Setup
+
+Proxed.AI is a monorepo that uses [TurboRepo](https://turbo.build/repo).
+
+## Project Structure
+
+```bash
+apps
+├── api
+├── app
+├── docs
+├── proxy
+├── web
+packages
+├── analytics
+├── api
+├── location
+├── logger
+├── mail
+├── structure
+├── supabase
+├── ui
+├── utils
+tooling
+├── typescript
+```
+
+The `apps` directory contains the core applications and services that need to be run.
+
+* `api`: The API service that is built with Supabase.
+* `app`: The Next.js portal that is used to manage the Proxed.AI platform.
+* `docs`: The documentation site that is built with Fumadocs.
+* `proxy`: The proxy service that is built with Next.js and Hono.
+* `web`: The Next.js marketing site.
+
+The `packages` directory contains the shared code that is used across the project.
+
+* `analytics`: The analytics service that is built with Openpanel.
+* `api`: The API service that is built with Hono.
+* `location`: The location specific utilities.
+* `logger`: The logger service that is built with Pino.
+* `mail`: The mail service that is built with Resend.
+* `structure`: The visual schema builder.
+* `supabase`: The Supabase service that is built with Supabase.
+* `ui`: The UI components that are built with Shadcn/UI.
+* `utils`: The utility functions that are used across the project.
+
+
+The `tooling` directory contains the tools and scripts that are used to build and run the project.
+
+* `typescript`: The TypeScript configuration.
+
+
+## Prerequisites
+
+* Bun
+* Docker
+* Supabase
+
+
+## Setup Steps
+
+1. Clone the repository
+
+```bash
+git clone https://github.com/nech-ai/proxed.git
+```
+
+2. Install dependencies
+
+```bash
+bun install
+```
+
+3. Create a `.env` file in the root of the project
+
+```bash
+cp .env.example .env
+```
+
+4. Run the project
+
+```bash
+bun dev
+```
+
+
+
+
+
+

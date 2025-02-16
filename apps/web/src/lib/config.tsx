@@ -13,7 +13,7 @@ export const BLUR_FADE_DELAY = 0.15;
 
 export const siteConfig = {
 	name: "Proxed.AI",
-	description: "Protect AI APIs Instantly—Just Update Your URL.",
+	description: "Protect AI APIs Instantly - Just Update Your URL.",
 	cta: "Secure Your AI API Now",
 	url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
 	keywords: [
@@ -138,6 +138,7 @@ export const siteConfig = {
 				"Real-time monitoring",
 			],
 			cta: "Start Free",
+			popular: false,
 		},
 		{
 			name: "Pro",
@@ -152,6 +153,7 @@ export const siteConfig = {
 				"Real-Time Logs & Monitoring",
 			],
 			cta: "Upgrade to Pro",
+			popular: false,
 		},
 		{
 			name: "Ultimate",
@@ -166,6 +168,7 @@ export const siteConfig = {
 				"Dedicated support & SLA",
 			],
 			cta: "Secure Your AI API Now",
+			popular: false,
 		},
 	],
 

@@ -5,7 +5,7 @@
 		"@proxed/structure": "workspace:*",
 		"@proxed/supabase": "workspace:*",
 		"@proxed/utils": "workspace:*",
-		"@sentry/nextjs": "^8.53.0",
+		"@sentry/nextjs": "^9.1.0",
 		"@supabase/sentry-js-integration": "^0.3.0",
 		"@supabase/supabase-js": "^2.48.1",
 		"ai": "^4.1.16",

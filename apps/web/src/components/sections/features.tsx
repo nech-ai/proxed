@@ -23,6 +23,7 @@ interface FeatureCardProps {
 	name: string;
 	description: string;
 	icon: React.ReactNode;
+	href: string;
 	index: number;
 }
 
@@ -30,6 +31,7 @@ function FeatureCard({
 	name,
 	description,
 	icon: Icon,
+	href,
 	index,
 }: FeatureCardProps) {
 	return (
@@ -60,7 +62,7 @@ function FeatureCard({
 			</div>
 			<div className="mt-auto pt-4">
 				<Link
-					href="#"
+					href={href}
 					className="inline-flex items-center text-sm text-primary hover:text-primary/80 transition-colors"
 				>
 					<span className="border-b border-transparent transition-colors group-hover:border-current">

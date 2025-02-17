@@ -73,13 +73,13 @@ export const siteConfig = {
 				{
 					title: "No SDK, No Backend Required",
 					description:
-						"Simply replace your AI API URL with Proxed.AI’s secure endpoint—no extra code, no SDK dependencies.",
+						"Simply replace your AI API URL with Proxed.AI's secure endpoint—no extra code, no SDK dependencies.",
 					icon: <CheckCircleIcon className="h-6 w-6" />,
 				},
 				{
 					title: "Lock Down API Keys",
 					description:
-						"Your secret keys never reach the client. Proxed securely manages keys so they’re never exposed or stolen.",
+						"Your secret keys never reach the client. Proxed securely manages keys so they're never exposed or stolen.",
 					icon: <CheckCircleIcon className="h-6 w-6" />,
 				},
 				{
@@ -104,24 +104,28 @@ export const siteConfig = {
 			description:
 				"Proxed.AI acts as a secure proxy—just update your API URL and instantly protect your AI calls.",
 			icon: <KeyIcon className="h-6 w-6" />,
+			href: "/secure",
 		},
 		{
 			name: "DeviceCheck Authentication",
 			description:
 				"Ensure only genuine, unmodified iOS devices can access your AI APIs—blocking fake requests and unauthorized users.",
 			icon: <ShieldIcon className="h-6 w-6" />,
+			href: "/device-check",
 		},
 		{
 			name: "Rate Limiting & AI Cost Control",
 			description:
 				"Monitor API usage, set request limits, and prevent runaway costs automatically.",
 			icon: <GaugeIcon className="h-6 w-6" />,
+			href: "/rate-limiting",
 		},
 		{
 			name: "Structured AI Responses",
 			description:
 				"Define response formats and enforce consistency—no more malformed AI outputs or unexpected JSON errors.",
 			icon: <BrainIcon className="h-6 w-6" />,
+			href: "/structured-responses",
 		},
 	],
 

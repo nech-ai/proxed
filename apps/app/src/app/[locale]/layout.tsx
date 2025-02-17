@@ -14,7 +14,6 @@ export const metadata: Metadata = {
 	title: {
 		absolute: "Proxed.AI",
 		default: "Proxed.AI",
-		template: "%s | Proxed.AI",
 	},
 };
 

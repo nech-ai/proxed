@@ -1,4 +1,5 @@
 import { getBlogPosts } from "@/lib/blog";
+import { siteConfig } from "@/lib/config";
 import type { MetadataRoute } from "next";
 
 export const baseUrl = "https://proxed.ai";
@@ -9,10 +10,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		lastModified: post.metadata.publishedAt,
 	}));
 
+	const features = siteConfig.features.map((feature) => ({
+		url: `${baseUrl}${feature.href}`,
+		lastModified: new Date().toISOString().split("T")[0],
+	}));
+
 	const routes = ["", "/updates", "/about"].map((route) => ({
 		url: `${baseUrl}${route}`,
 		lastModified: new Date().toISOString().split("T")[0],
 	}));
 
-	return [...routes, ...blogs];
+	return [...routes, ...blogs, ...features];
 }

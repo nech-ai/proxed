@@ -18,18 +18,18 @@ const ANIMATION_CONFIG = {
 function HeroPill() {
 	return (
 		<motion.a
-			href="/updates/starting"
+			href="/updates/public-launch"
 			className="group flex w-auto items-center space-x-2 bg-primary/20 px-3 py-1.5 ring-1 ring-accent rounded-full hover:bg-primary/30 transition-colors"
 			initial={{ opacity: 0, y: -20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={ANIMATION_CONFIG}
 		>
 			<div className="w-fit bg-accent px-2 py-0.5 rounded-full text-left text-xs font-medium text-primary sm:text-sm">
-				🛠️ New
+				🚀 Launch
 			</div>
-			<p className="text-xs font-medium text-primary sm:text-sm">
-				Starting Proxed
-			</p>
+			<span className="font-medium">Public Beta Coming Soon</span>
+			<span className="hidden sm:inline"> · </span>
+			<span className="sm:inline">Get early access now</span>
 			<svg
 				width="12"
 				height="12"

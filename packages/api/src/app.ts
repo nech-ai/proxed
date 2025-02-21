@@ -5,7 +5,9 @@ import { openAPISpecs } from "hono-openapi";
 import { corsMiddleware } from "./middleware/cors";
 import { loggerMiddleware } from "./middleware/logger";
 import { healthRouter } from "./routes/health";
-import { structuredResponseRouter } from "./routes/structured-response";
+import { visionResponseRouter } from "./routes/vision";
+import { textResponseRouter } from "./routes/text";
+import { pdfResponseRouter } from "./routes/pdf";
 import { logger } from "@proxed/logger";
 
 const root = new Hono();
@@ -18,7 +20,9 @@ apiV1.use(loggerMiddleware);
 apiV1.use(corsMiddleware);
 
 apiV1.route("/", healthRouter);
-apiV1.route("/structured-response", structuredResponseRouter);
+apiV1.route("/vision", visionResponseRouter);
+apiV1.route("/text", textResponseRouter);
+apiV1.route("/pdf", pdfResponseRouter);
 
 export const app = new Hono();
 
@@ -26,7 +30,7 @@ app.route("/", root);
 app.route("/", apiV1);
 
 app.get(
-	"/structured-response",
+	"/vision",
 	openAPISpecs(app, {
 		documentation: {
 			info: {
@@ -48,7 +52,7 @@ app.get(
 	apiReference({
 		theme: "saturn",
 		spec: {
-			url: "/structured-response",
+			url: "/vision",
 		},
 	}),
 );

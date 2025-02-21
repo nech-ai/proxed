@@ -53,7 +53,6 @@ const getCommonExecutionParams = ({
 		Number.parseFloat(c.req.header(Headers.Latitude) ?? "0") || undefined,
 });
 
-// MARK: - Handle Structured Response
 async function handleStructuredResponse(
 	c: Context<{ Variables: AuthMiddlewareVariables }>,
 ) {
@@ -69,7 +68,6 @@ async function handleStructuredResponse(
 		return c.json({ error: "Project not found" }, 404);
 	}
 
-	// Validate the request body: check content-type, safely parse JSON, and validate with zod
 	const contentType = c.req.header("content-type");
 	if (!contentType || !contentType.includes("application/json")) {
 		return c.json({ error: "Invalid content type" }, 400);
@@ -83,15 +81,18 @@ async function handleStructuredResponse(
 	}
 
 	const bodySchema = z.object({
-		image: z.string().nonempty("Image is required"),
+		pdf: z
+			.string()
+			.nonempty("PDF content is required")
+			.regex(/^data:application\/pdf;base64,/, "Invalid PDF base64 format")
+			.or(z.string().url("Invalid PDF URL")),
 	});
 	const result = bodySchema.safeParse(bodyData);
 	if (!result.success) {
 		return c.json({ error: result.error.flatten() }, 400);
 	}
-	const { image } = result.data;
+	const { pdf } = result.data;
 
-	// Convert project schema config using jsonToZod
 	const parser = new ZodParser();
 	const schema = parser.convertJsonSchemaToZodValidator(
 		project.schema_config as unknown as JsonSchema,
@@ -129,6 +130,22 @@ async function handleStructuredResponse(
 			apiKey: fullApiKey,
 		});
 
+		let pdfData: Buffer;
+		if (pdf.startsWith("data:application/pdf;base64,")) {
+			pdfData = Buffer.from(
+				pdf.replace(/^data:application\/pdf;base64,/, ""),
+				"base64",
+			);
+		} else {
+			// If it's a URL, fetch the PDF
+			const response = await fetch(pdf);
+			if (!response.ok) {
+				throw new Error(`Failed to fetch PDF from URL: ${response.statusText}`);
+			}
+			const arrayBuffer = await response.arrayBuffer();
+			pdfData = Buffer.from(arrayBuffer);
+		}
+
 		const { object, usage, finishReason } = await generateObject({
 			model: openaiClient(project.model, { structuredOutputs: true }),
 			schema,
@@ -143,16 +160,18 @@ async function handleStructuredResponse(
 						{
 							type: "text",
 							text:
-								project.default_user_prompt ?? "You are a helpful assistant.",
+								project.default_user_prompt ??
+								"Analyze the following PDF and generate a structured response.",
 						},
 						{
-							type: "image",
-							image: image,
+							type: "file",
+							data: pdfData,
+							mimeType: "application/pdf",
 						},
 					],
 				},
 			],
-			maxTokens: 1000,
+			maxTokens: 4000,
 		});
 
 		const latency = Date.now() - startTime;
@@ -187,18 +206,17 @@ async function handleStructuredResponse(
 	}
 }
 
-export const structuredResponseRouter = new Hono<{
+export const pdfResponseRouter = new Hono<{
 	Variables: AuthMiddlewareVariables;
 }>()
-
-	// ProjectId provided as header
 	.use("/", authMiddleware)
 	.post(
 		"/",
 		describeRoute({
 			tags: ["Structured Response"],
-			summary: "Structured Response",
-			description: "Returns a structured response using projectId from header",
+			summary: "PDF Structured Response",
+			description:
+				"Returns a structured response for PDF input using projectId from header",
 			responses: {
 				200: { description: "Structured response" },
 				400: { description: "Bad request" },
@@ -208,14 +226,14 @@ export const structuredResponseRouter = new Hono<{
 		}),
 		handleStructuredResponse,
 	)
-	// ProjectId provided as part of the URL
 	.use("/:projectId", authMiddleware)
 	.post(
 		"/:projectId",
 		describeRoute({
 			tags: ["Structured Response"],
-			summary: "Structured Response with URL projectId",
-			description: "Returns a structured response using projectId from the URL",
+			summary: "PDF Structured Response with URL projectId",
+			description:
+				"Returns a structured response for PDF input using projectId from the URL",
 			parameters: [
 				{
 					in: "path",

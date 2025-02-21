@@ -1,0 +1,143 @@
+---
+title: "New Structured Response Routes: Text and PDF Analysis"
+publishedAt: "2025-02-21"
+summary: "Introducing new routes for text and PDF analysis with structured responses"
+image: "/images/starting.png"
+tag: "Engineering"
+---
+
+# New Structured Response Routes: Text and PDF Analysis
+
+We're excited to announce two new routes in our API: Text and PDF analysis with structured responses. These additions complement our existing Vision route, providing a comprehensive suite of AI-powered analysis tools.
+
+## Text Analysis Route
+
+The new `/v1/text` endpoint allows you to send text content and receive structured, schema-validated responses. This is perfect for:
+
+- Sentiment analysis
+- Topic extraction
+- Text summarization
+- Key phrase identification
+- Custom text analysis based on your schema
+
+Example request:
+```json
+POST /v1/text/<your-project-id>
+Content-Type: application/json
+x-ai-key: <your-api-key>
+
+{
+  "text": "Your text content here"
+}
+```
+
+## PDF Analysis Route
+
+The `/v1/pdf` endpoint enables structured analysis of PDF documents. You can send PDFs either as a URL or base64-encoded data. This is ideal for:
+
+- Document summarization
+- Information extraction
+- Table and figure analysis
+- Content structuring
+- Custom PDF analysis based on your schema
+
+Example request with URL:
+```json
+POST /v1/pdf/<your-project-id>
+Content-Type: application/json
+x-ai-key: <your-api-key>
+
+{
+  "pdf": "https://example.com/document.pdf"
+}
+```
+
+Example request with base64:
+```json
+POST /v1/pdf/<your-project-id>
+Content-Type: application/json
+x-ai-key: <your-api-key>
+
+{
+  "pdf": "data:application/pdf;base64,..."
+}
+```
+
+## Key Features
+
+Both routes include:
+
+- **Schema Validation**: Define your response structure in the project settings
+- **Flexible Input**: Support for various input formats
+- **Security**: Full DeviceCheck integration
+- **Metrics Tracking**: Monitor usage, latency, and performance
+- **Error Handling**: Comprehensive error reporting
+- **Location Awareness**: Optional geographic context for responses
+
+## Implementation Example
+
+Here's a Swift example showing how to use both routes:
+
+```swift
+actor ContentAnalyzer {
+    let apiKey = "<your-api-key>"
+    let textEndpoint = "https://api.proxed.ai/v1/text/<your-project-id>"
+    let pdfEndpoint = "https://api.proxed.ai/v1/pdf/<your-project-id>"
+
+    // Analyze text
+    func analyzeText(_ text: String) async throws {
+        let token = await SimpleDeviceCheck.retrieveToken()
+
+        var request = URLRequest(url: URL(string: textEndpoint)!)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(apiKey, forHTTPHeaderField: "x-ai-key")
+        if let token = token {
+            request.setValue(token, forHTTPHeaderField: "x-device-token")
+        }
+        request.httpBody = try JSONEncoder().encode(["text": text])
+
+        let (data, _) = try await URLSession.shared.data(for: request)
+        let analysis = try JSONDecoder().decode(Analysis.self, from: data)
+        print("Analysis:", analysis)
+    }
+
+    // Analyze PDF from URL
+    func analyzePDF(url: URL) async throws {
+        let token = await SimpleDeviceCheck.retrieveToken()
+
+        var request = URLRequest(url: URL(string: pdfEndpoint)!)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(apiKey, forHTTPHeaderField: "x-ai-key")
+        if let token = token {
+            request.setValue(token, forHTTPHeaderField: "x-device-token")
+        }
+        request.httpBody = try JSONEncoder().encode(["pdf": url.absoluteString])
+
+        let (data, _) = try await URLSession.shared.data(for: request)
+        let analysis = try JSONDecoder().decode(Analysis.self, from: data)
+        print("Analysis:", analysis)
+    }
+}
+```
+
+## Getting Started
+
+1. Create a new project in the dashboard
+2. Define your response schema
+3. Generate an API key
+4. Implement DeviceCheck security
+5. Start making requests!
+
+Check out our [documentation](https://docs.proxed.ai/structured-responses) for detailed implementation guides and best practices.
+
+## What's Next?
+
+We're continuously working on improving our API. Coming soon:
+- More input formats
+- Enhanced analysis capabilities
+- Additional language support
+- Advanced schema validation options
+
+Stay tuned for more updates!

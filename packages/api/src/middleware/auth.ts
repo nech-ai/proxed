@@ -9,9 +9,11 @@ export const authMiddleware = createMiddleware<{
 }>(async (c, next) => {
 	const supabase = await createClient();
 
+	// Get tokens from headers
 	const deviceToken = c.req.header("x-device-token");
 	const testKey = c.req.header("x-proxed-test-key");
 	const projectId = c.req.param("projectId") || c.req.header("x-project-id");
+	const authHeader = c.req.header("Authorization");
 
 	if (!projectId) {
 		return c.json({ error: "Missing project id" }, 401);
@@ -33,6 +35,40 @@ export const authMiddleware = createMiddleware<{
 		return;
 	}
 
+	// Handle concatenated token in Authorization header
+	if (authHeader?.startsWith("Bearer ")) {
+		const [token, deviceCheckToken] = authHeader
+			.replace("Bearer ", "")
+			.split(".");
+
+		if (!token || !deviceCheckToken || !project?.device_check) {
+			return c.json({ error: "Invalid authorization token format" }, 401);
+		}
+
+		try {
+			const isValid = await verifyDeviceCheckToken(
+				Buffer.from(deviceCheckToken, "base64"),
+				project.device_check,
+			);
+
+			if (!isValid) {
+				return c.json({ error: "Invalid device token" }, 401);
+			}
+
+			c.set("session", {
+				teamId: project.team_id,
+				projectId,
+				token,
+			});
+
+			await next();
+			return;
+		} catch (error) {
+			return c.json({ error: "Invalid device token" }, 401);
+		}
+	}
+
+	// Handle separate device token
 	if (!deviceToken || !project?.device_check) {
 		return c.json({ error: "Missing device token" }, 401);
 	}
@@ -46,6 +82,7 @@ export const authMiddleware = createMiddleware<{
 		if (!isValid) {
 			return c.json({ error: "Invalid device token" }, 401);
 		}
+
 		c.set("session", {
 			teamId: project.team_id,
 			projectId,

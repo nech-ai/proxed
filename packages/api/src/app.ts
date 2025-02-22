@@ -9,6 +9,7 @@ import { visionResponseRouter } from "./routes/vision";
 import { textResponseRouter } from "./routes/text";
 import { pdfResponseRouter } from "./routes/pdf";
 import { logger } from "@proxed/logger";
+import { openaiRouter } from "./routes/openai";
 
 const root = new Hono();
 
@@ -23,7 +24,7 @@ apiV1.route("/", healthRouter);
 apiV1.route("/vision", visionResponseRouter);
 apiV1.route("/text", textResponseRouter);
 apiV1.route("/pdf", pdfResponseRouter);
-
+apiV1.route("/openai", openaiRouter);
 export const app = new Hono();
 
 app.route("/", root);

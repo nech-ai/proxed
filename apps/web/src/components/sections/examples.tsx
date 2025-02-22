@@ -225,6 +225,69 @@ struct Figure: Decodable {
 	let description: String
 }`,
 	},
+	{
+		id: 4,
+		title: "OpenAI API Proxy",
+		comingSoon: false,
+		description:
+			"Use proxed.ai as a secure proxy for OpenAI API calls with built-in security and usage tracking",
+		code: `import OpenAI
+
+actor OpenAIProxy {
+    let endpoint = "https://api.proxed.ai/v1/openai/<your-project-id>"  // API endpoint
+    let apiKey = "<your-api-key>"
+    let client: OpenAI
+
+    init() {
+        // Get DeviceCheck token and combine with API key
+        let token = await SimpleDeviceCheck.retrieveToken()
+        let combinedToken = "\(apiKey).\(token)"
+
+        // Configure OpenAI client to use proxed.ai with combined token
+        let configuration = OpenAI.Configuration(
+            baseURL: URL(string: endpoint)!,
+            apiKey: combinedToken
+        )
+
+        client = OpenAI(configuration: configuration)
+    }
+
+    // Example usage
+    func chatCompletion(messages: [Chat]) async throws -> ChatCompletion {
+        let query = ChatQuery(
+            model: .gpt4,
+            messages: messages
+        )
+        return try await client.chats(query: query)
+    }
+
+    // Image generation example
+    func generateImage(prompt: String) async throws -> ImagesResponse {
+        let query = ImagesQuery(
+            model: .dallE3,
+            prompt: prompt,
+            n: 1,
+            size: .s1024
+        )
+
+        return try await client.images(query: query)
+    }
+}
+
+struct SimpleDeviceCheck {
+    static func retrieveToken() async throws -> String {
+        guard DCDevice.current.isSupported else {
+            throw DeviceCheckError.notSupported
+        }
+        let tokenData = try await DCDevice.current.generateToken()
+        return tokenData.base64EncodedString()
+    }
+}
+
+enum DeviceCheckError: Error {
+    case notSupported
+}`,
+	},
 ];
 
 export async function Examples() {

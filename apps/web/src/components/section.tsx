@@ -17,6 +17,7 @@ interface SectionProps extends React.HTMLAttributes<HTMLElement> {
 	noBorder?: boolean;
 	className?: string;
 	fadeIn?: boolean;
+	skipInitialAnimation?: boolean;
 }
 
 const FADE_IN_ANIMATION = {
@@ -60,6 +61,7 @@ function SectionHeader({
 	description,
 	align,
 	fadeIn,
+	skipInitialAnimation,
 }: Omit<SectionProps, "children" | "className" | "noBorder">) {
 	if (!title && !subtitle && !description) return null;
 
@@ -84,7 +86,14 @@ function SectionHeader({
 
 	if (fadeIn) {
 		return (
-			<motion.div {...FADE_IN_ANIMATION}>
+			<motion.div
+				{...FADE_IN_ANIMATION}
+				initial={
+					skipInitialAnimation
+						? { opacity: 1, y: 0 }
+						: FADE_IN_ANIMATION.initial
+				}
+			>
 				<HeaderContent />
 			</motion.div>
 		);
@@ -105,6 +114,7 @@ const Section = forwardRef<HTMLElement, SectionProps>(
 			align,
 			noBorder,
 			fadeIn = true,
+			skipInitialAnimation = false,
 			...props
 		},
 		forwardedRef,
@@ -126,9 +136,19 @@ const Section = forwardRef<HTMLElement, SectionProps>(
 					description={description}
 					align={align}
 					fadeIn={fadeIn}
+					skipInitialAnimation={skipInitialAnimation}
 				/>
 				{fadeIn ? (
-					<motion.div {...FADE_IN_ANIMATION}>{children}</motion.div>
+					<motion.div
+						{...FADE_IN_ANIMATION}
+						initial={
+							skipInitialAnimation
+								? { opacity: 1, y: 0 }
+								: FADE_IN_ANIMATION.initial
+						}
+					>
+						{children}
+					</motion.div>
 				) : (
 					children
 				)}

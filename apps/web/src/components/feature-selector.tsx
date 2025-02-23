@@ -40,7 +40,7 @@ interface CodeDisplayProps {
 function CodeDisplay({ code }: CodeDisplayProps) {
 	return (
 		<div
-			className="bg-background font-mono text-sm [&>pre]:!bg-transparent [&>pre]:p-4 [&_code]:break-all md:max-h-[45vh] overflow-scroll"
+			className="bg-background font-mono text-sm [&>pre]:!bg-transparent [&>pre]:p-4 [&_code]:break-all"
 			// biome-ignore lint/security/noDangerouslySetInnerHtml: Code is sanitized by the build process
 			dangerouslySetInnerHTML={{ __html: code }}
 		/>
@@ -57,7 +57,12 @@ export function FeatureSelector({ features, className }: FeatureSelectorProps) {
 	const selectedFeature = features[selectedIndex];
 
 	return (
-		<div className={cn("grid grid-cols-1 md:grid-cols-5 relative", className)}>
+		<div
+			className={cn(
+				"grid grid-cols-1 md:grid-cols-5 relative h-[calc(100vh-var(--header-height))]",
+				className,
+			)}
+		>
 			<div className="md:col-span-2 border-b md:border-b-0 bg-background md:border-r border-border sticky top-[var(--header-height)]">
 				<div className="flex md:flex-col feature-btn-container overflow-x-auto p-4 pb-2">
 					{features.map((option, index) => (
@@ -70,7 +75,7 @@ export function FeatureSelector({ features, className }: FeatureSelectorProps) {
 					))}
 				</div>
 			</div>
-			<div className="col-span-1 md:col-span-3">
+			<div className="col-span-1 md:col-span-3 h-full">
 				{selectedFeature && <CodeDisplay code={selectedFeature.code} />}
 			</div>
 		</div>

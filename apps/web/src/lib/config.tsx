@@ -34,8 +34,7 @@ export const siteConfig = {
 		description:
 			"Proxed.AI is the simplest way to protect AI API keys in iOS apps. Lock down your API credentials, verify device authenticity with Apple's DeviceCheck, and structure AI outputs—all without a backend. Just change your API URL and get instant security.",
 		cta: "Start Protecting Your API",
-		ctaDescription:
-			"Open-source and free during Beta—upgrade your security with zero integration effort.",
+		ctaDescription: "Open-source with a free tier.",
 	},
 
 	problemSolution: {

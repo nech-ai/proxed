@@ -47,46 +47,6 @@ actor VisionAnalyzer {
 		let analysis = try JSONDecoder().decode(VisionAnalysis.self, from: data)
 		print("Vision Analysis:", analysis)
 	}
-}
-
-struct DeviceCheck {
-	static func retrieveToken() async -> String? {
-		guard DCDevice.current.isSupported else {
-			print("DeviceCheck not supported")
-			return nil
-		}
-		do {
-			let tokenData = try await DCDevice.current.generateToken()
-			return tokenData.base64EncodedString()
-		} catch {
-			print("Error generating token:", error)
-			return nil
-		}
-	}
-}
-
-enum AnalyzerError: Error {
-	case imageConversionFailed
-	case requestFailed
-}
-
-struct VisionAnalysis: Decodable {
-	let objects: [DetectedObject]
-	let labels: [String]
-	let description: String
-}
-
-struct DetectedObject: Decodable {
-	let label: String
-	let confidence: Float
-	let boundingBox: BoundingBox
-}
-
-struct BoundingBox: Decodable {
-	let x: Float
-	let y: Float
-	let width: Float
-	let height: Float
 }`,
 	},
 	{
@@ -122,40 +82,6 @@ actor TextAnalyzer {
 		let analysis = try JSONDecoder().decode(TextAnalysis.self, from: data)
 		print("Text Analysis:", analysis)
 	}
-}
-
-struct DeviceCheck {
-	static func retrieveToken() async -> String? {
-		guard DCDevice.current.isSupported else {
-			print("DeviceCheck not supported")
-			return nil
-		}
-		do {
-			let tokenData = try await DCDevice.current.generateToken()
-			return tokenData.base64EncodedString()
-		} catch {
-			print("Error generating token:", error)
-			return nil
-		}
-	}
-}
-
-enum AnalyzerError: Error {
-	case requestFailed
-}
-
-struct TextAnalysis: Decodable {
-	let sentiment: String
-	let topics: [String]
-	let summary: String
-	let keyPhrases: [String]
-	let entities: [Entity]
-}
-
-struct Entity: Decodable {
-	let text: String
-	let type: String
-	let confidence: Float
 }`,
 	},
 	{
@@ -170,28 +96,6 @@ actor DocumentAnalyzer {
 	let apiKey = "<your-api-key>"
 	let endpoint = "https://api.proxed.ai/v1/document/<your-project-id>"
 
-	func analyzeDocument(url: URL) async throws {
-		let token = await DeviceCheck.retrieveToken()
-
-		var request = URLRequest(url: URL(string: endpoint)!)
-		request.httpMethod = "POST"
-		request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-		request.setValue(apiKey, forHTTPHeaderField: "x-ai-key")
-		if let token = token {
-			request.setValue(token, forHTTPHeaderField: "x-device-token")
-		}
-		request.httpBody = try JSONEncoder().encode(["pdf": url.absoluteString])
-
-		let (data, response) = try await URLSession.shared.data(for: request)
-		guard let httpResponse = response as? HTTPURLResponse,
-			  (200...299).contains(httpResponse.statusCode) else {
-			throw AnalyzerError.requestFailed
-		}
-
-		let analysis = try JSONDecoder().decode(DocumentAnalysis.self, from: data)
-		print("Document Analysis:", analysis)
-	}
-
 	func analyzeDocumentData(_ documentData: Data) async throws {
 		let token = await DeviceCheck.retrieveToken()
 		let base64Document = documentData.base64EncodedString()
@@ -203,7 +107,7 @@ actor DocumentAnalyzer {
 		if let token = token {
 			request.setValue(token, forHTTPHeaderField: "x-device-token")
 		}
-		request.httpBody = try JSONEncoder().encode(["document": base64Document])
+		request.httpBody = try JSONEncoder().encode(["pdf": base64Document])
 
 		let (data, response) = try await URLSession.shared.data(for: request)
 		guard let httpResponse = response as? HTTPURLResponse,
@@ -214,45 +118,6 @@ actor DocumentAnalyzer {
 		let analysis = try JSONDecoder().decode(DocumentAnalysis.self, from: data)
 		print("Document Analysis:", analysis)
 	}
-}
-
-struct DeviceCheck {
-	static func retrieveToken() async -> String? {
-		guard DCDevice.current.isSupported else {
-			print("DeviceCheck not supported")
-			return nil
-		}
-		do {
-			let tokenData = try await DCDevice.current.generateToken()
-			return tokenData.base64EncodedString()
-		} catch {
-			print("Error generating token:", error)
-			return nil
-		}
-	}
-}
-
-enum AnalyzerError: Error {
-	case requestFailed
-}
-
-struct DocumentAnalysis: Decodable {
-	let title: String
-	let authors: [String]
-	let summary: String
-	let keyFindings: [String]
-	let tables: [Table]
-	let figures: [Figure]
-}
-
-struct Table: Decodable {
-	let caption: String
-	let data: [[String]]
-}
-
-struct Figure: Decodable {
-	let caption: String
-	let description: String
 }`,
 	},
 	{
@@ -287,37 +152,6 @@ actor OpenAIAnalyzer {
         )
         return try await client.chats(query: query)
     }
-
-    func generateImage(prompt: String) async throws -> ImagesResponse {
-        let query = ImagesQuery(
-            model: .dallE3,
-            prompt: prompt,
-            n: 1,
-            size: .s1024
-        )
-
-        return try await client.images(query: query)
-    }
-}
-
-struct DeviceCheck {
-    static func retrieveToken() async -> String? {
-        guard DCDevice.current.isSupported else {
-            print("DeviceCheck not supported")
-            return nil
-        }
-        do {
-            let tokenData = try await DCDevice.current.generateToken()
-            return tokenData.base64EncodedString()
-        } catch {
-            print("Error generating token:", error)
-            return nil
-        }
-    }
-}
-
-enum AnalyzerError: Error {
-    case requestFailed
 }`,
 	},
 ];

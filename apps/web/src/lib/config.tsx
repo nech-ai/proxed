@@ -188,6 +188,10 @@ export const siteConfig = {
 		],
 		links: [
 			{ text: "Docs", url: "https://docs.proxed.ai" },
+			{
+				text: "Example Apps",
+				url: "https://github.com/nech-ai/proxed-examples",
+			},
 			{ text: "Privacy Policy", url: "/legal/privacy" },
 			{ text: "Terms of Service", url: "/legal/terms" },
 		],

@@ -20,7 +20,6 @@ import {
 	verticalListSortingStrategy,
 	useSortable,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { Alert, AlertDescription } from "@proxed/ui/components/alert";
 import { ScrollArea } from "@proxed/ui/components/scroll-area";
 import {

@@ -28,6 +28,7 @@ import {
 	AlertTitle,
 } from "@proxed/ui/components/alert";
 import { AlertTriangleIcon } from "lucide-react";
+import { z } from "zod";
 
 export async function generateMetadata(props: {
 	params: Promise<{ id: string }>;
@@ -54,10 +55,20 @@ export default async function Page(props: {
 		notFound();
 	}
 
-	const schemaConfig = (project.schema_config || {
+	const defaultSchema = {
 		type: "object",
 		fields: {},
-	}) as JsonSchema;
+	} as const;
+
+	const schemaConfigValidator = z.object({
+		type: z.string(),
+		fields: z.record(z.any()).default({}),
+	});
+
+	const schemaConfig = schemaConfigValidator.safeParse(project.schema_config)
+		.success
+		? (project.schema_config as unknown as JsonSchema)
+		: (defaultSchema as JsonSchema);
 
 	const zodParser = new ZodParser();
 	const swiftParser = new SwiftParser("");

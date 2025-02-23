@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { updateProjectAction } from "@/actions/update-project-action";
 import {
 	type UpdateProjectFormValues,
@@ -52,6 +53,85 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 
+type Provider = "OPENAI" | "ANTHROPIC";
+
+interface ModelOption {
+	value: string;
+	label: string;
+}
+
+const MODEL_OPTIONS: Record<Provider, ModelOption[]> = {
+	OPENAI: [
+		{ value: "gpt-4o", label: "GPT-4o" },
+		{ value: "gpt-4o-mini", label: "GPT-4o Mini" },
+	],
+	ANTHROPIC: [{ value: "claude-3-sonnet", label: "Claude 3 Sonnet" }],
+};
+
+interface SectionProps {
+	title: string;
+	children: ReactNode;
+}
+
+function Section({ title, children }: SectionProps) {
+	return (
+		<div>
+			<div className="text-lg font-semibold border-b pb-2 text-foreground">
+				{title}
+			</div>
+			<div className="mt-4">{children}</div>
+		</div>
+	);
+}
+
+interface EmptyStateProps {
+	message: string;
+	linkText: string;
+	linkHref: string;
+}
+
+function EmptyState({ message, linkText, linkHref }: EmptyStateProps) {
+	return (
+		<div className="p-4 text-sm text-center space-y-2">
+			<p className="text-muted-foreground">{message}</p>
+			<Button asChild variant="link" className="p-0">
+				<Link href={linkHref}>{linkText}</Link>
+			</Button>
+		</div>
+	);
+}
+
+interface ConfirmationDialogProps {
+	isOpen: boolean;
+	onCancel: () => void;
+	onConfirm: () => void;
+	title: string;
+	description: string;
+}
+
+function ConfirmationDialog({
+	isOpen,
+	onCancel,
+	onConfirm,
+	title,
+	description,
+}: ConfirmationDialogProps) {
+	return (
+		<AlertDialogContent>
+			<AlertDialogHeader>
+				<AlertDialogTitle>{title}</AlertDialogTitle>
+				<AlertDialogDescription>{description}</AlertDialogDescription>
+			</AlertDialogHeader>
+			<AlertDialogFooter>
+				<AlertDialogCancel onClick={onCancel}>Cancel</AlertDialogCancel>
+				<AlertDialogAction onClick={onConfirm}>
+					Confirm Change
+				</AlertDialogAction>
+			</AlertDialogFooter>
+		</AlertDialogContent>
+	);
+}
+
 interface ProjectEditFormProps {
 	project: Tables<"projects">;
 	deviceChecks: Tables<"device_checks">[];
@@ -71,31 +151,48 @@ export function ProjectEditForm({
 			name: project.name,
 			description: project.description || "",
 			bundleId: project.bundle_id,
-			deviceCheckId: project.device_check_id,
-			keyId: project.key_id,
+			deviceCheckId: project.device_check_id || "none",
+			keyId: project.key_id || "none",
 			systemPrompt: project.system_prompt || "",
 			defaultUserPrompt: project.default_user_prompt || "",
-			model: project.model || "",
+			model: project.model || "none",
 		},
 	});
 
-	// Add state for tracking pending changes
 	const [pendingKeyChange, setPendingKeyChange] = useState<string | null>(null);
 	const [pendingDeviceCheckChange, setPendingDeviceCheckChange] = useState<
 		string | null
 	>(null);
 
 	const handleKeyChange = (value: string) => {
+		if (form.getValues("keyId") === "none") {
+			form.setValue("keyId", value, { shouldDirty: true });
+			if (value === "none") {
+				form.setValue("model", "none", { shouldDirty: true });
+			}
+			return;
+		}
+
+		if (value === "none") {
+			form.setValue("model", "none");
+		}
 		setPendingKeyChange(value);
 	};
 
 	const handleDeviceCheckChange = (value: string) => {
+		if (form.getValues("deviceCheckId") === "none") {
+			form.setValue("deviceCheckId", value, { shouldDirty: true });
+			return;
+		}
 		setPendingDeviceCheckChange(value);
 	};
 
 	const confirmChange = (type: "key" | "deviceCheck") => {
 		if (type === "key" && pendingKeyChange !== null) {
 			form.setValue("keyId", pendingKeyChange, { shouldDirty: true });
+			if (pendingKeyChange === "none") {
+				form.setValue("model", "none", { shouldDirty: true });
+			}
 			setPendingKeyChange(null);
 		} else if (type === "deviceCheck" && pendingDeviceCheckChange !== null) {
 			form.setValue("deviceCheckId", pendingDeviceCheckChange, {
@@ -125,9 +222,8 @@ export function ProjectEditForm({
 		updateProject.execute(data);
 	});
 
-	// Get selected key's provider
 	const selectedKey = keys.find((k) => k.id === form.watch("keyId"));
-	const selectedProvider = selectedKey?.provider;
+	const selectedProvider = selectedKey?.provider as Provider | undefined;
 
 	return (
 		<Form {...form}>
@@ -142,12 +238,8 @@ export function ProjectEditForm({
 
 					<CardContent>
 						<div className="space-y-8">
-							{/* Basic Information */}
-							<div>
-								<div className="text-lg font-semibold border-b pb-2 text-foreground">
-									Basic Information
-								</div>
-								<div className="grid gap-4 sm:grid-cols-2 mt-4">
+							<Section title="Basic Information">
+								<div className="grid gap-4 sm:grid-cols-2">
 									<FormField
 										control={form.control}
 										name="name"
@@ -194,14 +286,10 @@ export function ProjectEditForm({
 										)}
 									/>
 								</div>
-							</div>
+							</Section>
 
-							{/* Device Check Integration */}
-							<div>
-								<div className="text-lg font-semibold border-b pb-2 text-foreground">
-									Device Check Integration
-								</div>
-								<div className="grid gap-4 sm:grid-cols-2 mt-4">
+							<Section title="Device Check Integration">
+								<div className="grid gap-4 sm:grid-cols-2">
 									<FormField
 										control={form.control}
 										name="deviceCheckId"
@@ -211,8 +299,9 @@ export function ProjectEditForm({
 												<AlertDialog open={!!pendingDeviceCheckChange}>
 													<AlertDialogTrigger asChild>
 														<Select
-															value={field.value || ""}
+															value={field.value}
 															onValueChange={handleDeviceCheckChange}
+															disabled={deviceChecks.length === 0}
 														>
 															<FormControl>
 																<SelectTrigger className="w-full rounded-md border border-input px-3 py-2 bg-card text-foreground focus:ring focus:ring-ring">
@@ -221,60 +310,34 @@ export function ProjectEditForm({
 															</FormControl>
 															<SelectContent>
 																{deviceChecks.length === 0 ? (
-																	<div className="p-4 text-sm text-center space-y-2">
-																		<p className="text-muted-foreground">
-																			No device check configurations found
-																		</p>
-																		<Button
-																			asChild
-																			variant="link"
-																			className="p-0"
-																		>
-																			<Link href="/settings/team/device-check">
-																				Create a Device Check configuration
-																			</Link>
-																		</Button>
-																	</div>
+																	<EmptyState
+																		message="No device check configurations found"
+																		linkText="Create a Device Check configuration"
+																		linkHref="/settings/team/device-check"
+																	/>
 																) : (
-																	deviceChecks.map((dc) => (
-																		<SelectItem key={dc.id} value={dc.id}>
-																			<div className="flex flex-col">
-																				<span>{dc.name}</span>
-																			</div>
-																		</SelectItem>
-																	))
+																	<>
+																		<SelectItem value="none">None</SelectItem>
+																		{deviceChecks.map((dc) => (
+																			<SelectItem key={dc.id} value={dc.id}>
+																				<div className="flex flex-col">
+																					<span>{dc.name}</span>
+																				</div>
+																			</SelectItem>
+																		))}
+																	</>
 																)}
 															</SelectContent>
 														</Select>
 													</AlertDialogTrigger>
 													{pendingDeviceCheckChange && (
-														<AlertDialogContent>
-															<AlertDialogHeader>
-																<AlertDialogTitle>
-																	Warning: Configuration Change
-																</AlertDialogTitle>
-																<AlertDialogDescription>
-																	Changing the Device Check configuration will
-																	affect all production apps using this project.
-																	This change may disrupt service for existing
-																	users. Are you sure you want to proceed?
-																</AlertDialogDescription>
-															</AlertDialogHeader>
-															<AlertDialogFooter>
-																<AlertDialogCancel
-																	onClick={() =>
-																		setPendingDeviceCheckChange(null)
-																	}
-																>
-																	Cancel
-																</AlertDialogCancel>
-																<AlertDialogAction
-																	onClick={() => confirmChange("deviceCheck")}
-																>
-																	Confirm Change
-																</AlertDialogAction>
-															</AlertDialogFooter>
-														</AlertDialogContent>
+														<ConfirmationDialog
+															isOpen={!!pendingDeviceCheckChange}
+															onCancel={() => setPendingDeviceCheckChange(null)}
+															onConfirm={() => confirmChange("deviceCheck")}
+															title="Warning: Configuration Change"
+															description="Changing the Device Check configuration will affect all production apps using this project. This change may disrupt service for existing users. Are you sure you want to proceed?"
+														/>
 													)}
 												</AlertDialog>
 												<FormMessage />
@@ -282,14 +345,10 @@ export function ProjectEditForm({
 										)}
 									/>
 								</div>
-							</div>
+							</Section>
 
-							{/* AI Provider Settings */}
-							<div>
-								<div className="text-lg font-semibold border-b pb-2 text-foreground">
-									AI Provider Settings
-								</div>
-								<div className="grid gap-4 sm:grid-cols-2 mt-4">
+							<Section title="AI Provider Settings">
+								<div className="grid gap-4 sm:grid-cols-2">
 									<FormField
 										control={form.control}
 										name="keyId"
@@ -299,20 +358,21 @@ export function ProjectEditForm({
 												<AlertDialog open={!!pendingKeyChange}>
 													<AlertDialogTrigger asChild>
 														<Select
-															value={field.value || ""}
+															value={field.value}
 															onValueChange={handleKeyChange}
+															disabled={keys.length === 0}
 														>
 															<FormControl>
 																<SelectTrigger className="w-full rounded-md border border-input px-3 py-2 bg-card text-foreground focus:ring focus:ring-ring">
 																	<SelectValue placeholder="Select a provider">
-																		{field.value && (
+																		{field.value && field.value !== "none" && (
 																			<div className="flex items-center gap-2">
 																				<span>
 																					{
 																						keys.find(
 																							(k) => k.id === field.value,
 																						)?.display_name
-																					}
+																					}{" "}
 																					(
 																					{
 																						keys.find(
@@ -327,44 +387,40 @@ export function ProjectEditForm({
 																</SelectTrigger>
 															</FormControl>
 															<SelectContent>
-																{keys.map((key) => (
-																	<SelectItem key={key.id} value={key.id}>
-																		<div className="flex items-center gap-2">
-																			<span>
-																				{key.display_name} ({key.provider})
-																			</span>
-																		</div>
-																	</SelectItem>
-																))}
+																{keys.length === 0 ? (
+																	<EmptyState
+																		message="No API keys found"
+																		linkText="Create an API key"
+																		linkHref="/settings/team/keys"
+																	/>
+																) : (
+																	<>
+																		<SelectItem value="none">None</SelectItem>
+																		{keys
+																			.filter((key) => key.id)
+																			.map((key) => (
+																				<SelectItem key={key.id} value={key.id}>
+																					<div className="flex items-center gap-2">
+																						<span>
+																							{key.display_name} ({key.provider}
+																							)
+																						</span>
+																					</div>
+																				</SelectItem>
+																			))}
+																	</>
+																)}
 															</SelectContent>
 														</Select>
 													</AlertDialogTrigger>
 													{pendingKeyChange && (
-														<AlertDialogContent>
-															<AlertDialogHeader>
-																<AlertDialogTitle>
-																	Warning: Credentials Change
-																</AlertDialogTitle>
-																<AlertDialogDescription>
-																	Changing the AI Provider will affect all
-																	production apps using this project. This
-																	change may disrupt service for existing users.
-																	Are you sure you want to proceed?
-																</AlertDialogDescription>
-															</AlertDialogHeader>
-															<AlertDialogFooter>
-																<AlertDialogCancel
-																	onClick={() => setPendingKeyChange(null)}
-																>
-																	Cancel
-																</AlertDialogCancel>
-																<AlertDialogAction
-																	onClick={() => confirmChange("key")}
-																>
-																	Confirm Change
-																</AlertDialogAction>
-															</AlertDialogFooter>
-														</AlertDialogContent>
+														<ConfirmationDialog
+															isOpen={!!pendingKeyChange}
+															onCancel={() => setPendingKeyChange(null)}
+															onConfirm={() => confirmChange("key")}
+															title="Warning: Credentials Change"
+															description="Changing the AI Provider will affect all production apps using this project. This change may disrupt service for existing users. Are you sure you want to proceed?"
+														/>
 													)}
 												</AlertDialog>
 												<FormMessage />
@@ -372,14 +428,10 @@ export function ProjectEditForm({
 										)}
 									/>
 								</div>
-							</div>
+							</Section>
 
-							{/* AI Configuration */}
-							<div>
-								<div className="text-lg font-semibold border-b pb-2 text-foreground">
-									AI Configuration
-								</div>
-								<div className="grid gap-4 sm:grid-cols-2 mt-4">
+							<Section title="AI Configuration">
+								<div className="grid gap-4 sm:grid-cols-2">
 									<FormField
 										control={form.control}
 										name="model"
@@ -397,21 +449,26 @@ export function ProjectEditForm({
 														</SelectTrigger>
 													</FormControl>
 													<SelectContent>
-														{selectedProvider === "OPENAI" ? (
-															<>
-																<SelectItem value="gpt-4o">GPT-4o</SelectItem>
-																<SelectItem value="gpt-4o-mini">
-																	GPT-4o Mini
-																</SelectItem>
-															</>
-														) : selectedProvider === "ANTHROPIC" ? (
-															<SelectItem value="claude-3-sonnet">
-																Claude 3 Sonnet
-															</SelectItem>
+														{!selectedProvider ? (
+															<EmptyState
+																message="Select a provider first"
+																linkText=""
+																linkHref=""
+															/>
 														) : (
-															<SelectItem value="" disabled>
-																Select a provider first
-															</SelectItem>
+															<>
+																<SelectItem value="none">None</SelectItem>
+																{MODEL_OPTIONS[selectedProvider].map(
+																	(option) => (
+																		<SelectItem
+																			key={option.value}
+																			value={option.value}
+																		>
+																			{option.label}
+																		</SelectItem>
+																	),
+																)}
+															</>
 														)}
 													</SelectContent>
 												</Select>
@@ -463,7 +520,7 @@ export function ProjectEditForm({
 										)}
 									/>
 								</div>
-							</div>
+							</Section>
 						</div>
 					</CardContent>
 
@@ -478,21 +535,13 @@ export function ProjectEditForm({
 									Reset
 								</Button>
 							</AlertDialogTrigger>
-							<AlertDialogContent>
-								<AlertDialogHeader>
-									<AlertDialogTitle>Reset Changes?</AlertDialogTitle>
-									<AlertDialogDescription>
-										This will reset all changes you've made. This action cannot
-										be undone.
-									</AlertDialogDescription>
-								</AlertDialogHeader>
-								<AlertDialogFooter>
-									<AlertDialogCancel>Cancel</AlertDialogCancel>
-									<AlertDialogAction onClick={() => form.reset()}>
-										Reset Changes
-									</AlertDialogAction>
-								</AlertDialogFooter>
-							</AlertDialogContent>
+							<ConfirmationDialog
+								isOpen={true}
+								onCancel={() => {}}
+								onConfirm={() => form.reset()}
+								title="Reset Changes?"
+								description="This will reset all changes you've made. This action cannot be undone."
+							/>
 						</AlertDialog>
 						<Button
 							type="submit"

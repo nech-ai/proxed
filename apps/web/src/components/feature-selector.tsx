@@ -40,7 +40,7 @@ interface CodeDisplayProps {
 function CodeDisplay({ code }: CodeDisplayProps) {
 	return (
 		<div
-			className="bg-background font-mono text-sm [&>pre]:!bg-transparent [&>pre]:p-4 [&_code]:break-all"
+			className="bg-background font-mono text-sm [&>pre]:!bg-transparent [&>pre]:p-4 [&_code]:break-all overflow-x-auto"
 			// biome-ignore lint/security/noDangerouslySetInnerHtml: Code is sanitized by the build process
 			dangerouslySetInnerHTML={{ __html: code }}
 		/>

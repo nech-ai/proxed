@@ -13,22 +13,22 @@ interface FeatureOption {
 export const featureOptions: FeatureOption[] = [
 	{
 		id: 1,
-		title: "Vision Structured Response",
+		title: "Vision Analysis",
 		comingSoon: false,
 		description:
-			"Use proxed.ai to send images from your app for seamless, structured analysis",
+			"Transform images into structured data with our Vision API. Perfect for building apps that need to understand and analyze visual content - from product recognition to medical imaging analysis.",
 		code: `import DeviceCheck
 
-actor SimpleAPIIntegrator {
-	let apiKey = "<your-api-key>"        // Partial API key (we don't store the full key)
-	let endpoint = "https://api.proxed.ai/v1/vision/<your-project-id>"  // API endpoint
+actor VisionAnalyzer {
+	let apiKey = "<your-api-key>"
+	let endpoint = "https://api.proxed.ai/v1/vision/<your-project-id>"
 
-	func sendImage(image: UIImage) async throws {
+	func analyzeImage(image: UIImage) async throws {
 		guard let imageData = image.jpegData(compressionQuality: 0.9) else {
-			fatalError("Image conversion failed")
+			throw AnalyzerError.imageConversionFailed
 		}
 		let base64Image = imageData.base64EncodedString()
-		let token = await SimpleDeviceCheck.retrieveToken()
+		let token = await DeviceCheck.retrieveToken()
 
 		var request = URLRequest(url: URL(string: endpoint)!)
 		request.httpMethod = "POST"
@@ -41,16 +41,15 @@ actor SimpleAPIIntegrator {
 		let (data, response) = try await URLSession.shared.data(for: request)
 		guard let httpResponse = response as? HTTPURLResponse,
 			  (200...299).contains(httpResponse.statusCode) else {
-			fatalError("Failed to send image")
+			throw AnalyzerError.requestFailed
 		}
 
-		// Decode structured AI response which you build in the project settings from received data
-		let plantResponse = try JSONDecoder().decode(PlantResponse.self, from: data)
-		print("Plant Response:", plantResponse)
+		let analysis = try JSONDecoder().decode(VisionAnalysis.self, from: data)
+		print("Vision Analysis:", analysis)
 	}
 }
 
-struct SimpleDeviceCheck {
+struct DeviceCheck {
 	static func retrieveToken() async -> String? {
 		guard DCDevice.current.isSupported else {
 			print("DeviceCheck not supported")
@@ -66,25 +65,44 @@ struct SimpleDeviceCheck {
 	}
 }
 
-struct PlantResponse: Decodable {
-	let scientificName: String
-	let commonNames: [String]
+enum AnalyzerError: Error {
+	case imageConversionFailed
+	case requestFailed
+}
+
+struct VisionAnalysis: Decodable {
+	let objects: [DetectedObject]
+	let labels: [String]
+	let description: String
+}
+
+struct DetectedObject: Decodable {
+	let label: String
+	let confidence: Float
+	let boundingBox: BoundingBox
+}
+
+struct BoundingBox: Decodable {
+	let x: Float
+	let y: Float
+	let width: Float
+	let height: Float
 }`,
 	},
 	{
 		id: 2,
-		title: "Text Structured Response",
+		title: "Text Analysis",
 		comingSoon: false,
 		description:
-			"Send text to proxed.ai for structured analysis and get consistent, schema-validated responses",
+			"Convert unstructured text into actionable data. Extract entities, analyze sentiment, classify content, and more with our advanced NLP capabilities.",
 		code: `import DeviceCheck
 
 actor TextAnalyzer {
-	let apiKey = "<your-api-key>"        // Partial API key (we don't store the full key)
-	let endpoint = "https://api.proxed.ai/v1/text/<your-project-id>"  // API endpoint
+	let apiKey = "<your-api-key>"
+	let endpoint = "https://api.proxed.ai/v1/text/<your-project-id>"
 
 	func analyzeText(_ text: String) async throws {
-		let token = await SimpleDeviceCheck.retrieveToken()
+		let token = await DeviceCheck.retrieveToken()
 
 		var request = URLRequest(url: URL(string: endpoint)!)
 		request.httpMethod = "POST"
@@ -98,16 +116,15 @@ actor TextAnalyzer {
 		let (data, response) = try await URLSession.shared.data(for: request)
 		guard let httpResponse = response as? HTTPURLResponse,
 			  (200...299).contains(httpResponse.statusCode) else {
-			fatalError("Failed to analyze text")
+			throw AnalyzerError.requestFailed
 		}
 
-		// Decode structured AI response based on your project schema
 		let analysis = try JSONDecoder().decode(TextAnalysis.self, from: data)
 		print("Text Analysis:", analysis)
 	}
 }
 
-struct SimpleDeviceCheck {
+struct DeviceCheck {
 	static func retrieveToken() async -> String? {
 		guard DCDevice.current.isSupported else {
 			print("DeviceCheck not supported")
@@ -121,6 +138,10 @@ struct SimpleDeviceCheck {
 			return nil
 		}
 	}
+}
+
+enum AnalyzerError: Error {
+	case requestFailed
 }
 
 struct TextAnalysis: Decodable {
@@ -128,22 +149,29 @@ struct TextAnalysis: Decodable {
 	let topics: [String]
 	let summary: String
 	let keyPhrases: [String]
+	let entities: [Entity]
+}
+
+struct Entity: Decodable {
+	let text: String
+	let type: String
+	let confidence: Float
 }`,
 	},
 	{
 		id: 3,
-		title: "PDF Structured Response",
+		title: "Document Analysis",
 		comingSoon: false,
 		description:
-			"Extract structured information from PDFs with our advanced document analysis API",
+			"Extract structured data from PDFs and documents automatically. Perfect for automating document processing workflows, from invoice parsing to research paper analysis.",
 		code: `import DeviceCheck
 
-actor PDFAnalyzer {
-	let apiKey = "<your-api-key>"        // Partial API key (we don't store the full key)
-	let endpoint = "https://api.proxed.ai/v1/pdf/<your-project-id>"  // API endpoint
+actor DocumentAnalyzer {
+	let apiKey = "<your-api-key>"
+	let endpoint = "https://api.proxed.ai/v1/document/<your-project-id>"
 
-	func analyzePDF(pdfURL: URL) async throws {
-		let token = await SimpleDeviceCheck.retrieveToken()
+	func analyzeDocument(url: URL) async throws {
+		let token = await DeviceCheck.retrieveToken()
 
 		var request = URLRequest(url: URL(string: endpoint)!)
 		request.httpMethod = "POST"
@@ -152,22 +180,21 @@ actor PDFAnalyzer {
 		if let token = token {
 			request.setValue(token, forHTTPHeaderField: "x-device-token")
 		}
-		request.httpBody = try JSONEncoder().encode(["pdf": pdfURL.absoluteString])
+		request.httpBody = try JSONEncoder().encode(["pdf": url.absoluteString])
 
 		let (data, response) = try await URLSession.shared.data(for: request)
 		guard let httpResponse = response as? HTTPURLResponse,
 			  (200...299).contains(httpResponse.statusCode) else {
-			fatalError("Failed to analyze PDF")
+			throw AnalyzerError.requestFailed
 		}
 
-		// Decode structured AI response based on your project schema
-		let analysis = try JSONDecoder().decode(PDFAnalysis.self, from: data)
-		print("PDF Analysis:", analysis)
+		let analysis = try JSONDecoder().decode(DocumentAnalysis.self, from: data)
+		print("Document Analysis:", analysis)
 	}
 
-	func analyzePDFData(_ pdfData: Data) async throws {
-		let token = await SimpleDeviceCheck.retrieveToken()
-		let base64PDF = "data:application/pdf;base64," + pdfData.base64EncodedString()
+	func analyzeDocumentData(_ documentData: Data) async throws {
+		let token = await DeviceCheck.retrieveToken()
+		let base64Document = documentData.base64EncodedString()
 
 		var request = URLRequest(url: URL(string: endpoint)!)
 		request.httpMethod = "POST"
@@ -176,21 +203,20 @@ actor PDFAnalyzer {
 		if let token = token {
 			request.setValue(token, forHTTPHeaderField: "x-device-token")
 		}
-		request.httpBody = try JSONEncoder().encode(["pdf": base64PDF])
+		request.httpBody = try JSONEncoder().encode(["document": base64Document])
 
 		let (data, response) = try await URLSession.shared.data(for: request)
 		guard let httpResponse = response as? HTTPURLResponse,
 			  (200...299).contains(httpResponse.statusCode) else {
-			fatalError("Failed to analyze PDF")
+			throw AnalyzerError.requestFailed
 		}
 
-		// Decode structured AI response based on your project schema
-		let analysis = try JSONDecoder().decode(PDFAnalysis.self, from: data)
-		print("PDF Analysis:", analysis)
+		let analysis = try JSONDecoder().decode(DocumentAnalysis.self, from: data)
+		print("Document Analysis:", analysis)
 	}
 }
 
-struct SimpleDeviceCheck {
+struct DeviceCheck {
 	static func retrieveToken() async -> String? {
 		guard DCDevice.current.isSupported else {
 			print("DeviceCheck not supported")
@@ -206,7 +232,11 @@ struct SimpleDeviceCheck {
 	}
 }
 
-struct PDFAnalysis: Decodable {
+enum AnalyzerError: Error {
+	case requestFailed
+}
+
+struct DocumentAnalysis: Decodable {
 	let title: String
 	let authors: [String]
 	let summary: String
@@ -227,23 +257,21 @@ struct Figure: Decodable {
 	},
 	{
 		id: 4,
-		title: "OpenAI API Proxy",
+		title: "OpenAI Proxy",
 		comingSoon: false,
 		description:
-			"Use proxed.ai as a secure proxy for OpenAI API calls with built-in security and usage tracking",
+			"Secure and monitor your OpenAI API usage with our enterprise-grade proxy. Includes rate limiting, usage tracking, and seamless integration with existing OpenAI SDKs.",
 		code: `import OpenAI
 
-actor OpenAIProxy {
-    let endpoint = "https://api.proxed.ai/v1/openai/<your-project-id>"  // API endpoint
+actor OpenAIAnalyzer {
+    let endpoint = "https://api.proxed.ai/v1/openai/<your-project-id>"
     let apiKey = "<your-api-key>"
     let client: OpenAI
 
-    init() {
-        // Get DeviceCheck token and combine with API key
-        let token = await SimpleDeviceCheck.retrieveToken()
-        let combinedToken = "\(apiKey).\(token)"
+    init() async {
+        let token = await DeviceCheck.retrieveToken()
+        let combinedToken = "\(apiKey).\(token ?? "")"
 
-        // Configure OpenAI client to use proxed.ai with combined token
         let configuration = OpenAI.Configuration(
             baseURL: URL(string: endpoint)!,
             apiKey: combinedToken
@@ -252,8 +280,7 @@ actor OpenAIProxy {
         client = OpenAI(configuration: configuration)
     }
 
-    // Example usage
-    func chatCompletion(messages: [Chat]) async throws -> ChatCompletion {
+    func generateCompletion(messages: [Chat]) async throws -> ChatCompletion {
         let query = ChatQuery(
             model: .gpt4,
             messages: messages
@@ -261,7 +288,6 @@ actor OpenAIProxy {
         return try await client.chats(query: query)
     }
 
-    // Image generation example
     func generateImage(prompt: String) async throws -> ImagesResponse {
         let query = ImagesQuery(
             model: .dallE3,
@@ -274,18 +300,24 @@ actor OpenAIProxy {
     }
 }
 
-struct SimpleDeviceCheck {
-    static func retrieveToken() async throws -> String {
+struct DeviceCheck {
+    static func retrieveToken() async -> String? {
         guard DCDevice.current.isSupported else {
-            throw DeviceCheckError.notSupported
+            print("DeviceCheck not supported")
+            return nil
         }
-        let tokenData = try await DCDevice.current.generateToken()
-        return tokenData.base64EncodedString()
+        do {
+            let tokenData = try await DCDevice.current.generateToken()
+            return tokenData.base64EncodedString()
+        } catch {
+            print("Error generating token:", error)
+            return nil
+        }
     }
 }
 
-enum DeviceCheckError: Error {
-    case notSupported
+enum AnalyzerError: Error {
+    case requestFailed
 }`,
 	},
 ];

@@ -45,7 +45,7 @@
 		"react-dom": "19.0.0",
 		"react-dropzone": "^14.3.5",
 		"react-hook-form": "^7.54.2",
-		"react-markdown": "^9.0.3",
+		"react-markdown": "^10.0.0",
 		"remark-gfm": "^4.0.0",
 		"swr": "^2.3.0",
 		"uuid": "^11.0.5",

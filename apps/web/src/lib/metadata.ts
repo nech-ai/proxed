@@ -22,23 +22,23 @@ export function generateMetadata({
 	const fullUrl = `${baseUrl}${normalizedPath}`;
 
 	const defaultTitle =
-		"Proxed.AI - Secure iOS API with DeviceCheck for AI Models";
+		"Proxed.AI - Secure AI APIs in Seconds—No SDK, No Backend Needed";
 	const defaultDescription =
-		"Build secure AI wrappers with Proxed.AI - an iOS SDK with Apple DeviceCheck integration that safely manages API keys and unifies ChatGPT, Claude, LLaMA, and Mistral models. Start building for free during Beta.";
+		"Proxed.AI is the simplest way to protect AI API keys in iOS apps. Lock down your API credentials, verify device authenticity with Apple's DeviceCheck, and structure AI outputs—all without a backend.";
 
 	const defaultKeywords = [
-		"iOS SDK",
+		"AI API Security",
+		"iOS AI Integration",
 		"DeviceCheck",
-		"Secure API keys",
-		"AI key management",
-		"ChatGPT SDK",
-		"Claude SDK",
-		"LLaMA SDK",
-		"Mistral SDK",
-		"iOS security",
-		"AI integration",
-		"mobile AI",
-		"key rotation",
+		"LLM API Protection",
+		"No SDK",
+		"No Backend",
+		"API Key Protection",
+		"iOS Security",
+		"AI Cost Control",
+		"Rate Limiting",
+		"Structured AI Responses",
+		"API Proxy",
 	];
 
 	return {
@@ -67,7 +67,7 @@ export function generateMetadata({
 					url: ogImage,
 					width: 800,
 					height: 600,
-					alt: "Proxed.AI iOS API Protection",
+					alt: "Proxed.AI - Secure AI APIs in Seconds",
 				},
 			],
 			locale: "en_GB",
@@ -116,12 +116,12 @@ export const jsonLd = {
 	applicationCategory: "DeveloperApplication",
 	operatingSystem: "iOS",
 	description:
-		"Secure iOS API with DeviceCheck integration that safely manages API keys and unifies ChatGPT, Claude, LLaMA, and Mistral models in one interface",
+		"Secure AI APIs in Seconds—No SDK, No Backend Needed. Proxed.AI is the simplest way to protect AI API keys in iOS apps with DeviceCheck authentication.",
 	offers: {
 		"@type": "Offer",
 		price: "0",
 		priceCurrency: "USD",
-		description: "Free during Beta",
+		description: "Free tier available",
 	},
 	aggregateRating: {
 		"@type": "AggregateRating",
@@ -132,7 +132,7 @@ export const jsonLd = {
 	image: "https://proxed.ai/icon.png",
 	applicationSuite: "Secure AI SDK",
 	featureList:
-		"Apple DeviceCheck Integration, Secure Key Management, Key Rotation, ChatGPT Integration, Claude Integration, LLaMA Integration, Vision Structured Response, iOS Development",
+		"No SDK Required, No Backend Required, Apple DeviceCheck Integration, Secure Key Management, Rate Limiting, AI Cost Control, Structured AI Responses",
 	softwareVersion: "1.0",
 	author: {
 		"@type": "Person",
@@ -146,6 +146,6 @@ export const jsonLd = {
 		sameAs: ["https://github.com/nech-ai/proxed", "https://x.com/vahaah"],
 	},
 	category: "AI Security & Development Tools",
-	applicationSubCategory: "Secure iOS SDK for AI Models",
+	applicationSubCategory: "API Security for iOS AI Integration",
 	releaseNotes: "https://proxed.ai/updates",
 };

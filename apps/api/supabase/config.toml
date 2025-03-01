@@ -30,7 +30,7 @@ enable_confirmations = true
 enable_signup = true
 
 [analytics]
-enabled = true
+enabled = false
 port = 54327
 vector_port = 54328
 backend = "postgres"

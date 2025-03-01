@@ -247,9 +247,19 @@ export function AuthErrorAlert({ params }: { params: AuthErrorParams }) {
 		setHashParams(getParamsFromHash());
 	}, []);
 
-	const error = getErrorMessage({ ...params, ...hashParams });
+	// Check if there are any error parameters before showing the alert
+	const combinedParams = { ...params, ...hashParams };
+	const hasErrorParams = !!(
+		combinedParams.error ||
+		combinedParams.error_code ||
+		combinedParams.error_description ||
+		combinedParams.message === "password_updated"
+	);
 
-	if (!error) return null;
+	// Only get error message if there are error parameters
+	if (!hasErrorParams) return null;
+
+	const error = getErrorMessage(combinedParams);
 
 	return (
 		<Alert

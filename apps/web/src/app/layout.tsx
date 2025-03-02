@@ -8,6 +8,7 @@ import { generateMetadata, jsonLd } from "@/lib/metadata";
 import { config } from "@config";
 import { SubscribeModalProvider } from "@/context/subscribe-modal-context";
 import { SubscribeModal } from "@/components/subscribe-modal";
+import { AnalyticsProvider } from "@proxed/analytics/client";
 
 export const metadata = generateMetadata();
 
@@ -65,6 +66,7 @@ export default function RootLayout({
 						<SubscribeModal />
 					</SubscribeModalProvider>
 				</ThemeProvider>
+				<AnalyticsProvider />
 			</body>
 		</html>
 	);

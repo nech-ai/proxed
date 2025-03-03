@@ -1,13 +1,15 @@
 import {
+	createLoader,
 	createSearchParamsCache,
 	parseAsInteger,
 	parseAsString,
 	parseAsStringLiteral,
 } from "nuqs/server";
 
-export const searchParamsCache = createSearchParamsCache({
+export const searchParamsMap = {
 	q: parseAsString,
 	page: parseAsInteger.withDefault(0),
+	sort: parseAsString,
 	start: parseAsString,
 	end: parseAsString,
 	projectId: parseAsString,
@@ -28,4 +30,6 @@ export const searchParamsCache = createSearchParamsCache({
 	] as const),
 	deviceCheckId: parseAsString,
 	keyId: parseAsString,
-});
+};
+
+export const searchParamsLoader = createLoader(searchParamsMap);

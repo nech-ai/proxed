@@ -2,26 +2,27 @@ import { Loading } from "@/components/tables/executions/loading";
 import { ErrorFallback } from "@/components/error-fallback";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
-import { searchParamsCache } from "./search-params";
+import { searchParamsLoader } from "./search-params";
 import { SearchFilter } from "@/components/tables/executions/search-filter";
 import { Table } from "@/components/tables/executions";
 import { ColumnVisibility } from "@/components/tables/executions/column-visibility";
 import { PageHeader } from "@/components/layout/page-header";
 import type { Metadata } from "next";
+import type { SearchParams } from "nuqs/server";
 
 export const metadata: Metadata = {
 	title: "Executions | Proxed",
 };
 
-export default async function Page(props: {
-	params: Promise<{
-		searchParams: { [key: string]: string | string[] | undefined };
-	}>;
-}) {
-	const { searchParams } = await props.params;
+type PageProps = {
+	searchParams: Promise<SearchParams>;
+};
+
+export default async function Page({ searchParams }: PageProps) {
 	const {
 		q: query,
 		page,
+		sort: sortArray,
 		start,
 		end,
 		projectId,
@@ -30,7 +31,7 @@ export default async function Page(props: {
 		finishReason,
 		deviceCheckId,
 		keyId,
-	} = searchParamsCache.parse(searchParams);
+	} = await searchParamsLoader(searchParams);
 
 	const filter = {
 		start,
@@ -43,8 +44,7 @@ export default async function Page(props: {
 		keyId,
 	};
 
-	// @ts-ignore
-	const sort = searchParams?.sort?.split(":");
+	const sort = sortArray?.split(":");
 
 	const loadingKey = JSON.stringify({
 		page,

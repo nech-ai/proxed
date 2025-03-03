@@ -20,6 +20,7 @@ import { NavMain } from "./nav-main";
 import { TeamSwitcher } from "./team-switcher";
 import { Logo } from "./logo";
 import { useTeam } from "@/hooks/use-team";
+import { cn } from "@proxed/ui/utils";
 
 const data = {
 	navMain: [
@@ -59,8 +60,10 @@ export function AppSidebar({ teamMemberships, user }: AppSidebarProps) {
 		<Sidebar collapsible="icon">
 			<SidebarHeader>
 				<div className="flex w-full items-center justify-between">
-					<div className="flex w-14 items-center justify-center">
-						<Logo className="w-8" withLabel={false} />
+					<div
+						className={cn("flex items-center", !open && "w-14 justify-center")}
+					>
+						<Logo withLabel={open} />
 					</div>
 					{open && <SidebarTrigger />}
 				</div>

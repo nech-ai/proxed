@@ -5,7 +5,7 @@ import {
 	createLoader,
 } from "nuqs/server";
 
-export const searchParamsMap = {
+export const searchParamsCache = createSearchParamsCache({
 	q: parseAsString,
 	page: parseAsInteger.withDefault(0),
 	sort: parseAsString,
@@ -14,6 +14,4 @@ export const searchParamsMap = {
 	bundleId: parseAsString,
 	deviceCheck: parseAsString,
 	keyId: parseAsString,
-};
-
-export const searchParamsLoader = createLoader(searchParamsMap);
+});

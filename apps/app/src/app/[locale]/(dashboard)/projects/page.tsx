@@ -2,7 +2,7 @@ import { Loading } from "@/components/tables/projects/loading";
 import { ErrorFallback } from "@/components/error-fallback";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
-import { searchParamsLoader } from "./search-params";
+import { searchParamsCache } from "./search-params";
 import { SearchFilter } from "@/components/tables/projects/search-filter";
 import { Table } from "@/components/tables/projects";
 import { ColumnVisibility } from "@/components/tables/projects/column-visibility";
@@ -34,7 +34,7 @@ export default async function Page({ searchParams }: PageProps) {
 		bundleId,
 		deviceCheck,
 		keyId,
-	} = await searchParamsLoader(searchParams);
+	} = await searchParamsCache.parse(searchParams);
 
 	const filter = {
 		start,

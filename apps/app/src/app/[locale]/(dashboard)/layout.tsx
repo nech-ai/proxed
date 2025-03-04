@@ -46,9 +46,7 @@ export default async function Layout({ children }: PropsWithChildren) {
 				<div className="flex h-screen">
 					<SidebarProvider defaultOpen={false}>
 						<AppSidebar teamMemberships={teamMemberships} user={user} />
-						<div className="flex flex-col overflow-hidden flex-1">
-							{children}
-						</div>
+						<div className="flex flex-col overflow-auto w-full">{children}</div>
 					</SidebarProvider>
 				</div>
 			</UserProvider>

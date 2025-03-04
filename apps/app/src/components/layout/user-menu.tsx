@@ -17,42 +17,19 @@ import {
 	DropdownMenuTrigger,
 } from "@proxed/ui/components/dropdown-menu";
 import { useMediaQuery } from "@proxed/ui/hooks/use-media-query";
-import {
-	CircleHelpIcon,
-	LogoutIcon,
-	SettingsGearIcon,
-	SunIcon,
-} from "@proxed/ui/icons";
+import { CircleHelpIcon, LogoutIcon, SettingsGearIcon } from "@proxed/ui/icons";
 import { cn } from "@proxed/ui/utils";
-import { HardDriveIcon, MoonIcon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { useTheme } from "next-themes";
 import Link from "next/link";
-import { useState } from "react";
 import { UserAvatar } from "./user-avatar";
 
-export function UserMenu({ user }: { user: User }) {
-	const { setTheme: setCurrentTheme, theme: currentTheme } = useTheme();
-	const [theme, setTheme] = useState<string>(currentTheme ?? "system");
-	const isMobile = useMediaQuery("(max-width: 768px)");
+interface UserMenuProps {
+	user: User;
+	className?: string;
+}
 
-	const colorModeOptions = [
-		{
-			value: "system",
-			label: "System",
-			icon: HardDriveIcon,
-		},
-		{
-			value: "light",
-			label: "Light",
-			icon: SunIcon,
-		},
-		{
-			value: "dark",
-			label: "Dark",
-			icon: MoonIcon,
-		},
-	];
+export function UserMenu({ user, className }: UserMenuProps) {
+	const isMobile = useMediaQuery("(max-width: 768px)");
 
 	if (!user) {
 		return null;
@@ -80,6 +57,7 @@ export function UserMenu({ user }: { user: User }) {
 					"w-56 p-2",
 					isMobile &&
 						"right-[16px] left-[16px] w-[calc(100vw-32px)] max-w-[20rem]",
+					className,
 				)}
 				side="bottom"
 				sideOffset={8}
@@ -92,43 +70,6 @@ export function UserMenu({ user }: { user: User }) {
 						</p>
 					</div>
 				</DropdownMenuLabel>
-				<DropdownMenuSeparator />
-				<DropdownMenuSub>
-					<DropdownMenuSubTrigger className="rounded-md">
-						<SunIcon className="mr-2 size-4" />
-						Color mode
-					</DropdownMenuSubTrigger>
-					<DropdownMenuPortal>
-						<DropdownMenuSubContent
-							className={cn(
-								"p-2",
-								isMobile &&
-									"right-[16px] left-[16px] w-[calc(100vw-32px)] max-w-[20rem]",
-							)}
-							sideOffset={-4}
-						>
-							<DropdownMenuRadioGroup
-								value={theme}
-								onValueChange={(value) => {
-									setTheme(value);
-									setCurrentTheme(value);
-								}}
-							>
-								{colorModeOptions.map((option) => (
-									<DropdownMenuRadioItem
-										key={option.value}
-										value={option.value}
-										className="rounded-md"
-									>
-										<option.icon className="mr-2 size-4 opacity-50" />
-										{option.label}
-									</DropdownMenuRadioItem>
-								))}
-							</DropdownMenuRadioGroup>
-						</DropdownMenuSubContent>
-					</DropdownMenuPortal>
-				</DropdownMenuSub>
-
 				<DropdownMenuSeparator />
 
 				<DropdownMenuItem asChild className="rounded-md">

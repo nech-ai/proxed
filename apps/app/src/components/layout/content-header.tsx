@@ -17,17 +17,19 @@ export function ContentHeader({ children, className }: ContentHeaderProps) {
 
 	return (
 		<div className={cn("border-b bg-background sticky top-0 z-10", className)}>
-			<header className="flex h-14 items-center container mx-auto px-2 sm:px-4">
-				<div className="flex items-center gap-4 flex-1 min-w-0">
+			<header className="flex min-h-14 items-center container mx-auto px-2 sm:px-4">
+				<div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0 overflow-hidden">
 					{isMobile && (
 						<>
-							<SidebarTrigger />
-							<Separator orientation="vertical" className="h-4" />
+							<SidebarTrigger className="flex-shrink-0" />
+							<Separator orientation="vertical" className="h-4 flex-shrink-0" />
 						</>
 					)}
-					{children}
+					<div className="overflow-x-auto w-full">{children}</div>
 				</div>
-				<UserMenu user={user} />
+				<div className="flex-shrink-0 ml-2">
+					<UserMenu user={user} />
+				</div>
 			</header>
 		</div>
 	);

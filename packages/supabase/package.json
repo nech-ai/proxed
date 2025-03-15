@@ -15,7 +15,7 @@
 		"date-fns": "^4.1.0",
 		"react": "19.0.0",
 		"server-only": "^0.0.1",
-		"supabase": "^2.15.8"
+		"supabase": "^2.19.7"
 	},
 	"devDependencies": {
 		"@supabase/supabase-js": "^2.49.1"

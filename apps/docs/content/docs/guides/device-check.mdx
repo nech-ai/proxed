@@ -1,0 +1,84 @@
+---
+title: Configuring Apple DeviceCheck
+description: |
+  Learn how to set up and integrate Apple's DeviceCheck API with Proxed.AI to enhance security and prevent fraud on your iOS applications.
+---
+
+# Apple DeviceCheck Integration
+
+Apple's DeviceCheck API provides a way to securely identify devices that have previously been used with your app, even after the app has been uninstalled or the device has been wiped. This guide will walk you through configuring DeviceCheck with Proxed.AI to enhance your fraud prevention capabilities.
+
+## Understanding DeviceCheck
+
+DeviceCheck allows you to:
+- Associate two bits of data with a device
+- Store this data on Apple's servers
+- Access and update this data when the same device installs your app again
+- Reduce fraud by tracking device-level behaviors across reinstalls
+
+## Prerequisites
+
+Before configuring DeviceCheck in Proxed.AI, you'll need:
+
+- An Apple Developer Account with admin access
+- A private key (P8 file) from Apple for DeviceCheck API
+- Your DeviceCheck Key ID
+- Your Apple Team ID
+
+## Step 1: Generate a DeviceCheck Key in Apple Developer Portal
+
+1. Sign in to your [Apple Developer Account](https://developer.apple.com/account/) and navigate to the "Certificates, IDs & Profiles" section.
+
+2. Select "Keys" from the sidebar menu.
+
+![Apple Developer Account Keys section](/images/docs/guides/device-check/apple-dev-keys.png)
+
+3. Click on the "+" button (Create a Key).
+
+4. Enter a name for your key (e.g., "Proxed DeviceCheck Key") and select "DeviceCheck" as the key type.
+
+![Create a DeviceCheck key](/images/docs/guides/device-check/create-a-key-page.png)
+
+5. Click "Continue" and then "Register" to confirm.
+
+6. Download the P8 file when prompted. **Important:** This file can only be downloaded once, so store it securely.
+
+![Apple Developer Account Certificates page](/images/docs/guides/device-check/apple-dev-cert-page.png)
+
+7. Note down the Key ID displayed on this page and your Team ID (found at the top right of the Apple Developer page).
+
+## Step 2: Configure DeviceCheck in Proxed.AI
+
+1. Log in to your Proxed.AI account and navigate to the [Device Checks configuration page](https://app.proxed.ai/settings/team/device-check).
+
+![Device Checks page](/images/docs/guides/device-check/device-checks-page.png)
+
+2. Click "Add Configuration" to create a new DeviceCheck integration.
+
+3. Upload your P8 key file and enter the DeviceCheck Key ID and Apple Team ID you noted earlier.
+
+![Create a Device Check](/images/docs/guides/device-check/create-device-check-populated.png)
+
+4. Click "Create Configuration" to save your settings.
+
+5. Your DeviceCheck integration is now active and will appear in the configurations list.
+
+![Device Check list](/images/docs/guides/device-check/create-device-check-ready.png)
+
+## Using DeviceCheck in Your Applications
+
+For optimal results, ensure your iOS app properly implements the DeviceCheck API according to [Apple's documentation](https://developer.apple.com/documentation/devicecheck).
+
+## Troubleshooting
+
+If you encounter issues with your DeviceCheck configuration:
+
+- Verify that your P8 file is valid and hasn't expired
+- Confirm that you've entered the correct Key ID and Team ID
+- Check that your Apple Developer account has the necessary permissions
+- Review Apple's rate limits for the DeviceCheck API
+
+For additional assistance, contact the Proxed.AI support team.
+
+
+

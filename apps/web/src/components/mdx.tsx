@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { highlight } from "sugar-high";
-import { cn } from "@proxed/ui/utils";
+import { cn } from "@proxed/ui/lib/utils";
 
 interface TableData {
 	headers: string[];

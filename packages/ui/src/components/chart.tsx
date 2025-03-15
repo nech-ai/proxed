@@ -3,7 +3,7 @@
 import * as React from "react";
 import * as RechartsPrimitive from "recharts";
 
-import { cn } from "@proxed/ui/utils";
+import { cn } from "@proxed/ui/lib/utils";
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const;
@@ -69,7 +69,7 @@ ChartContainer.displayName = "Chart";
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 	const colorConfig = Object.entries(config).filter(
-		([_, config]) => config.theme || config.color,
+		([, config]) => config.theme || config.color,
 	);
 
 	if (!colorConfig.length) {
@@ -78,7 +78,7 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 
 	return (
 		<style
-			// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+			// biome-ignore lint/security/noDangerouslySetInnerHtml: known safe
 			dangerouslySetInnerHTML={{
 				__html: Object.entries(THEMES)
 					.map(
@@ -240,7 +240,7 @@ const ChartTooltipContent = React.forwardRef<
 												</span>
 											</div>
 											{item.value && (
-												<span className="font-medium font-mono text-foreground tabular-nums">
+												<span className="font-mono font-medium tabular-nums text-foreground">
 													{item.value.toLocaleString()}
 												</span>
 											)}

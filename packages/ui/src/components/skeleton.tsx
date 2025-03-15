@@ -1,4 +1,4 @@
-import { cn } from "@proxed/ui/utils";
+import { cn } from "@proxed/ui/lib/utils";
 
 function Skeleton({
 	className,

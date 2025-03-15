@@ -16,7 +16,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@types/node": "^20.17.24",
+		"@types/node": "^22.13.10",
 		"tsconfig": "workspace:*",
 		"typescript": "5.8.2"
 	}

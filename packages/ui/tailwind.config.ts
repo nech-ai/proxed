@@ -212,13 +212,6 @@ const config = {
 			},
 		},
 	},
-	variants: {
-		extend: {
-			backgroundColor: ["disabled"],
-			opacity: ["disabled"],
-			cursor: ["disabled"],
-		},
-	},
 	plugins: [
 		require("tailwindcss-animate"),
 		require("@tailwindcss/typography"),

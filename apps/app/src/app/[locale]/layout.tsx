@@ -2,11 +2,9 @@ import { Toaster } from "@proxed/ui/components/toaster";
 import { cn } from "@proxed/ui/utils";
 import { Provider as JotaiProvider } from "jotai";
 import type { Metadata } from "next";
-import { ThemeProvider } from "next-themes";
 import { Geist } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import "@proxed/ui/globals.css";
-import { config } from "@config";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { I18nProviderClient } from "@/locales/client";
 
@@ -46,11 +44,9 @@ export default async function RootLayout({
 			>
 				<NextTopLoader color="var(--colors-primary)" />
 				<I18nProviderClient locale="en">
-					<ThemeProvider forcedTheme={config.ui.defaultTheme}>
-						<JotaiProvider>
-							<NuqsAdapter>{children}</NuqsAdapter>
-						</JotaiProvider>
-					</ThemeProvider>
+					<JotaiProvider>
+						<NuqsAdapter>{children}</NuqsAdapter>
+					</JotaiProvider>
 				</I18nProviderClient>
 				<Toaster />
 			</body>

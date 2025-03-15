@@ -28,10 +28,6 @@ export const config = {
 		provider: "console",
 		from: "ProxedAI <hello@mail.proxed.ai>",
 	},
-	ui: {
-		enabledThemes: ["dark"],
-		defaultTheme: "dark",
-	},
 } as const satisfies Config;
 
 export type Config = {
@@ -48,10 +44,6 @@ export type Config = {
 	mailing: {
 		provider: "console" | "resend";
 		from: string;
-	};
-	ui: {
-		enabledThemes: Array<"dark">;
-		defaultTheme: Config["ui"]["enabledThemes"][number];
 	};
 };
 

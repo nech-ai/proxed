@@ -1,11 +1,9 @@
-import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@proxed/ui/lib/utils";
 import { Geist, Geist_Mono } from "next/font/google";
 import PlausibleProvider from "next-plausible";
 import type { Viewport } from "next";
 import "@proxed/ui/globals.css";
 import { generateMetadata, jsonLd } from "@/lib/metadata";
-import { config } from "@config";
 import { SubscribeModalProvider } from "@/context/subscribe-modal-context";
 import { SubscribeModal } from "@/components/subscribe-modal";
 import { AnalyticsProvider } from "@proxed/analytics/client";
@@ -60,12 +58,10 @@ export default function RootLayout({
 					monoFont.variable,
 				)}
 			>
-				<ThemeProvider forcedTheme={config.ui.defaultTheme}>
-					<SubscribeModalProvider>
-						{children}
-						<SubscribeModal />
-					</SubscribeModalProvider>
-				</ThemeProvider>
+				<SubscribeModalProvider>
+					{children}
+					<SubscribeModal />
+				</SubscribeModalProvider>
 				<AnalyticsProvider />
 			</body>
 		</html>

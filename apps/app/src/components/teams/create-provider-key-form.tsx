@@ -24,7 +24,17 @@ import {
 	SelectValue,
 } from "@proxed/ui/components/select";
 import { useToast } from "@proxed/ui/hooks/use-toast";
-import { Loader2, Check, Copy, AlertCircle, ChevronRight } from "lucide-react";
+import {
+	Loader2,
+	Check,
+	Copy,
+	AlertCircle,
+	ChevronRight,
+	Info,
+	ExternalLink,
+	BookOpen,
+	HelpCircle,
+} from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import {
@@ -38,6 +48,18 @@ import { cn } from "@proxed/ui/utils";
 import { Alert, AlertDescription } from "@proxed/ui/components/alert";
 import { TeamCard } from "./team-card";
 import Link from "next/link";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@proxed/ui/components/tooltip";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@proxed/ui/components/accordion";
 
 const cryptoProvider =
 	typeof window !== "undefined"
@@ -197,6 +219,56 @@ export function CreateProviderKeyForm() {
 					: "Securely store your API key by splitting it into server and client parts"
 			}
 		>
+			<div className="flex items-end justify-end mb-2">
+				<a
+					href="https://docs.proxed.ai/partial-keys"
+					target="_blank"
+					rel="noopener noreferrer"
+					className="text-xs flex items-center gap-1 text-blue-500 hover:text-blue-600 transition-colors"
+				>
+					<BookOpen className="h-3.5 w-3.5" />
+					<span>Documentation</span>
+					<ExternalLink className="h-3 w-3" />
+				</a>
+			</div>
+
+			{formState.isCreating && (
+				<Accordion type="single" collapsible className="mb-4">
+					<AccordionItem
+						value="about"
+						className="border rounded-md overflow-hidden"
+					>
+						<AccordionTrigger className="px-3 py-2 text-sm font-medium hover:no-underline">
+							<div className="flex items-center gap-2">
+								<Info className="h-4 w-4 text-blue-500" />
+								<span>What are Partial Keys?</span>
+							</div>
+						</AccordionTrigger>
+						<AccordionContent className="px-3 pb-3">
+							<p className="text-sm text-muted-foreground mb-2">
+								Partial keys split your API key into two separate parts:
+							</p>
+							<ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1 mb-2">
+								<li>A server part stored securely on your servers</li>
+								<li>A client part that users must provide</li>
+							</ul>
+							<p className="text-sm text-muted-foreground mb-2">
+								This approach significantly enhances security by ensuring that
+								no single location contains the complete API key.
+							</p>
+							<p className="text-sm font-medium mt-2">Security Benefits:</p>
+							<ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1">
+								<li>Reduced risk of key exposure</li>
+								<li>Enhanced access control</li>
+								<li>Audit trail for requests</li>
+								<li>Easy revocation control</li>
+								<li>Better key management</li>
+							</ul>
+						</AccordionContent>
+					</AccordionItem>
+				</Accordion>
+			)}
+
 			<Form {...form}>
 				<form
 					onSubmit={form.handleSubmit((data) =>
@@ -228,6 +300,43 @@ export function CreateProviderKeyForm() {
 								<CopyToClipboard value={savedClientPart} />
 							</div>
 
+							<Accordion type="single" collapsible className="mt-4">
+								<AccordionItem
+									value="implementation"
+									className="border rounded-md"
+								>
+									<AccordionTrigger className="px-3 py-2 text-xs font-medium hover:no-underline">
+										<div className="flex items-center gap-2">
+											<Info className="h-3.5 w-3.5 text-blue-500" />
+											<span>How to use this client key in your app</span>
+										</div>
+									</AccordionTrigger>
+									<AccordionContent className="px-3 pb-3 text-xs">
+										<p className="text-muted-foreground mb-2">
+											Include the client key part in your API requests to
+											Proxed.AI:
+										</p>
+										<div className="bg-muted p-2 rounded-md font-mono text-xs mb-2 overflow-x-auto">
+											const apiKey = "{savedClientPart}";
+											<br />
+											const endpoint = "https://api.proxed.ai/v1/openai/
+											{"<your-project-id>"}";
+										</div>
+										<p className="text-muted-foreground mb-1 font-medium">
+											Security Best Practices:
+										</p>
+										<ul className="text-muted-foreground list-disc pl-4 space-y-0.5">
+											<li>
+												Store client parts in environment variables, not in code
+											</li>
+											<li>Rotate partial keys periodically</li>
+											<li>Use different keys for different environments</li>
+											<li>Monitor usage patterns to detect abuse</li>
+										</ul>
+									</AccordionContent>
+								</AccordionItem>
+							</Accordion>
+
 							<div className="flex items-center justify-between pt-4 mt-2 border-t">
 								<Button
 									variant="outline"
@@ -254,7 +363,22 @@ export function CreateProviderKeyForm() {
 									name="display_name"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Name</FormLabel>
+											<div className="flex items-center gap-2">
+												<FormLabel>Name</FormLabel>
+												<TooltipProvider>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+														</TooltipTrigger>
+														<TooltipContent
+															side="right"
+															className="max-w-[220px]"
+														>
+															A descriptive name to identify this API key
+														</TooltipContent>
+													</Tooltip>
+												</TooltipProvider>
+											</div>
 											<FormControl>
 												<Input
 													placeholder={
@@ -275,7 +399,22 @@ export function CreateProviderKeyForm() {
 									name="provider"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Provider</FormLabel>
+											<div className="flex items-center gap-2">
+												<FormLabel>Provider</FormLabel>
+												<TooltipProvider>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+														</TooltipTrigger>
+														<TooltipContent
+															side="right"
+															className="max-w-[220px]"
+														>
+															The AI provider this key belongs to
+														</TooltipContent>
+													</Tooltip>
+												</TooltipProvider>
+											</div>
 											<FormControl>
 												<Select
 													value={field.value}
@@ -300,7 +439,21 @@ export function CreateProviderKeyForm() {
 								/>
 
 								<FormItem>
-									<FormLabel>API Key</FormLabel>
+									<div className="flex items-center gap-2">
+										<FormLabel>API Key</FormLabel>
+										<TooltipProvider>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+												</TooltipTrigger>
+												<TooltipContent side="right" className="max-w-[240px]">
+													Your API key will be split into two parts. Only the
+													server part will be stored, and you'll receive the
+													client part to use in your app.
+												</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
+									</div>
 									<FormControl>
 										<div className="relative">
 											<Input
@@ -332,6 +485,42 @@ export function CreateProviderKeyForm() {
 									)}
 								</FormItem>
 							</div>
+
+							<Accordion type="single" collapsible className="w-full mt-2">
+								<AccordionItem value="help" className="border rounded-md">
+									<AccordionTrigger className="px-3 py-2 text-xs font-medium hover:no-underline">
+										<div className="flex items-center gap-2">
+											<AlertCircle className="h-3.5 w-3.5 text-amber-500" />
+											<span>How does the key splitting work?</span>
+										</div>
+									</AccordionTrigger>
+									<AccordionContent className="px-3 pb-3 text-xs text-muted-foreground">
+										<p className="mb-2">Partial keys work by:</p>
+										<ul className="space-y-1 list-disc pl-4">
+											<li>
+												Splitting your original API key into two
+												cryptographically linked parts
+											</li>
+											<li>
+												The server part is stored securely in your Proxed
+												database
+											</li>
+											<li>
+												The client part is provided to you to share with your
+												users or applications
+											</li>
+											<li>
+												Both parts are required to reconstruct the original API
+												key
+											</li>
+											<li>
+												The system validates the reconstructed key before using
+												it
+											</li>
+										</ul>
+									</AccordionContent>
+								</AccordionItem>
+							</Accordion>
 
 							<div className="pt-4 border-t mt-4">
 								<div className="flex items-center justify-between">

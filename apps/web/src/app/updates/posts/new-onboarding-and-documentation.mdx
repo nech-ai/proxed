@@ -1,0 +1,82 @@
+---
+title: "New Onboarding Flow"
+publishedAt: "2025-03-16"
+summary: "A look at our new step-by-step team setup, DeviceCheck configuration, and partial key management"
+image: "/images/create-team.png"
+tag: "Updates"
+---
+
+Last week we shipped a completely rebuilt onboarding experience. Here's what's new and why we made these changes.
+
+<br />
+### The Problem
+
+Setting up security for AI integrations has been unnecessarily complex. We kept seeing users struggle with the same issues:
+
+- Confused about where to start and what order to do things
+- Getting stuck during DeviceCheck configuration
+- Losing track of partial keys after creation
+- Missing important security steps
+
+<br />
+### What's New
+
+We've created a linear, guided flow that walks you through each setup step:
+
+1. **Team creation** → Just enter a name (that's it)
+2. **Member invites** → Add your colleagues with proper roles from day one
+3. **DeviceCheck setup** → Visual guide for Apple Developer credentials
+4. **Partial keys** → Smart key detection and safe client-side splitting
+
+Each component works well on its own but forms a complete security system when combined.
+
+<br />
+### Team Creation & Invites
+
+![Team Invite](/images/team-invite.png)
+
+The new team form is minimal - just enter a name and go. For invites, we added:
+- Multi-member invitations in one go (no more one-by-one)
+- Inline role selection (Owner/Member)
+- Email validation that catches common mistakes
+
+<br />
+### DeviceCheck Made Simple
+
+![DeviceCheck Configuration](/images/devicecheck-config.png)
+
+Configuring DeviceCheck used to require reading through pages of docs. Now:
+- Visual field explanations with tooltips
+- Inline documentation about Apple's credentials
+- Proper p8 file handling with validation
+- Smart error messages that tell you exactly what's wrong
+
+<br />
+### Better Partial Key Management
+
+![Partial Keys](/images/partial-keys.png)
+
+The key management interface got major improvements:
+- Auto-detection of key type (OpenAI, Anthropic, etc.)
+- One-time secure key splitting that happens client-side
+- Clear visuals showing which part is stored where
+- Copy protection for client parts with confirmation
+
+<br />
+### Docs That Actually Help
+
+Instead of generic documentation, we created specific guides:
+- [Partial Keys](https://docs.proxed.ai/partial-keys) - What they are, how they work
+- [DeviceCheck](https://docs.proxed.ai/device-check) - Step-by-step setup with screenshots
+
+Each component in the UI links directly to relevant documentation sections.
+
+<br />
+### What's Next
+
+We're focused on improving these specific areas next:
+
+- Usage notifications and alerts
+- Better usage analytics with cost forecasting
+- Real-time logging and monitoring of API requests
+

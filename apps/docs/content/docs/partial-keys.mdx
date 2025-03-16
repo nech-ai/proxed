@@ -1,0 +1,132 @@
+---
+title: Partial Keys
+description: |
+  Learn how to use partial keys to secure your API keys.
+---
+
+# Partial Keys
+
+Partial keys are a security mechanism that protects your API keys by splitting them into two separate parts: a server part stored securely on your servers, and a client part that users must provide. This approach significantly enhances security by ensuring that no single location contains the complete API key.
+
+## Understanding Partial Keys
+
+Partial keys work by:
+- Splitting your original API key into two cryptographically linked parts
+- Storing the server part in your secure database
+- Providing the client part to your users or applications
+- Requiring both parts to be present to reconstruct the original API key
+- Adding a validation layer to ensure the reconstructed key is legitimate
+
+When an API request is made, the system combines both parts, validates the reconstructed key, and then uses it to authenticate the request to the third-party API provider.
+
+![Partial Keys workflow](/images/docs/guides/partial-keys/partial-keys-workflow.png)
+
+## Why Use Partial Keys
+
+Partial keys provide several security advantages:
+
+- **Reduced Risk of Key Exposure**: Even if your database is compromised, attackers only get the server part, which is unusable alone
+- **Enhanced Access Control**: Require users to provide their client part for each request, allowing fine-grained access control
+- **Audit Trail**: Track which client parts are used for which requests
+- **Revocation Control**: Easily revoke access by invalidating specific client parts without changing the original API key
+- **Key Management**: Manage multiple API keys with different access levels using the same underlying provider key
+
+## Step 1: Create a Partial Key
+
+1. Navigate to the [API Keys management page](https://app.proxed.ai/settings/team/keys) in your Proxed.AI account.
+
+2. Click "Add New Key" to create a new partial key.
+
+3. Enter a descriptive name for your key.
+
+4. Select the API provider (OpenAI, Anthropic, etc.).
+
+5. Paste your complete original API key in the "API Key" field.
+
+6. Click "Create Partial Key".
+
+7. The system will generate your partial key and display the client part. **Important:** Copy this client part immediately as it will only be shown once.
+
+## Step 2: Using Partial Keys in Your Applications
+
+To use partial keys in your applications, you'll need to:
+
+1. Store the client part securely in your application.
+
+2. Include the client part in your API requests to Proxed.AI.
+
+## Technical Details
+
+Partial keys use a secure splitting mechanism with these characteristics:
+
+- A random salt is generated and attached to both key parts to ensure they match
+- The splitting point is chosen randomly for each key to prevent pattern analysis
+- Metadata stored with the client part includes version, timestamp, and unique identifiers
+- The original API key format is preserved and validated when reassembled
+
+## Using Partial Keys with Swift
+
+When integrating partial keys in your iOS applications, you can combine them with Apple's DeviceCheck for enhanced security:
+
+```swift
+import OpenAI
+import DeviceCheck
+
+actor OpenAIAnalyzer {
+    let endpoint = "https://api.proxed.ai/v1/openai/<your-project-id>"
+    let apiKey = "<your-api-key>"
+    let client: OpenAI
+
+    init() async {
+        let token = await DeviceCheck.retrieveToken()
+        let combinedToken = "\(apiKey).\(token ?? "")"
+
+        let configuration = OpenAI.Configuration(
+            baseURL: URL(string: endpoint)!,
+            apiKey: combinedToken
+        )
+
+        client = OpenAI(configuration: configuration)
+    }
+
+    func generateCompletion(messages: [Chat]) async throws -> ChatCompletion {
+        let query = ChatQuery(
+            model: .gpt4,
+            messages: messages
+        )
+        return try await client.chats(query: query)
+    }
+}
+```
+
+## Managing Partial Keys
+
+In the Proxed.AI dashboard, you can:
+
+- View all your partial keys
+- Create new partial keys
+- Delete existing partial keys
+- Monitor usage of each partial key
+- Set rate limits and permissions per key
+
+## Troubleshooting
+
+If you experience issues with your partial keys:
+
+- **Invalid Key Error**: Ensure you're using the correct client part that matches the server part
+- **Missing Client Part**: Unfortunately, if you lose the client part, you'll need to create a new partial key
+- **Key Validation Errors**: Check that your original API key is still valid with your provider
+- **Format Not Recognized**: Ensure your API key is from a supported provider (OpenAI, Anthropic, etc.)
+
+For additional assistance, contact the Proxed.AI support team.
+
+## Security Best Practices
+
+For optimal security when using partial keys:
+
+- Store client parts in environment variables, not in code repositories
+- Rotate partial keys periodically
+- Use different partial keys for different environments (development, staging, production)
+- Set the minimum necessary permissions for each partial key
+- Monitor usage patterns to detect potential abuse
+

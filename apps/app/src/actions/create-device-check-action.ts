@@ -4,12 +4,13 @@ import { createDeviceCheck } from "@proxed/supabase/mutations";
 import { authActionClient } from "./safe-action";
 import { createDeviceCheckSchema } from "./schema";
 import { revalidatePath as revalidatePathFunc } from "next/cache";
+import { redirect } from "next/navigation";
 
 export const createDeviceCheckAction = authActionClient
 	.schema(createDeviceCheckSchema)
 	.action(
 		async ({
-			parsedInput: { revalidatePath, ...data },
+			parsedInput: { revalidatePath, redirectTo, ...data },
 			ctx: { user, supabase },
 		}) => {
 			if (!user.team_id) {
@@ -31,6 +32,10 @@ export const createDeviceCheckAction = authActionClient
 
 			if (revalidatePath) {
 				revalidatePathFunc(revalidatePath);
+			}
+
+			if (redirectTo) {
+				redirect(redirectTo);
 			}
 
 			return deviceCheck;

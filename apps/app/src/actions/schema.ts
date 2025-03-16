@@ -50,6 +50,20 @@ export const inviteTeamMemberSchema = z.object({
 
 export type InviteTeamMemberFormValues = z.infer<typeof inviteTeamMemberSchema>;
 
+export const inviteTeamMembersSchema = z.object({
+	invites: z.array(
+		z.object({
+			email: z.string().email(),
+			role: z.enum(["OWNER", "MEMBER"]),
+		}),
+	),
+	revalidatePath: z.string().optional(),
+	redirectTo: z.string().optional(),
+});
+
+export type InviteTeamMembersFormValues = z.infer<
+	typeof inviteTeamMembersSchema
+>;
 export const deleteInviteSchema = z.object({
 	id: z.string(),
 	revalidatePath: z.string().optional(),
@@ -96,6 +110,7 @@ export const createDeviceCheckSchema = z.object({
 		message: "Apple Team ID is required",
 	}),
 	revalidatePath: z.string().optional(),
+	redirectTo: z.string().optional(),
 });
 
 export type CreateDeviceCheckFormValues = z.infer<

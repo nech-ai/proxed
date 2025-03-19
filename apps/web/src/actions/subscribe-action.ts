@@ -1,6 +1,6 @@
 "use server";
 
-import { resend } from "@/utils/resend";
+import { resend } from "@proxed/utils";
 import { setupAnalytics } from "@proxed/analytics/server";
 import { LogEvents } from "@proxed/analytics/events";
 

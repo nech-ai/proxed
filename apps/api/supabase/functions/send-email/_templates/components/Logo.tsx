@@ -14,7 +14,7 @@ export function Logo({
 					height="48"
 					alt="Proxed.AI"
 				/>
-				{withLabel && <span className="ml-3 text-xl">Proxed.AI</span>}
+				{withLabel && <span className="ml-3 text-xl">proxed.ai</span>}
 			</span>
 		</>
 	);

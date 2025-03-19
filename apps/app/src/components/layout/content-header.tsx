@@ -6,6 +6,7 @@ import { cn } from "@proxed/ui/utils";
 import type { PropsWithChildren } from "react";
 import { UserMenu } from "./user-menu";
 import { useTeam } from "@/hooks/use-team";
+import { FeedbackDialog } from "./feedback-dialog";
 
 interface ContentHeaderProps extends PropsWithChildren {
 	className?: string;
@@ -27,7 +28,8 @@ export function ContentHeader({ children, className }: ContentHeaderProps) {
 					)}
 					<div className="overflow-x-auto w-full">{children}</div>
 				</div>
-				<div className="flex-shrink-0 ml-2">
+				<div className="flex-shrink-0 ml-2 flex items-center gap-2">
+					<FeedbackDialog />
 					<UserMenu user={user} />
 				</div>
 			</header>

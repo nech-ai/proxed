@@ -3,12 +3,14 @@ import { ForgotPassword } from "../emails/ForgotPassword";
 import { MagicLink } from "../emails/MagicLink";
 import { NewUser } from "../emails/NewUser";
 import { TeamInvitation } from "../emails/TeamInvitation";
+import { Feedback } from "../emails/Feedback";
 
 export const mailTemplates = {
 	magicLink: MagicLink,
 	forgotPassword: ForgotPassword,
 	newUser: NewUser,
 	teamInvitation: TeamInvitation,
+	feedback: Feedback,
 };
 
 export async function getTemplate<

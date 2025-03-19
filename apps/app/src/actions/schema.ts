@@ -231,3 +231,11 @@ export const changeChartPeriodSchema = z.object({
 export const changeChartTypeSchema = z.enum(["all"]);
 
 export const trackingConsentSchema = z.boolean();
+
+export const feedbackSchema = z.object({
+	message: z.string(),
+	revalidatePath: z.string().optional(),
+	redirectTo: z.string().optional(),
+});
+
+export type FeedbackFormValues = z.infer<typeof feedbackSchema>;

@@ -1,135 +1,184 @@
 ---
-description: Project strtrucure.
-globs: *.ts, *.tsx
+description: 
+globs: 
+alwaysApply: true
 ---
+# Project Structure and Code Standards
 
-# Project structure
+## Project Organization
+- ./apps: Contains deployable applications
+  - /app (@proxed/app): Dashboard for projects, user management and security (NextJS, React, Tailwind, Supabase, Shadcn)
+  - /web (@proxed/web): Marketing website (NextJS, React, Tailwind, Shadcn)
+  - /api (@proxed/api): Supabase configuration and database migrations (Supabase, Deno)
+  - /proxy (@proxed/proxy): API proxy to connect all clients (NextJS, Supabase)
+  - /docs (@proxed/docs): Fumadocs application with documentation
+- ./packages: Contains shared code between apps
+  - /ui (@proxed/ui): UI library with Shadcn components, global.css, Tailwind configuration
+  - /supabase (@proxed/supabase): Shared queries, cached queries, mutations, and database types
 
-- ./apps: containst all aplictaions whichg can be deplyed
-  - /app (@proxed/app): dashboard, cotains all controll for projects, usermanagement and security (nextjs, react, tailwindcss, supabase, shadcn)
-  - /web (@proxed/web): marketing website (nextjs, react, tailwindcss, shadcn)
-  - /api (@proxed/api): supabase configuration and databse migrations (supabase, deno)
-  - /proxy (@proxed/proxy): API proxy app to allow connet all clients (nextjs, supabase)
-  - /docs (@proxed/docs): Fumadocs application with all documents 
-- ./packages: contains all sharable code between all apps
-  - /ui (@proxed/ui): ui application, contains all shadcn components, global.css with colors, tailwindcss configuration  
-  - /supabase (@proxed/supabase): contains all sharable queries, cached queries and mutations. Also contails all types for database
+## Code Standards
 
+### Code Style and Structure
+- Write concise, technical TypeScript code with accurate examples
+- Use functional and declarative programming patterns; avoid classes
+- Prefer iteration and modularization over code duplication
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
+- Structure files: exported component, subcomponents, helpers, static content, types
 
-# Code standards:
+### Naming Conventions
+- Use lowercase with dashes for directories (e.g., components/auth-wizard)
+- Favor named exports for components
 
-Use TypeScript, Node.js, Next.js App Router, React, Shadcn UI, Radix UI and Tailwind.
+### TypeScript Usage
+- Use TypeScript for all code; prefer interfaces over types
+- Avoid enums; use maps instead
+- Use functional components with TypeScript interfaces
 
-## Code Style and Structure
-- Write concise, technical TypeScript code with accurate examples.
-- Use functional and declarative programming patterns; avoid classes.
-- Prefer iteration and modularization over code duplication.
-- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
-- Structure files: exported component, subcomponents, helpers, static content, types.
+### Syntax and Formatting
+- Use the "function" keyword for pure functions
+- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements
+- Use declarative JSX
 
-## Naming Conventions
-- Use lowercase with dashes for directories (e.g., components/auth-wizard).
-- Favor named exports for components.
+### UI and Styling
+- Use Shadcn UI, Radix, and Tailwind for components and styling
+- Implement responsive design with Tailwind CSS; use a mobile-first approach
 
-## TypeScript Usage
-- Use TypeScript for all code; prefer interfaces over types.
-- Avoid enums; use maps instead.
-- Use functional components with TypeScript interfaces.
+## Next.js Best Practices
 
-## Syntax and Formatting
-- Use the "function" keyword for pure functions.
-- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements.
-- Use declarative JSX.
+### State Management
+- Use `nuqs` for URL search parameter management
+- Implement `useQueryState` for client-side query state
+```typescript
+'use client'
 
-## UI and Styling
-- Use Shadcn UI, Radix, and Tailwind for components and styling.
-- Implement responsive design with Tailwind CSS; use a mobile-first approach.
+import { useQueryState } from 'nuqs'
 
-## Performance Optimization
-- Minimize 'use client', 'useEffect', and 'setState'; favor React Server Components (RSC).
-- Wrap client components in Suspense with fallback.
-- Use dynamic loading for non-critical components.
-- Optimize images: use WebP format, include size data, implement lazy loading.
+export function Demo() {
+  const [name, setName] = useQueryState('name')
+  return (
+    <>
+      <input value={name || ''} onChange={e => setName(e.target.value)} />
+      <button onClick={() => setName(null)}>Clear</button>
+      <p>Hello, {name || 'anonymous visitor'}!</p>
+    </>
+  )
+}
+```
 
-## Next.js Specifics
-- Use next-safe-action for all server actions:
-- Implement type-safe server actions with proper validation.
-- Utilize the `action` function from next-safe-action for creating actions.
-- Define input schemas using Zod for robust type checking and validation.
-- Handle errors gracefully and return appropriate responses.
-- Use import type { ActionResponse } from '@/types/actions'
-- Ensure all server actions return the ActionResponse type
-- Implement consistent error handling and success responses using ActionResponse
-- Example:
-  ```typescript
-  'use server'
+- Create server-side query management with `createSearchParamsCache`
+```typescript
+import {
+  createSearchParamsCache,
+  parseAsInteger,
+  parseAsStringLiteral,
+} from "nuqs/server";
 
-  import { createSafeActionClient } from 'next-safe-action'
-  import { z } from 'zod'
-  import type { ActionResponse } from '@/app/actions/actions'
+export const searchParamsCache = createSearchParamsCache({
+  type: parseAsStringLiteral([
+    "one",
+    "two",
+  ] as const),
+  page: parseAsInteger.withDefault(1),
+  perPage: parseAsInteger.withDefault(25),
+});
+```
 
-  const schema = z.object({
-    value: z.string()
+### Server Actions
+- Use `next-safe-action` for type-safe server actions
+- Define schemas and types in separate files for reusability
+- Create action clients with appropriate middleware
+
+#### Schema Definition
+```typescript
+// schema.ts
+import { z } from "zod";
+
+export const exampleSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  redirectTo: z.string().optional(),
+  revalidatePath: z.string().optional(),
+});
+
+export type ExampleFormValues = z.infer<typeof exampleSchema>;
+```
+
+#### Action Client Setup
+```typescript
+// safe-action.ts
+import { createSafeActionClient } from "next-safe-action";
+import { createClient } from "@proxed/supabase/server";
+import { getUser } from "@proxed/supabase/cached-queries";
+
+export const actionClient = createSafeActionClient({
+  handleServerError: (e) => e instanceof Error ? e.message : "An error occurred",
+});
+
+export const authActionClient = actionClient
+  // Add logging middleware
+  .use(async ({ next, clientInput, metadata }) => {
+    const result = await next({ ctx: {} });
+    return result;
   })
+  // Add authentication middleware
+  .use(async ({ next }) => {
+    const userData = await getUser();
+    const user = userData?.data;
+    const supabase = await createClient();
 
-  export const someAction = createSafeActionClient()
-    .schema(schema)
-    .action(async (input): Promise<ActionResponse> => {
-      try {
-        // Action logic here
-        return { success: true, data: /* result */ }
-      } catch (error) {
-        return { success: false, error: error instanceof AppError ? error : appErrors.UNEXPECTED_ERROR, }
-      }
-    })
-  ```
-- Use useQueryState for all query state management.
-- Example:
-  ```typescript
-  'use client'
+    if (!user) {
+      throw new Error("Unauthorized");
+    }
 
-  import { useQueryState } from 'nuqs'
-
-  export function Demo() {
-    const [name, setName] = useQueryState('name')
-    return (
-      <>
-        <input value={name || ''} onChange={e => setName(e.target.value)} />
-        <button onClick={() => setName(null)}>Clear</button>
-        <p>Hello, {name || 'anonymous visitor'}!</p>
-      </>
-    )
-  }
-  ```
-  - Nuqs search-params.ts for serverside query management
-  - Example:
-  ```typescript
-    import {
-    createSearchParamsCache,
-    parseAsInteger,
-    parseAsStringLiteral,
-  } from "nuqs/server";
-
-  export const searchParamsCache = createSearchParamsCache({
-    type: parseAsStringLiteral([
-      "one",
-      "two",
-    ] as const),
-    page: parseAsInteger.withDefault(1),
-    perPage: parseAsInteger.withDefault(25),
+    return next({
+      ctx: {
+        supabase,
+        user,
+      },
+    });
   });
-  ```
+```
 
-## Key Conventions
-- Use 'nuqs' for URL search parameter state management.
-- Optimize Web Vitals (LCP, CLS, FID).
-- Limit 'use client':
-  - Favor server components and Next.js SSR.
-  - Use only for Web API access in small components.
-  - Avoid for data fetching or state management.
+#### Action Implementation
+```typescript
+// actions/example-action.ts
+"use server";
 
-## Follow Next.js docs for Data Fetching, Rendering, and Routing.
+import { revalidatePath } from "next/cache";
+import { authActionClient } from "./safe-action";
+import { exampleSchema } from "./schema";
 
-## Unti tests:
-- use "bun:test" for writing test
-- "bun:test" is fully compatable with vitest and jest
+export const exampleAction = authActionClient
+  .schema(exampleSchema)
+  .action(
+    async ({
+      parsedInput: { revalidatePath: revalidatePath, ...data },
+      ctx: { user, supabase },
+    }) => {
+      try {
+        // Action implementation
+        const result = await someOperation(data);
+
+        // Handle revalidation if needed
+        if (revalidatePath) {
+          revalidatePath(revalidatePath);
+        }
+
+        return result;
+      } catch (error) {
+        throw new Error(error instanceof Error ? error.message : "An error occurred");
+      }
+    },
+  );
+```
+
+### Performance Optimization
+- Minimize 'use client', 'useEffect', and 'setState'; favor React Server Components (RSC)
+- Wrap client components in Suspense with fallback
+- Use dynamic loading for non-critical components
+- Optimize images: use WebP format, include size data, implement lazy loading
+
+## Testing
+- Use "bun:test" for writing tests
+- "bun:test" is fully compatible with vitest and jest

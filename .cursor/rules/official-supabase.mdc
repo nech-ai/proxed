@@ -1,0 +1,205 @@
+---
+description: Next.js Supabase Auth Implementation
+globs: **/*.ts, **/*.tsx
+---
+
+# Supabase Auth with Next.js
+
+## Required Packages and Setup
+
+1. Install required packages:
+   ```
+   npm install @supabase/supabase-js @supabase/ssr
+   ```
+
+2. Set up environment variables in `.env.local`:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your-project-url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   ```
+
+## 🚨 CRITICAL IMPLEMENTATION REQUIREMENTS 🚨
+
+### USE ONLY THESE PATTERNS:
+
+✅ ALWAYS use `@supabase/ssr` for auth
+✅ ALWAYS use `getAll()` and `setAll()` for cookie management
+✅ ALWAYS return the correct response object from middleware
+
+### NEVER USE THESE DEPRECATED PATTERNS:
+
+❌ NEVER use individual cookie methods (`get`, `set`, `remove`)
+❌ NEVER import from `@supabase/auth-helpers-nextjs`
+
+## Browser Client Implementation
+
+```typescript
+// app/supabase/client.ts
+import { createBrowserClient } from '@supabase/ssr'
+
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
+```
+
+## Server Client Implementation
+
+```typescript
+// app/supabase/server.ts
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+export async function createClient() {
+  const cookieStore = await cookies()
+
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+      },
+    }
+  )
+}
+```
+
+## Middleware Implementation
+
+```typescript
+// middleware.ts
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
+
+export async function middleware(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({
+    request,
+  })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({
+            request,
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  // IMPORTANT: Do not remove auth.getUser() call
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // Optional: Redirect to login if user not authenticated
+  if (
+    !user &&
+    !request.nextUrl.pathname.startsWith('/login') &&
+    !request.nextUrl.pathname.startsWith('/auth')
+  ) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
+  }
+
+  return supabaseResponse
+}
+
+export const config = {
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+}
+```
+
+## Example Usage in Components
+
+### Server Component
+```typescript
+// app/profile/page.tsx
+import { createClient } from '@/app/supabase/server'
+
+export default async function Profile() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  return (
+    <div>
+      <h1>Profile</h1>
+      {user ? (
+        <p>Logged in as: {user.email}</p>
+      ) : (
+        <p>Not logged in</p>
+      )}
+    </div>
+  )
+}
+```
+
+### Client Component
+```typescript
+// app/components/LoginForm.tsx
+'use client'
+import { createClient } from '@/app/supabase/client'
+import { useState } from 'react'
+
+export function LoginForm() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const supabase = createClient()
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await supabase.auth.signInWithPassword({
+      email,
+      password
+    })
+    window.location.href = '/dashboard'
+  }
+
+  return (
+    <form onSubmit={handleLogin}>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email"
+      />
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Password"
+      />
+      <button type="submit">Login</button>
+    </form>
+  )
+}
+```

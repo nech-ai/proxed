@@ -1,132 +1,85 @@
 ---
-description: Supabase config
-globs: ./apps/api/supabase/migrations/**/*
+description: Supabase SQL and database management
+globs: **/migrations/**/*.sql
 ---
-# Postgres SQL Style Guide
-
-## General
-
-- Use lowercase for SQL reserved words to maintain consistency and readability.
-- Employ consistent, descriptive identifiers for tables, columns, and other database objects.
-- Use white space and indentation to enhance the readability of your code.
-- Store dates in ISO 8601 format (`yyyy-mm-ddThh:mm:ss.sssss`).
-- Include comments for complex logic, using '/* ... */' for block comments and '--' for line comments.
+# Supabase: SQL Style and Database Management
 
 ## Naming Conventions
 
-- Avoid SQL reserved words and ensure names are unique and under 63 characters.
-- Use snake_case for tables and columns.
-- Prefer plurals for table names
-- Prefer singular names for columns.
+- Use snake_case for tables, columns, and database objects
+- Avoid SQL reserved words and stay under 63 characters
+- Prefer plurals for table names (e.g., `users`)
+- Prefer singular names for columns (e.g., `user_id`)
+- For foreign keys, use singular table name with `_id` suffix (e.g., `user_id` to reference `users` table)
 
-## Tables
+## Table Structure
 
-- Avoid prefixes like 'tbl_' and ensure no table name matches any of its column names.
-- Always add an `id` column of type `identity generated always` unless otherwise specified.
-- Create all tables in the `public` schema unless otherwise specified.
-- Always add the schema to SQL queries for clarity.
-- Always add a comment to describe what the table does. The comment can be up to 1024 characters.
-
-## Columns
-
-- Use singular names and avoid generic names like 'id'.
-- For references to foreign tables, use the singular of the table name with the `_id` suffix. For example `user_id` to reference the `users` table
-- Always use lowercase except in cases involving acronyms or when readability would be enhanced by an exception.
-
-#### Examples:
+- Always add an `id` column of type `identity generated always` unless otherwise specified
+- Create tables in the `public` schema by default
+- Always add comments to describe table purpose (up to 1024 characters)
+- Always qualify schema names in SQL queries for clarity
 
 ```sql
-create table books (
+create table public.books (
   id bigint generated always as identity primary key,
   title text not null,
-  author_id bigint references authors (id)
+  author_id bigint references public.authors (id)
 );
-comment on table books is 'A list of all the books in the library.';
+comment on table public.books is 'A list of all the books in the library.';
 ```
 
+## SQL Query Style
 
-## Queries
+- Add spaces and newlines for readability
+- Use lowercase for SQL reserved words
+- Format smaller queries concisely, larger queries with more structure
 
-- When the query is shorter keep it on just a few lines. As it gets larger start adding newlines for readability
-- Add spaces for readability.
-
-Smaller queries:
-
-
+### Small Query Example
 ```sql
 select *
-from employees
+from public.employees
 where end_date is null;
 
-update employees
+update public.employees
 set end_date = '2023-12-31'
 where employee_id = 1001;
 ```
 
-Larger queries:
-
+### Larger Query Example
 ```sql
 select
   first_name,
   last_name
 from
-  employees
+  public.employees
 where
   start_date between '2021-01-01' and '2021-12-31'
 and
   status = 'employed';
 ```
 
+## Joins and Complex Queries
 
-### Joins and Subqueries
-
-- Format joins and subqueries for clarity, aligning them with related SQL clauses.
-- Prefer full table names when referencing tables. This helps for readability.
-
-```sql
-select
-  employees.employee_name,
-  departments.department_name
-from
-  employees
-join
-  departments on employees.department_id = departments.department_id
-where
-  employees.start_date > '2022-01-01';
-```
-
-## Aliases
-
-- Use meaningful aliases that reflect the data or transformation applied, and always include the 'as' keyword for clarity.
-
-```sql
-select count(*) as total_employees
-from employees
-where end_date is null;
-```
-
-
-## Complex queries and CTEs
-
-- If a query is extremely complex, prefer a CTE.
-- Make sure the CTE is clear and linear. Prefer readability over performance.
-- Add comments to each block.
+- Align joins and subqueries with related SQL clauses
+- Use full table names for clarity
+- Use meaningful aliases with the 'as' keyword
+- For complex queries, use CTEs (Common Table Expressions) with comments
 
 ```sql
 with department_employees as (
   -- Get all employees and their departments
   select
-    employees.department_id,
-    employees.first_name,
-    employees.last_name,
-    departments.department_name
+    e.department_id,
+    e.first_name,
+    e.last_name,
+    d.department_name
   from
-    employees
+    public.employees e
   join
-    departments on employees.department_id = departments.department_id
+    public.departments d on e.department_id = d.department_id
 ),
 employee_counts as (
-  -- Count how many employees in each department
+  -- Count employees per department
   select
     department_name,
     count(*) as num_employees
@@ -144,49 +97,19 @@ order by
   department_name;
 ```
 
-# Database: Create functions
+## Database Functions
 
-You're a Supabase Postgres expert in writing database functions. Generate **high-quality PostgreSQL functions** that adhere to the following best practices:
+### Security Best Practices
 
-## General Guidelines
+- Default to `SECURITY INVOKER` (use `SECURITY DEFINER` only when explicitly required)
+- Always set `search_path` to empty string (`set search_path = '';`)
+- Use fully qualified names for all database objects
 
-1. **Default to `SECURITY INVOKER`:**
+### Function Templates
 
-   - Functions should run with the permissions of the user invoking the function, ensuring safer access control.
-   - Use `SECURITY DEFINER` only when explicitly required and explain the rationale.
-
-2. **Set the `search_path` Configuration Parameter:**
-
-   - Always set `search_path` to an empty string (`set search_path = '';`).
-   - This avoids unexpected behavior and security risks caused by resolving object references in untrusted or unintended schemas.
-   - Use fully qualified names (e.g., `schema_name.table_name`) for all database objects referenced within the function.
-
-3. **Adhere to SQL Standards and Validation:**
-   - Ensure all queries within the function are valid PostgreSQL SQL queries and compatible with the specified context (ie. Supabase).
-
-## Best Practices
-
-1. **Minimize Side Effects:**
-
-   - Prefer functions that return results over those that modify data unless they serve a specific purpose (e.g., triggers).
-
-2. **Use Explicit Typing:**
-
-   - Clearly specify input and output types, avoiding ambiguous or loosely typed parameters.
-
-3. **Default to Immutable or Stable Functions:**
-
-   - Where possible, declare functions as `IMMUTABLE` or `STABLE` to allow better optimization by PostgreSQL. Use `VOLATILE` only if the function modifies data or has side effects.
-
-4. **Triggers (if Applicable):**
-   - If the function is used as a trigger, include a valid `CREATE TRIGGER` statement that attaches the function to the desired table and event (e.g., `BEFORE INSERT`).
-
-## Example Templates
-
-### Simple Function with `SECURITY INVOKER`
-
+#### Basic Function
 ```sql
-create or replace function my_schema.hello_world()
+create or replace function public.hello_world()
 returns text
 language plpgsql
 security invoker
@@ -198,8 +121,7 @@ end;
 $$;
 ```
 
-### Function with Parameters and Fully Qualified Object Names
-
+#### Function with Parameters
 ```sql
 create or replace function public.calculate_total_price(order_id bigint)
 returns numeric
@@ -220,60 +142,32 @@ end;
 $$;
 ```
 
-### Function as a Trigger
-
+#### Trigger Function
 ```sql
-create or replace function my_schema.update_updated_at()
+create or replace function public.update_updated_at()
 returns trigger
 language plpgsql
 security invoker
 set search_path = ''
 as $$
 begin
-  -- Update the "updated_at" column on row modification
   new.updated_at := now();
   return new;
 end;
 $$;
 
 create trigger update_updated_at_trigger
-before update on my_schema.my_table
+before update on public.my_table
 for each row
-execute function my_schema.update_updated_at();
+execute function public.update_updated_at();
 ```
 
-### Function with Error Handling
+## Function Types
 
-```sql
-create or replace function my_schema.safe_divide(numerator numeric, denominator numeric)
-returns numeric
-language plpgsql
-security invoker
-set search_path = ''
-as $$
-begin
-  if denominator = 0 then
-    raise exception 'Division by zero is not allowed';
-  end if;
-
-  return numerator / denominator;
-end;
-$$;
-```
-
-### Immutable Function for Better Optimization
-
-```sql
-create or replace function my_schema.full_name(first_name text, last_name text)
-returns text
-language sql
-security invoker
-set search_path = ''
-immutable
-as $$
-  select first_name || ' ' || last_name;
-$$;
-```
+- Prefer `IMMUTABLE` or `STABLE` functions where possible
+- Use `VOLATILE` only when function modifies data or has side effects
+- Minimize side effects in functions
+- Use explicit typing for inputs and outputs
 
 # Database: Create migration
 

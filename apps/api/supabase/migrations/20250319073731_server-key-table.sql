@@ -50,11 +50,6 @@ BEGIN
   FROM provider_keys
   WHERE id = p_provider_key_id;
 
-  -- Check if the user is a member of the team
-  IF NOT public.is_member_of(auth.uid(), v_team_id) THEN
-    RAISE EXCEPTION 'Unauthorized access to server key';
-  END IF;
-
   -- Get the key value
   SELECT key_value INTO v_key_value
   FROM server_keys

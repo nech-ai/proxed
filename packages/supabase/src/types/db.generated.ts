@@ -263,7 +263,6 @@ export type Database = {
 					display_name: string;
 					id: string;
 					is_active: boolean;
-					partial_key_server: string;
 					provider: Database["public"]["Enums"]["provider_type"];
 					team_id: string;
 					updated_at: string;
@@ -273,7 +272,6 @@ export type Database = {
 					display_name: string;
 					id?: string;
 					is_active?: boolean;
-					partial_key_server: string;
 					provider: Database["public"]["Enums"]["provider_type"];
 					team_id: string;
 					updated_at?: string;
@@ -283,7 +281,6 @@ export type Database = {
 					display_name?: string;
 					id?: string;
 					is_active?: boolean;
-					partial_key_server?: string;
 					provider?: Database["public"]["Enums"]["provider_type"];
 					team_id?: string;
 					updated_at?: string;
@@ -294,6 +291,38 @@ export type Database = {
 						columns: ["team_id"];
 						isOneToOne: false;
 						referencedRelation: "teams";
+						referencedColumns: ["id"];
+					},
+				];
+			};
+			server_keys: {
+				Row: {
+					created_at: string;
+					id: string;
+					key_value: string;
+					provider_key_id: string;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					id?: string;
+					key_value: string;
+					provider_key_id: string;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					key_value?: string;
+					provider_key_id?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "server_keys_provider_key_id_fkey";
+						columns: ["provider_key_id"];
+						isOneToOne: true;
+						referencedRelation: "provider_keys";
 						referencedColumns: ["id"];
 					},
 				];
@@ -477,6 +506,19 @@ export type Database = {
 					date: string;
 					execution_count: number;
 				}[];
+			};
+			get_server_key: {
+				Args: {
+					p_provider_key_id: string;
+				};
+				Returns: string;
+			};
+			insert_server_key: {
+				Args: {
+					p_provider_key_id: string;
+					p_key_value: string;
+				};
+				Returns: undefined;
 			};
 			is_member_of: {
 				Args: {

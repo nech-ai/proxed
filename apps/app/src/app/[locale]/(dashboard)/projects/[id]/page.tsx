@@ -100,7 +100,6 @@ export default async function Page(props: {
 						project={project}
 						// @ts-expect-error
 						deviceChecks={deviceChecks?.data || []}
-						// @ts-expect-error
 						keys={keys?.data || []}
 					/>
 

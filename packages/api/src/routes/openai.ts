@@ -69,10 +69,13 @@ async function handleOpenAIProxy(
 	}
 
 	const apiKey = c.req.header("x-ai-key");
-	const [fullApiKey] = reassembleKey(
-		project.key.partial_key_server,
-		apiKey,
-	).split(".");
+
+	// Get the server key part using the function
+	const { data: serverKey } = await supabase.rpc("get_server_key", {
+		p_provider_key_id: project.key_id,
+	});
+
+	const [fullApiKey] = reassembleKey(serverKey, apiKey).split(".");
 
 	const startTime = Date.now();
 

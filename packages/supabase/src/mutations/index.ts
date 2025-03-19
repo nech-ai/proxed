@@ -195,7 +195,35 @@ export async function createProviderKey(
 	supabase: Client,
 	params: CreateProviderKeyParams,
 ) {
-	return supabase.from("provider_keys").insert(params).select().single();
+	const { partial_key_server, ...providerKeyData } = params;
+
+	// First transaction: Create provider key
+	const { data: providerKey, error } = await supabase
+		.from("provider_keys")
+		.insert({
+			display_name: providerKeyData.display_name,
+			provider: providerKeyData.provider,
+			team_id: providerKeyData.team_id,
+		})
+		.select()
+		.single();
+
+	if (error || !providerKey) {
+		return { error };
+	}
+
+	// Second transaction: Store the server key securely
+	const { error: serverKeyError } = await supabase.rpc("insert_server_key", {
+		p_provider_key_id: providerKey.id,
+		p_key_value: partial_key_server,
+	});
+
+	if (serverKeyError) {
+		await supabase.from("provider_keys").delete().eq("id", providerKey.id);
+		return { error: serverKeyError };
+	}
+
+	return { data: providerKey };
 }
 
 type UpdateProviderKeyParams = Partial<CreateProviderKeyParams>;

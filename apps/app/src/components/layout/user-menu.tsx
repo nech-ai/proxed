@@ -19,6 +19,7 @@ import {
 import { useMediaQuery } from "@proxed/ui/hooks/use-media-query";
 import { CircleHelpIcon, LogoutIcon, SettingsGearIcon } from "@proxed/ui/icons";
 import { cn } from "@proxed/ui/utils";
+import { LifeBuoy } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { UserAvatar } from "./user-avatar";
@@ -88,6 +89,13 @@ export function UserMenu({ user, className }: UserMenuProps) {
 						<CircleHelpIcon className="mr-2 size-4" />
 						Documentation
 					</a>
+				</DropdownMenuItem>
+
+				<DropdownMenuItem asChild className="rounded-md">
+					<Link href="/settings/account/support">
+						<LifeBuoy className="mr-2 size-4" />
+						Support
+					</Link>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem

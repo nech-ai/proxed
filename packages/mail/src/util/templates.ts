@@ -4,6 +4,7 @@ import { MagicLink } from "../emails/MagicLink";
 import { NewUser } from "../emails/NewUser";
 import { TeamInvitation } from "../emails/TeamInvitation";
 import { Feedback } from "../emails/Feedback";
+import { Support } from "../emails/Support";
 
 export const mailTemplates = {
 	magicLink: MagicLink,
@@ -11,6 +12,7 @@ export const mailTemplates = {
 	newUser: NewUser,
 	teamInvitation: TeamInvitation,
 	feedback: Feedback,
+	support: Support,
 };
 
 export async function getTemplate<

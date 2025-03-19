@@ -239,3 +239,14 @@ export const feedbackSchema = z.object({
 });
 
 export type FeedbackFormValues = z.infer<typeof feedbackSchema>;
+
+export const supportSchema = z.object({
+	subject: z.string(),
+	category: z.enum(["bug", "feature", "question", "other"]),
+	priority: z.enum(["low", "medium", "high"]),
+	message: z.string(),
+	revalidatePath: z.string().optional(),
+	redirectTo: z.string().optional(),
+});
+
+export type SupportFormValues = z.infer<typeof supportSchema>;

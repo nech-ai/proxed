@@ -12,6 +12,10 @@ export default async function SettingsLayout({ children }: PropsWithChildren) {
 							title: "General",
 							href: "/settings/account/general",
 						},
+						{
+							title: "Support",
+							href: "/settings/account/support",
+						},
 					]}
 				/>
 			</ContentHeader>

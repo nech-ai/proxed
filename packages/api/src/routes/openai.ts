@@ -5,52 +5,14 @@ import { type Context, Hono } from "hono";
 import { proxy } from "hono/proxy";
 import { describeRoute } from "hono-openapi";
 import { authMiddleware } from "../middleware/auth";
-import type { AuthMiddlewareVariables } from "../types";
+import type { AuthMiddlewareVariables, FinishReason } from "../types";
 import { reassembleKey } from "@proxed/utils/lib/partial-keys";
 import { logger } from "@proxed/logger";
-import { Headers } from "@proxed/location/constants";
+import { createError, ErrorCode } from "../utils/errors";
+import { getCommonExecutionParams } from "../utils/execution-params";
+import { mapOpenAIFinishReason, type OpenAIResponse } from "../utils/openai";
 
 const OPENAI_API_BASE = "https://api.openai.com/v1";
-
-type CommonExecutionParams = {
-	teamId: string;
-	projectId: string;
-	deviceCheckId: string;
-	keyId: string;
-	ip: string | undefined;
-	userAgent: string | undefined;
-	model: string;
-	provider: "OPENAI" | "ANTHROPIC";
-	c: Context;
-};
-
-const getCommonExecutionParams = ({
-	teamId,
-	projectId,
-	deviceCheckId,
-	keyId,
-	ip,
-	userAgent,
-	model,
-	provider,
-	c,
-}: CommonExecutionParams) => ({
-	team_id: teamId,
-	project_id: projectId,
-	device_check_id: deviceCheckId,
-	key_id: keyId,
-	ip,
-	user_agent: userAgent ?? undefined,
-	model,
-	provider,
-	country_code: c.req.header(Headers.CountryCode),
-	region_code: c.req.header(Headers.RegionCode),
-	city: c.req.header(Headers.City),
-	longitude:
-		Number.parseFloat(c.req.header(Headers.Longitude) ?? "0") || undefined,
-	latitude:
-		Number.parseFloat(c.req.header(Headers.Latitude) ?? "0") || undefined,
-});
 
 async function handleOpenAIProxy(
 	c: Context<{ Variables: AuthMiddlewareVariables }>,
@@ -65,15 +27,31 @@ async function handleOpenAIProxy(
 	const { data: project, error } = await getProjectQuery(supabase, projectId);
 
 	if (error || !project || !project.key) {
-		return c.json({ error: "Project not found" }, 404);
+		throw createError(ErrorCode.PROJECT_NOT_FOUND);
 	}
 
 	const apiKey = c.req.header("x-ai-key");
+	if (!apiKey) {
+		throw createError(ErrorCode.UNAUTHORIZED, "API key is required");
+	}
 
 	// Get the server key part using the function
-	const { data: serverKey } = await supabase.rpc("get_server_key", {
-		p_provider_key_id: project.key_id,
-	});
+	const { data: serverKey, error: serverKeyError } = await supabase.rpc(
+		"get_server_key",
+		{
+			p_provider_key_id: project.key_id,
+		},
+	);
+
+	if (serverKeyError || !serverKey) {
+		throw createError(
+			ErrorCode.INTERNAL_ERROR,
+			"Failed to retrieve server key",
+			{
+				error: serverKeyError?.message,
+			},
+		);
+	}
 
 	const [fullApiKey] = reassembleKey(serverKey, apiKey).split(".");
 
@@ -91,12 +69,21 @@ async function handleOpenAIProxy(
 		const latency = Date.now() - startTime;
 
 		// Extract usage information from OpenAI response
-		const responseData = await response.clone().json();
+		let responseData: OpenAIResponse = {};
+		try {
+			responseData = await response.clone().json();
+		} catch (err) {
+			logger.warn("Failed to parse OpenAI response as JSON", { error: err });
+		}
+
 		const usage = responseData.usage ?? {
 			prompt_tokens: 0,
 			completion_tokens: 0,
 			total_tokens: 0,
 		};
+
+		const openaiFinishReason = responseData.choices?.[0]?.finish_reason;
+		const finishReason = mapOpenAIFinishReason(openaiFinishReason);
 
 		await createExecution(supabase, {
 			...getCommonExecutionParams({
@@ -112,7 +99,7 @@ async function handleOpenAIProxy(
 			}),
 			prompt_tokens: usage.prompt_tokens,
 			completion_tokens: usage.completion_tokens,
-			finish_reason: responseData.choices?.[0]?.finish_reason ?? "unknown",
+			finish_reason: finishReason,
 			latency,
 			response_code: response.status,
 			response: JSON.stringify(responseData),
@@ -120,8 +107,8 @@ async function handleOpenAIProxy(
 
 		return response;
 	} catch (error) {
-		logger.error("OpenAI proxy error:", error);
 		const latency = Date.now() - startTime;
+		logger.error("OpenAI proxy error:", error);
 
 		await createExecution(supabase, {
 			...getCommonExecutionParams({
@@ -137,14 +124,20 @@ async function handleOpenAIProxy(
 			}),
 			prompt_tokens: 0,
 			completion_tokens: 0,
-			finish_reason: "error",
+			finish_reason: "error" as FinishReason,
 			latency,
 			response_code: 500,
 			error_message: error instanceof Error ? error.message : "Unknown error",
 			error_code: error instanceof Error ? error.name : "UNKNOWN_ERROR",
 		});
 
-		return c.json({ error: (error as Error).message }, 500);
+		throw createError(
+			ErrorCode.PROVIDER_ERROR,
+			error instanceof Error ? error.message : "OpenAI service error",
+			{
+				originalError: error instanceof Error ? error.message : "Unknown error",
+			},
+		);
 	}
 }
 

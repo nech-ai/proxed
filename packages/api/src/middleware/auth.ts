@@ -3,6 +3,7 @@ import { getProjectQuery } from "@proxed/supabase/queries";
 import { createMiddleware } from "hono/factory";
 import type { AuthMiddlewareVariables } from "../types";
 import { verifyDeviceCheckToken } from "../utils/verify-device-check";
+import { AppError, createError, ErrorCode } from "../utils/errors";
 
 export const authMiddleware = createMiddleware<{
 	Variables: AuthMiddlewareVariables;
@@ -16,13 +17,13 @@ export const authMiddleware = createMiddleware<{
 	const authHeader = c.req.header("Authorization");
 
 	if (!projectId) {
-		return c.json({ error: "Missing project id" }, 401);
+		throw createError(ErrorCode.MISSING_PROJECT_ID);
 	}
 
 	const { data: project, error } = await getProjectQuery(supabase, projectId);
 
 	if (error) {
-		return c.json({ error: "Project not found" }, 401);
+		throw createError(ErrorCode.PROJECT_NOT_FOUND);
 	}
 
 	// Check test mode first
@@ -42,7 +43,10 @@ export const authMiddleware = createMiddleware<{
 			.split(".");
 
 		if (!token || !deviceCheckToken || !project?.device_check) {
-			return c.json({ error: "Invalid authorization token format" }, 401);
+			throw createError(
+				ErrorCode.INVALID_TOKEN,
+				"Invalid authorization token format",
+			);
 		}
 
 		try {
@@ -52,7 +56,7 @@ export const authMiddleware = createMiddleware<{
 			);
 
 			if (!isValid) {
-				return c.json({ error: "Invalid device token" }, 401);
+				throw createError(ErrorCode.INVALID_TOKEN, "Invalid device token");
 			}
 
 			c.set("session", {
@@ -64,13 +68,16 @@ export const authMiddleware = createMiddleware<{
 			await next();
 			return;
 		} catch (error) {
-			return c.json({ error: "Invalid device token" }, 401);
+			if (error instanceof AppError) {
+				throw error;
+			}
+			throw createError(ErrorCode.INVALID_TOKEN, "Invalid device token");
 		}
 	}
 
 	// Handle separate device token
 	if (!deviceToken || !project?.device_check) {
-		return c.json({ error: "Missing device token" }, 401);
+		throw createError(ErrorCode.MISSING_DEVICE_TOKEN);
 	}
 
 	try {
@@ -80,7 +87,7 @@ export const authMiddleware = createMiddleware<{
 		);
 
 		if (!isValid) {
-			return c.json({ error: "Invalid device token" }, 401);
+			throw createError(ErrorCode.INVALID_TOKEN, "Invalid device token");
 		}
 
 		c.set("session", {
@@ -90,6 +97,9 @@ export const authMiddleware = createMiddleware<{
 
 		await next();
 	} catch (error) {
-		return c.json({ error: "Something went wrong" }, 500);
+		if (error instanceof AppError) {
+			throw error;
+		}
+		throw createError(ErrorCode.INTERNAL_ERROR, "Something went wrong");
 	}
 });

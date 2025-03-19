@@ -7,51 +7,13 @@ import { generateObject } from "ai";
 import { type Context, Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 import { authMiddleware } from "../middleware/auth";
-import type { AuthMiddlewareVariables } from "../types";
+import type { AuthMiddlewareVariables, FinishReason } from "../types";
 import { reassembleKey } from "@proxed/utils/lib/partial-keys";
 import { z } from "zod";
 import { logger } from "@proxed/logger";
 import { Headers } from "@proxed/location/constants";
-
-type CommonExecutionParams = {
-	teamId: string;
-	projectId: string;
-	deviceCheckId: string;
-	keyId: string;
-	ip: string | undefined;
-	userAgent: string | undefined;
-	model: string;
-	provider: "OPENAI" | "ANTHROPIC";
-	c: Context;
-};
-
-const getCommonExecutionParams = ({
-	teamId,
-	projectId,
-	deviceCheckId,
-	keyId,
-	ip,
-	userAgent,
-	model,
-	provider,
-	c,
-}: CommonExecutionParams) => ({
-	team_id: teamId,
-	project_id: projectId,
-	device_check_id: deviceCheckId,
-	key_id: keyId,
-	ip,
-	user_agent: userAgent ?? undefined,
-	model,
-	provider,
-	country_code: c.req.header(Headers.CountryCode),
-	region_code: c.req.header(Headers.RegionCode),
-	city: c.req.header(Headers.City),
-	longitude:
-		Number.parseFloat(c.req.header(Headers.Longitude) ?? "0") || undefined,
-	latitude:
-		Number.parseFloat(c.req.header(Headers.Latitude) ?? "0") || undefined,
-});
+import { createError, ErrorCode } from "../utils/errors";
+import { getCommonExecutionParams } from "../utils/execution-params";
 
 // MARK: - Handle Structured Response
 async function handleStructuredResponse(
@@ -66,20 +28,20 @@ async function handleStructuredResponse(
 	const { data: project, error } = await getProjectQuery(supabase, projectId);
 
 	if (error || !project || !project.key) {
-		return c.json({ error: "Project not found" }, 404);
+		throw createError(ErrorCode.PROJECT_NOT_FOUND);
 	}
 
 	// Validate the request body: check content-type, safely parse JSON, and validate with zod
 	const contentType = c.req.header("content-type");
 	if (!contentType || !contentType.includes("application/json")) {
-		return c.json({ error: "Invalid content type" }, 400);
+		throw createError(ErrorCode.BAD_REQUEST, "Invalid content type");
 	}
 
 	let bodyData: unknown;
 	try {
 		bodyData = await c.req.json();
 	} catch (err) {
-		return c.json({ error: "Invalid JSON payload" }, 400);
+		throw createError(ErrorCode.BAD_REQUEST, "Invalid JSON payload");
 	}
 
 	const bodySchema = z.object({
@@ -87,7 +49,9 @@ async function handleStructuredResponse(
 	});
 	const result = bodySchema.safeParse(bodyData);
 	if (!result.success) {
-		return c.json({ error: result.error.flatten() }, 400);
+		throw createError(ErrorCode.VALIDATION_ERROR, "Validation failed", {
+			details: result.error.flatten(),
+		});
 	}
 	const { image } = result.data;
 
@@ -97,20 +61,36 @@ async function handleStructuredResponse(
 		project.schema_config as unknown as JsonSchema,
 	);
 	if (!schema) {
-		return c.json({ error: "Invalid schema" }, 400);
+		throw createError(ErrorCode.VALIDATION_ERROR, "Invalid schema");
 	}
 
 	const deviceCheckId = project.device_check_id;
 	const keyId = project.key_id;
 
 	const apiKey = c.req.header("x-ai-key");
+	if (!apiKey) {
+		throw createError(ErrorCode.UNAUTHORIZED, "API key is required");
+	}
 
 	const startTime = Date.now();
 
 	// Get the server key part using the function instead of accessing partial_key_server directly
-	const { data: serverKey } = await supabase.rpc("get_server_key", {
-		p_provider_key_id: project.key_id,
-	});
+	const { data: serverKey, error: serverKeyError } = await supabase.rpc(
+		"get_server_key",
+		{
+			p_provider_key_id: project.key_id,
+		},
+	);
+
+	if (serverKeyError || !serverKey) {
+		throw createError(
+			ErrorCode.INTERNAL_ERROR,
+			"Failed to retrieve server key",
+			{
+				error: serverKeyError?.message,
+			},
+		);
+	}
 
 	const [fullApiKey] = reassembleKey(serverKey, apiKey).split(".");
 
@@ -163,7 +143,7 @@ async function handleStructuredResponse(
 			...commonParams,
 			prompt_tokens: usage.promptTokens,
 			completion_tokens: usage.completionTokens,
-			finish_reason: finishReason,
+			finish_reason: finishReason as FinishReason,
 			latency,
 			response_code: 200,
 			response: JSON.stringify(object),
@@ -178,14 +158,22 @@ async function handleStructuredResponse(
 			...commonParams,
 			prompt_tokens: 0,
 			completion_tokens: 0,
-			finish_reason: "error",
+			finish_reason: "error" as FinishReason,
 			latency,
 			response_code: 500,
 			error_message: error instanceof Error ? error.message : "Unknown error",
 			error_code: error instanceof Error ? error.name : "UNKNOWN_ERROR",
 		});
 
-		return c.json({ error: (error as Error).message }, 500);
+		throw createError(
+			ErrorCode.PROVIDER_ERROR,
+			error instanceof Error
+				? error.message
+				: "Vision structured response failed",
+			{
+				originalError: error instanceof Error ? error.message : "Unknown error",
+			},
+		);
 	}
 }
 

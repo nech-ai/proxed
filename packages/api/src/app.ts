@@ -57,9 +57,7 @@ app.get(
 	"/",
 	apiReference({
 		theme: "saturn",
-		spec: {
-			url: "/vision",
-		},
+		url: "/vision",
 	}),
 );
 

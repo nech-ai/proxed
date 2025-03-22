@@ -3,12 +3,12 @@
 		"@react-email/components": "^0.0.32",
 		"@react-email/render": "^1.0.5",
 		"lodash-es": "^4.17.21",
-		"next-intl": "^3.26.5",
+		"next-intl": "^4.0.2",
 		"nodemailer": "^6.10.0",
 		"react": "19.0.0",
 		"react-dom": "19.0.0",
 		"react-email": "^3.0.7",
-		"use-intl": "^3.26.5"
+		"use-intl": "^4.0.2"
 	},
 	"devDependencies": {
 		"@proxed/ui": "workspace:*",

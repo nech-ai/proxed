@@ -9,6 +9,7 @@ import { MagicLink } from "@proxed/mail/emails/MagicLink";
 Deno.serve(async (req) => {
 	const resend = new Resend(Deno.env.get("RESEND_API_KEY") as string);
 	const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") as string;
+	const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
 
 	const payload = await req.text();
 	const headers = Object.fromEntries(req.headers);
@@ -40,9 +41,7 @@ Deno.serve(async (req) => {
 	switch (email_action_type) {
 		case "recovery":
 		case "reset_password": {
-			const verifyUrl = new URL(
-				"https://gkrjhtitfjhisfiejsve.supabase.co/auth/v1/verify",
-			);
+			const verifyUrl = new URL(`${supabaseUrl}/auth/v1/verify`);
 			verifyUrl.searchParams.set("token", token_hash);
 			verifyUrl.searchParams.set("type", "recovery");
 			verifyUrl.searchParams.set(
@@ -68,9 +67,7 @@ Deno.serve(async (req) => {
 		}
 		case "login":
 		case "magiclink": {
-			const verifyUrl = new URL(
-				"https://gkrjhtitfjhisfiejsve.supabase.coauth/v1/verify",
-			);
+			const verifyUrl = new URL(`${supabaseUrl}/auth/v1/verify`);
 			verifyUrl.searchParams.set("token", token_hash);
 			verifyUrl.searchParams.set("type", "magiclink");
 			verifyUrl.searchParams.set(

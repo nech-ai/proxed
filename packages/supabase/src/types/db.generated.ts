@@ -295,38 +295,6 @@ export type Database = {
 					},
 				];
 			};
-			server_keys: {
-				Row: {
-					created_at: string;
-					id: string;
-					key_value: string;
-					provider_key_id: string;
-					updated_at: string;
-				};
-				Insert: {
-					created_at?: string;
-					id?: string;
-					key_value: string;
-					provider_key_id: string;
-					updated_at?: string;
-				};
-				Update: {
-					created_at?: string;
-					id?: string;
-					key_value?: string;
-					provider_key_id?: string;
-					updated_at?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: "server_keys_provider_key_id_fkey";
-						columns: ["provider_key_id"];
-						isOneToOne: true;
-						referencedRelation: "provider_keys";
-						referencedColumns: ["id"];
-					},
-				];
-			};
 			team_invitations: {
 				Row: {
 					created_at: string;

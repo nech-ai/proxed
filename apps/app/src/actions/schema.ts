@@ -190,7 +190,7 @@ export type ToggleProjectTestModeFormValues = z.infer<
 export const filterExecutionsSchema = z.object({
 	projectId: z.string().optional().describe("The project ID to filter by"),
 	provider: z
-		.enum(["OPENAI", "ANTHROPIC"])
+		.enum(["OPENAI"])
 		.optional()
 		.describe("The AI provider to filter by"),
 	model: z

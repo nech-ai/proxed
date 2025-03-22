@@ -69,8 +69,6 @@ const cryptoProvider =
 export enum ProviderType {
 	OPENAI = "OPENAI",
 	ANTHROPIC = "ANTHROPIC",
-	GOOGLE = "GOOGLE",
-	MISTRAL = "MISTRAL",
 }
 
 interface FormState {

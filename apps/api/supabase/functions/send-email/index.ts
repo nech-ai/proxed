@@ -1,15 +1,15 @@
-import { render } from "npm:@react-email/components@0.0.22";
-import React from "npm:react@18.3.1";
-import { Resend } from "npm:resend@4.0.1";
+import { render } from "@react-email/component";
+import React from "react";
+import { Resend } from "resend";
 
-import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
-import { ForgotPassword } from "./_templates/ForgotPassword.tsx";
-import { MagicLink } from "./_templates/MagicLink.tsx";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY") as string);
-const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") as string;
+import { Webhook } from "standardwebhooks";
+import { ForgotPassword } from "@proxed/mail/emails/ForgotPassword";
+import { MagicLink } from "@proxed/mail/emails/MagicLink";
 
 Deno.serve(async (req) => {
+	const resend = new Resend(Deno.env.get("RESEND_API_KEY") as string);
+	const hookSecret = Deno.env.get("SEND_EMAIL_HOOK_SECRET") as string;
+
 	const payload = await req.text();
 	const headers = Object.fromEntries(req.headers);
 	const wh = new Webhook(hookSecret);
@@ -40,7 +40,9 @@ Deno.serve(async (req) => {
 	switch (email_action_type) {
 		case "recovery":
 		case "reset_password": {
-			const verifyUrl = new URL("https://api.proxed.ai/auth/v1/verify");
+			const verifyUrl = new URL(
+				"https://gkrjhtitfjhisfiejsve.supabase.co/auth/v1/verify",
+			);
 			verifyUrl.searchParams.set("token", token_hash);
 			verifyUrl.searchParams.set("type", "recovery");
 			verifyUrl.searchParams.set(
@@ -66,7 +68,9 @@ Deno.serve(async (req) => {
 		}
 		case "login":
 		case "magiclink": {
-			const verifyUrl = new URL("https://api.proxed.ai/auth/v1/verify");
+			const verifyUrl = new URL(
+				"https://gkrjhtitfjhisfiejsve.supabase.coauth/v1/verify",
+			);
 			verifyUrl.searchParams.set("token", token_hash);
 			verifyUrl.searchParams.set("type", "magiclink");
 			verifyUrl.searchParams.set(

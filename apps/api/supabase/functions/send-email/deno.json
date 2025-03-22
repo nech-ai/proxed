@@ -1,3 +1,19 @@
 {
-	"imports": {}
+	"imports": {
+		"@react-email/component": "npm:@react-email/components@0.0.32",
+		"@react-email/render": "npm:@react-email/render@1.0.5",
+		"react": "npm:react@19.0.0",
+		"react-dom": "npm:react-dom@19.0.0",
+		"resend": "npm:resend@4.0.1",
+		"react-email": "npm:react-email@3.0.7",
+		"standardwebhooks": "https://esm.sh/standardwebhooks@1.0.0",
+		"@proxed/mail": "https://esm.sh/gh/nech-ai/proxed/packages/mail/src/index.ts",
+		"@proxed/mail/emails/MagicLink": "https://esm.sh/gh/nech-ai/proxed/packages/mail/src/emails/MagicLink.tsx",
+		"@proxed/mail/emails/ForgotPassword": "https://esm.sh/gh/nech-ai/proxed/packages/mail/src/emails/ForgotPassword.tsx",
+		"@proxed/mail/util/": "https://esm.sh/gh/nech-ai/proxed/packages/mail/src/util/",
+		"@proxed/mail/provider/": "https://esm.sh/gh/nech-ai/proxed/packages/mail/src/provider/"
+	},
+	"lock": {
+		"frozen": true
+	}
 }

@@ -2,6 +2,7 @@ import { Link, Text } from "@react-email/components";
 import type { JSX } from "react";
 import PrimaryButton from "./components/PrimaryButton";
 import Wrapper from "./components/Wrapper";
+
 export function ForgotPassword({
 	url,
 	name,

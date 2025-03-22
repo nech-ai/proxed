@@ -83,6 +83,12 @@
 	textarea:disabled {
 		@apply opacity-50 cursor-not-allowed;
 	}
+
+	/* Add pointer cursor for buttons and inputs */
+	button:not(:disabled),
+	[role="button"]:not(:disabled) {
+		cursor: pointer;
+	}
 }
 
 @layer base {

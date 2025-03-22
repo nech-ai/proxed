@@ -25,8 +25,8 @@ function isPublicPath(path: string) {
 
 export async function middleware(request: NextRequest) {
 	const { response, user } = await updateSession(
-		request,
-		I18nMiddleware(request),
+		request as any,
+		I18nMiddleware(request as any),
 	);
 
 	const { pathname } = request.nextUrl;

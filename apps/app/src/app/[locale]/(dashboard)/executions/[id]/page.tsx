@@ -29,7 +29,7 @@ export default async function Page(props: {
 		<div className="flex flex-col h-full">
 			<PageHeader title="Execution Details" />
 			<main className="flex-1 overflow-auto bg-muted/5">
-				<div className="container mx-auto px-4 py-8 space-y-6 max-w-4xl">
+				<div className="container mx-auto px-4 py-8 space-y-6">
 					<ExecutionDetailsCard execution={execution} />
 				</div>
 			</main>

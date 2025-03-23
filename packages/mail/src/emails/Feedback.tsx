@@ -1,7 +1,7 @@
-import { Link, Text } from "@react-email/components";
+import { Section, Text } from "@react-email/components";
 import type { JSX } from "react";
-import PrimaryButton from "./components/PrimaryButton";
 import Wrapper from "./components/Wrapper";
+import { darkTheme } from "./components/Wrapper";
 
 export function Feedback({
 	email,
@@ -11,18 +11,34 @@ export function Feedback({
 	message: string;
 }): JSX.Element {
 	return (
-		<Wrapper>
-			<Text>
-				Hey, <br /> we received feedback from {email}.
+		<Wrapper previewText={`Feedback received from ${email}`}>
+			<Text
+				className="text-[16px] leading-[26px] mb-[28px]"
+				style={{ color: darkTheme.foreground }}
+			>
+				Hey,
 				<br />
 				<br />
+				We received feedback from {email}.
 			</Text>
 
-			<Text>
-				<strong className="font-bold">Message:</strong>
-				<br />
-				{message}
-			</Text>
+			<Section
+				className="p-[24px] mb-[28px]"
+				style={{ backgroundColor: darkTheme.secondary }}
+			>
+				<Text
+					className="text-[14px] leading-[20px] mb-[8px] font-bold"
+					style={{ color: darkTheme.mutedForeground }}
+				>
+					Message:
+				</Text>
+				<Text
+					className="text-[16px] leading-[26px] m-0"
+					style={{ color: darkTheme.foreground }}
+				>
+					{message}
+				</Text>
+			</Section>
 		</Wrapper>
 	);
 }

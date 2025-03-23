@@ -1,97 +1,96 @@
+import * as React from "react";
 import {
+	Body,
 	Container,
-	Font,
 	Head,
 	Html,
+	Preview,
 	Section,
+	Text,
 	Tailwind,
+	Link,
 } from "@react-email/components";
 import { Logo } from "./Logo";
 
-export const lightVariables = {
-	colors: {
-		background: "hsl(0deg 0% 100%)",
-		foreground: "hsl(222.2deg 47.4% 11.2%)",
-		muted: "hsl(210deg 40% 96.1%)",
-		"muted-foreground": "hsl(215.4deg 16.3% 46.9%)",
-		popover: "hsl(0deg 0% 100%)",
-		"popover-foreground": "hsl(222.2deg 47.4% 11.2%)",
-		border: "hsl(214.3deg 31.8% 94.4%)",
-		input: "hsl(214.3deg 31.8% 91.4%)",
-		card: "hsl(0deg 0% 100%)",
-		"card-foreground": "hsl(222.2deg 47.4% 11.2%)",
-		primary: "hsl(222.2deg 47.4% 11.2%)",
-		"primary-foreground": "hsl(210deg 40% 98%)",
-		secondary: "hsl(210deg 40% 96.1%)",
-		"secondary-foreground": "hsl(222.2deg 47.4% 11.2%)",
-		accent: "hsl(210deg 40% 96.1%)",
-		"accent-foreground": "hsl(222.2deg 47.4% 11.2%)",
-		destructive: "hsl(0deg 100% 50%)",
-		"destructive-foreground": "hsl(210deg 40% 98%)",
-		ring: "hsl(215deg 20.2% 65.1%)",
-	},
+// Dark theme colors
+export const darkTheme = {
+	background: "hsl(220, 17%, 6%)", // --background
+	foreground: "hsl(220, 13%, 98%)", // --foreground
+	card: "hsl(220, 17%, 9%)", // --card
+	primary: "#61AFEF", // --primary
+	secondary: "hsl(220, 13%, 15%)", // --secondary
+	muted: "hsl(220, 13%, 15%)", // --muted
+	mutedForeground: "hsl(220, 13%, 65%)", // --muted-foreground
+	accent: "hsl(220, 13%, 20%)", // --accent
+	border: "hsl(220, 13%, 15%)", // --border
 };
 
-export default function Wrapper({ children }: { children: React.ReactNode }) {
+interface WrapperProps {
+	children: React.ReactNode;
+	previewText?: string;
+}
+
+export default function Wrapper({ children, previewText }: WrapperProps) {
 	return (
-		<Html lang="en">
-			<Head>
-				<Font
-					fontFamily="Inter"
-					fallbackFontFamily="Arial"
-					fontWeight={400}
-					fontStyle="normal"
-				/>
-			</Head>
-			<Tailwind
-				config={{
-					theme: {
-						extend: {
-							colors: {
-								border: lightVariables.colors.border,
-								input: lightVariables.colors.input,
-								ring: lightVariables.colors.ring,
-								background: lightVariables.colors.background,
-								foreground: lightVariables.colors.foreground,
-								primary: {
-									DEFAULT: lightVariables.colors.primary,
-									foreground: lightVariables.colors["primary-foreground"],
-								},
-								secondary: {
-									DEFAULT: lightVariables.colors.secondary,
-									foreground: lightVariables.colors["secondary-foreground"],
-								},
-								destructive: {
-									DEFAULT: lightVariables.colors.destructive,
-									foreground: lightVariables.colors["destructive-foreground"],
-								},
-								muted: {
-									DEFAULT: lightVariables.colors.muted,
-									foreground: lightVariables.colors["muted-foreground"],
-								},
-								accent: {
-									DEFAULT: lightVariables.colors.accent,
-									foreground: lightVariables.colors["accent-foreground"],
-								},
-								popover: {
-									DEFAULT: lightVariables.colors.popover,
-									foreground: lightVariables.colors["popover-foreground"],
-								},
-								card: {
-									DEFAULT: lightVariables.colors.card,
-									foreground: lightVariables.colors["card-foreground"],
-								},
-							},
-						},
-					},
-				}}
-			>
-				<Section className="p-1">
-					<Container className="border border-border border-solid bg-card p-6 text-card-foreground">
-						<Logo />
-						{children}
+		<Html>
+			<Head />
+			{previewText && <Preview>{previewText}</Preview>}
+			<Tailwind>
+				<Body
+					className="font-sans my-auto mx-auto"
+					style={{
+						fontFamily:
+							"Geist, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif",
+						backgroundColor: darkTheme.background,
+						color: darkTheme.foreground,
+					}}
+				>
+					<Container
+						className="p-[40px] my-[40px] mx-auto max-w-[500px]"
+						style={{ backgroundColor: darkTheme.card }}
+					>
+						{/* Logo/Header Section */}
+						<Section className="mb-[36px] text-center">
+							<Logo />
+						</Section>
+
+						{/* Main Content */}
+						<Section>{children}</Section>
+
+						{/* Footer */}
+						<Section
+							className="mt-[36px] pt-[24px] text-center"
+							style={{ borderTop: `1px solid ${darkTheme.border}` }}
+						>
+							<Text
+								className="text-[13px] leading-[20px] m-0"
+								style={{ color: darkTheme.mutedForeground }}
+							>
+								© {new Date().getFullYear()} Proxed.AI. All rights reserved.
+							</Text>
+							<Text
+								className="text-[13px] leading-[20px] m-0"
+								style={{ color: darkTheme.mutedForeground }}
+							>
+								<Link
+									href="https://proxed.ai/legal/terms"
+									className="underline"
+									style={{ color: darkTheme.primary }}
+								>
+									Terms of Service
+								</Link>{" "}
+								•{" "}
+								<Link
+									href="https://proxed.ai/legal/privacy"
+									className="underline"
+									style={{ color: darkTheme.primary }}
+								>
+									Privacy Policy
+								</Link>
+							</Text>
+						</Section>
 					</Container>
-				</Section>
+				</Body>
 			</Tailwind>
 		</Html>
 	);

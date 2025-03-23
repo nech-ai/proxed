@@ -1,7 +1,12 @@
-import { Link, Text } from "@react-email/components";
+import { Text } from "@react-email/components";
 import type { JSX } from "react";
+import Divider from "./components/Divider";
+import OtpCode from "./components/OtpCode";
 import PrimaryButton from "./components/PrimaryButton";
+import SecurityNote from "./components/SecurityNote";
+import UrlCopy from "./components/UrlCopy";
 import Wrapper from "./components/Wrapper";
+import { darkTheme } from "./components/Wrapper";
 
 export function ForgotPassword({
 	url,
@@ -13,29 +18,29 @@ export function ForgotPassword({
 	otp: string;
 }): JSX.Element {
 	return (
-		<Wrapper>
-			<Text>
-				Hey {name}, <br /> you requested a password reset.
+		<Wrapper previewText={`Your Proxed.AI password reset code: ${otp}`}>
+			<Text
+				className="text-[16px] leading-[26px] mb-[28px]"
+				style={{ color: darkTheme.foreground }}
+			>
+				Hey {name},
 				<br />
-				<br /> You can either enter the one-time password below manually in the
-				application
-			</Text>
-
-			<Text>
-				One-time password:
 				<br />
-				<strong className="font-bold text-2xl">{otp}</strong>
+				You requested a password reset. You can reset your password using either
+				method below:
 			</Text>
 
-			<Text>or use this link:</Text>
+			<OtpCode otp={otp} />
 
-			<PrimaryButton href={url}>Reset password &rarr;</PrimaryButton>
+			<Divider />
 
-			<Text className="text-muted-foreground text-sm">
-				If you want to open the link in a different browser than your default
-				one, copy and paste this link:
-				<Link href={url}>{url}</Link>
-			</Text>
+			<div className="text-center mb-[28px]">
+				<PrimaryButton href={url}>Reset password →</PrimaryButton>
+			</div>
+
+			<UrlCopy url={url} />
+
+			<SecurityNote />
 		</Wrapper>
 	);
 }

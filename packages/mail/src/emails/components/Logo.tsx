@@ -1,17 +1,32 @@
+import { darkTheme } from "./Wrapper";
+
 export function Logo({
 	withLabel = true,
 }: {
 	withLabel?: boolean;
 }) {
 	return (
-		<span className="flex items-center font-semibold text-primary leading-none">
+		<div
+			style={{
+				display: "flex",
+				justifyContent: "center",
+				alignItems: "center",
+			}}
+		>
 			<svg
-				id="Layer_1"
 				xmlns="http://www.w3.org/2000/svg"
-				className="group size-8 text-primary"
+				width="32"
+				height="32"
 				viewBox="0 0 400 400"
+				style={{ flexShrink: 0 }}
 			>
-				<rect x="-17.13" y="-14.87" width="435.4" height="426.9" />
+				<rect
+					x="-17.13"
+					y="-14.87"
+					width="435.4"
+					height="426.9"
+					fill={darkTheme.card}
+				/>
 				<g>
 					<path
 						d="m167.46,228.69c-5.55-20.56-14.84-38.9-27.97-55.54,13.09-16.57,22.46-35.03,27.97-55.55,21.73,4.58,43.32,4.59,65.07,0,5.51,20.41,14.79,38.84,27.97,55.53-13.04,16.53-22.41,34.91-27.96,55.55-21.64-4.57-43.25-4.62-65.09.02Z"
@@ -67,7 +82,19 @@ export function Logo({
 					/>
 				</g>
 			</svg>
-			{withLabel && <span className="ml-3 text-lg">proxed.ai</span>}
-		</span>
+			{withLabel && (
+				<span
+					style={{
+						marginLeft: "12px",
+						fontSize: "20px",
+						fontWeight: "600",
+						color: "#FFFFFF",
+						lineHeight: "1",
+					}}
+				>
+					proxed.ai
+				</span>
+			)}
+		</div>
 	);
 }

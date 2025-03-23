@@ -1,4 +1,5 @@
 import { Button } from "@react-email/components";
+import { darkTheme } from "./Wrapper";
 
 export default function PrimaryButton({
 	href,
@@ -10,7 +11,13 @@ export default function PrimaryButton({
 	return (
 		<Button
 			href={href}
-			className="rounded-md bg-primary px-4 py-2 text-primary-foreground"
+			className="px-[32px] py-[14px] text-[16px] no-underline text-center inline-block"
+			style={{
+				backgroundColor: darkTheme.primary,
+				color: "#FFFFFF",
+				fontWeight: "normal",
+				boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+			}}
 		>
 			{children}
 		</Button>

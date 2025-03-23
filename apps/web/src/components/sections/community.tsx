@@ -9,6 +9,7 @@ import {
 } from "@proxed/ui/components/avatar";
 import { Button } from "@proxed/ui/components/button";
 import { Ripple } from "@/components/ui/ripple";
+import Link from "next/link";
 
 const contributors = [
 	{
@@ -45,10 +46,12 @@ export function Community() {
 						))}
 					</div>
 					<div className="flex justify-center">
-						<Button variant="secondary" className="flex items-center gap-2">
-							<Icons.github className="h-5 w-5" />
-							Become a contributor
-						</Button>
+						<Link href="https://github.com/nech-ai/nech">
+							<Button variant="secondary" className="flex items-center gap-2">
+								<Icons.github className="h-5 w-5" />
+								Become a contributor
+							</Button>
+						</Link>
 					</div>
 				</div>
 			</div>

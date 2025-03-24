@@ -31,8 +31,18 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@proxed/ui/components/select";
-import { toast } from "@proxed/ui/hooks/use-toast";
-import { Loader2, Check, Copy, AlertCircle } from "lucide-react";
+import { useToast } from "@proxed/ui/hooks/use-toast";
+import {
+	Loader2,
+	Check,
+	Copy,
+	AlertCircle,
+	Info,
+	ExternalLink,
+	BookOpen,
+	HelpCircle,
+	ChevronRight,
+} from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import {
@@ -44,6 +54,18 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@proxed/ui/utils";
 import { Alert, AlertDescription } from "@proxed/ui/components/alert";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@proxed/ui/components/tooltip";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@proxed/ui/components/accordion";
 
 const cryptoProvider =
 	typeof window !== "undefined"
@@ -51,7 +73,7 @@ const cryptoProvider =
 		: require("node:crypto").webcrypto;
 
 interface ProviderKeyCreateFormProps {
-	onSuccess?: () => void;
+	onSuccessAction?: () => void;
 	revalidatePath?: string;
 }
 
@@ -67,9 +89,10 @@ interface FormState {
 }
 
 export function ProviderKeyCreateForm({
-	onSuccess,
+	onSuccessAction,
 	revalidatePath,
 }: ProviderKeyCreateFormProps) {
+	const { toast } = useToast();
 	const [clientPart, setClientPart] = useState<string>("");
 	const [savedClientPart, setSavedClientPart] = useState<string>("");
 	const clientPartRef = useRef<string>("");
@@ -91,6 +114,7 @@ export function ProviderKeyCreateForm({
 			provider: ProviderType.OPENAI,
 			revalidatePath,
 		},
+		mode: "onChange",
 	});
 
 	useEffect(() => {
@@ -131,7 +155,7 @@ export function ProviderKeyCreateForm({
 				duration: 10000,
 			});
 
-			onSuccess?.();
+			onSuccessAction?.();
 		},
 		onError: (error) => {
 			setFormState((prev) => ({ ...prev, isSubmitting: false }));
@@ -211,68 +235,180 @@ export function ProviderKeyCreateForm({
 			>
 				<Card>
 					<CardHeader>
-						<CardTitle>
-							{formState.isSuccess
-								? "Save Your Client Key Part"
-								: "Add API Key"}
-						</CardTitle>
-						<CardDescription>
-							{formState.isSuccess
-								? "Copy and save this key part now - you won't see it again!"
-								: "Securely store your API key by splitting it into server and client parts."}
-						</CardDescription>
+						<div className="flex items-center justify-between">
+							<div>
+								<CardTitle>
+									{formState.isSuccess
+										? "Save Your Client Key Part"
+										: "Add API Key"}
+								</CardTitle>
+								<CardDescription>
+									{formState.isSuccess
+										? "Copy and save this key part now - you won't see it again!"
+										: "Securely store your API key by splitting it into server and client parts."}
+								</CardDescription>
+							</div>
+							<a
+								href="https://docs.proxed.ai/partial-keys"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-xs flex items-center gap-1 text-blue-500 hover:text-blue-600 transition-colors"
+							>
+								<BookOpen className="h-3.5 w-3.5" />
+								<span>Documentation</span>
+								<ExternalLink className="h-3 w-3" />
+							</a>
+						</div>
 					</CardHeader>
 
 					{formState.isSuccess ? (
-						<div className="mx-6 mb-4">
+						<div className="mx-6 mb-6">
 							<Alert className="border-yellow-500/20 bg-yellow-500/10 dark:border-yellow-500/30 dark:bg-yellow-500/20">
 								<AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
 								<div className="ml-2">
-									<div className="flex justify-between items-center mb-1">
-										<div className="font-medium text-foreground">
-											🔑 Copy Your Client Key Part
-										</div>
-										<Button
-											variant="ghost"
-											size="sm"
-											onClick={resetForm}
-											className="text-muted-foreground hover:text-foreground"
-										>
-											Add Another Key
-										</Button>
+									<div className="font-medium text-foreground">
+										🔑 Copy Your Client Key Part
 									</div>
-									<div className="flex items-center gap-2">
-										<Input
-											readOnly
-											value={savedClientPart}
-											className="font-mono text-sm bg-background border-border"
-										/>
-										<CopyToClipboard value={savedClientPart} />
-									</div>
-									<p className="mt-2 text-sm text-muted-foreground">
-										⚠️ Important: Save this key part now. For security reasons,
-										you won't be able to see it again!
+									<p className="text-sm text-muted-foreground mt-1">
+										⚠️ Save this key part now. For security reasons, you won't be
+										able to see it again!
 									</p>
 								</div>
 							</Alert>
+
+							<div className="flex items-center gap-2 mt-4">
+								<Input
+									readOnly
+									value={savedClientPart}
+									className="font-mono text-sm bg-background border-border"
+								/>
+								<CopyToClipboard value={savedClientPart} />
+							</div>
+
+							<Accordion type="single" collapsible className="mt-4">
+								<AccordionItem
+									value="implementation"
+									className="border rounded-md"
+								>
+									<AccordionTrigger className="px-3 py-2 text-xs font-medium hover:no-underline">
+										<div className="flex items-center gap-2">
+											<Info className="h-3.5 w-3.5 text-blue-500" />
+											<span>How to use this client key in your app</span>
+										</div>
+									</AccordionTrigger>
+									<AccordionContent className="px-3 pb-3 text-xs">
+										<p className="text-muted-foreground mb-2">
+											Include the client key part in your API requests to
+											Proxed.AI:
+										</p>
+										<div className="bg-muted p-2 rounded-md font-mono text-xs mb-2 overflow-x-auto">
+											const apiKey = "{savedClientPart}";
+											<br />
+											const endpoint = "https://api.proxed.ai/v1/openai/
+											{"<your-project-id>"}";
+										</div>
+										<p className="text-muted-foreground mb-1 font-medium">
+											Security Best Practices:
+										</p>
+										<ul className="text-muted-foreground list-disc pl-4 space-y-0.5">
+											<li>
+												Store client parts in environment variables, not in code
+											</li>
+											<li>Rotate partial keys periodically</li>
+											<li>Use different keys for different environments</li>
+											<li>Monitor usage patterns to detect abuse</li>
+										</ul>
+									</AccordionContent>
+								</AccordionItem>
+							</Accordion>
+
+							<div className="flex items-center justify-end mt-6">
+								<Button
+									variant="outline"
+									type="button"
+									onClick={resetForm}
+									className="text-muted-foreground hover:text-foreground"
+								>
+									Add Another Key
+								</Button>
+							</div>
 						</div>
 					) : (
 						<>
 							<CardContent className="space-y-4">
+								{formState.isCreating && (
+									<Accordion type="single" collapsible className="mb-4">
+										<AccordionItem
+											value="about"
+											className="border rounded-md overflow-hidden"
+										>
+											<AccordionTrigger className="px-3 py-2 text-sm font-medium hover:no-underline">
+												<div className="flex items-center gap-2">
+													<Info className="h-4 w-4 text-blue-500" />
+													<span>What are Partial Keys?</span>
+												</div>
+											</AccordionTrigger>
+											<AccordionContent className="px-3 pb-3">
+												<p className="text-sm text-muted-foreground mb-2">
+													Partial keys split your API key into two separate
+													parts:
+												</p>
+												<ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1 mb-2">
+													<li>A server part stored securely on your servers</li>
+													<li>A client part that users must provide</li>
+												</ul>
+												<p className="text-sm text-muted-foreground mb-2">
+													This approach significantly enhances security by
+													ensuring that no single location contains the complete
+													API key.
+												</p>
+												<p className="text-sm font-medium mt-2">
+													Security Benefits:
+												</p>
+												<ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1">
+													<li>Reduced risk of key exposure</li>
+													<li>Enhanced access control</li>
+													<li>Audit trail for requests</li>
+													<li>Easy revocation control</li>
+													<li>Better key management</li>
+												</ul>
+											</AccordionContent>
+										</AccordionItem>
+									</Accordion>
+								)}
+
 								<FormField
 									control={form.control}
 									name="display_name"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Name</FormLabel>
+											<div className="flex items-center gap-2">
+												<FormLabel className="text-sm font-medium">
+													Name
+												</FormLabel>
+												<TooltipProvider>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+														</TooltipTrigger>
+														<TooltipContent
+															side="right"
+															className="max-w-[220px]"
+														>
+															A descriptive name to identify this API key
+														</TooltipContent>
+													</Tooltip>
+												</TooltipProvider>
+											</div>
 											<FormControl>
 												<Input
 													placeholder={
 														keyValidation.provider
 															? `${keyValidation.provider} Key`
-															: "My Partial Key"
+															: "My API Key"
 													}
 													{...field}
+													className="h-9"
 												/>
 											</FormControl>
 											<FormMessage />
@@ -285,14 +421,31 @@ export function ProviderKeyCreateForm({
 									name="provider"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Provider</FormLabel>
+											<div className="flex items-center gap-2">
+												<FormLabel className="text-sm font-medium">
+													Provider
+												</FormLabel>
+												<TooltipProvider>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+														</TooltipTrigger>
+														<TooltipContent
+															side="right"
+															className="max-w-[220px]"
+														>
+															The AI provider this key belongs to
+														</TooltipContent>
+													</Tooltip>
+												</TooltipProvider>
+											</div>
 											<FormControl>
 												<Select
 													value={field.value}
 													onValueChange={field.onChange}
 													disabled={!!keyValidation.provider}
 												>
-													<SelectTrigger>
+													<SelectTrigger className="h-9">
 														<SelectValue placeholder="Select a provider" />
 													</SelectTrigger>
 													<SelectContent>
@@ -310,7 +463,23 @@ export function ProviderKeyCreateForm({
 								/>
 
 								<FormItem>
-									<FormLabel>API Key</FormLabel>
+									<div className="flex items-center gap-2">
+										<FormLabel className="text-sm font-medium">
+											API Key
+										</FormLabel>
+										<TooltipProvider>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+												</TooltipTrigger>
+												<TooltipContent side="right" className="max-w-[240px]">
+													Your API key will be split into two parts. Only the
+													server part will be stored, and you'll receive the
+													client part to use in your app.
+												</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
+									</div>
 									<FormControl>
 										<div className="relative">
 											<Input
@@ -318,7 +487,7 @@ export function ProviderKeyCreateForm({
 												placeholder="Paste your API key here"
 												onChange={(e) => handleKeyInput(e.target.value)}
 												className={cn(
-													"pr-10",
+													"pr-10 h-9",
 													keyValidation.error && "border-destructive",
 													keyValidation.isValid && "border-green-500",
 													"transition-colors duration-200",
@@ -341,8 +510,44 @@ export function ProviderKeyCreateForm({
 										</Alert>
 									)}
 								</FormItem>
+
+								<Accordion type="single" collapsible className="w-full mt-2">
+									<AccordionItem value="help" className="border rounded-md">
+										<AccordionTrigger className="px-3 py-2 text-xs font-medium hover:no-underline">
+											<div className="flex items-center gap-2">
+												<AlertCircle className="h-3.5 w-3.5 text-amber-500" />
+												<span>How does the key splitting work?</span>
+											</div>
+										</AccordionTrigger>
+										<AccordionContent className="px-3 pb-3 text-xs text-muted-foreground">
+											<p className="mb-2">Partial keys work by:</p>
+											<ul className="space-y-1 list-disc pl-4">
+												<li>
+													Splitting your original API key into two
+													cryptographically linked parts
+												</li>
+												<li>
+													The server part is stored securely in your Proxed
+													database
+												</li>
+												<li>
+													The client part is provided to you to share with your
+													users or applications
+												</li>
+												<li>
+													Both parts are required to reconstruct the original
+													API key
+												</li>
+												<li>
+													The system validates the reconstructed key before
+													using it
+												</li>
+											</ul>
+										</AccordionContent>
+									</AccordionItem>
+								</Accordion>
 							</CardContent>
-							<CardFooter className="flex justify-end">
+							<CardFooter className="flex justify-end pt-2">
 								<Button
 									type="submit"
 									disabled={
@@ -350,6 +555,12 @@ export function ProviderKeyCreateForm({
 										!form.formState.isDirty ||
 										!keyValidation.isValid
 									}
+									className={cn(
+										"px-6",
+										form.formState.isDirty && keyValidation.isValid
+											? "bg-primary"
+											: "bg-primary/80",
+									)}
 								>
 									{formState.isSubmitting ? (
 										<>
@@ -371,6 +582,7 @@ export function ProviderKeyCreateForm({
 
 function CopyToClipboard({ value }: { value: string }) {
 	const [copied, setCopied] = useState(false);
+	const { toast } = useToast();
 
 	const onCopy = async () => {
 		try {
@@ -398,7 +610,7 @@ function CopyToClipboard({ value }: { value: string }) {
 			size="icon"
 			onClick={onCopy}
 			className={cn(
-				"h-8 w-8 transition-colors",
+				"h-9 w-9 transition-colors",
 				copied && "border-green-500 text-green-500",
 			)}
 			title={copied ? "Copied!" : "Copy to clipboard"}

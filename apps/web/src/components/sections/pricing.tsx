@@ -1,7 +1,6 @@
 "use client";
 
 import { Section } from "@/components/section";
-import { Badge } from "@proxed/ui/components/badge";
 import { Button } from "@proxed/ui/components/button";
 import { CardContent, CardHeader, CardTitle } from "@proxed/ui/components/card";
 import { siteConfig } from "@/lib/config";
@@ -11,6 +10,7 @@ import { Check } from "lucide-react";
 import { useState } from "react";
 import { useSubscribeModal } from "@/context/subscribe-modal-context";
 import { GradientText } from "../gradient-text";
+import { Icons } from "@/components/icons";
 
 interface TabsProps {
 	activeTab: string;
@@ -175,11 +175,53 @@ export function Pricing() {
 		<Section
 			id="pricing"
 			title="Pricing"
-			subtitle="Start Building for Free"
-			description="Access all features at no cost during our Beta period, then choose the plan that fits you best."
+			subtitle="Flexible Options for Every Team"
+			description="Choose a hosted plan that fits your needs or self-host for free with our open-source solution."
 		>
 			<div className="grid grid-rows-1">
+				<div className="mb-12 p-8 border-2 border-primary/30 bg-gradient-to-r from-primary/10 via-accent/10 to-transparent rounded-lg max-w-4xl mx-auto shadow-sm">
+					<div className="flex flex-col md:flex-row items-center gap-8">
+						<div className="flex-1">
+							<GradientText as="h3" className="text-2xl font-bold mb-3">
+								Self-Host For Free
+							</GradientText>
+							<p className="text-base">
+								Proxed.AI is 100% open-source. Deploy on your own infrastructure
+								with <span className="font-semibold">no usage limits</span> or
+								subscription fees.
+							</p>
+							<p className="text-sm text-muted-foreground mt-2">
+								Perfect for privacy-focused teams and enterprise deployments.
+							</p>
+						</div>
+						<div>
+							<Button
+								variant="default"
+								size="lg"
+								className="text-base font-medium whitespace-nowrap"
+								onClick={() =>
+									window.open("https://github.com/nech-ai/proxed", "_blank")
+								}
+							>
+								<Icons.github className="mr-2 h-5 w-5" />
+								View on GitHub
+							</Button>
+							<div className="text-xs text-center mt-2 text-muted-foreground">
+								⭐ Star us on GitHub
+							</div>
+						</div>
+					</div>
+				</div>
+
 				<div className="grid grid-rows-1 gap-y-10 p-10">
+					<div className="text-center mb-2">
+						<h3 className="text-xl font-medium text-foreground">
+							Hosted Plans
+						</h3>
+						<p className="text-muted-foreground text-sm">
+							Let us handle the infrastructure while you focus on building
+						</p>
+					</div>
 					<Tabs
 						activeTab={billingCycle}
 						setActiveTab={handleTabChange}

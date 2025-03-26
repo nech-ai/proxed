@@ -1,0 +1,96 @@
+---
+title: Test Mode for Development
+description: |
+  Learn how to use Test Mode to bypass Apple DeviceCheck validation during development and testing of your iOS applications with Proxed.AI.
+---
+
+# Overview
+
+Test Mode is a development feature that allows you to bypass Apple DeviceCheck validation when testing your iOS applications with Proxed.AI. This simplifies the development and testing process by removing the need for DeviceCheck authentication in non-production environments.
+
+![Test Mode Toggle](/images/docs/projects/test-mode/test-mode-toggle.png)
+
+## Benefits of Test Mode
+
+- **Simplified Development**: Test your API integration without setting up DeviceCheck
+- **Faster Prototyping**: Quickly iterate on your application without authentication hurdles
+- **Controlled Testing**: Use a dedicated test key for non-production environments
+- **Seamless Transition**: Switch between test and production modes without code changes
+
+## How Test Mode Works
+
+When Test Mode is enabled for a project:
+
+1. A unique test key is generated for your project
+2. Requests with the `x-proxed-test-key` header containing this key will bypass DeviceCheck validation
+3. All other security measures and request validation remain active
+4. You can toggle Test Mode on/off without affecting your production configuration
+5. The test key is automatically regenerated each time Test Mode is toggled, ensuring security
+
+## Enabling Test Mode
+
+1. Navigate to your project settings in the [Proxed.AI Dashboard](https://app.proxed.ai/projects)
+2. Select the project you want to configure
+3. Find the "Test Mode" card in the project settings
+4. Toggle the switch to enable Test Mode
+5. Copy the generated test key for use in your application
+
+![Test Mode Configuration](/images/docs/projects/test-mode/test-mode-config.png)
+
+## Using Test Mode in Your Applications
+
+### Swift Example
+
+```swift
+import UIKit
+
+actor VisionAnalyzer {
+    let apiKey = "<your-api-key>"
+    let testKey = "<your-test-key>" // Test key from project settings
+    let endpoint = "https://api.proxed.ai/v1/vision/<your-project-id>"
+
+    func analyzeImage(image: UIImage) async throws {
+        guard let imageData = image.jpegData(compressionQuality: 0.9) else {
+            throw AnalyzerError.imageConversionFailed
+        }
+        let base64Image = imageData.base64EncodedString()
+
+        var request = URLRequest(url: URL(string: endpoint)!)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(apiKey, forHTTPHeaderField: "x-ai-key")
+        request.setValue(testKey, forHTTPHeaderField: "x-proxed-test-key") // Use test key instead of DeviceCheck
+
+        request.httpBody = try JSONEncoder().encode(["image": base64Image])
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw AnalyzerError.requestFailed
+        }
+
+        let analysis = try JSONDecoder().decode(VisionAnalysis.self, from: data)
+        print("Vision Analysis:", analysis)
+    }
+}
+```
+
+## Security Considerations
+
+While Test Mode is convenient for development, keep these security considerations in mind:
+
+- **Not for Production**: Test Mode should never be enabled for production environments
+- **Protect Your Test Key**: Although less sensitive than production keys, your test key should still be kept secure
+- **Limited Testing**: Use Test Mode only for functional testing, not for security testing
+- **Regular Auditing**: Periodically review your projects to ensure Test Mode is disabled for production projects
+
+## Troubleshooting
+
+If you encounter issues with Test Mode:
+
+- Verify that Test Mode is enabled for your project
+- Confirm you're using the correct test key in your `x-proxed-test-key` header
+- Check that your project ID in the API endpoint is correct
+- Ensure your request format matches the expected API format
+
+For additional assistance, contact the Proxed.AI support team.

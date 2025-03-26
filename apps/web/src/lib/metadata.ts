@@ -24,7 +24,7 @@ export function generateMetadata({
 	const defaultTitle =
 		"Proxed.AI - Secure AI APIs in Seconds—No SDK, No Backend Needed";
 	const defaultDescription =
-		"Proxed.AI is the simplest way to protect AI API keys in iOS apps. Lock down your API credentials, verify device authenticity with Apple's DeviceCheck, and structure AI outputs—all without a backend.";
+		"Proxed.AI is the simplest way to protect AI API keys in iOS apps. Lock down your API credentials, verify device authenticity with Apple's DeviceCheck, and structure AI outputs—all without a backend. Open-source and available for self-hosting.";
 
 	const defaultKeywords = [
 		"AI API Security",
@@ -39,6 +39,8 @@ export function generateMetadata({
 		"Rate Limiting",
 		"Structured AI Responses",
 		"API Proxy",
+		"Open Source",
+		"Self Hosting",
 	];
 
 	return {
@@ -103,8 +105,8 @@ export function generateMetadata({
 		other: {
 			"twitter:label1": "Security",
 			"twitter:data1": "DeviceCheck & Secure Keys",
-			"twitter:label2": "Available for",
-			"twitter:data2": "iOS Development",
+			"twitter:label2": "Availability",
+			"twitter:data2": "Open-source or starting at $2.50/month",
 		},
 	};
 }
@@ -119,9 +121,9 @@ export const jsonLd = {
 		"Secure AI APIs in Seconds—No SDK, No Backend Needed. Proxed.AI is the simplest way to protect AI API keys in iOS apps with DeviceCheck authentication.",
 	offers: {
 		"@type": "Offer",
-		price: "0",
+		price: "2.50",
 		priceCurrency: "USD",
-		description: "Free tier available",
+		description: "Paid plans start at $2.50/month, or self-host for free",
 	},
 	aggregateRating: {
 		"@type": "AggregateRating",
@@ -132,7 +134,7 @@ export const jsonLd = {
 	image: "https://proxed.ai/icon.png",
 	applicationSuite: "Secure AI SDK",
 	featureList:
-		"No SDK Required, No Backend Required, Apple DeviceCheck Integration, Secure Key Management, Rate Limiting, AI Cost Control, Structured AI Responses",
+		"Open Source, Self-Hosted Option, No SDK Required, No Backend Required, Apple DeviceCheck Integration, Secure Key Management, Rate Limiting, AI Cost Control, Structured AI Responses",
 	softwareVersion: "1.0",
 	author: {
 		"@type": "Person",

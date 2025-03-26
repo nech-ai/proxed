@@ -15,10 +15,10 @@
 		"date-fns": "^4.1.0",
 		"react": "19.0.0",
 		"server-only": "^0.0.1",
-		"supabase": "^2.19.7"
+		"supabase": "^2.20.3"
 	},
 	"devDependencies": {
-		"@supabase/supabase-js": "^2.49.1"
+		"@supabase/supabase-js": "^2.49.3"
 	},
 	"exports": {
 		"./server": "./src/clients/server.ts",

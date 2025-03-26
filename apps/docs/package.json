@@ -14,7 +14,7 @@
 		"fumadocs-core": "^15.1.2",
 		"fumadocs-mdx": "^11.5.7",
 		"fumadocs-ui": "^15.1.2",
-		"next": "^15.2.3",
+		"next": "^15.2.4",
 		"react": "19.0.0",
 		"react-dom": "19.0.0"
 	},
@@ -22,7 +22,7 @@
 		"@types/mdx": "^2.0.13",
 		"@types/react": "^19.0.12",
 		"@types/react-dom": "19.0.3",
-		"algoliasearch": "^5.21.0",
+		"algoliasearch": "^5.23.0",
 		"typescript": "5.8.2"
 	}
 }

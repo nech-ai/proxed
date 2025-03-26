@@ -25,12 +25,12 @@
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"@manypkg/cli": "^0.23.0",
-		"@types/bun": "^1.2.5",
-		"@types/node": "^22.13.11",
+		"@types/bun": "^1.2.6",
+		"@types/node": "^22.13.13",
 		"dotenv-cli": "^8.0.0",
 		"tsconfig": "workspace:*",
 		"turbo": "^2.4.4",
-		"type-fest": "^4.37.0",
+		"type-fest": "^4.38.0",
 		"typescript": "5.8.2"
 	},
 	"packageManager": "bun@1.2.4",

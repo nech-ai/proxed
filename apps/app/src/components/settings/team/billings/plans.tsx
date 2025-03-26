@@ -95,7 +95,7 @@ export function Plans({
 							<Tooltip>
 								<TooltipTrigger asChild>
 									<Link
-										href={`/api/checkout?plan=starter-${billingCycle}&teamId=${teamId}&planType=starter`}
+										href={`/api/checkout?plan=starter-${billingCycle}&teamId=${teamId}`}
 										className={cn(
 											!canChooseStarterPlan && "opacity-50 cursor-default",
 										)}
@@ -181,7 +181,7 @@ export function Plans({
 
 					<div className="mt-auto border-t border-border pt-4">
 						<Link
-							href={`/api/checkout?plan=pro-${billingCycle}&teamId=${teamId}&planType=pro`}
+							href={`/api/checkout?plan=pro-${billingCycle}&teamId=${teamId}`}
 						>
 							<Button
 								variant="default"
@@ -242,7 +242,7 @@ export function Plans({
 
 					<div className="mt-auto border-t border-border pt-4">
 						<Link
-							href={`/api/checkout?plan=ultimate-${billingCycle}&teamId=${teamId}&planType=ultimate`}
+							href={`/api/checkout?plan=ultimate-${billingCycle}&teamId=${teamId}`}
 						>
 							<Button
 								variant="secondary"

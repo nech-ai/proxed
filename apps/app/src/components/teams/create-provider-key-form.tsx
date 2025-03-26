@@ -345,7 +345,7 @@ export function CreateProviderKeyForm() {
 									Add Another Key
 								</Button>
 
-								<Link href="/">
+								<Link href="/teams/billing">
 									<Button className="px-6">
 										Complete Setup
 										<ChevronRight className="h-4 w-4 ml-2" />
@@ -522,7 +522,7 @@ export function CreateProviderKeyForm() {
 
 							<div className="pt-4 border-t mt-4">
 								<div className="flex items-center justify-between">
-									<Link href="/">
+									<Link href="/teams/billing">
 										<Button
 											variant="ghost"
 											type="button"

@@ -136,7 +136,7 @@ export const siteConfig = {
 			description: "Affordable security for small projects.",
 			features: [
 				"1 Project",
-				"5,000 API calls per month",
+				"1,000 API calls per month",
 				"DeviceCheck authentication",
 				"Real-time monitoring",
 			],

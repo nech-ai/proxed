@@ -17,6 +17,7 @@ import {
 } from "@proxed/ui/components/table";
 import { useAction } from "next-safe-action/hooks";
 import { TeamCard } from "./team-card";
+import { TeamAvatar } from "./team-avatar";
 
 export function SelectTeamTable({
 	data,
@@ -44,14 +45,11 @@ export function SelectTeamTable({
 						>
 							<TableCell className="border-r-[0px] py-4">
 								<div className="flex items-center space-x-4">
-									<Avatar className="h-8 w-8 rounded-full">
-										<AvatarImage src={row.team?.avatar_url ?? ""} />
-										<AvatarFallback>
-											<span className="text-xs">
-												{row.team?.name?.charAt(0)?.toUpperCase() ?? ""}
-											</span>
-										</AvatarFallback>
-									</Avatar>
+									<TeamAvatar
+										className="h-8 w-8"
+										name={row.team?.name ?? ""}
+										avatarUrl={row.team?.avatar_url ?? ""}
+									/>
 									<div className="flex flex-col">
 										<span
 											className={cn(

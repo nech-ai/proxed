@@ -61,7 +61,10 @@ export function AppSidebar({ teamMemberships, user }: AppSidebarProps) {
 			<SidebarHeader>
 				<div className="flex w-full items-center justify-between">
 					<div
-						className={cn("flex items-center", !open && "w-14 justify-center")}
+						className={cn(
+							"flex items-center",
+							open ? "pl-3" : "w-10 justify-center",
+						)}
 					>
 						<Logo withLabel={open} />
 					</div>

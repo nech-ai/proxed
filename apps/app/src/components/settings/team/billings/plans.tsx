@@ -13,7 +13,7 @@ import { Tabs, TabsList, TabsTrigger } from "@proxed/ui/components/tabs";
 import { Check } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { PLANS, formatPrice } from "@/utils/plans";
+import { PLANS, formatPrice, formatCostPerCall } from "@/utils/plans";
 
 export function Plans({
 	teamId,
@@ -61,6 +61,11 @@ export function Plans({
 							Excl. VAT
 						</span>
 					</div>
+					<div className="mt-1">
+						<span className="text-xs text-muted-foreground">
+							({formatCostPerCall(`starter-${billingCycle}`)} per API call)
+						</span>
+					</div>
 
 					<div className="mt-4">
 						<h3 className="text-xs font-medium uppercase tracking-wide text-left text-[#878787] font-mono">
@@ -73,7 +78,12 @@ export function Plans({
 							</li>
 							<li className="flex items-start">
 								<Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-								<span className="text-xs">5,000 API calls per month</span>
+								<span className="text-xs">
+									{PLANS.production[
+										`starter-${billingCycle}`
+									].apiCalls.toLocaleString()}{" "}
+									API calls per month
+								</span>
 							</li>
 							<li className="flex items-start">
 								<Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
@@ -150,6 +160,16 @@ export function Plans({
 							Excl. VAT
 						</span>
 					</div>
+					<div className="mt-1">
+						<span className="text-xs text-muted-foreground">
+							({formatCostPerCall(`pro-${billingCycle}`)} per API call)
+						</span>
+						<span className="ml-1 text-xs text-green-500">
+							{billingCycle === "yearly"
+								? "Save 83% per call vs Starter"
+								: "Save 75% per call vs Starter"}
+						</span>
+					</div>
 
 					<div className="mt-4">
 						<h3 className="text-xs font-medium uppercase tracking-wide text-left text-[#878787] font-mono">
@@ -162,7 +182,12 @@ export function Plans({
 							</li>
 							<li className="flex items-start">
 								<Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-								<span className="text-xs">10,000 API calls per month</span>
+								<span className="text-xs">
+									{PLANS.production[
+										`pro-${billingCycle}`
+									].apiCalls.toLocaleString()}{" "}
+									API calls per month
+								</span>
 							</li>
 							<li className="flex items-start">
 								<Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
@@ -209,6 +234,16 @@ export function Plans({
 							Excl. VAT
 						</span>
 					</div>
+					<div className="mt-1">
+						<span className="text-xs text-muted-foreground">
+							({formatCostPerCall(`ultimate-${billingCycle}`)} per API call)
+						</span>
+						<span className="ml-1 text-xs text-green-500">
+							{billingCycle === "yearly"
+								? "Save 50% per call vs Pro"
+								: "Save 40% per call vs Pro"}
+						</span>
+					</div>
 
 					<div className="mt-4">
 						<h3 className="text-xs font-medium uppercase tracking-wide text-left text-[#878787] font-mono">
@@ -221,7 +256,12 @@ export function Plans({
 							</li>
 							<li className="flex items-start">
 								<Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />
-								<span className="text-xs">50,000 API calls per month</span>
+								<span className="text-xs">
+									{PLANS.production[
+										`ultimate-${billingCycle}`
+									].apiCalls.toLocaleString()}{" "}
+									API calls per month
+								</span>
 							</li>
 							<li className="flex items-start">
 								<Check className="h-4 w-4 text-primary flex-shrink-0 mr-2" />

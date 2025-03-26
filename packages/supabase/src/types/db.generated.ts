@@ -388,23 +388,32 @@ export type Database = {
 			teams: {
 				Row: {
 					avatar_url: string | null;
+					canceled_at: string | null;
 					created_at: string;
+					email: string | null;
 					id: string;
 					name: string;
+					plan: string | null;
 					updated_at: string;
 				};
 				Insert: {
 					avatar_url?: string | null;
+					canceled_at?: string | null;
 					created_at?: string;
+					email?: string | null;
 					id?: string;
 					name: string;
+					plan?: string | null;
 					updated_at?: string;
 				};
 				Update: {
 					avatar_url?: string | null;
+					canceled_at?: string | null;
 					created_at?: string;
+					email?: string | null;
 					id?: string;
 					name?: string;
+					plan?: string | null;
 					updated_at?: string;
 				};
 				Relationships: [];

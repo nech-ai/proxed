@@ -13,6 +13,10 @@ export default async function SettingsLayout({ children }: PropsWithChildren) {
 							href: "/settings/team/general",
 						},
 						{
+							title: "Billing",
+							href: "/settings/team/billing",
+						},
+						{
 							title: "Members",
 							href: "/settings/team/members",
 						},

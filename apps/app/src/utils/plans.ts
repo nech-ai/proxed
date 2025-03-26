@@ -3,7 +3,7 @@ const POLAR_ENVIRONMENT = process.env.POLAR_ENVIRONMENT;
 export const PLANS = {
 	production: {
 		"starter-monthly": {
-			id: "ac17601d-29a9-4530-ab9d-9f6ea39f7e32",
+			id: "0e756236-86a2-4770-9f02-fe0bf3aef672",
 			name: "Starter",
 			key: "starter-monthly",
 			price: 2.5,
@@ -11,7 +11,7 @@ export const PLANS = {
 			apiCalls: 1000,
 		},
 		"starter-yearly": {
-			id: "ac17601d-29a9-4530-ab9d-9f6ea39f7e32",
+			id: "c409b494-2015-4b4e-8a26-ea4e6d7c5899",
 			name: "Starter",
 			key: "starter-yearly",
 			price: 25,
@@ -19,7 +19,7 @@ export const PLANS = {
 			apiCalls: 1000,
 		},
 		"pro-monthly": {
-			id: "0a0a36b1-38d3-4082-85ca-f46cec9d8b1a",
+			id: "0b57c94a-1c4b-4104-bfab-43d3543bf76d",
 			name: "Pro",
 			key: "pro-monthly",
 			price: 10,
@@ -27,7 +27,7 @@ export const PLANS = {
 			apiCalls: 10000,
 		},
 		"pro-yearly": {
-			id: "0a0a36b1-38d3-4082-85ca-f46cec9d8b1a",
+			id: "9cb849f4-dfa9-476e-8de8-498da46f7783",
 			name: "Pro",
 			key: "pro-yearly",
 			price: 100,
@@ -35,7 +35,7 @@ export const PLANS = {
 			apiCalls: 10000,
 		},
 		"ultimate-monthly": {
-			id: "0a0a36b1-38d3-4082-85ca-f46cec9d8b1a",
+			id: "d9fba00c-b1bb-48a6-a84e-390446b3f7b8",
 			name: "Ultimate",
 			key: "ultimate-monthly",
 			price: 30,
@@ -43,7 +43,7 @@ export const PLANS = {
 			apiCalls: 50000,
 		},
 		"ultimate-yearly": {
-			id: "0a0a36b1-38d3-4082-85ca-f46cec9d8b1a",
+			id: "68ff75a3-9bd1-4fc9-8b22-cd081395c3ac",
 			name: "Ultimate",
 			key: "ultimate-yearly",
 			price: 300,
@@ -53,7 +53,7 @@ export const PLANS = {
 	},
 	sandbox: {
 		"starter-monthly": {
-			id: "265b6845-4fca-4813-86b7-70fb606626dd",
+			id: "ecc28d62-dacb-4d86-b78a-4c89c3048931",
 			name: "Starter",
 			key: "starter-monthly",
 			price: 2.5,
@@ -61,7 +61,7 @@ export const PLANS = {
 			apiCalls: 1000,
 		},
 		"starter-yearly": {
-			id: "265b6845-4fca-4813-86b7-70fb606626dd",
+			id: "f394b6e6-c199-4384-9b70-b32ba1c2327c",
 			name: "Starter",
 			key: "starter-yearly",
 			price: 25,
@@ -69,7 +69,7 @@ export const PLANS = {
 			apiCalls: 1000,
 		},
 		"pro-monthly": {
-			id: "dc9e75d2-c1ef-4265-9265-f599e54eb172",
+			id: "b0a50602-7d60-4924-a67b-91aec9d8eb55",
 			name: "Pro",
 			key: "pro-monthly",
 			price: 10,
@@ -77,7 +77,7 @@ export const PLANS = {
 			apiCalls: 10000,
 		},
 		"pro-yearly": {
-			id: "dc9e75d2-c1ef-4265-9265-f599e54eb172",
+			id: "6b387f89-33d2-453f-95f5-440d11cef196",
 			name: "Pro",
 			key: "pro-yearly",
 			price: 100,
@@ -85,7 +85,7 @@ export const PLANS = {
 			apiCalls: 10000,
 		},
 		"ultimate-monthly": {
-			id: "0a0a36b1-38d3-4082-85ca-f46cec9d8b1a",
+			id: "4dc5a293-d2b0-4375-bc61-458710d53194",
 			name: "Ultimate",
 			key: "ultimate-monthly",
 			price: 30,
@@ -93,7 +93,7 @@ export const PLANS = {
 			apiCalls: 50000,
 		},
 		"ultimate-yearly": {
-			id: "0a0a36b1-38d3-4082-85ca-f46cec9d8b1a",
+			id: "d80aeb68-08a0-4c09-9358-de53454ebc3e",
 			name: "Ultimate",
 			key: "ultimate-yearly",
 			price: 300,

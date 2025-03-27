@@ -8,6 +8,13 @@ import { changeTeamSchema } from "./schema";
 
 export const changeTeamAction = authActionClient
 	.schema(changeTeamSchema)
+	.metadata({
+		name: "changeTeamAction",
+		track: {
+			event: "change_team",
+			channel: "change_team",
+		},
+	})
 	.action(
 		async ({ parsedInput: { teamId, redirectTo }, ctx: { supabase } }) => {
 			const user = await updateUser(supabase, { team_id: teamId });

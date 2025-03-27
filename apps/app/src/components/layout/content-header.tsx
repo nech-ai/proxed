@@ -5,7 +5,7 @@ import { SidebarTrigger, useSidebar } from "@proxed/ui/components/sidebar";
 import { cn } from "@proxed/ui/utils";
 import type { PropsWithChildren } from "react";
 import { UserMenu } from "./user-menu";
-import { useTeam } from "@/hooks/use-team";
+import { useTeamContext } from "@/store/team/hook";
 import { FeedbackDialog } from "./feedback-dialog";
 
 interface ContentHeaderProps extends PropsWithChildren {
@@ -14,7 +14,7 @@ interface ContentHeaderProps extends PropsWithChildren {
 
 export function ContentHeader({ children, className }: ContentHeaderProps) {
 	const { isMobile } = useSidebar();
-	const { user } = useTeam();
+	const { user } = useTeamContext((state) => state.data);
 
 	return (
 		<div className={cn("border-b bg-background sticky top-0 z-10", className)}>

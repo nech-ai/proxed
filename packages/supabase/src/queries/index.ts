@@ -494,13 +494,39 @@ export async function getExecutionMetricsQuery(
 	};
 }
 
-export async function getTeamLimitsMetricsQuery(
-	supabase: Client,
+export const getTeamLimitsMetricsQuery = async (
+	client: Client,
 	teamId: string,
-) {
-	return supabase
+) => {
+	return client
 		.rpc("get_team_limits_metrics", {
 			p_team_id: teamId,
 		})
 		.single();
-}
+};
+
+export const getTeamBillingQuery = async (client: Client, teamId: string) => {
+	const [{ data: team }, { data: limits }] = await Promise.all([
+		client
+			.from("teams")
+			.select("plan, email, canceled_at")
+			.eq("id", teamId)
+			.single(),
+		getTeamLimitsMetricsQuery(client, teamId),
+	]);
+
+	if (!team) return null;
+
+	return {
+		plan: team.plan,
+		email: team.email,
+		canceled_at: team.canceled_at,
+		limits: limits || {
+			projects_limit: null,
+			projects_count: 0,
+			api_calls_limit: null,
+			api_calls_used: 0,
+			api_calls_remaining: 0,
+		},
+	};
+};

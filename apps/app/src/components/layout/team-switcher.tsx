@@ -1,6 +1,5 @@
 "use client";
 import { changeTeamAction } from "@/actions/change-team-action";
-import { useTeam } from "@/hooks/use-team";
 import type { TeamMembership } from "@proxed/supabase/types";
 import {
 	DropdownMenu,
@@ -19,6 +18,7 @@ import { ChevronsUpDown } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { TeamAvatar } from "../teams/team-avatar";
 import { cn } from "@proxed/ui/utils";
+import { useTeamContext } from "@/store/team/hook";
 
 export function TeamSwitcher({
 	activeTeamId,
@@ -30,7 +30,6 @@ export function TeamSwitcher({
 	className?: string;
 }) {
 	const changeTeam = useAction(changeTeamAction);
-	const { reloadTeamId } = useTeam();
 	const { isMobile, open } = useSidebar();
 	const activeTeam = teamMemberships.find(
 		(teamMembership) => activeTeamId === teamMembership.team_id,
@@ -45,7 +44,6 @@ export function TeamSwitcher({
 			teamId,
 			redirectTo: "/",
 		});
-		reloadTeamId(teamId);
 	};
 
 	if (!activeTeam) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { deleteTeamAction } from "@/actions/delete-team-action";
-import { useTeam } from "@/hooks/use-team";
+import { useTeamContext } from "@/store/team/hook";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -31,7 +31,7 @@ interface DeleteTeamProps {
 
 export function DeleteTeam({ teamId }: DeleteTeamProps) {
 	const router = useRouter();
-	const { teamMembership } = useTeam();
+	const { teamMembership } = useTeamContext((state) => state.data);
 	const deleteTeam = useAction(deleteTeamAction, {
 		onSuccess: () => router.push("/teams"),
 	});

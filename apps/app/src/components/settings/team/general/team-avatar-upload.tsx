@@ -2,7 +2,7 @@
 
 import { UserAvatar } from "@/components/layout/user-avatar";
 import { CropImageDialog } from "@/components/shared/settings/crop-image-dialog";
-import { useTeam } from "@/hooks/use-team";
+import { useTeamContext } from "@/store/team/hook";
 import { useUpload } from "@/hooks/use-upload";
 import type { Team } from "@proxed/supabase/types";
 import { LoaderIcon } from "lucide-react";
@@ -19,7 +19,7 @@ export function TeamAvatarUpload({
 	onSuccess: (avatar_url: string) => void;
 	onError: (message: string) => void;
 }) {
-	const { teamMembership } = useTeam();
+	const { teamMembership } = useTeamContext((state) => state.data);
 	const [cropDialogOpen, setCropDialogOpen] = useState(false);
 	const [image, setImage] = useState<File | null>(null);
 	const [avatarUrl, setAvatarUrl] = useState<string | null>(team.avatar_url);

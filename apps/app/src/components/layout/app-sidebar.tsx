@@ -19,8 +19,8 @@ import {
 import { NavMain } from "./nav-main";
 import { TeamSwitcher } from "./team-switcher";
 import { Logo } from "./logo";
-import { useTeam } from "@/hooks/use-team";
 import { cn } from "@proxed/ui/utils";
+import { useTeamContext } from "@/store/team/hook";
 
 const data = {
 	navMain: [
@@ -53,7 +53,7 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ teamMemberships, user }: AppSidebarProps) {
-	const { teamId } = useTeam();
+	const { teamId } = useTeamContext((state) => state.data);
 	const { open } = useSidebar();
 
 	return (

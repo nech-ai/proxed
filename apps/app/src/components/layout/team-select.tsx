@@ -1,6 +1,6 @@
 "use client";
 import { changeTeamAction } from "@/actions/change-team-action";
-import { useTeam } from "@/hooks/use-team";
+
 import type { TeamMembership } from "@proxed/supabase/types";
 import {
 	DropdownMenu,
@@ -17,6 +17,7 @@ import { useAction } from "next-safe-action/hooks";
 import { redirect } from "next/navigation";
 // import { CreateTeamDialog } from "../teams/create-team-dialog";
 import { TeamAvatar } from "../teams/team-avatar";
+import { useTeamContext } from "@/store/team/hook";
 
 export function TeamSelect({
 	activeTeamId,
@@ -29,7 +30,6 @@ export function TeamSelect({
 }) {
 	const changeTeam = useAction(changeTeamAction);
 
-	const { reloadTeamId } = useTeam();
 	const activeTeam = teamMemberships.find(
 		(teamMembership) => activeTeamId === teamMembership.team_id,
 	);
@@ -43,7 +43,6 @@ export function TeamSelect({
 			teamId,
 			redirectTo: "/",
 		});
-		reloadTeamId(teamId);
 	};
 
 	if (!activeTeam) {

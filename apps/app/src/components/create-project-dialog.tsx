@@ -23,11 +23,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { createProjectAction } from "@/actions/create-project-action";
 import { useRouter } from "next/navigation";
-import { PlusIcon } from "@radix-ui/react-icons";
+import { PlusIcon, LockClosedIcon } from "@radix-ui/react-icons";
 import { createProjectSchema } from "@/actions/schema";
 import type { CreateProjectFormValues } from "@/actions/schema";
+import { useTeamContext } from "@/store/team/hook";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@proxed/ui/components/tooltip";
 
 export function CreateProjectDialog() {
+	const canAccessFeature = useTeamContext((state) => state.canAccessFeature);
+	const billing = useTeamContext((state) => state.data.billing);
 	const router = useRouter();
 	const form = useForm<CreateProjectFormValues>({
 		resolver: zodResolver(createProjectSchema),
@@ -45,14 +53,46 @@ export function CreateProjectDialog() {
 		}
 	}
 
+	const canCreate = canAccessFeature("create_project");
+	const projectsLimit = billing?.limits?.projects_limit || 0;
+	const projectsCount = billing?.limits?.projects_count || 0;
+
 	return (
 		<Dialog>
-			<DialogTrigger asChild>
-				<Button>
-					<PlusIcon className="mr-2 h-4 w-4" />
-					New Project
-				</Button>
-			</DialogTrigger>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<div className="inline-block">
+						<DialogTrigger asChild>
+							<Button
+								disabled={!canCreate}
+								variant={canCreate ? "default" : "secondary"}
+								className="relative"
+							>
+								{canCreate ? (
+									<PlusIcon className="mr-2 h-4 w-4" />
+								) : (
+									<LockClosedIcon className="mr-2 h-4 w-4" />
+								)}
+								New Project
+								{!canCreate && (
+									<span className="ml-2 text-xs">
+										({projectsCount}/{projectsLimit})
+									</span>
+								)}
+							</Button>
+						</DialogTrigger>
+					</div>
+				</TooltipTrigger>
+				{!canCreate && (
+					<TooltipContent>
+						<p>Upgrade your plan to create more projects</p>
+						<p className="text-xs text-muted-foreground">
+							Your current plan allows {projectsLimit}{" "}
+							{projectsLimit === 1 ? "project" : "projects"}
+						</p>
+					</TooltipContent>
+				)}
+			</Tooltip>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Create New Project</DialogTitle>

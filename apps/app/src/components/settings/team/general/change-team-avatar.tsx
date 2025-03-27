@@ -2,7 +2,7 @@
 
 import { type UpdateTeamFormValues, updateTeamSchema } from "@/actions/schema";
 import { updateTeamAction } from "@/actions/update-team-action";
-import { useTeam } from "@/hooks/use-team";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Team } from "@proxed/supabase/types";
 import { Button } from "@proxed/ui/components/button";
@@ -20,6 +20,7 @@ import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { TeamAvatarUpload } from "./team-avatar-upload";
+import { useTeamContext } from "@/store/team/hook";
 
 type Props = {
 	team: Team;
@@ -27,7 +28,7 @@ type Props = {
 
 export function ChangeTeamAvatar({ team }: Props) {
 	const action = useAction(updateTeamAction);
-	const { teamMembership } = useTeam();
+	const { teamMembership } = useTeamContext((state) => state.data);
 
 	const form = useForm<UpdateTeamFormValues>({
 		resolver: zodResolver(updateTeamSchema),

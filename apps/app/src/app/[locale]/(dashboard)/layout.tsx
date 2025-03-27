@@ -1,7 +1,11 @@
 import { AppSidebar } from "@/components/layout/app-sidebar";
-import { TeamContextProvider } from "@/shared/lib/team-context";
+import { TeamProvider } from "@/store/team/provider";
 import { UserProvider } from "@/store/user/provider";
-import { getTeamMemberships, getUser } from "@proxed/supabase/cached-queries";
+import {
+	getTeamMemberships,
+	getUser,
+	getTeamBilling,
+} from "@proxed/supabase/cached-queries";
 import { SidebarProvider } from "@proxed/ui/components/sidebar";
 import { redirect } from "next/navigation";
 import type { PropsWithChildren } from "react";
@@ -27,6 +31,8 @@ export default async function Layout({ children }: PropsWithChildren) {
 		return redirect("/teams/create");
 	}
 
+	const { data: billing } = await getTeamBilling();
+
 	const userData = {
 		id: user.id,
 		full_name: user.full_name ?? "",
@@ -36,12 +42,17 @@ export default async function Layout({ children }: PropsWithChildren) {
 		timezone: "Europe/London",
 	};
 
+	const teamData = {
+		teamId: user.team_id,
+		teamMembership:
+			teamMemberships.find((m) => m.team_id === user.team_id) ?? null,
+		allTeamMemberships: teamMemberships,
+		user,
+		billing,
+	};
+
 	return (
-		<TeamContextProvider
-			initialTeamId={user.team_id}
-			allTeamMemberships={teamMemberships}
-			user={user}
-		>
+		<TeamProvider data={teamData}>
 			<UserProvider data={userData}>
 				<div className="flex h-screen">
 					<SidebarProvider defaultOpen={false}>
@@ -50,6 +61,6 @@ export default async function Layout({ children }: PropsWithChildren) {
 					</SidebarProvider>
 				</div>
 			</UserProvider>
-		</TeamContextProvider>
+		</TeamProvider>
 	);
 }

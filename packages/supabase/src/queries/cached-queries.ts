@@ -22,7 +22,10 @@ import {
 	getExecutionQuery,
 	type getExecutionMetricsParams,
 	getExecutionMetricsQuery,
+	getTeamBillingQuery,
 } from "../queries";
+
+import type { TeamBilling } from "../types";
 
 export const getSession = cache(async () => {
 	const supabase = await createClient();
@@ -301,4 +304,22 @@ export const getExecutionMetrics = async (
 		},
 		// @ts-expect-error
 	)(params);
+};
+
+export const getTeamBilling = async () => {
+	const client = await createClient();
+	const user = await getUser();
+
+	if (!user?.data?.team_id) {
+		return { data: null };
+	}
+
+	return unstable_cache(
+		async () => {
+			const data = await getTeamBillingQuery(client, user.data.team_id);
+			return { data: data as TeamBilling | null };
+		},
+		[`team-billing-${user.data.team_id}`],
+		{ revalidate: 30 },
+	)();
 };

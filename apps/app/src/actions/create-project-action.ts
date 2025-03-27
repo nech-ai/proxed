@@ -9,6 +9,14 @@ import { createProject } from "@proxed/supabase/mutations";
 
 export const createProjectAction = authActionClient
 	.schema(createProjectSchema)
+	.metadata({
+		name: "createProjectAction",
+		requiredFeature: "create_project",
+		track: {
+			event: "create_project",
+			channel: "create_project",
+		},
+	})
 	.action(
 		async ({
 			parsedInput: { name, description, bundleId, revalidatePath },

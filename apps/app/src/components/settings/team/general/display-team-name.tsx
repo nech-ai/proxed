@@ -2,7 +2,7 @@
 
 import { type UpdateTeamFormValues, updateTeamSchema } from "@/actions/schema";
 import { updateTeamAction } from "@/actions/update-team-action";
-import { useTeam } from "@/hooks/use-team";
+import { useTeamContext } from "@/store/team/hook";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@proxed/ui/components/button";
 import {
@@ -32,7 +32,7 @@ type Props = {
 
 export function DisplayTeamName({ teamName }: Props) {
 	const { toast } = useToast();
-	const { teamMembership } = useTeam();
+	const { teamMembership } = useTeamContext((state) => state.data);
 	const action = useAction(updateTeamAction, {
 		onSuccess: () => {
 			toast({

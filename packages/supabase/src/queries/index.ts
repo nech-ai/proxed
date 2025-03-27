@@ -493,3 +493,14 @@ export async function getExecutionMetricsQuery(
 		}),
 	};
 }
+
+export async function getTeamLimitsMetricsQuery(
+	supabase: Client,
+	teamId: string,
+) {
+	return supabase
+		.rpc("get_team_limits_metrics", {
+			p_team_id: teamId,
+		})
+		.single();
+}

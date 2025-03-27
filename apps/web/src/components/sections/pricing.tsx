@@ -12,6 +12,20 @@ import { useSubscribeModal } from "@/context/subscribe-modal-context";
 import { GradientText } from "../gradient-text";
 import { Icons } from "@/components/icons";
 
+// Define the cost per call for each plan
+const COST_PER_CALL = {
+	monthly: {
+		starter: "$0.0025",
+		pro: "$0.0010",
+		ultimate: "$0.0006",
+	},
+	yearly: {
+		starter: "$0.0021",
+		pro: "$0.0008",
+		ultimate: "$0.0005",
+	},
+};
+
 interface TabsProps {
 	activeTab: string;
 	setActiveTab: (tab: "yearly" | "monthly") => void;
@@ -91,6 +105,21 @@ function PricingTier({
 	billingCycle: "monthly" | "yearly";
 }) {
 	const { openModal } = useSubscribeModal();
+
+	// Get cost per call based on tier and billing cycle
+	const costPerCall =
+		COST_PER_CALL[billingCycle][
+			tier.name.toLowerCase() as "starter" | "pro" | "ultimate"
+		];
+
+	// Calculate savings percentages
+	let savingsText = "";
+	if (tier.name === "Pro") {
+		savingsText = billingCycle === "yearly" ? "83%" : "75%";
+	} else if (tier.name === "Ultimate") {
+		savingsText = billingCycle === "yearly" ? "50%" : "40%";
+	}
+
 	return (
 		<div
 			className={cn(
@@ -125,6 +154,15 @@ function PricingTier({
 									/{tier.frequency[billingCycle]}
 								</span>
 							</motion.div>
+							<p className="mt-1 text-sm text-muted-foreground">
+								({costPerCall} per API call)
+								{savingsText && (
+									<span className="ml-1 text-xs text-green-500">
+										Save {savingsText} vs{" "}
+										{tier.name === "Pro" ? "Starter" : "Pro"}
+									</span>
+								)}
+							</p>
 							<p className="mt-4 text-base text-muted-foreground">
 								{tier.description}
 							</p>
@@ -175,8 +213,8 @@ export function Pricing() {
 		<Section
 			id="pricing"
 			title="Pricing"
-			subtitle="Flexible Options for Every Team"
-			description="Choose a hosted plan that fits your needs or self-host for free with our open-source solution."
+			subtitle="Enterprise Security at Startup Prices"
+			description="Flexible plans that scale with your usage, from indie developers to enterprise teams. All with no hidden fees."
 		>
 			<div className="grid grid-rows-1">
 				<div className="mb-12 p-8 border-2 border-primary/30 bg-gradient-to-r from-primary/10 via-accent/10 to-transparent rounded-lg max-w-4xl mx-auto shadow-sm">
@@ -187,11 +225,12 @@ export function Pricing() {
 							</GradientText>
 							<p className="text-base">
 								Proxed.AI is 100% open-source. Deploy on your own infrastructure
-								with <span className="font-semibold">no usage limits</span> or
-								subscription fees.
+								with <span className="font-semibold">no usage limits</span>,
+								subscription fees, or vendor lock-in.
 							</p>
 							<p className="text-sm text-muted-foreground mt-2">
-								Perfect for privacy-focused teams and enterprise deployments.
+								Perfect for privacy-focused teams, regulated industries, and
+								enterprise deployments.
 							</p>
 						</div>
 						<div>
@@ -219,7 +258,8 @@ export function Pricing() {
 							Hosted Plans
 						</h3>
 						<p className="text-muted-foreground text-sm">
-							Let us handle the infrastructure while you focus on building
+							Let us handle the infrastructure while you focus on building great
+							AI apps
 						</p>
 					</div>
 					<Tabs
@@ -254,6 +294,19 @@ export function Pricing() {
 						<PricingTier key={index} tier={tier} billingCycle={billingCycle} />
 					))}
 				</div>
+			</div>
+
+			<div className="text-center pt-8 max-w-2xl mx-auto">
+				<p className="text-sm mb-2">
+					All plans include email support and a 30-day money-back guarantee.
+					Prices exclude VAT.
+				</p>
+				<p className="text-sm text-muted-foreground">
+					Need a custom plan or have questions?{" "}
+					<a href="mailto:alex@proxed.ai" className="text-primary underline">
+						Contact us
+					</a>
+				</p>
 			</div>
 		</Section>
 	);

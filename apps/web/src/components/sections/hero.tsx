@@ -36,11 +36,11 @@ function HeroPill() {
 			className="group flex w-auto items-center space-x-2 bg-primary/20 px-3 py-1.5 ring-1 ring-accent rounded-full hover:bg-primary/30 transition-all duration-300"
 		>
 			<div className="w-fit bg-accent px-2 py-0.5 rounded-full text-left text-xs font-medium text-primary sm:text-sm">
-				🚀 Launch
+				🚀 Beta
 			</div>
-			<span className="font-medium">Public Beta Coming Soon</span>
+			<span className="font-medium">Early Access Available</span>
 			<span className="hidden sm:inline"> · </span>
-			<span className="sm:inline">Get early access now</span>
+			<span className="sm:inline">Join now for special pricing</span>
 			<svg
 				width="12"
 				height="12"
@@ -61,7 +61,7 @@ function HeroPill() {
 function HeroTitles() {
 	return (
 		<div className="flex w-full max-w-3xl flex-col overflow-hidden pt-8">
-			<h1 className="text-left text-3xl font-semibold leading-tight text-foreground sm:text-4xl md:text-5xl lg:text-6xl tracking-tighter">
+			<h1 className="text-left text-3xl font-semibold leading-tight text-foreground sm:text-4xl md:text-5xl lg:text-6xl tracking-tighter mt-4">
 				<span className="inline-block text-balance">
 					<GradientText as="h1" className="leading-tight">
 						{siteConfig.hero.title}
@@ -90,7 +90,8 @@ function HeroCTA() {
 				</Button>
 			</div>
 			<p className="mt-4 text-sm text-muted-foreground text-left max-w-xl">
-				{siteConfig.hero.ctaDescription}
+				{siteConfig.hero.ctaDescription}{" "}
+				<span className="text-primary">Get started in under 5 minutes.</span>
 			</p>
 		</div>
 	);

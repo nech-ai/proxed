@@ -13,8 +13,8 @@ export const BLUR_FADE_DELAY = 0.15;
 
 export const siteConfig = {
 	name: "Proxed.AI",
-	description: "Protect AI APIs Instantly - Just Update Your URL.",
-	cta: "Secure Your AI API Now",
+	description: "Secure AI API Integration for iOS Apps in Seconds",
+	cta: "Start Securing Your API",
 	url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
 	keywords: [
 		"AI API Security",
@@ -30,67 +30,67 @@ export const siteConfig = {
 	},
 
 	hero: {
-		title: "Secure AI APIs in Seconds—No SDK, No Backend Needed.",
+		title: "Secure Your AI Keys in iOS Apps—No Backend Required",
 		description:
-			"Proxed.AI is the simplest way to protect AI API keys in iOS apps. Lock down your API credentials, verify device authenticity with Apple's DeviceCheck, and structure AI outputs—all without a backend. Just change your API URL and get instant security.",
-		cta: "Start Protecting Your API",
-		ctaDescription: "Open-source with self-hosting option available.",
+			"Proxed.AI protects your AI API credentials in mobile apps with just one URL change. Instantly verify genuine iOS devices, prevent credential theft, and control AI costs—without building a custom backend or SDK integration.",
+		cta: "Secure Your AI APIs Now",
+		ctaDescription: "Open-source and self-hostable. No vendor lock-in.",
 	},
 
 	problemSolution: {
 		problem: {
-			title: "AI APIs Are Vulnerable to Abuse & Key Theft",
+			title: "AI APIs Are Vulnerable in Mobile Apps",
 			description:
-				"Without proper security, AI-powered apps are exposed to key leaks, unauthorized usage, and compliance risks. A stolen API key can result in massive costs and service disruption.",
+				"Embedding API keys in mobile apps is risky. Attackers can extract credentials, bypass authentication, and exploit your AI services—leading to data breaches, runaway costs, and compliance violations.",
 			points: [
 				{
-					title: "Exposed API Keys",
+					title: "API Keys Get Stolen",
 					description:
-						"Hardcoded keys in your app? Hackers will find them and exploit your AI services.",
+						"Mobile app binaries can be easily decompiled. Any API key in your app will eventually be extracted and abused.",
 					icon: <AlertTriangleIcon className="h-6 w-6" />,
 				},
 				{
-					title: "No Control Over Requests",
+					title: "Anyone Can Access Your AI",
 					description:
-						"Without authentication, anyone can call your AI API—leading to fraud, abuse, and skyrocketing costs.",
+						"Without proper device verification, attackers can bypass your app entirely and make unlimited API calls from anywhere.",
 					icon: <AlertTriangleIcon className="h-6 w-6" />,
 				},
 				{
-					title: "Compliance & Security Risks",
+					title: "Out-of-Control AI Costs",
 					description:
-						"Regulatory requirements demand secure API handling—exposed keys can lead to data breaches and compliance violations.",
+						"A single leaked API key can result in thousands of dollars in unauthorized usage before you detect and revoke it.",
 					icon: <AlertTriangleIcon className="h-6 w-6" />,
 				},
 			],
 		},
 
 		solution: {
-			title: "Proxed.AI – API Security in One Simple URL Change",
+			title: "Proxed.AI – One URL Change, Complete Protection",
 			description:
-				"Proxed.AI eliminates security risks by acting as a smart proxy between your app and AI providers.",
+				"Proxed.AI is a secure proxy for all your AI API calls. Just change your API endpoint and get enterprise-grade security instantly.",
 			points: [
 				{
-					title: "No SDK, No Backend Required",
+					title: "Zero Backend Development",
 					description:
-						"Simply replace your AI API URL with Proxed.AI's secure endpoint—no extra code, no SDK dependencies.",
+						"No need to build a custom backend or implement complex token exchange. Just update your API URL and you're secured.",
 					icon: <CheckCircleIcon className="h-6 w-6" />,
 				},
 				{
-					title: "Lock Down API Keys",
+					title: "No API Keys in Your App",
 					description:
-						"Your secret keys never reach the client. Proxed securely manages keys so they're never exposed or stolen.",
+						"Your sensitive API credentials stay on the server. Your app only needs a lightweight, revocable access token.",
 					icon: <CheckCircleIcon className="h-6 w-6" />,
 				},
 				{
-					title: "DeviceCheck Authentication",
+					title: "Apple DeviceCheck Verification",
 					description:
-						"Verify every request comes from a genuine iOS device—blocking bots, emulators, and fake requests.",
+						"Verify each request comes from a legitimate, non-jailbroken iOS device to block emulators, bots, and scripted attacks.",
 					icon: <CheckCircleIcon className="h-6 w-6" />,
 				},
 				{
-					title: "Control AI Usage & Costs",
+					title: "Complete Cost Control",
 					description:
-						"Set rate limits, monitor API requests, and prevent abuse with real-time tracking and analytics.",
+						"Set granular rate limits, track usage patterns, and instantly revoke access to compromised devices or users.",
 					icon: <CheckCircleIcon className="h-6 w-6" />,
 				},
 			],
@@ -99,30 +99,30 @@ export const siteConfig = {
 
 	features: [
 		{
-			name: "Secure Your AI API with One URL Change",
+			name: "One-Line Integration",
 			description:
-				"Proxed.AI acts as a secure proxy—just update your API URL and instantly protect your AI calls.",
+				"Simply replace your AI provider's URL with your Proxed endpoint. No SDKs to install, no backend to build—just instant security.",
 			icon: <KeyIcon className="h-6 w-6" />,
 			href: "/secure",
 		},
 		{
-			name: "DeviceCheck Authentication",
+			name: "Hardware-Level Authentication",
 			description:
-				"Ensure only genuine, unmodified iOS devices can access your AI APIs—blocking fake requests and unauthorized users.",
+				"Leverage Apple's DeviceCheck API to verify device authenticity at the hardware level, blocking emulators and preventing API abuse.",
 			icon: <ShieldIcon className="h-6 w-6" />,
 			href: "/device-check",
 		},
 		{
-			name: "Rate Limiting & AI Cost Control",
+			name: "Intelligent Rate Limiting",
 			description:
-				"Monitor API usage, set request limits, and prevent runaway costs automatically.",
+				"Protect against cost overruns with granular controls: limit by user, device, endpoint, or create custom throttling rules.",
 			icon: <GaugeIcon className="h-6 w-6" />,
 			href: "/rate-limiting",
 		},
 		{
-			name: "Structured AI Responses",
+			name: "Response Formatting",
 			description:
-				"Define response formats and enforce consistency—no more malformed AI outputs or unexpected JSON errors.",
+				"Enforce consistent output formats from any AI model, ensuring your app always receives predictable, parseable responses.",
 			icon: <BrainIcon className="h-6 w-6" />,
 			href: "/structured-responses",
 		},
@@ -133,12 +133,14 @@ export const siteConfig = {
 			name: "Starter",
 			price: { monthly: "$2.50", yearly: "$25" },
 			frequency: { monthly: "month", yearly: "year" },
-			description: "Affordable security for small projects.",
+			description: "Perfect for indie developers and early-stage projects.",
 			features: [
 				"1 Project",
 				"1,000 API calls per month",
 				"DeviceCheck authentication",
 				"Real-time monitoring",
+				"Basic analytics dashboard",
+				"Email support",
 			],
 			cta: "Get Started",
 			popular: false,
@@ -147,13 +149,16 @@ export const siteConfig = {
 			name: "Pro",
 			price: { monthly: "$10", yearly: "$100" },
 			frequency: { monthly: "month", yearly: "year" },
-			description: "For growing apps that need more security & control.",
+			description:
+				"Ideal for production apps that need reliable security and higher capacity.",
 			features: [
 				"Unlimited Projects",
 				"10,000 API calls per month",
 				"DeviceCheck authentication",
-				"Advanced rate limiting",
+				"Advanced rate limiting rules",
 				"Real-Time Logs & Monitoring",
+				"Custom rate limit configurations",
+				"Priority email support",
 			],
 			cta: "Upgrade to Pro",
 			popular: true,
@@ -162,15 +167,18 @@ export const siteConfig = {
 			name: "Ultimate",
 			price: { monthly: "$30", yearly: "$300" },
 			frequency: { monthly: "month", yearly: "year" },
-			description: "Enterprise-grade security & scalability.",
+			description:
+				"Enterprise-grade security and analytics for high-volume apps.",
 			features: [
 				"Unlimited Projects",
 				"50,000 API calls per month",
 				"DeviceCheck authentication",
 				"Advanced analytics & cost monitoring",
+				"Detailed usage reports",
+				"Custom integrations",
 				"Dedicated support & SLA",
 			],
-			cta: "Secure Your AI API Now",
+			cta: "Get Ultimate Security",
 			popular: false,
 		},
 	],

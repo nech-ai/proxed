@@ -4,6 +4,7 @@ import { siteConfig } from "@/lib/config";
 import { motion } from "framer-motion";
 import { Section } from "../section";
 import { cn } from "@proxed/ui/utils";
+import { GradientText } from "../gradient-text";
 
 const ease = [0.16, 1, 0.3, 1];
 
@@ -20,14 +21,14 @@ function ProblemCard({
 }) {
 	return (
 		<motion.div
-			className="group relative flex flex-col gap-6 border border-border/50 bg-card/30 p-6 transition-all hover:bg-card/50"
+			className="group relative flex flex-col gap-6 border border-border/50 bg-card/30 p-6 transition-all hover:bg-card/50 h-full"
 			initial={{ opacity: 0, y: 20 }}
 			whileInView={{ opacity: 1, y: 0 }}
 			viewport={{ once: true }}
 			transition={{ duration: 0.8, delay: index * 0.1, ease }}
 		>
 			<div className="flex items-start gap-6">
-				<div className="flex h-12 w-12 shrink-0 items-center justify-center bg-destructive/10 text-destructive ring-1 ring-destructive/20">
+				<div className="flex h-12 w-12 shrink-0 items-center justify-center bg-destructive/10 text-destructive ring-1 ring-destructive/20 rounded-full">
 					{icon}
 				</div>
 				<div className="space-y-2.5">
@@ -62,14 +63,14 @@ function SolutionCard({
 }) {
 	return (
 		<motion.div
-			className="group relative flex flex-col gap-6 border border-border/50 bg-card/30 p-6 transition-all hover:bg-card/50"
+			className="group relative flex flex-col gap-6 border border-border/50 bg-card/30 p-6 transition-all hover:bg-card/50 h-full"
 			initial={{ opacity: 0, y: 20 }}
 			whileInView={{ opacity: 1, y: 0 }}
 			viewport={{ once: true }}
 			transition={{ duration: 0.8, delay: index * 0.1, ease }}
 		>
 			<div className="flex items-start gap-6">
-				<div className="flex h-12 w-12 shrink-0 items-center justify-center bg-primary/10 text-primary ring-1 ring-primary/20">
+				<div className="flex h-12 w-12 shrink-0 items-center justify-center bg-primary/10 text-primary ring-1 ring-primary/20 rounded-full">
 					{icon}
 				</div>
 				<div className="space-y-2.5">
@@ -99,6 +100,7 @@ export function ProblemSolution() {
 			<Section
 				id="problem"
 				title="The Challenge"
+				subtitle={problemSolution.problem.title}
 				description={problemSolution.problem.description}
 			>
 				<div className="my-8">
@@ -114,6 +116,7 @@ export function ProblemSolution() {
 			<Section
 				id="solution"
 				title="The Solution"
+				subtitle={problemSolution.solution.title}
 				description={problemSolution.solution.description}
 			>
 				<div className="my-8">

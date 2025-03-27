@@ -490,6 +490,18 @@ export type Database = {
 				};
 				Returns: string;
 			};
+			get_team_limits_metrics: {
+				Args: {
+					p_team_id: string;
+				};
+				Returns: {
+					projects_limit: number;
+					projects_count: number;
+					api_calls_limit: number;
+					api_calls_used: number;
+					api_calls_remaining: number;
+				}[];
+			};
 			insert_server_key: {
 				Args: {
 					p_provider_key_id: string;

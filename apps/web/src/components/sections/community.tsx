@@ -21,13 +21,18 @@ const contributors = [
 
 export function Community() {
 	return (
-		<Section id="community" title="Community">
+		<Section
+			id="community"
+			title="Community"
+			subtitle="Join the open-source revolution"
+		>
 			<div className="border-t overflow-hidden relative">
 				<Ripple />
 				<div className="p-6 text-center py-12">
 					<p className="text-muted-foreground mb-6 text-balance max-w-prose mx-auto font-medium">
-						Join our open-source family on GitHub. We value every contributor -
-						your pull request might shape the future of proxed.ai!
+						Proxed.AI is built in the open by developers who believe security
+						shouldn't require a PhD. Contribute code, report issues, or help
+						improve our documentation. Every contribution matters.
 					</p>
 					<div className="flex justify-center -space-x-6 mb-8">
 						{contributors.map((contributor, index) => (
@@ -46,10 +51,10 @@ export function Community() {
 						))}
 					</div>
 					<div className="flex justify-center">
-						<Link href="https://github.com/nech-ai/nech">
+						<Link href="https://github.com/nech-ai/proxed">
 							<Button variant="secondary" className="flex items-center gap-2">
 								<Icons.github className="h-5 w-5" />
-								Become a contributor
+								Star on GitHub
 							</Button>
 						</Link>
 					</div>

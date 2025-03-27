@@ -5,9 +5,14 @@ import { authActionClient } from "./safe-action";
 import { createDeviceCheckSchema } from "./schema";
 import { revalidatePath as revalidatePathFunc } from "next/cache";
 import { redirect } from "next/navigation";
+import { LogEvents } from "@proxed/analytics";
 
 export const createDeviceCheckAction = authActionClient
 	.schema(createDeviceCheckSchema)
+	.metadata({
+		name: "createDeviceCheckAction",
+		track: LogEvents.CreateDeviceCheck,
+	})
 	.action(
 		async ({
 			parsedInput: { revalidatePath, redirectTo, ...data },

@@ -5,9 +5,14 @@ import { revalidatePath as revalidatePathFunc } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { inviteTeamMembersSchema } from "./schema";
 import { redirect } from "next/navigation";
+import { LogEvents } from "@proxed/analytics";
 
 export const inviteTeamMembersAction = authActionClient
 	.schema(inviteTeamMembersSchema)
+	.metadata({
+		name: "inviteTeamMembersAction",
+		track: LogEvents.InviteTeamMembers,
+	})
 	.action(
 		async ({
 			parsedInput: { revalidatePath, redirectTo, invites },

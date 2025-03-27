@@ -6,9 +6,14 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { authActionClient } from "./safe-action";
 import { acceptInvitationSchema } from "./schema";
+import { LogEvents } from "@proxed/analytics";
 
 export const acceptInvitationAction = authActionClient
 	.schema(acceptInvitationSchema)
+	.metadata({
+		name: "acceptInvitationAction",
+		track: LogEvents.AcceptInvitation,
+	})
 	.action(
 		async ({ parsedInput: { invitationId, redirectTo }, ctx: { user } }) => {
 			const supaSupabase = createClient();

@@ -4,9 +4,14 @@ import { createProviderKey } from "@proxed/supabase/mutations";
 import { authActionClient } from "./safe-action";
 import { createProviderKeySchema } from "./schema";
 import { revalidatePath as revalidatePathFunc } from "next/cache";
+import { LogEvents } from "@proxed/analytics";
 
 export const createProviderKeyAction = authActionClient
 	.schema(createProviderKeySchema)
+	.metadata({
+		name: "createProviderKeyAction",
+		track: LogEvents.CreateProviderKey,
+	})
 	.action(
 		async ({
 			parsedInput: { revalidatePath, ...data },

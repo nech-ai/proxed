@@ -7,9 +7,14 @@ import {
 } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { updateUserSchema } from "./schema";
+import { LogEvents } from "@proxed/analytics";
 
 export const updateUserAction = authActionClient
 	.schema(updateUserSchema)
+	.metadata({
+		name: "updateUserAction",
+		track: LogEvents.UpdateUser,
+	})
 	.action(
 		async ({
 			parsedInput: { revalidatePath, ...data },

@@ -13,7 +13,7 @@ export async function subscribeAction(formData: FormData) {
 	});
 
 	analytics.track({
-		event: LogEvents.JoinWaitlist.name,
+		event: LogEvents.JoinWaitlist.event,
 		channel: LogEvents.JoinWaitlist.channel,
 	});
 

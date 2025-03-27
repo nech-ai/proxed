@@ -4,9 +4,14 @@ import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { authActionClient } from "./safe-action";
 import { createTeamSchema } from "./schema";
+import { LogEvents } from "@proxed/analytics";
 
 export const createTeamAction = authActionClient
 	.schema(createTeamSchema)
+	.metadata({
+		name: "createTeamAction",
+		track: LogEvents.CreateTeam,
+	})
 	.action(async ({ parsedInput: { name, redirectTo }, ctx: { supabase } }) => {
 		const team_id = await createTeam(supabase, { name });
 		const user = await updateUser(supabase, { team_id });

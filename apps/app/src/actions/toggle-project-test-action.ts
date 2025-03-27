@@ -7,9 +7,14 @@ import {
 	revalidateTag,
 	revalidatePath as revalidatePathFunc,
 } from "next/cache";
+import { LogEvents } from "@proxed/analytics";
 
 export const toggleProjectTestAction = authActionClient
 	.schema(toggleProjectTestModeSchema)
+	.metadata({
+		name: "toggleProjectTestAction",
+		track: LogEvents.ToggleProjectTest,
+	})
 	.action(
 		async ({
 			parsedInput: { projectId, testMode, revalidatePath },

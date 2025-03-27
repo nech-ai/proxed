@@ -1,7 +1,9 @@
 {
 	"name": "@proxed/analytics",
-	"version": "1.0.0",
+	"version": "0.0.0",
 	"private": true,
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules",
 		"lint": "biome check .",
@@ -10,15 +12,19 @@
 	},
 	"dependencies": {
 		"@openpanel/nextjs": "^1.0.7",
+		"@proxed/logger": "workspace:*",
 		"@vercel/functions": "^1.6.0",
 		"next": "^15.2.4"
 	},
 	"devDependencies": {
+		"@types/node": "^22.13.13",
 		"@types/react": "^19.0.12",
 		"@types/react-dom": "19.0.3",
-		"tsconfig": "workspace:*"
+		"tsconfig": "workspace:*",
+		"typescript": "5.8.2"
 	},
 	"exports": {
+		".": "./src/index.ts",
 		"./server": "./src/server.ts",
 		"./client": "./src/client.tsx",
 		"./events": "./src/events.ts"

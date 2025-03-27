@@ -5,9 +5,14 @@ import { authActionClient } from "./safe-action";
 import { feedbackSchema } from "./schema";
 import { redirect } from "next/navigation";
 import { sendEmail } from "@proxed/mail";
+import { LogEvents } from "@proxed/analytics";
 
 export const feedbackAction = authActionClient
 	.schema(feedbackSchema)
+	.metadata({
+		name: "feedbackAction",
+		track: LogEvents.Feedback,
+	})
 	.action(
 		async ({
 			parsedInput: { revalidatePath, redirectTo, message },

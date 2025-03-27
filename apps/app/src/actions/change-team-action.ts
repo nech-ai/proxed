@@ -5,15 +5,13 @@ import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { authActionClient } from "./safe-action";
 import { changeTeamSchema } from "./schema";
+import { LogEvents } from "@proxed/analytics";
 
 export const changeTeamAction = authActionClient
 	.schema(changeTeamSchema)
 	.metadata({
 		name: "changeTeamAction",
-		track: {
-			event: "change_team",
-			channel: "change_team",
-		},
+		track: LogEvents.ChangeTeam,
 	})
 	.action(
 		async ({ parsedInput: { teamId, redirectTo }, ctx: { supabase } }) => {

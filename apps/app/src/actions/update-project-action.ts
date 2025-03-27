@@ -4,9 +4,14 @@ import { authActionClient } from "./safe-action";
 import { updateProjectSchema } from "./schema";
 import { updateProject } from "@proxed/supabase/mutations";
 import { revalidateTag } from "next/cache";
+import { LogEvents } from "@proxed/analytics";
 
 export const updateProjectAction = authActionClient
 	.schema(updateProjectSchema)
+	.metadata({
+		name: "updateProjectAction",
+		track: LogEvents.UpdateProject,
+	})
 	.action(async ({ parsedInput: data, ctx: { supabase } }) => {
 		const result = await updateProject(supabase, data.id, {
 			name: data.name,

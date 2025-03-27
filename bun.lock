@@ -191,16 +191,19 @@
     },
     "packages/analytics": {
       "name": "@proxed/analytics",
-      "version": "1.0.0",
+      "version": "0.0.0",
       "dependencies": {
         "@openpanel/nextjs": "^1.0.7",
+        "@proxed/logger": "workspace:*",
         "@vercel/functions": "^1.6.0",
         "next": "^15.2.4",
       },
       "devDependencies": {
+        "@types/node": "^22.13.13",
         "@types/react": "^19.0.12",
         "@types/react-dom": "19.0.3",
         "tsconfig": "workspace:*",
+        "typescript": "5.8.2",
       },
     },
     "packages/api": {

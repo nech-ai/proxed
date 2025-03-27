@@ -6,16 +6,14 @@ import {
 import { authActionClient } from "./safe-action";
 import { createProjectSchema } from "./schema";
 import { createProject } from "@proxed/supabase/mutations";
+import { LogEvents } from "@proxed/analytics";
 
 export const createProjectAction = authActionClient
 	.schema(createProjectSchema)
 	.metadata({
 		name: "createProjectAction",
 		requiredFeature: "create_project",
-		track: {
-			event: "create_project",
-			channel: "create_project",
-		},
+		track: LogEvents.CreateProject,
 	})
 	.action(
 		async ({

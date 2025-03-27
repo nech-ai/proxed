@@ -5,9 +5,14 @@ import { authActionClient } from "./safe-action";
 import { supportSchema } from "./schema";
 import { redirect } from "next/navigation";
 import { sendEmail } from "@proxed/mail";
+import { LogEvents } from "@proxed/analytics";
 
 export const supportAction = authActionClient
 	.schema(supportSchema)
+	.metadata({
+		name: "supportAction",
+		track: LogEvents.Support,
+	})
 	.action(
 		async ({
 			parsedInput: {

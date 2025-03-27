@@ -1,6 +1,6 @@
 -- Add new columns to the teams table
 alter table public.teams
-add column plan text,
+add column plan text default 'trial',
 add column email text,
 add column canceled_at timestamptz;
 

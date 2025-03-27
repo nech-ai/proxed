@@ -24,6 +24,7 @@ begin
   -- Calculate limits based on plan
   projects_limit := case
     when v_plan like 'starter-%' then 1
+    when v_plan = 'trial' then 5
     else null -- null means unlimited
   end;
 
@@ -38,6 +39,7 @@ begin
     when v_plan like 'starter-%' then 1000
     when v_plan like 'pro-%' then 10000
     when v_plan like 'ultimate-%' then 50000
+    when v_plan = 'trial' then 2000
     else null -- null means unlimited
   end;
 

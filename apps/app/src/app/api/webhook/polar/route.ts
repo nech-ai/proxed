@@ -22,7 +22,7 @@ export const POST = Webhooks({
 			// Subscription has been explicitly canceled by the user
 			case "subscription.canceled": {
 				await updateTeamPlan(payload.data.metadata.organizationId as string, {
-					plan: null,
+					plan: "trial",
 					canceled_at: new Date().toISOString(),
 				});
 
@@ -40,7 +40,7 @@ export const POST = Webhooks({
 				}
 
 				await updateTeamPlan(payload.data.metadata.organizationId as string, {
-					plan: null,
+					plan: "trial",
 					canceled_at: new Date().toISOString(),
 				});
 

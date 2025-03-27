@@ -4,7 +4,8 @@ export type BillingPlan =
 	| "pro-monthly"
 	| "pro-yearly"
 	| "ultimate-monthly"
-	| "ultimate-yearly";
+	| "ultimate-yearly"
+	| "trial";
 
 export type TeamBilling = {
 	plan: BillingPlan;

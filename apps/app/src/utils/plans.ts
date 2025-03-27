@@ -2,6 +2,14 @@ const POLAR_ENVIRONMENT = process.env.POLAR_ENVIRONMENT;
 
 export const PLANS = {
 	production: {
+		trial: {
+			id: "trial",
+			name: "Trial",
+			key: "trial",
+			price: 0,
+			billingCycle: "monthly",
+			apiCalls: 2000,
+		},
 		"starter-monthly": {
 			id: "0e756236-86a2-4770-9f02-fe0bf3aef672",
 			name: "Starter",
@@ -52,6 +60,14 @@ export const PLANS = {
 		},
 	},
 	sandbox: {
+		trial: {
+			id: "trial",
+			name: "Trial",
+			key: "trial",
+			price: 0,
+			billingCycle: "monthly",
+			apiCalls: 2000,
+		},
 		"starter-monthly": {
 			id: "ecc28d62-dacb-4d86-b78a-4c89c3048931",
 			name: "Starter",
@@ -176,6 +192,11 @@ export function getPlanLimits(plan: string) {
 			return {
 				projects: null,
 				calls: 50000,
+			};
+		case "trial":
+			return {
+				projects: 5,
+				calls: 2000,
 			};
 		default:
 			return {

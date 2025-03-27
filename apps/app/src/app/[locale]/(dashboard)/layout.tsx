@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { TrialEnded } from "@/components/trial-ended.server";
 import { TeamProvider } from "@/store/team/provider";
 import { UserProvider } from "@/store/user/provider";
 import {
@@ -9,6 +10,7 @@ import {
 import { SidebarProvider } from "@proxed/ui/components/sidebar";
 import { redirect } from "next/navigation";
 import type { PropsWithChildren } from "react";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -59,6 +61,13 @@ export default async function Layout({ children }: PropsWithChildren) {
 						<AppSidebar teamMemberships={teamMemberships} user={user} />
 						<div className="flex flex-col overflow-auto w-full">{children}</div>
 					</SidebarProvider>
+					<Suspense>
+						<TrialEnded
+							createdAt={user.team?.created_at}
+							plan={user.team?.plan}
+							teamId={user.team?.id}
+						/>
+					</Suspense>
 				</div>
 			</UserProvider>
 		</TeamProvider>

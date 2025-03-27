@@ -19,8 +19,10 @@ export default async function Page() {
 	const canChooseStarterPlan = await canChooseStarterPlanQuery(team?.id);
 	return (
 		<div className="grid grid-cols-1 gap-6">
-			{team?.plan && <ManageSubscription teamId={team?.id} plan={team?.plan} />}
-			{!team?.plan && (
+			{team?.plan !== "trial" && (
+				<ManageSubscription teamId={team?.id} plan={team?.plan} />
+			)}
+			{team?.plan === "trial" && (
 				<div>
 					<Plans
 						teamId={team?.id}

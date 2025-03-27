@@ -219,26 +219,37 @@ export function TeamBillingForm() {
 				</div>
 
 				<div className="pt-4 border-t">
-					<Button
-						type="button"
-						onClick={handleContinue}
-						disabled={isLoading}
-						className="w-full"
-					>
-						{isLoading ? (
-							"Processing..."
-						) : (
-							<>
-								Continue with{" "}
-								{
-									PLANS.production[
-										selectedPlan as keyof typeof PLANS.production
-									].name
-								}
-								<ChevronRight className="h-4 w-4 ml-2" />
-							</>
-						)}
-					</Button>
+					<div className="flex flex-col sm:flex-row gap-4">
+						<Button
+							type="button"
+							onClick={handleContinue}
+							disabled={isLoading}
+							className="w-full"
+						>
+							{isLoading ? (
+								"Processing..."
+							) : (
+								<>
+									Continue with{" "}
+									{
+										PLANS.production[
+											selectedPlan as keyof typeof PLANS.production
+										].name
+									}
+									<ChevronRight className="h-4 w-4 ml-2" />
+								</>
+							)}
+						</Button>
+
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => router.push("/")}
+							className="w-full"
+						>
+							Start Free Trial
+						</Button>
+					</div>
 				</div>
 			</div>
 		</TeamCard>

@@ -5,6 +5,7 @@ import { openAPISpecs } from "hono-openapi";
 import { corsMiddleware } from "./middleware/cors";
 import { loggerMiddleware } from "./middleware/logger";
 import { errorHandlerMiddleware } from "./middleware/error-handler";
+import { rateLimitMiddleware } from "./middleware/rate-limit";
 import { healthRouter } from "./routes/health";
 import { visionResponseRouter } from "./routes/vision";
 import { textResponseRouter } from "./routes/text";
@@ -19,11 +20,13 @@ const root = new Hono<{ Variables: AppVariables }>();
 root.use(loggerMiddleware);
 root.use(corsMiddleware);
 root.use(errorHandlerMiddleware);
+root.use(rateLimitMiddleware);
 
 const apiV1 = new Hono<{ Variables: AppVariables }>().basePath("/v1");
 apiV1.use(loggerMiddleware);
 apiV1.use(corsMiddleware);
 apiV1.use(errorHandlerMiddleware);
+apiV1.use(rateLimitMiddleware);
 
 apiV1.route("/", healthRouter);
 apiV1.route("/vision", visionResponseRouter);

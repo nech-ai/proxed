@@ -4,6 +4,7 @@ export enum ErrorCode {
 	// Client errors (400-499)
 	BAD_REQUEST = "BAD_REQUEST",
 	UNAUTHORIZED = "UNAUTHORIZED",
+	FORBIDDEN = "FORBIDDEN",
 	NOT_FOUND = "NOT_FOUND",
 	INVALID_REQUEST = "INVALID_REQUEST",
 	INVALID_TOKEN = "INVALID_TOKEN",
@@ -16,6 +17,7 @@ export enum ErrorCode {
 	PROVIDER_ERROR = "PROVIDER_ERROR",
 	DATABASE_ERROR = "DATABASE_ERROR",
 	VALIDATION_ERROR = "VALIDATION_ERROR",
+	TOO_MANY_REQUESTS = "TOO_MANY_REQUESTS",
 }
 
 export interface ApiError {
@@ -56,6 +58,7 @@ export class AppError extends Error {
 export const errorMap = {
 	[ErrorCode.BAD_REQUEST]: { status: 400, message: "Bad request" },
 	[ErrorCode.UNAUTHORIZED]: { status: 401, message: "Unauthorized" },
+	[ErrorCode.FORBIDDEN]: { status: 403, message: "Forbidden" },
 	[ErrorCode.NOT_FOUND]: { status: 404, message: "Resource not found" },
 	[ErrorCode.INVALID_REQUEST]: { status: 400, message: "Invalid request" },
 	[ErrorCode.INVALID_TOKEN]: { status: 401, message: "Invalid token" },
@@ -72,6 +75,7 @@ export const errorMap = {
 	[ErrorCode.PROVIDER_ERROR]: { status: 502, message: "Provider error" },
 	[ErrorCode.DATABASE_ERROR]: { status: 500, message: "Database error" },
 	[ErrorCode.VALIDATION_ERROR]: { status: 400, message: "Validation error" },
+	[ErrorCode.TOO_MANY_REQUESTS]: { status: 429, message: "Too many requests" },
 };
 
 export function createError(

@@ -1,9 +1,13 @@
 import { createClient } from "@proxed/supabase/api";
-import { getProjectQuery } from "@proxed/supabase/queries";
+import {
+	getProjectQuery,
+	getTeamLimitsMetricsQuery,
+} from "@proxed/supabase/queries";
 import { createMiddleware } from "hono/factory";
 import type { AuthMiddlewareVariables } from "../types";
 import { verifyDeviceCheckToken } from "../utils/verify-device-check";
 import { AppError, createError, ErrorCode } from "../utils/errors";
+import { logger } from "@proxed/logger";
 
 export const authMiddleware = createMiddleware<{
 	Variables: AuthMiddlewareVariables;
@@ -34,6 +38,25 @@ export const authMiddleware = createMiddleware<{
 		});
 		await next();
 		return;
+	}
+
+	const { data: limits } = await getTeamLimitsMetricsQuery(
+		supabase,
+		project.team_id,
+	);
+	if (!limits) {
+		throw createError(ErrorCode.UNAUTHORIZED, "No billing information found");
+	}
+
+	// Check API calls limit
+	if (
+		limits.api_calls_limit &&
+		limits.api_calls_used >= limits.api_calls_limit
+	) {
+		throw createError(
+			ErrorCode.FORBIDDEN,
+			"API calls limit reached for your current plan",
+		);
 	}
 
 	// Handle concatenated token in Authorization header

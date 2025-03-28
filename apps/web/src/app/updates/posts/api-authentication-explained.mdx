@@ -1,0 +1,210 @@
+---
+title: "API Authentication Deep Dive: How Proxed Securely Verifies Your Requests"
+publishedAt: "2025-03-28"
+summary: "A technical exploration of Proxed's layered authentication system combining API keys, DeviceCheck, and token-based verification"
+image: "/images/starting.png"
+tag: "Engineering"
+---
+
+Authentication is the foundation of API security. Let's explore how Proxed's multi-layered authentication works and why we designed it this way.
+
+<br />
+### Authentication Flow Overview
+
+When your app makes a request to Proxed, several security checks happen in sequence:
+
+1. **Initial Identification**: Your project is identified through a project ID in the URL path
+2. **Authentication Method Detection**: We determine which auth method you're using
+3. **Key Verification**: We validate your API key(s) using a split-key approach
+4. **Device Validation**: For production requests, we verify the authenticity of the iOS device
+5. **Usage Checks**: We ensure your account is in good standing and within usage limits
+
+This process takes milliseconds but provides multiple layers of security.
+
+<br />
+### Three Ways to Authenticate
+
+We support multiple authentication methods to accommodate different use cases:
+
+#### 1. Bearer Token Authentication (Recommended)
+
+This is our primary method, supporting both test keys and device tokens:
+
+```bash
+curl -X POST https://api.proxed.dev/v1/openai/your-project-id/chat/completions \
+  -H "Authorization: Bearer your-partial-key.your-token" \
+  -H "Content-Type: application/json" \
+  -d '{...}'
+```
+
+With this method:
+- The partial API key is extracted from the first part of the Bearer token
+- The second part can be either a test key or a DeviceCheck token
+- You don't need to provide an additional `x-ai-key` header
+
+**Why we use this format:** Many AI SDKs don't support custom headers like `x-ai-key`, but they do support setting the `Authorization` header. The combined format allows us to transmit both the partial API key and device token in a single standard header that works with virtually any HTTP client or SDK.
+
+#### 2. Test Key Authentication (Development)
+
+This method is designed for testing during development:
+
+```bash
+curl -X POST https://api.proxed.dev/v1/openai/your-project-id/chat/completions \
+  -H "x-proxed-test-key: your-test-key" \
+  -H "x-ai-key: your-partial-key" \
+  -H "Content-Type: application/json" \
+  -d '{...}'
+```
+
+This method:
+- Requires Test Mode to be enabled for your project
+- Requires both your test key and partial API key
+- Bypasses device verification
+- Should only be used during development
+
+#### 3. Device Token Authentication (Legacy)
+
+Our original method, which we maintain for backward compatibility:
+
+```bash
+curl -X POST https://api.proxed.dev/v1/openai/your-project-id/chat/completions \
+  -H "x-device-token: your-device-token" \
+  -H "x-ai-key: your-partial-key" \
+  -H "Content-Type: application/json" \
+  -d '{...}'
+```
+
+This method:
+- Requires separate headers for the device token and API key
+- Still performs full device verification
+- Will eventually be deprecated in favor of the Bearer method
+
+<br />
+### Under the Hood: How It Works
+
+Let's explore what happens when a request hits our API gateway:
+
+#### Project Resolution
+
+We extract your project ID from the URL path parameter (`/v1/provider/{projectId}/endpoint`). This allows us to look up your project configuration, including whether you're in test mode and if device verification is enabled.
+
+Using the project ID in the URL path makes your requests more RESTful and explicit about which project context they're operating in.
+
+#### Key Splitting Architecture
+
+We never store complete API keys for third-party providers. Instead:
+- You retain a portion of the key (partial key)
+- We store the complementary portion securely
+- Both parts are needed to reconstruct the full key
+- The full key only exists momentarily during request processing
+
+This approach ensures that even if our servers were compromised, attackers would only have access to partial keys, not complete ones.
+
+**SDK Compatibility:** Our Bearer token method (`Authorization: Bearer partialKey.token`) enables the use of standard AI SDKs that don't support custom headers. This means you can use official libraries from providers like OpenAI or Anthropic with minimal configuration, while still maintaining our security model.
+
+#### Device Verification with Apple's DeviceCheck
+
+For production requests, we validate that the request comes from a legitimate iOS device:
+
+1. Your app requests a DeviceCheck token from Apple
+2. Your app includes this token in the request to our API
+3. Our server validates this token with Apple's servers
+4. We proceed only if Apple confirms the device is legitimate
+
+This prevents unauthorized usage from non-iOS environments, scripts, or emulators.
+
+<br />
+### Authentication in Your iOS App
+
+Here's how to implement authentication in your iOS app:
+
+```swift
+import DeviceCheck
+
+func makeAuthenticatedRequest() async throws {
+    // 1. Generate a DeviceCheck token (for production)
+    let deviceToken = try await getDeviceToken()
+
+    // 2. Prepare the API request with projectId in the path
+    let projectId = "your-project-id" // UUID format: e29c1826-f314-4c9c-801f-0ce1827c8153
+    var request = URLRequest(url: URL(string: "https://api.proxed.dev/v1/openai/\(projectId)/chat/completions")!)
+    request.httpMethod = "POST"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+    // 3. Set authentication headers (Bearer token method)
+    request.setValue("Bearer \(partialKey).\(deviceToken)", forHTTPHeaderField: "Authorization")
+
+    // 4. Set request body and send
+    request.httpBody = try JSONEncoder().encode(requestBody)
+    let (data, response) = try await URLSession.shared.data(for: request)
+
+    // 5. Process response
+    // ...
+}
+
+func getDeviceToken() async throws -> String {
+    guard DCDevice.current.isSupported else {
+        throw AuthError.deviceCheckNotSupported
+    }
+
+    return try await withCheckedThrowingContinuation { continuation in
+        DCDevice.current.generateToken { token, error in
+            if let error = error {
+                continuation.resume(throwing: error)
+                return
+            }
+
+            guard let token = token else {
+                continuation.resume(throwing: AuthError.tokenGenerationFailed)
+                return
+            }
+
+            continuation.resume(returning: token.base64EncodedString())
+        }
+    }
+}
+```
+
+<br />
+### Security Considerations
+
+Our authentication system addresses several key security concerns:
+
+1. **API Key Protection**
+   - Keys are never completely stored in any one location
+   - Keys are never embedded in client apps
+   - The full key is only momentarily reconstructed during request processing
+
+2. **Request Forgery Prevention**
+   - DeviceCheck verification prevents requests from non-iOS sources
+   - Multiple authentication factors (project ID, API key, device token)
+   - Token-based approach that can be revoked if needed
+
+3. **Usage Control**
+   - Rate limiting and usage tracking
+   - Project-specific permissions and settings
+   - Automatic detection of suspicious usage patterns
+
+<br />
+### Best Practices
+
+To maximize security in your application:
+
+1. **Use Bearer Authentication**: Our recommended method for all new implementations
+2. **Rotate Keys Regularly**: Create new API keys periodically
+3. **Keep Test Mode Disabled** in production environments
+4. **Implement Proper Error Handling** for authentication failures
+5. **Monitor Your Usage** to detect unauthorized access attempts
+6. **Use HTTPS** for all API communications
+7. **Include Project ID in URL Path**: Always use the project ID in the URL path for better REST practices
+
+<br />
+### What's Next
+
+Authentication is just one part of our security architecture. In upcoming posts, we'll explore:
+- Advanced rate limiting strategies
+- Custom validation rules for API requests
+- Enterprise security features
+- Multi-environment key management
+
+By understanding and properly implementing these authentication methods, you're building a strong foundation for your AI-powered applications.

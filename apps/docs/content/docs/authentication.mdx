@@ -1,0 +1,138 @@
+---
+title: API Authentication
+description: Understanding how to authenticate requests to the Proxed API.
+---
+
+# API Authentication
+
+Authenticating requests to the Proxed API involves providing credentials that verify the project and, depending on the configuration, the requesting device or test environment.
+
+## Core Requirements
+
+All authenticated API requests require:
+
+1.  **Project ID:** Identifies the project context. Can be provided either via:
+    *   URL parameter (e.g., `/api/v1/some-route/{projectId}`)
+    *   `x-project-id` header.
+2.  **Partial API Key:** A client-side portion of the provider API key. How this is provided depends on the authentication method (see below).
+3.  **Authentication Token:** Either a test key or a device check token, provided in one of the formats below.
+
+## Authentication Methods
+
+The API middleware checks for credentials in the following order:
+
+### 1. Test Key (Header)
+
+This method is used primarily for testing purposes when `Test Mode` is enabled for the project.
+
+*   **Headers:**
+    *   `x-proxed-test-key`: Your project's specific test key.
+    *   `x-ai-key`: The client-side partial API key.
+    *   `x-project-id`: (If `projectId` is not in the URL).
+
+*   **Conditions:**
+    *   Project must be in `Test Mode`.
+    *   The value of `x-proxed-test-key` must match the project's configured test key.
+    *   `x-ai-key` header must be present.
+
+*   **Security Considerations:**
+    *   Only enable Test Mode during development or testing.
+    *   Rotate test keys regularly and never share them publicly.
+
+```bash
+curl -X POST https://api.proxed.dev/v1/some-route \
+  -H "x-project-id: your-project-id" \
+  -H "x-proxed-test-key: your-test-key" \
+  -H "x-ai-key: your-partial-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{...}'
+```
+
+### 2. Bearer Token (Combined Key + Token)
+
+This is the primary and preferred authentication method. The `Authorization` header contains a combined string: `Bearer {partialApiKey}.{token}`. The first part (`partialApiKey`) is **always** used as the client-side partial API key.
+
+*   **Header:**
+    *   `Authorization`: `Bearer your-partial-api-key.your-token`
+    *   `x-project-id`: (If `projectId` is not in the URL).
+    *   `x-ai-key`: **Ignored.** The partial key is always taken from the Bearer token itself.
+
+*   **Token (`your-token`) can be:**
+    *   **Test Key:**
+        *   Conditions: Project must be in `Test Mode`, and `your-token` must match the project's test key.
+    *   **Device Check Token:**
+        *   Conditions: Project must have `Device Check` enabled. `your-token` must be a valid, base64-encoded device check token.
+
+*   **Security Considerations:**
+    *   Use HTTPS for all API calls to prevent token interception.
+    *   The Bearer token should be securely generated and transmitted.
+
+```bash
+# Example using Test Key in Bearer token
+curl -X POST https://api.proxed.dev/v1/some-route \
+  -H "x-project-id: your-project-id" \
+  -H "Authorization: Bearer your-partial-api-key.your-test-key" \
+  -H "Content-Type: application/json" \
+  -d '{...}'
+
+# Example using Device Check Token in Bearer token
+curl -X POST https://api.proxed.dev/v1/some-route \
+  -H "x-project-id: your-project-id" \
+  -H "Authorization: Bearer your-partial-api-key.base64-encoded-device-token" \
+  -H "Content-Type: application/json" \
+  -d '{...}'
+```
+
+### 3. Device Check Token (Header - Legacy)
+
+This method uses a separate header for the device check token. **Note:** This method is considered legacy and may be deprecated in the future. We recommend using the Bearer token method for all new implementations.
+
+*   **Headers:**
+    *   `x-device-token`: A valid, base64-encoded device check token.
+    *   `x-ai-key`: The client-side partial API key (**required**).
+    *   `x-project-id`: (If `projectId` is not in the URL).
+
+*   **Conditions:**
+    *   Project must have `Device Check` enabled.
+    *   The value of `x-device-token` must be a valid, base64-encoded device check token.
+    *   The `x-ai-key` header must be present.
+
+*   **Security Considerations:**
+    *   This method will be deprecated in a future release.
+    *   Migrate to the Bearer token method for improved security.
+
+```bash
+curl -X POST https://api.proxed.dev/v1/some-route \
+  -H "x-project-id: your-project-id" \
+  -H "x-device-token: base64-encoded-device-token" \
+  -H "x-ai-key: your-partial-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{...}'
+```
+
+## Summary
+
+| Method                  | Auth Header/Key               | Partial Key Source     | `x-ai-key` Header | Conditions                                     |
+|:------------------------|:------------------------------|:-----------------------|:------------------|:-----------------------------------------------|
+| Test Key (Header)       | `x-proxed-test-key`           | `x-ai-key` header      | **Required**      | Test Mode enabled, key matches                 |
+| Test Key (Bearer)       | `Authorization: Bearer PK.TK` | `PK` from Bearer token | Ignored           | Test Mode enabled, `TK` matches                |
+| Device Check (Bearer)   | `Authorization: Bearer PK.DT` | `PK` from Bearer token | Ignored           | Device Check enabled, `DT` is valid device token |
+| Device Check (Header)*  | `x-device-token`              | `x-ai-key` header      | **Required**      | Device Check enabled, token is valid           |
+
+*PK = Partial Key, TK = Test Key, DT = Device Token (Base64)*
+*\* Legacy method, recommended to migrate to Bearer token method*
+
+## Security Best Practices
+
+1. **Use HTTPS**: Always use HTTPS to encrypt your API requests.
+2. **Rotate Keys**: Regularly rotate your test keys and device check token components.
+3. **Restrict Access**: Only enable Test Mode in non-production environments.
+4. **Token Management**: Securely manage tokens and never expose them in client-side code.
+5. **Error Handling**: Implement proper error handling for authentication failures.
+6. **Rate Limiting**: Be aware that excessive authentication attempts may be rate-limited.
+
+## Error Handling
+
+Authentication failures will return an appropriate HTTP error status (401 Unauthorized or 403 Forbidden) with a JSON error object. Your client should be prepared to handle these errors gracefully.
+
+If none of these authentication methods succeeds, the API will return a 401 Unauthorized error.

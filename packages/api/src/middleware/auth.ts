@@ -103,7 +103,7 @@ export const authMiddleware = createMiddleware<{
 		if (!project.device_check) {
 			throw createError(
 				ErrorCode.INVALID_TOKEN,
-				"Device check is not enabled for this project, and test key did not match.",
+				"Invalid authentication credentials",
 			);
 		}
 
@@ -114,21 +114,17 @@ export const authMiddleware = createMiddleware<{
 			);
 
 			if (!isValid) {
-				throw createError(ErrorCode.INVALID_TOKEN, "Invalid device token");
-			}
-
-			if (!partialApiKey) {
-				// Check if x-ai-key is present for this flow
 				throw createError(
-					ErrorCode.UNAUTHORIZED,
-					"Missing x-ai-key header for Bearer device token auth",
+					ErrorCode.INVALID_TOKEN,
+					"Invalid authentication credentials",
 				);
 			}
+
 			c.set("session", {
 				teamId: project.team_id,
 				projectId,
-				token: bearerTokenPart, // This 'bearerTokenPart' is the first part of the Bearer token
-				apiKey: partialApiKey, // Store partial API key
+				token: bearerTokenPart, // The device token part used for auth
+				apiKey: bearerApiKeyPart, // Use the part from the Bearer token as the partial API key
 			});
 
 			await next();
@@ -158,37 +154,36 @@ export const authMiddleware = createMiddleware<{
 			if (!isValid) {
 				throw createError(
 					ErrorCode.INVALID_TOKEN,
-					"Invalid device token (header)",
+					"Invalid authentication credentials",
 				);
 			}
 
-			// Decide if apiKey is required for this legacy flow.
-			// If yes, add a check and throw an error similar to above.
-			// If no, keep apiKey as undefined.
-			// const requiredApiKey = c.req.header("x-ai-key"); // Example check
-			// if (!requiredApiKey) throw createError(...)
+			// Make x-ai-key required for legacy device token flow
+			if (!partialApiKey) {
+				throw createError(
+					ErrorCode.UNAUTHORIZED,
+					"Missing required credentials",
+				);
+			}
 
 			c.set("session", {
 				teamId: project.team_id,
 				projectId,
-				apiKey: partialApiKey, // Store partial API key if present, otherwise undefined
+				apiKey: partialApiKey, // Now guaranteed to exist
 				// token: undefined // No token in this specific flow
 			});
 
 			await next();
-			return; // Added return here
+			return;
 		} catch (error) {
 			if (error instanceof AppError) {
 				throw error;
 			}
 			console.error("Device check verification failed (header):", error);
-			throw createError(
-				ErrorCode.INTERNAL_ERROR,
-				"Something went wrong during device check (header)",
-			);
+			throw createError(ErrorCode.INTERNAL_ERROR, "Authentication failed");
 		}
 	}
 
 	// If neither Bearer token nor separate device token is valid/present
-	throw createError(ErrorCode.UNAUTHORIZED, "Missing or invalid credentials");
+	throw createError(ErrorCode.UNAUTHORIZED, "Invalid or missing credentials");
 });

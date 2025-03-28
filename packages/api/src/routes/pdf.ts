@@ -17,7 +17,7 @@ import { getCommonExecutionParams } from "../utils/execution-params";
 async function handleStructuredResponse(
 	c: Context<{ Variables: AuthMiddlewareVariables }>,
 ) {
-	const { projectId, teamId } = c.get("session");
+	const { projectId, teamId, apiKey } = c.get("session");
 	const ip =
 		c.req.header("x-forwarded-for") ?? c.req.header("cf-connecting-ip");
 	const userAgent = c.req.header("user-agent");
@@ -67,9 +67,8 @@ async function handleStructuredResponse(
 	const deviceCheckId = project.device_check_id;
 	const keyId = project.key_id;
 
-	const apiKey = c.req.header("x-ai-key");
 	if (!apiKey) {
-		throw createError(ErrorCode.UNAUTHORIZED, "API key is required");
+		throw createError(ErrorCode.INTERNAL_ERROR, "API key not found in session");
 	}
 
 	const startTime = Date.now();

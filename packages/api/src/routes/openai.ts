@@ -18,7 +18,7 @@ async function handleOpenAIProxy(
 	c: Context<{ Variables: AuthMiddlewareVariables }>,
 	targetUrl: string,
 ) {
-	const { projectId, teamId } = c.get("session");
+	const { projectId, teamId, apiKey } = c.get("session");
 	const ip =
 		c.req.header("x-forwarded-for") ?? c.req.header("cf-connecting-ip");
 	const userAgent = c.req.header("user-agent");
@@ -30,9 +30,8 @@ async function handleOpenAIProxy(
 		throw createError(ErrorCode.PROJECT_NOT_FOUND);
 	}
 
-	const apiKey = c.req.header("x-ai-key");
 	if (!apiKey) {
-		throw createError(ErrorCode.UNAUTHORIZED, "API key is required");
+		throw createError(ErrorCode.INTERNAL_ERROR, "API key not found in session");
 	}
 
 	// Get the server key part using the function

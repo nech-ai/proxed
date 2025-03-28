@@ -4,6 +4,7 @@ export type AuthSession = {
 	teamId: string;
 	projectId: string;
 	token?: string;
+	apiKey?: string;
 };
 
 export interface AuthMiddlewareVariables {

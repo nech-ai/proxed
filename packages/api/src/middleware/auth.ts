@@ -7,7 +7,6 @@ import { createMiddleware } from "hono/factory";
 import type { AuthMiddlewareVariables } from "../types";
 import { verifyDeviceCheckToken } from "../utils/verify-device-check";
 import { AppError, createError, ErrorCode } from "../utils/errors";
-import { logger } from "@proxed/logger";
 
 export const authMiddleware = createMiddleware<{
 	Variables: AuthMiddlewareVariables;
@@ -19,22 +18,39 @@ export const authMiddleware = createMiddleware<{
 	const testKey = c.req.header("x-proxed-test-key");
 	const projectId = c.req.param("projectId") || c.req.header("x-project-id");
 	const authHeader = c.req.header("Authorization");
+	const partialApiKey = c.req.header("x-ai-key"); // Read the partial API key header
 
 	if (!projectId) {
 		throw createError(ErrorCode.MISSING_PROJECT_ID);
 	}
 
+	// Require partial API key for all valid auth paths except potentially the legacy deviceToken flow
+	// if (!partialApiKey) {
+	//   // Decide if this should be an error. If the routes ALWAYS need it, uncomment this.
+	// 	 throw createError(ErrorCode.UNAUTHORIZED, "Missing x-ai-key header");
+	// }
+
 	const { data: project, error } = await getProjectQuery(supabase, projectId);
 
-	if (error) {
+	if (error || !project) {
+		// Added !project check for type safety
 		throw createError(ErrorCode.PROJECT_NOT_FOUND);
 	}
 
-	// Check test mode first
-	if (project.test_mode && testKey === project.test_key) {
+	// Check test key from header first (separate from Bearer token)
+	if (testKey && project.test_mode && testKey === project.test_key) {
+		if (!partialApiKey) {
+			// Check if x-ai-key is present for this flow
+			throw createError(
+				ErrorCode.UNAUTHORIZED,
+				"Missing x-ai-key header for test key auth",
+			);
+		}
 		c.set("session", {
 			teamId: project.team_id,
 			projectId,
+			token: testKey, // Using the test key itself as the token identifier
+			apiKey: partialApiKey, // Store partial API key
 		});
 		await next();
 		return;
@@ -61,20 +77,39 @@ export const authMiddleware = createMiddleware<{
 
 	// Handle concatenated token in Authorization header
 	if (authHeader?.startsWith("Bearer ")) {
-		const [token, deviceCheckToken] = authHeader
-			.replace("Bearer ", "")
-			.split(".");
+		const combinedToken = authHeader.replace("Bearer ", "");
+		const [bearerApiKeyPart, bearerTokenPart] = combinedToken.split("."); // Renamed for clarity
 
-		if (!token || !deviceCheckToken || !project?.device_check) {
+		if (!bearerApiKeyPart || !bearerTokenPart) {
 			throw createError(
 				ErrorCode.INVALID_TOKEN,
-				"Invalid authorization token format",
+				"Invalid authorization token format. Expected 'apiKey.tokenPart'.",
+			);
+		}
+
+		// Check if in test mode and tokenPart matches the test key
+		if (project.test_mode && bearerTokenPart === project.test_key) {
+			c.set("session", {
+				teamId: project.team_id,
+				projectId,
+				token: bearerTokenPart, // The test key itself was used for auth
+				apiKey: bearerApiKeyPart, // Use the part from the Bearer token as the partial API key
+			});
+			await next();
+			return;
+		}
+
+		// If not test mode or test key doesn't match, proceed with device check
+		if (!project.device_check) {
+			throw createError(
+				ErrorCode.INVALID_TOKEN,
+				"Device check is not enabled for this project, and test key did not match.",
 			);
 		}
 
 		try {
 			const isValid = await verifyDeviceCheckToken(
-				Buffer.from(deviceCheckToken, "base64"),
+				Buffer.from(bearerTokenPart, "base64"),
 				project.device_check,
 			);
 
@@ -82,10 +117,18 @@ export const authMiddleware = createMiddleware<{
 				throw createError(ErrorCode.INVALID_TOKEN, "Invalid device token");
 			}
 
+			if (!partialApiKey) {
+				// Check if x-ai-key is present for this flow
+				throw createError(
+					ErrorCode.UNAUTHORIZED,
+					"Missing x-ai-key header for Bearer device token auth",
+				);
+			}
 			c.set("session", {
 				teamId: project.team_id,
 				projectId,
-				token,
+				token: bearerTokenPart, // This 'bearerTokenPart' is the first part of the Bearer token
+				apiKey: partialApiKey, // Store partial API key
 			});
 
 			await next();
@@ -94,35 +137,58 @@ export const authMiddleware = createMiddleware<{
 			if (error instanceof AppError) {
 				throw error;
 			}
-			throw createError(ErrorCode.INVALID_TOKEN, "Invalid device token");
+			// Consider logging the original error for debugging
+			console.error("Device check verification failed:", error);
+			throw createError(
+				ErrorCode.INVALID_TOKEN,
+				"Device token verification failed",
+			);
 		}
 	}
 
-	// Handle separate device token
-	if (!deviceToken || !project?.device_check) {
-		throw createError(ErrorCode.MISSING_DEVICE_TOKEN);
+	// Handle separate device token (legacy or specific use case?)
+	// This part might need reconsideration if the Bearer token is the ONLY way forward.
+	if (deviceToken && project.device_check) {
+		try {
+			const isValid = await verifyDeviceCheckToken(
+				Buffer.from(deviceToken, "base64"),
+				project.device_check,
+			);
+
+			if (!isValid) {
+				throw createError(
+					ErrorCode.INVALID_TOKEN,
+					"Invalid device token (header)",
+				);
+			}
+
+			// Decide if apiKey is required for this legacy flow.
+			// If yes, add a check and throw an error similar to above.
+			// If no, keep apiKey as undefined.
+			// const requiredApiKey = c.req.header("x-ai-key"); // Example check
+			// if (!requiredApiKey) throw createError(...)
+
+			c.set("session", {
+				teamId: project.team_id,
+				projectId,
+				apiKey: partialApiKey, // Store partial API key if present, otherwise undefined
+				// token: undefined // No token in this specific flow
+			});
+
+			await next();
+			return; // Added return here
+		} catch (error) {
+			if (error instanceof AppError) {
+				throw error;
+			}
+			console.error("Device check verification failed (header):", error);
+			throw createError(
+				ErrorCode.INTERNAL_ERROR,
+				"Something went wrong during device check (header)",
+			);
+		}
 	}
 
-	try {
-		const isValid = await verifyDeviceCheckToken(
-			Buffer.from(deviceToken, "base64"),
-			project.device_check,
-		);
-
-		if (!isValid) {
-			throw createError(ErrorCode.INVALID_TOKEN, "Invalid device token");
-		}
-
-		c.set("session", {
-			teamId: project.team_id,
-			projectId,
-		});
-
-		await next();
-	} catch (error) {
-		if (error instanceof AppError) {
-			throw error;
-		}
-		throw createError(ErrorCode.INTERNAL_ERROR, "Something went wrong");
-	}
+	// If neither Bearer token nor separate device token is valid/present
+	throw createError(ErrorCode.UNAUTHORIZED, "Missing or invalid credentials");
 });

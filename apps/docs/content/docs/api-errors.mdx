@@ -1,0 +1,247 @@
+---
+title: API Errors
+description: |
+  Comprehensive documentation of error codes and messages returned by the Proxed API.
+---
+
+# API Errors
+
+The Proxed API uses standardized error responses to help you understand and troubleshoot issues that occur during API calls. This guide documents all possible error codes, their meanings, and how to resolve them.
+
+## Error Response Format
+
+All API errors are returned with a consistent JSON structure:
+
+```json
+{
+  "error": "ERROR_CODE",
+  "message": "Human readable error description",
+  "requestId": "unique-request-identifier",
+  "details": {
+    // Optional additional information about the error
+  }
+}
+```
+
+- **error**: A string identifier that indicates the specific error type.
+- **message**: A human-readable description of what went wrong.
+- **requestId**: A unique identifier for the request, useful for troubleshooting with support.
+- **details**: Optional object containing additional information about the error.
+
+## HTTP Status Codes
+
+The API uses standard HTTP status codes to indicate the general category of response:
+
+| HTTP Status | Category | Description |
+|:------------|:---------|:------------|
+| 400-499 | Client Error | Issues with your request that must be fixed on the client side |
+| 500-599 | Server Error | Issues on the Proxed server side or with third-party providers |
+
+## Error Codes Reference
+
+### Authentication Errors
+
+| Error Code | HTTP Status | Description | Resolution |
+|:-----------|:------------|:------------|:-----------|
+| `UNAUTHORIZED` | 401 | General authentication failure | Verify your authentication credentials |
+| `INVALID_TOKEN` | 401 | The provided authentication token is invalid | Check the format and validity of your token |
+| `MISSING_PROJECT_ID` | 401 | Required project ID is missing | Provide a valid project ID in the URL or header |
+| `MISSING_DEVICE_TOKEN` | 401 | Device token is required but missing | Provide a valid device token |
+| `PROJECT_NOT_FOUND` | 404 | The specified project does not exist | Verify your project ID is correct |
+
+Common scenarios that trigger these errors:
+
+- **Invalid Authorization Token Format**: If your Bearer token doesn't follow the required format (`apiKey.tokenPart`).
+- **Missing x-ai-key Header**: When using test key authentication without providing the partial API key.
+- **Device Check Verification Failed**: When the provided device token cannot be verified.
+- **No Billing Information**: When the project's team has no associated billing information.
+
+### Request Validation Errors
+
+| Error Code | HTTP Status | Description | Resolution |
+|:-----------|:------------|:------------|:-----------|
+| `BAD_REQUEST` | 400 | Generic bad request error | Check your request parameters |
+| `INVALID_REQUEST` | 400 | The request is malformed or contains invalid parameters | Fix the request format |
+| `VALIDATION_ERROR` | 400 | Input validation failed | Check the details object for specific validation issues |
+
+Common scenarios that trigger these errors:
+
+- **Invalid Content Type**: When the request's content type is not `application/json`.
+- **Invalid JSON Payload**: When the request body cannot be parsed as JSON.
+- **Missing Required Fields**: When required fields like text input or image data are missing.
+- **Invalid Schema**: When the project's schema configuration is invalid.
+
+### Rate Limiting and Permissions
+
+| Error Code | HTTP Status | Description | Resolution |
+|:-----------|:------------|:------------|:-----------|
+| `FORBIDDEN` | 403 | The request is not allowed | Check your permissions |
+| `TOO_MANY_REQUESTS` | 429 | Rate limit exceeded | Reduce request frequency and try again later |
+
+Common scenarios that trigger these errors:
+
+- **API Calls Limit Reached**: When you've reached the API call limit for your current plan.
+- **Rate Limiting**: When too many requests are made in a short period.
+
+### Server-Side Errors
+
+| Error Code | HTTP Status | Description | Resolution |
+|:-----------|:------------|:------------|:-----------|
+| `INTERNAL_ERROR` | 500 | An unexpected error occurred | Contact support with your requestId |
+| `PROVIDER_ERROR` | 502 | Error from the AI provider (e.g., OpenAI) | Check the details for the underlying error |
+| `DATABASE_ERROR` | 500 | Database related error | Contact support with your requestId |
+
+Common scenarios that trigger these errors:
+
+- **API Key Not Found**: When the API key is missing from the session.
+- **Failed to Retrieve Server Key**: When the server-side portion of a partial key cannot be retrieved.
+- **Provider Service Error**: When the underlying AI provider service returns an error.
+
+## Error Code Structure and Processing
+
+Here's a complete reference of all error codes and recommended actions for handling them:
+
+```swift
+// Error codes enum - use in your application
+enum ProxedErrorCode: String {
+    // Authentication errors
+    case UNAUTHORIZED = "UNAUTHORIZED"
+    case INVALID_TOKEN = "INVALID_TOKEN"
+    case MISSING_PROJECT_ID = "MISSING_PROJECT_ID"
+    case MISSING_DEVICE_TOKEN = "MISSING_DEVICE_TOKEN"
+    case PROJECT_NOT_FOUND = "PROJECT_NOT_FOUND"
+
+    // Validation errors
+    case BAD_REQUEST = "BAD_REQUEST"
+    case INVALID_REQUEST = "INVALID_REQUEST"
+    case VALIDATION_ERROR = "VALIDATION_ERROR"
+
+    // Permissions and limits
+    case FORBIDDEN = "FORBIDDEN"
+    case TOO_MANY_REQUESTS = "TOO_MANY_REQUESTS"
+
+    // Server errors
+    case INTERNAL_ERROR = "INTERNAL_ERROR"
+    case PROVIDER_ERROR = "PROVIDER_ERROR"
+    case DATABASE_ERROR = "DATABASE_ERROR"
+
+    // Processing recommendation
+    var recommendedAction: ErrorAction {
+        switch self {
+        case .UNAUTHORIZED, .INVALID_TOKEN:
+            return .refreshAuthentication
+
+        case .MISSING_PROJECT_ID, .MISSING_DEVICE_TOKEN:
+            return .fixRequest
+
+        case .PROJECT_NOT_FOUND:
+            return .correctConfiguration
+
+        case .BAD_REQUEST, .INVALID_REQUEST, .VALIDATION_ERROR:
+            return .fixRequest
+
+        case .FORBIDDEN:
+            return .checkPermissions
+
+        case .TOO_MANY_REQUESTS:
+            return .retryWithBackoff
+
+        case .INTERNAL_ERROR, .DATABASE_ERROR:
+            return .contactSupport
+
+        case .PROVIDER_ERROR:
+            return .checkProviderStatus
+        }
+    }
+}
+
+// Action types for error handling
+enum ErrorAction {
+    case fixRequest          // Fix client request parameters/format
+    case refreshAuthentication // Get new credentials
+    case retryWithBackoff    // Implement exponential backoff
+    case checkPermissions    // Check account permissions
+    case correctConfiguration // Fix project configuration
+    case contactSupport      // Contact Proxed support
+    case checkProviderStatus // Check third-party provider status
+}
+```
+
+### Basic Error Processing Pattern
+
+Here's a simple pattern for processing error responses:
+
+```swift
+// When you receive an error response:
+func processErrorResponse(errorCode: String, message: String, requestId: String) {
+    // 1. Log the error with requestId
+    logError(code: errorCode, message: message, requestId: requestId)
+
+    // 2. Determine action based on error code
+    guard let errorCode = ProxedErrorCode(rawValue: errorCode) else {
+        // Unknown error code
+        return
+    }
+
+    // 3. Take appropriate action
+    switch errorCode.recommendedAction {
+    case .fixRequest:
+        // Check request parameters and format
+
+    case .refreshAuthentication:
+        // Renew credentials or redirect to login
+
+    case .retryWithBackoff:
+        // Implement retry with increasing delays
+
+    case .checkPermissions:
+        // Check user permissions or subscription
+
+    case .correctConfiguration:
+        // Verify project configuration
+
+    case .contactSupport:
+        // Notify user to contact support with requestId
+
+    case .checkProviderStatus:
+        // Check third-party provider status
+    }
+}
+```
+
+### Error Handling Decision Table
+
+| Error Code | HTTP Status | When It Occurs | Recommended Action |
+|:-----------|:------------|:--------------|:-------------------|
+| `UNAUTHORIZED` | 401 | Missing or invalid credentials | Refresh authentication |
+| `INVALID_TOKEN` | 401 | Token format wrong or invalid | Check token format and refresh |
+| `MISSING_PROJECT_ID` | 401 | No project ID in request | Add project ID to request |
+| `MISSING_DEVICE_TOKEN` | 401 | No device token when required | Add device token to request |
+| `PROJECT_NOT_FOUND` | 404 | Project doesn't exist | Verify project ID |
+| `BAD_REQUEST` | 400 | General invalid request | Check request format |
+| `INVALID_REQUEST` | 400 | Request parameters invalid | Correct request parameters |
+| `VALIDATION_ERROR` | 400 | Input validation failed | Check request schema |
+| `FORBIDDEN` | 403 | Lack of permissions | Check permissions |
+| `TOO_MANY_REQUESTS` | 429 | Rate limit exceeded | Implement backoff and retry |
+| `INTERNAL_ERROR` | 500 | Server-side issue | Contact support |
+| `PROVIDER_ERROR` | 502 | Third-party provider error | Check provider status |
+| `DATABASE_ERROR` | 500 | Database operation failed | Contact support |
+
+## Error Handling Best Practices
+
+When integrating with the Proxed API, we recommend the following best practices for error handling:
+
+1. **Always check the HTTP status code and error response** to understand the category of error.
+2. **Log the entire error response**, including the `requestId` for troubleshooting.
+3. **Handle common errors gracefully** in your application's user interface.
+4. **Implement exponential backoff** for retrying requests that encounter rate limits or temporary server issues.
+5. **Contact support** for persistent 500-level errors, providing the `requestId` for faster resolution.
+
+## Getting Help
+
+If you encounter errors that you can't resolve, please contact support with the following information:
+
+- The complete error response, including the `error`, `message`, and `requestId`
+- Details about your request (endpoint, method, headers)
+- Steps to reproduce the issue
+- Any relevant logs or additional context

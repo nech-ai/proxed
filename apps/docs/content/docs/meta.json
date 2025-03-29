@@ -1,0 +1,18 @@
+{
+	"title": "Documentation",
+	"pages": [
+		"index",
+		"quickstart",
+		"guides",
+		"---Core Concepts---",
+		"authentication",
+		"api-errors",
+		"---Features---",
+		"partial-keys",
+		"device-check",
+		"structured-responses",
+		"---",
+		"projects",
+		"open-source"
+	]
+}

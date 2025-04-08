@@ -1,0 +1,139 @@
+-- Storage related functions and policies
+-- Note: Bucket creation and initial policies might need manual setup or migration
+-- as they are often managed outside standard DDL.
+-- insert into storage.buckets (id, name, public) values ('avatars', 'avatars', false);
+-- Storage helper functions (from your migration)
+create or replace function storage.extension (name TEXT) returns TEXT language plpgsql as $function$
+declare
+_parts text[];
+_filename text;
+begin
+    select string_to_array(name, '/') into _parts;
+    select _parts[array_length(_parts,1)] into _filename;
+    -- @todo return the last part instead of 2 (corrected to handle multiple dots)
+    return substring(_filename from '\.([^.]*)$');
+end
+$function$;
+
+create or replace function storage.filename (name TEXT) returns TEXT language plpgsql as $function$
+declare
+_parts text[];
+begin
+    select string_to_array(name, '/') into _parts;
+    return _parts[array_length(_parts,1)];
+end
+$function$;
+
+create or replace function storage.foldername (name TEXT) returns text[] language plpgsql as $function$
+declare
+_parts text[];
+begin
+    select string_to_array(name, '/') into _parts;
+    return _parts[1:array_length(_parts,1)-1];
+end
+$function$;
+
+-- Storage RLS Policies (Review carefully, ensure they match security requirements)
+-- Note: Declarative support for storage policies might be limited. Apply via migration if needed.
+create policy "Give users select access to avatars folder" on storage.objects as permissive for
+select
+  to authenticated using (true);
+
+-- Or restrict further?
+create policy "Give members insert access to avatars folder" on storage.objects as permissive for insert to public
+with
+  check (
+    (
+      (bucket_id = 'avatars'::TEXT)
+      and (
+        exists (
+          select
+            1
+          from
+            team_memberships
+          where
+            (
+              (team_memberships.user_id = auth.uid ())
+              and (
+                (team_memberships.team_id)::TEXT = (storage.foldername (objects.name)) [1]
+              )
+            )
+        )
+      )
+    )
+  );
+
+create policy "Give members update access to avatars folder" on storage.objects as permissive
+for update
+  to public using (
+    (
+      (bucket_id = 'avatars'::TEXT)
+      and (
+        exists (
+          select
+            1
+          from
+            team_memberships
+          where
+            (
+              (team_memberships.user_id = auth.uid ())
+              and (
+                (team_memberships.team_id)::TEXT = (storage.foldername (objects.name)) [1]
+              )
+            )
+        )
+      )
+    )
+  );
+
+create policy "Give members delete access to avatars folder" on storage.objects as permissive for delete to public using (
+  (
+    (bucket_id = 'avatars'::TEXT)
+    and (
+      exists (
+        select
+          1
+        from
+          team_memberships
+        where
+          (
+            (team_memberships.user_id = auth.uid ())
+            and (
+              (team_memberships.team_id)::TEXT = (storage.foldername (objects.name)) [1]
+            )
+          )
+      )
+    )
+  )
+);
+
+create policy "Give users insert access to avatars folder" on storage.objects as permissive for insert to authenticated
+with
+  check (
+    (
+      (bucket_id = 'avatars'::TEXT)
+      and (
+        (auth.uid ())::TEXT = (storage.foldername (name)) [1]
+      )
+    )
+  );
+
+create policy "Give users update access to avatars folder" on storage.objects as permissive
+for update
+  to authenticated using (
+    (
+      (bucket_id = 'avatars'::TEXT)
+      and (
+        (auth.uid ())::TEXT = (storage.foldername (name)) [1]
+      )
+    )
+  );
+
+create policy "Give users delete access to avatars folder" on storage.objects as permissive for delete to authenticated using (
+  (
+    (bucket_id = 'avatars'::TEXT)
+    and (
+      (auth.uid ())::TEXT = (storage.foldername (name)) [1]
+    )
+  )
+);

@@ -43,7 +43,7 @@
 		"prosemirror-schema-basic": "^1.2.4",
 		"prosemirror-schema-list": "^1.5.1",
 		"prosemirror-view": "^1.39.1",
-		"react": "19.0.0",
+		"react": "19.1.0",
 		"react-cropper": "^2.3.3",
 		"react-dom": "19.0.0",
 		"react-dropzone": "^14.3.8",

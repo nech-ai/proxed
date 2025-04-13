@@ -44,7 +44,7 @@ export const inviteTeamMembersAction = authActionClient
 					templateId: "teamInvitation",
 					to: invitation.email,
 					context: {
-						url: `${getBaseUrl()}/team/invitation/${invitation.id}`,
+						url: `${getBaseUrl()}/api/team/invitation/${invitation.id}`,
 						teamName: invitation.team?.name ?? "",
 					},
 				});

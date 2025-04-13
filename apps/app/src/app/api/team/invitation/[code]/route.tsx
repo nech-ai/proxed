@@ -2,6 +2,7 @@ import { createClient as createSuperClient } from "@proxed/supabase/api";
 import { getTeamInviteQuery } from "@proxed/supabase/queries";
 import { createClient } from "@proxed/supabase/server";
 import { redirect } from "next/navigation";
+
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 

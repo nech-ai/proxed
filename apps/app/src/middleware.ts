@@ -32,7 +32,6 @@ export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
 	if (isPublicPath(pathname)) {
-		// Allow access to public paths regardless of auth status
 		return response;
 	}
 

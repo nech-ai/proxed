@@ -30,10 +30,17 @@
 		"@types/node": "^22.14.1",
 		"dotenv-cli": "^8.0.0",
 		"tsconfig": "workspace:*",
-		"turbo": "^2.4.4",
+		"turbo": "^2.5.0",
 		"type-fest": "^4.38.0",
-		"typescript": "5.8.2"
+		"typescript": "5.8.3"
 	},
 	"packageManager": "bun@1.2.4",
-	"trustedDependencies": ["@biomejs/biome", "@parcel/watcher", "@sentry/cli"]
+	"trustedDependencies": [
+		"@biomejs/biome",
+		"@parcel/watcher",
+		"@sentry/cli",
+		"esbuild",
+		"sharp",
+		"supabase"
+	]
 }

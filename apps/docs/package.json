@@ -15,14 +15,14 @@
 		"fumadocs-mdx": "^11.5.8",
 		"fumadocs-ui": "^15.2.6",
 		"next": "^15.3.0",
-		"react": "19.0.0",
-		"react-dom": "19.0.0"
+		"react": "19.1.0",
+		"react-dom": "19.1.0"
 	},
 	"devDependencies": {
 		"@types/mdx": "^2.0.13",
 		"@types/react": "^19.1.1",
 		"@types/react-dom": "19.0.3",
 		"algoliasearch": "^5.23.3",
-		"typescript": "5.8.2"
+		"typescript": "5.8.3"
 	}
 }

@@ -21,7 +21,7 @@
 		"@types/react": "^19.1.1",
 		"@types/react-dom": "19.0.3",
 		"tsconfig": "workspace:*",
-		"typescript": "5.8.2"
+		"typescript": "5.8.3"
 	},
 	"exports": {
 		".": "./src/index.ts",

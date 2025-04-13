@@ -32,7 +32,7 @@
 		"tsconfig": "workspace:*",
 		"turbo": "^2.4.4",
 		"type-fest": "^4.38.0",
-		"typescript": "5.8.2"
+		"typescript": "5.8.3"
 	},
 	"packageManager": "bun@1.2.4",
 	"trustedDependencies": ["@biomejs/biome", "@parcel/watcher", "@sentry/cli"]

@@ -12,7 +12,7 @@
         "tsconfig": "workspace:*",
         "turbo": "^2.4.4",
         "type-fest": "^4.38.0",
-        "typescript": "5.8.2",
+        "typescript": "5.8.3",
       },
     },
     "apps/api": {
@@ -106,7 +106,7 @@
         "@types/react": "^19.1.1",
         "@types/react-dom": "19.0.3",
         "algoliasearch": "^5.23.3",
-        "typescript": "5.8.2",
+        "typescript": "5.8.3",
       },
     },
     "apps/proxy": {
@@ -203,7 +203,7 @@
         "@types/react": "^19.1.1",
         "@types/react-dom": "19.0.3",
         "tsconfig": "workspace:*",
-        "typescript": "5.8.2",
+        "typescript": "5.8.3",
       },
     },
     "packages/api": {
@@ -245,7 +245,7 @@
       "version": "0.0.0",
       "devDependencies": {
         "tsconfig": "workspace:*",
-        "typescript": "5.8.2",
+        "typescript": "5.8.3",
       },
     },
     "packages/logger": {
@@ -289,7 +289,7 @@
         "@types/react": "^19.1.1",
         "@types/react-dom": "19.0.3",
         "tsconfig": "workspace:*",
-        "typescript": "5.8.2",
+        "typescript": "5.8.3",
       },
     },
     "packages/supabase": {
@@ -2725,7 +2725,7 @@
 
     "typedarray": ["typedarray@0.0.6", "", {}, "sha512-/aCDEGatGvZ2BIk+HmLf4ifCJFwvKFNb9/JeZPMulfgFracn9QFcAf5GO8B/mweUjSoblS5In0cWhqpfs/5PQA=="],
 
-    "typescript": ["typescript@5.8.2", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-aJn6wq13/afZp/jT9QZmwEjDqqvSGp1VT5GVg+f/t6/oVyrgXM6BY1h9BRh/O5p3PlUPAe+WuiEZOmb/49RqoQ=="],
+    "typescript": ["typescript@5.8.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ=="],
 
     "uc.micro": ["uc.micro@2.1.0", "", {}, "sha512-ARDJmphmdvUk6Glw7y9DQ2bFkKBHwQHLi2lsaH6PPmz/Ka9sFOBsBluozhDltWmnv9u/cF6Rt87znRTPV+yp/A=="],
 

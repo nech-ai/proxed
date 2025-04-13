@@ -13,6 +13,7 @@ import { z } from "zod";
 import { logger } from "@proxed/logger";
 import { createError, ErrorCode } from "../utils/errors";
 import { getCommonExecutionParams } from "../utils/execution-params";
+import { createAIClient } from "../utils/ai-client";
 
 async function handleStructuredResponse(
 	c: Context<{ Variables: AuthMiddlewareVariables }>,
@@ -102,12 +103,10 @@ async function handleStructuredResponse(
 	});
 
 	try {
-		const openaiClient = createOpenAI({
-			apiKey: fullApiKey,
-		});
+		const aiClient = createAIClient(project.key.provider, fullApiKey);
 
 		const { object, usage, finishReason } = await generateObject({
-			model: openaiClient(project.model, { structuredOutputs: true }),
+			model: aiClient(project.model, { structuredOutputs: true }),
 			schema,
 			messages: [
 				{

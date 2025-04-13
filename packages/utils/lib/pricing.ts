@@ -11,7 +11,7 @@ type OpenAIModel =
 	| "gpt-4o-mini"
 	| "gpt-4o-mini-2024-07-18";
 
-type AnthropicModel = "claude-3-sonnet";
+type AnthropicModel = "claude-3-7-sonnet-latest";
 type SupportedModel = OpenAIModel | AnthropicModel;
 
 type OpenAIModels = { [K in OpenAIModel]: ModelPricing };
@@ -45,7 +45,7 @@ const OPENAI_MODELS: OpenAIModels = {
 } as const;
 
 const ANTHROPIC_MODELS: AnthropicModels = {
-	"claude-3-sonnet": {
+	"claude-3-7-sonnet-latest": {
 		prompt: 0.003,
 		completion: 0.015,
 	},

@@ -16,7 +16,7 @@ export const searchParamsCache = createSearchParamsCache({
 	model: parseAsStringLiteral([
 		"gpt-4o",
 		"gpt-4o-mini",
-		"claude-3-sonnet",
+		"claude-3-7-sonnet-latest",
 	] as const),
 	finishReason: parseAsStringLiteral([
 		"stop",

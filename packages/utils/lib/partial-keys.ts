@@ -25,9 +25,13 @@ export const CURRENT_VERSION = 1;
 export const METADATA_LENGTH = 32; // 8 chars for version, 16 for timestamp, 8 for splitId
 
 const KEY_PATTERNS = {
-	ANTHROPIC: /^sk-ant-api\d{2}-[a-zA-Z0-9-]{24,}(?:\.[a-f0-9]{32})?$/,
-	OPENAI:
-		/^sk-(?:(?!proj-)[a-zA-Z0-9-]{20,}|proj-[a-zA-Z0-9-_]{20,}|proj-[a-zA-Z0-9-_+]{20,})(?:\.[a-f0-9]{32})?$/,
+	// Anthropic: sk-ant-api<version>-<random_chars_with_hyphen_and_underscore>
+	// Ensure length is at least MIN_KEY_LENGTH after prefix
+	ANTHROPIC: /^sk-ant-api\d{2}-[a-zA-Z0-9_-]{12,}$/,
+	// OpenAI: sk-<random_chars> OR sk-proj-<random_chars_with_hyphen_and_underscore>
+	// Use negative lookahead (?!ant-) to prevent matching Anthropic keys
+	// Ensure length is at least MIN_KEY_LENGTH after prefix
+	OPENAI: /^sk-(?!ant-)(?:proj-[a-zA-Z0-9_-]{12,}|[a-zA-Z0-9-]{12,})$/,
 } as const;
 
 export class KeyValidationError extends Error {
@@ -87,17 +91,33 @@ export function validateApiKey(key: string): KeyValidationResult {
 		};
 	}
 
-	// Split key and metadata
-	const [baseKey, metadataPart] = key.split(".");
+	// Split key and metadata - ONLY if metadata exists
+	const parts = key.split(".");
+	const baseKey = parts[0];
+	const metadataPart = parts.length > 1 ? parts[1] : undefined;
 
 	for (const [provider, pattern] of Object.entries(KEY_PATTERNS)) {
-		if (pattern.test(key)) {
+		// Test the base key against the pattern
+		if (pattern.test(baseKey)) {
+			let metadata: TokenMetadata | null = null;
 			if (metadataPart) {
-				const metadata = decodeMetadata(metadataPart);
-				if (metadata) {
-					return { isValid: true, provider: provider as KeyProvider, metadata };
+				metadata = decodeMetadata(metadataPart);
+				// If metadata part exists but is invalid, the key is invalid
+				if (!metadata) {
+					return {
+						isValid: false,
+						error: {
+							code: "INVALID_FORMAT",
+							message: "Invalid metadata format",
+						},
+					};
 				}
 			}
+			// If metadata exists and is valid, return it
+			if (metadata) {
+				return { isValid: true, provider: provider as KeyProvider, metadata };
+			}
+			// Otherwise, return valid without metadata
 			return { isValid: true, provider: provider as KeyProvider };
 		}
 	}
@@ -112,21 +132,21 @@ export function validateApiKey(key: string): KeyValidationResult {
 }
 
 /**
- * Extracts the API key prefix based on known patterns
- * @param fullKey - The complete API key
+ * Extracts the API key prefix based on known patterns.
+ * IMPORTANT: This operates on the BASE key (without metadata).
+ * @param baseKey - The API key without any potential .metadata suffix
  * @returns Object containing the prefix and remaining key portion
  * @throws {Error} If the key format is invalid
  */
-export function extractPrefix(fullKey: string): {
+export function extractPrefix(baseKey: string): {
 	prefix: string;
 	leftover: string;
 } {
-	if (!fullKey || typeof fullKey !== "string") {
+	if (!baseKey || typeof baseKey !== "string") {
 		throw new Error("Invalid key format: key must be a non-empty string");
 	}
 
-	// Remove metadata if present
-	const [baseKey] = fullKey.split(".");
+	// No need to split metadata here, assume baseKey is passed
 
 	const anthropicMatch = baseKey.match(/^(sk-ant-api\d{2}-)/);
 	if (anthropicMatch) {
@@ -225,15 +245,18 @@ export function reassembleKey(serverPart: string, clientPart: string): string {
 	const clientCore = clientKeyPart.slice(0, -SALT_LENGTH);
 	const reconstructed = serverCore + clientCore;
 
+	// Validate the reconstructed base key structure before adding metadata
+	const baseValidation = validateApiKey(reconstructed);
+	if (!baseValidation.isValid) {
+		throw new KeyValidationError(
+			baseValidation.error?.message ?? "Reconstructed key has invalid format",
+		);
+	}
+
 	// Add metadata back if present
 	const finalKey = metadataPart
 		? `${reconstructed}.${metadataPart}`
 		: reconstructed;
-
-	const validation = validateApiKey(finalKey);
-	if (!validation.isValid) {
-		throw new KeyValidationError("Unrecognized API key format");
-	}
 
 	return finalKey;
 }

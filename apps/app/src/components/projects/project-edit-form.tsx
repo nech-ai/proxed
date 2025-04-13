@@ -65,7 +65,7 @@ const MODEL_OPTIONS: Record<Provider, ModelOption[]> = {
 		{ value: "gpt-4o", label: "GPT-4o" },
 		{ value: "gpt-4o-mini", label: "GPT-4o Mini" },
 	],
-	ANTHROPIC: [{ value: "claude-3-sonnet", label: "Claude 3 Sonnet" }],
+	ANTHROPIC: [{ value: "claude-3-7-sonnet-latest", label: "Claude 3 Sonnet" }],
 };
 
 interface SectionProps {

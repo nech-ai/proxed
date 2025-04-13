@@ -25,10 +25,12 @@ const MIN_KEY_LENGTH = 12;
 
 // Test keys - never use real keys in tests
 const TEST_KEYS = {
-	ANTHROPIC: "sk-ant-api03-abcdefghijklmnopqrstuvwxyzABCDEFGHIJK",
-	OPENAI: "sk-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOP",
+	ANTHROPIC: "sk-ant-api03-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	ANTHROPIC_WITH_UNDERSCORE:
+		"sk-ant-api03-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXgAA",
+	OPENAI: "sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 	OPENAI_PROJECT:
-		"sk-proj-F49cxGjD9148EXIeoRUmwwBsRmvDhygQzzYzds-TbUZ0tFJ0Qxyvz5x4VAGCei89XbHIGDEe",
+		"sk-proj-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 	OPENAI_PROJECT_COMPLEX:
 		"sk-proj-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 	INVALID_SHORT: "sk-abc",
@@ -59,6 +61,14 @@ describe("API Key Utilities", () => {
 			expect(invalidResult).toMatchObject({
 				isValid: false,
 				error: { code: "UNRECOGNIZED_PROVIDER" },
+			});
+		});
+
+		test("should validate Anthropic keys with underscores", () => {
+			const validResult = validateApiKey(TEST_KEYS.ANTHROPIC_WITH_UNDERSCORE);
+			expect(validResult).toEqual({
+				isValid: true,
+				provider: "ANTHROPIC",
 			});
 		});
 
@@ -134,11 +144,12 @@ describe("API Key Utilities", () => {
 				testCrypto,
 			);
 			const reconstructed = reassembleKey(serverPart, clientPart);
-			const { prefix, leftover } = extractPrefix(reconstructed);
+			const [baseKey] = reconstructed.split(".");
+			const { prefix, leftover } = extractPrefix(baseKey);
 
 			expect(prefix).toStartWith("sk-");
 			expect(leftover.length).toBeGreaterThan(0);
-			// Metadata should be stripped
+			// Metadata should be stripped (check on leftover from baseKey)
 			expect(leftover).not.toContain(".");
 		});
 	});

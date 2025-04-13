@@ -194,7 +194,7 @@ export const filterExecutionsSchema = z.object({
 		.optional()
 		.describe("The AI provider to filter by"),
 	model: z
-		.enum(["gpt-4o", "gpt-4o-mini", "claude-3-sonnet"])
+		.enum(["gpt-4o", "gpt-4o-mini", "claude-3-7-sonnet-latest"])
 		.optional()
 		.describe("The model to filter by"),
 	finishReason: z

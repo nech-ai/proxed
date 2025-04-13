@@ -55,7 +55,7 @@ const finishReasons = [
 	"unknown",
 ] as const;
 
-const models = ["gpt-4o", "gpt-4o-mini", "claude-3-sonnet"] as const;
+const models = ["gpt-4o", "gpt-4o-mini", "claude-3-7-sonnet-latest"] as const;
 
 export function SearchFilter({ placeholder, className }: Props) {
 	const [prompt, setPrompt] = useState("");

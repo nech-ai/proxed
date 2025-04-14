@@ -8,7 +8,13 @@ export async function GET(request: Request) {
 	const cookieStore = await cookies();
 	const { searchParams, origin } = new URL(request.url);
 	const code = searchParams.get("code");
-	const next = searchParams.get("next") ?? "/";
+
+	// Prioritize 'redirectTo' from the callback URL's params,
+	// which is set by the login/signup forms.
+	// Fall back to 'next' if 'redirectTo' is missing.
+	const finalRedirectPath =
+		searchParams.get("redirectTo") ?? searchParams.get("next") ?? "/";
+
 	const provider = searchParams.get("provider");
 
 	if (provider) {
@@ -25,10 +31,10 @@ export async function GET(request: Request) {
 			const isLocalEnv = process.env.NODE_ENV === "development";
 
 			const redirectUrl = isLocalEnv
-				? `${origin}${next}`
+				? `${origin}${finalRedirectPath}`
 				: forwardedHost
-					? `https://${forwardedHost}${next}`
-					: `${origin}${next}`;
+					? `https://${forwardedHost}${finalRedirectPath}`
+					: `${origin}${finalRedirectPath}`;
 
 			return NextResponse.redirect(redirectUrl);
 		}

@@ -21,7 +21,7 @@
 	"devDependencies": {
 		"@types/mdx": "^2.0.13",
 		"@types/react": "^19.1.1",
-		"@types/react-dom": "19.0.3",
+		"@types/react-dom": "19.1.2",
 		"algoliasearch": "^5.23.3",
 		"typescript": "5.8.3"
 	}

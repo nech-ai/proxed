@@ -11,6 +11,7 @@ import { SidebarProvider } from "@proxed/ui/components/sidebar";
 import { redirect } from "next/navigation";
 import type { PropsWithChildren } from "react";
 import { Suspense } from "react";
+import { Footer } from "@/components/layout/footer";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -59,7 +60,10 @@ export default async function Layout({ children }: PropsWithChildren) {
 				<div className="flex h-screen">
 					<SidebarProvider defaultOpen={false}>
 						<AppSidebar teamMemberships={teamMemberships} user={user} />
-						<div className="flex flex-col overflow-auto w-full">{children}</div>
+						<div className="flex flex-col flex-grow overflow-auto">
+							<div className="flex-grow">{children}</div>
+							<Footer />
+						</div>
 					</SidebarProvider>
 					<Suspense>
 						<TrialEnded

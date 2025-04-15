@@ -64,6 +64,9 @@ const MODEL_OPTIONS: Record<Provider, ModelOption[]> = {
 	OPENAI: [
 		{ value: "gpt-4o", label: "GPT-4o" },
 		{ value: "gpt-4o-mini", label: "GPT-4o Mini" },
+		{ value: "gpt-4.1", label: "GPT-4.1" },
+		{ value: "gpt-4.1-mini", label: "GPT-4.1 Mini" },
+		{ value: "gpt-4.1-nano", label: "GPT-4.1 Nano" },
 	],
 	ANTHROPIC: [{ value: "claude-3-7-sonnet-latest", label: "Claude 3 Sonnet" }],
 };

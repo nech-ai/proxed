@@ -15,7 +15,7 @@ export async function generateProjectsFilters(
 
 	(async () => {
 		const { partialObjectStream } = await streamObject({
-			model: openai("gpt-4o-mini"),
+			model: openai("gpt-4.1-nano"),
 			system: `You are a helpful assistant that generates filters for a given prompt. \n
                Current date is: ${new Date().toISOString().split("T")[0]} \n
                ${context}

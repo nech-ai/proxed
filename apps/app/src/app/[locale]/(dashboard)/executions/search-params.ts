@@ -17,6 +17,9 @@ export const searchParamsCache = createSearchParamsCache({
 		"gpt-4o",
 		"gpt-4o-mini",
 		"claude-3-7-sonnet-latest",
+		"gpt-4.1",
+		"gpt-4.1-mini",
+		"gpt-4.1-nano",
 	] as const),
 	finishReason: parseAsStringLiteral([
 		"stop",

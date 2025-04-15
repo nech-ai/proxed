@@ -22,7 +22,7 @@ export async function generateExecutionsFilters(
 
 	(async () => {
 		const { partialObjectStream } = await streamObject({
-			model: openai("gpt-4o-mini"),
+			model: openai("gpt-4.1-nano"),
 			system: `You are a helpful assistant that generates filters for AI execution logs based on user queries. \n
                Current date is: ${new Date().toISOString().split("T")[0]} \n
                ${context}

@@ -9,7 +9,10 @@ type OpenAIModel =
 	| "gpt-4o-2024-08-06"
 	| "gpt-4o-2024-05-13"
 	| "gpt-4o-mini"
-	| "gpt-4o-mini-2024-07-18";
+	| "gpt-4o-mini-2024-07-18"
+	| "gpt-4.1"
+	| "gpt-4.1-mini"
+	| "gpt-4.1-nano";
 
 type AnthropicModel = "claude-3-7-sonnet-latest";
 type SupportedModel = OpenAIModel | AnthropicModel;
@@ -41,6 +44,18 @@ const OPENAI_MODELS: OpenAIModels = {
 	"gpt-4o-mini-2024-07-18": {
 		prompt: 0.00015,
 		completion: 0.0006,
+	},
+	"gpt-4.1": {
+		prompt: 0.002,
+		completion: 0.008,
+	},
+	"gpt-4.1-mini": {
+		prompt: 0.0004,
+		completion: 0.0016,
+	},
+	"gpt-4.1-nano": {
+		prompt: 0.0001,
+		completion: 0.0004,
 	},
 } as const;
 

@@ -164,9 +164,24 @@ export const updateProjectSchema = z.object({
 		message: "System prompt is required",
 	}),
 	defaultUserPrompt: z.string(),
-	model: z.string().min(1, {
-		message: "Model is required",
-	}),
+	model: z
+		.string()
+		.min(1, {
+			message: "Model is required",
+		})
+		.refine(
+			(val) =>
+				[
+					"gpt-4o",
+					"gpt-4o-mini",
+					"claude-3-7-sonnet-latest",
+					"gpt-4.1",
+					"gpt-4.1-mini",
+					"gpt-4.1-nano",
+					"none",
+				].includes(val),
+			{ message: "Invalid model selected" },
+		),
 	keyId: z
 		.string()
 		.min(1, {
@@ -194,7 +209,14 @@ export const filterExecutionsSchema = z.object({
 		.optional()
 		.describe("The AI provider to filter by"),
 	model: z
-		.enum(["gpt-4o", "gpt-4o-mini", "claude-3-7-sonnet-latest"])
+		.enum([
+			"gpt-4o",
+			"gpt-4o-mini",
+			"claude-3-7-sonnet-latest",
+			"gpt-4.1",
+			"gpt-4.1-mini",
+			"gpt-4.1-nano",
+		])
 		.optional()
 		.describe("The model to filter by"),
 	finishReason: z

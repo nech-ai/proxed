@@ -57,6 +57,7 @@ create policy "allow insert for team members" on public.executions for insert
 with
   check (public.is_member_of (auth.uid (), team_id));
 
--- Update Trigger (Define function in 06_functions.sql, apply trigger here)
--- Note: Applying triggers might require a migration step.
--- create trigger executions_updated_at before update on public.executions for each row execute function public.update_updated_at ();
+-- Update Trigger (Function defined in 00_functions_pre.sql)
+create trigger executions_updated_at before
+update on public.executions for each row
+execute function public.update_updated_at ();

@@ -31,9 +31,15 @@ create index if not exists idx_projects_test_mode_test_key on public.projects us
 -- Function to generate test key when test_mode is enabled
 create or replace function public.generate_test_key () returns trigger language plpgsql as $$
 begin
-  if new.test_mode then
-    new.test_key := gen_random_uuid ();
-  else
+  -- Check if test_mode changed from FALSE to TRUE or is TRUE on INSERT
+  if new.test_mode and (TG_OP = 'INSERT' or not old.test_mode) then
+    -- Generate a key only if it doesn't already have one
+    if new.test_key is null then
+      new.test_key := gen_random_uuid ();
+    end if;
+  -- Check if test_mode changed from TRUE to FALSE on UPDATE
+  elsif not new.test_mode and TG_OP = 'UPDATE' and old.test_mode then
+    -- Purge the key
     new.test_key := null;
   end if;
   return new;
@@ -66,7 +72,9 @@ for update
 
 create policy "allow delete for team owners" on public.projects for delete using (public.is_owner_of (auth.uid (), team_id));
 
--- Update & Test Key Triggers (Define update_updated_at in 06_functions.sql, apply triggers here)
+-- Update & Test Key Triggers (update_updated_at defined in 00_functions_pre.sql)
 -- Note: Applying triggers might require a migration step.
 -- create trigger generate_test_key_trigger before insert or update on public.projects for each row execute function public.generate_test_key ();
--- create trigger projects_updated_at before update on public.projects for each row execute function public.update_updated_at ();
+create trigger projects_updated_at before
+update on public.projects for each row
+execute function public.update_updated_at ();

@@ -118,7 +118,11 @@ with
   );
 
 -- Note: No select/update/delete policies on private.server_keys for general users.
--- Update Triggers (Define function in 06_functions.sql, apply triggers here)
--- Note: Applying triggers might require a migration step.
--- create trigger provider_keys_updated_at before update on public.provider_keys for each row execute function public.update_updated_at ();
--- create trigger server_keys_updated_at before update on private.server_keys for each row execute function public.update_updated_at ();
+-- Update Triggers (Function defined in 00_functions_pre.sql)
+create trigger provider_keys_updated_at before
+update on public.provider_keys for each row
+execute function public.update_updated_at ();
+
+create trigger server_keys_updated_at before
+update on private.server_keys for each row
+execute function public.update_updated_at ();

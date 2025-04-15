@@ -33,6 +33,7 @@ for update
 
 create policy "allow delete for team owners" on public.device_checks for delete using (public.is_owner_of (auth.uid (), team_id));
 
--- Update Trigger (Define function in 06_functions.sql, apply trigger here)
--- Note: Applying triggers might require a migration step.
--- create trigger device_checks_updated_at before update on public.device_checks for each row execute function public.update_updated_at ();
+-- Update Trigger (Function defined in 00_functions_pre.sql)
+create trigger device_checks_updated_at before
+update on public.device_checks for each row
+execute function public.update_updated_at ();

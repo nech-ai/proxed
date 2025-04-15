@@ -224,9 +224,19 @@ with
 
 create policy "allow delete invitations for team owners" on public.team_invitations for delete using (public.is_owner_of (auth.uid (), team_id));
 
--- Update Triggers (Define function in 06_functions.sql, apply triggers here)
--- Note: Applying triggers might require a migration step.
--- create trigger teams_updated_at before update on public.teams for each row execute function public.update_updated_at ();
--- create trigger users_updated_at before update on public.users for each row execute function public.update_updated_at ();
--- create trigger team_memberships_updated_at before update on public.team_memberships for each row execute function public.update_updated_at ();
--- create trigger team_invitations_updated_at before update on public.team_invitations for each row execute function public.update_updated_at ();
+-- Update Triggers (Function defined in 00_functions_pre.sql)
+create trigger teams_updated_at before
+update on public.teams for each row
+execute function public.update_updated_at ();
+
+create trigger users_updated_at before
+update on public.users for each row
+execute function public.update_updated_at ();
+
+create trigger team_memberships_updated_at before
+update on public.team_memberships for each row
+execute function public.update_updated_at ();
+
+-- Note: Trigger for team_invitations was commented out in 08_triggers.sql
+-- Add if needed:
+-- create trigger team_invitations_updated_at before update on public.team_invitations for each row execute function public.update_updated_at();

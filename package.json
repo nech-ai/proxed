@@ -21,7 +21,7 @@
 		"format": "biome format --write .",
 		"lint": "turbo lint && manypkg check",
 		"typecheck": "turbo typecheck",
-		"update:all": "for d in apps/* packages/* tooling/*; do (echo \"Updating in $d\" && cd \"$d\" && bun update && cd - > /dev/null); done"
+		"update:all": "manypkg exec bun update"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",

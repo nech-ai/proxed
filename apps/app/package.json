@@ -36,7 +36,7 @@
 		"next-safe-action": "^7.10.5",
 		"next-themes": "^0.4.6",
 		"nextjs-toploader": "^3.8.16",
-		"nuqs": "^2.4.2",
+		"nuqs": "^2.4.3",
 		"prismjs": "^1.30.0",
 		"prosemirror-inputrules": "^1.5.0",
 		"prosemirror-markdown": "^1.13.2",

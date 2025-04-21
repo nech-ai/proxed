@@ -12,7 +12,7 @@
 		"date-fns": "^4.1.0",
 		"next": "^15.3.0",
 		"uuid": "^11.1.0",
-		"zod": "^3.24.2"
+		"zod": "^3.24.3"
 	},
 	"devDependencies": {
 		"@proxed/logger": "workspace:*",

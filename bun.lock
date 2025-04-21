@@ -26,7 +26,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@ai-sdk/anthropic": "^1.2.10",
-        "@ai-sdk/google": "^1.2.11",
+        "@ai-sdk/google": "^1.2.12",
         "@ai-sdk/groq": "^1.2.8",
         "@ai-sdk/mistral": "^1.2.7",
         "@ai-sdk/openai": "^1.3.12",
@@ -402,7 +402,7 @@
   "packages": {
     "@ai-sdk/anthropic": ["@ai-sdk/anthropic@1.2.10", "", { "dependencies": { "@ai-sdk/provider": "1.1.3", "@ai-sdk/provider-utils": "2.2.7" }, "peerDependencies": { "zod": "^3.0.0" } }, "sha512-PyE7EC2fPjs9DnzRAHDrPQmcnI2m2Eojr8pfhckOejOlDEh2w7NnSJr1W3qe5hUWzKr+6d7NG1ZKR9fhmpDdEQ=="],
 
-    "@ai-sdk/google": ["@ai-sdk/google@1.2.11", "", { "dependencies": { "@ai-sdk/provider": "1.1.3", "@ai-sdk/provider-utils": "2.2.7" }, "peerDependencies": { "zod": "^3.0.0" } }, "sha512-gjGcxKcRri/Jbkujs9nVwP4qOW5GI4rYQ6vQ17uLAvGMo3qnwr26Q2KUqUWuVHQYtboXVSrxC/Kb6sm3hE5WUQ=="],
+    "@ai-sdk/google": ["@ai-sdk/google@1.2.12", "", { "dependencies": { "@ai-sdk/provider": "1.1.3", "@ai-sdk/provider-utils": "2.2.7" }, "peerDependencies": { "zod": "^3.0.0" } }, "sha512-A8AYqCmBs9SJFiAOP6AX0YEDHWTDrCaUDiRY2cdMSKjJiEknvwnPrAAKf3idgVqYaM2kS0qWz5v9v4pBzXDx+w=="],
 
     "@ai-sdk/groq": ["@ai-sdk/groq@1.2.8", "", { "dependencies": { "@ai-sdk/provider": "1.1.3", "@ai-sdk/provider-utils": "2.2.7" }, "peerDependencies": { "zod": "^3.0.0" } }, "sha512-DRq0b4twVUh52DFnIhVC4F14Po8w+76sCdigMRRIcAiSmGRr9I3Vyot36tun1q4tBZMYSvQUss60W3eiaoa6mg=="],
 

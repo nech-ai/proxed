@@ -8,7 +8,7 @@
 		"@sentry/nextjs": "^9.12.0",
 		"@supabase/sentry-js-integration": "^0.3.0",
 		"@supabase/supabase-js": "^2.49.4",
-		"ai": "^4.3.7",
+		"ai": "^4.3.9",
 		"date-fns": "^4.1.0",
 		"next": "^15.3.0",
 		"uuid": "^11.1.0",

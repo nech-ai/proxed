@@ -37,7 +37,7 @@ export const GET = async (req: NextRequest) => {
 	successUrl.searchParams.set("redirectPath", redirectPath);
 
 	const checkout = await api.checkouts.create({
-		productId: selectedPlan.id,
+		products: [selectedPlan.id],
 		successUrl: successUrl.toString(),
 		customerExternalId: teamId,
 		customerEmail: userData.data.email ?? undefined,

@@ -26,15 +26,15 @@
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"@manypkg/cli": "^0.23.0",
-		"@types/bun": "^1.2.9",
+		"@types/bun": "^1.2.10",
 		"@types/node": "^22.14.1",
 		"dotenv-cli": "^8.0.0",
 		"tsconfig": "workspace:*",
 		"turbo": "^2.5.0",
-		"type-fest": "^4.39.1",
+		"type-fest": "^4.40.0",
 		"typescript": "5.8.3"
 	},
-	"packageManager": "bun@1.2.4",
+	"packageManager": "bun@1.2.10",
 	"trustedDependencies": [
 		"@biomejs/biome",
 		"@parcel/watcher",

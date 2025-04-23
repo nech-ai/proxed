@@ -5,7 +5,8 @@ import { ChoosePlanButton } from "./choose-plan-button";
 export function Trial({
 	teamId,
 	createdAt,
-}: { teamId: string; createdAt: string }) {
+	plan,
+}: { teamId: string; createdAt: string; plan: string | null }) {
 	// Parse dates using UTCDate for consistent timezone handling
 	const rawCreatedAt = parseISO(createdAt);
 	const today = new UTCDate();
@@ -24,10 +25,12 @@ export function Trial({
 
 	const isTrialEnded = daysLeft <= 0;
 
+	const isOnTrialOrNoPlan = plan === "trial" || plan === null;
+
 	// This would typically come from a server query
 	const canChooseStarterPlan = true;
 
-	if (isTrialEnded) {
+	if (isTrialEnded && isOnTrialOrNoPlan) {
 		return (
 			<ChoosePlanButton
 				initialIsOpen={false}
@@ -38,6 +41,10 @@ export function Trial({
 				Unlock full access
 			</ChoosePlanButton>
 		);
+	}
+
+	if (!isOnTrialOrNoPlan) {
+		return null;
 	}
 
 	return (

@@ -33,6 +33,7 @@ export function ContentHeader({ children, className }: ContentHeaderProps) {
 					<Trial
 						createdAt={teamMembership.team?.created_at}
 						teamId={teamMembership.team?.id}
+						plan={teamMembership.team?.plan}
 					/>
 					<FeedbackDialog />
 					<UserMenu user={user} />

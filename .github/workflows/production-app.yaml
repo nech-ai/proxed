@@ -4,6 +4,7 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_APP }}
   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
+  NOVU_SECRET_KEY: ${{ secrets.PROD_NOVU_SECRET_KEY }}
 on:
   push:
     branches:

@@ -16,6 +16,7 @@ export const updateSubscriberPreferenceAction = authActionClient
 		},
 	})
 	.action(async ({ parsedInput: { revalidatePath, ...data } }) => {
+		// TODO: fix this
 		// @ts-expect-error
 		const preference = await updateSubscriberPreference(data);
 

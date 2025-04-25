@@ -13,6 +13,10 @@ export default async function SettingsLayout({ children }: PropsWithChildren) {
 							href: "/settings/account/general",
 						},
 						{
+							title: "Notifications",
+							href: "/settings/account/notifications",
+						},
+						{
 							title: "Support",
 							href: "/settings/account/support",
 						},

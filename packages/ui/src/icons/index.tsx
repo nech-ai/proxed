@@ -1,5 +1,6 @@
 export * from "./archive";
 export * from "./arrow-right";
+export * from "./bell";
 export * from "./chart-pie";
 export * from "./circle-help";
 export * from "./copy";

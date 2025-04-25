@@ -5,6 +5,7 @@ import { NewUser } from "../emails/NewUser";
 import { TeamInvitation } from "../emails/TeamInvitation";
 import { Feedback } from "../emails/Feedback";
 import { Support } from "../emails/Support";
+import { ExecutionError } from "../emails/ExecutionError";
 
 export const mailTemplates = {
 	magicLink: MagicLink,
@@ -13,6 +14,7 @@ export const mailTemplates = {
 	teamInvitation: TeamInvitation,
 	feedback: Feedback,
 	support: Support,
+	executionError: ExecutionError,
 };
 
 export async function getTemplate<

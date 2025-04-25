@@ -103,4 +103,8 @@ export const LogEvents = {
 		event: "Toggle Project Test",
 		channel: "toggle-project-test",
 	},
+	UpdateSubscriberPreference: {
+		event: "Update Subscriber Preference",
+		channel: "update-subscriber-preference",
+	},
 } as const;

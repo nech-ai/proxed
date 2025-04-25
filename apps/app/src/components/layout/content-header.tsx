@@ -8,7 +8,7 @@ import { UserMenu } from "./user-menu";
 import { useTeamContext } from "@/store/team/hook";
 import { FeedbackDialog } from "./feedback-dialog";
 import { Trial } from "../trial";
-import { Suspense } from "react";
+import { NotificationCenter } from "../notification-center";
 interface ContentHeaderProps extends PropsWithChildren {
 	className?: string;
 }
@@ -36,6 +36,7 @@ export function ContentHeader({ children, className }: ContentHeaderProps) {
 						plan={teamMembership.team?.plan}
 					/>
 					<FeedbackDialog />
+					<NotificationCenter />
 					<UserMenu user={user} />
 				</div>
 			</header>

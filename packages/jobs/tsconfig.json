@@ -1,8 +1,10 @@
 {
 	"extends": "tsconfig/react-library.json",
 	"compilerOptions": {
-		"resolveJsonModule": true,
-		"esModuleInterop": true
+		"baseUrl": "../..",
+		"paths": {
+			"@config": ["config.ts"]
+		}
 	},
 	"include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.json"],
 	"exclude": ["dist", "build", "node_modules", "src/__tests__"]

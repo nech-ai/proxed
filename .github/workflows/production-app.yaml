@@ -41,3 +41,9 @@ jobs:
         with:
           secret-key: ${{ secrets.PROD_NOVU_SECRET_KEY }}
           bridge-url: ${{ secrets.PROD_NOVU_BRIDGE_URL }}
+      - name: 🔄 Deploy Background Jobs
+        env:
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+        run: |
+          TRIGGER_PROJECT_ID=${{ secrets.TRIGGER_PROJECT_ID }} bunx trigger.dev@3.3.16 deploy --skip-update-check
+        working-directory: apps/app

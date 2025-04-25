@@ -24,6 +24,7 @@
 		"./server": "./src/clients/server.ts",
 		"./client": "./src/clients/client.ts",
 		"./api": "./src/clients/api.ts",
+		"./job": "./src/clients/job.ts",
 		"./mutations": "./src/mutations/index.ts",
 		"./middleware": "./src/clients/middleware.ts",
 		"./queries": "./src/queries/index.ts",

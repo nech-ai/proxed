@@ -12,6 +12,7 @@
 		"dev:api": "dotenv -c -- turbo dev --filter=@proxed/api",
 		"dev:email": "dotenv -c -- turbo dev --filter=@proxed/mail",
 		"dev:novu": "dotenv -c -- bunx novu@latest dev -p 3000 -r /api/novu",
+		"dev:trigger": "dotenv -c -- bun run --cwd apps/app dev:trigger",
 		"start:web": "dotenv -c -- turbo start --filter=@proxed/web",
 		"start:app": "dotenv -c -- turbo start --filter=@proxed/app",
 		"supabase:start": "dotenv -c -- bun run --cwd apps/api dev",

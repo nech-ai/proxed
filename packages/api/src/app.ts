@@ -14,6 +14,7 @@ import { logger } from "@proxed/logger";
 import { openaiRouter } from "./routes/openai";
 import { ErrorCode, handleApiError } from "./utils/errors";
 import type { AppVariables } from "./types";
+import { sendExecutionErrorNotifications } from "@proxed/jobs";
 
 const root = new Hono<{ Variables: AppVariables }>();
 
@@ -67,7 +68,6 @@ app.get(
 app.onError((err, c) => {
 	const requestId = c.get("requestId") || "unknown";
 	logger.error(`Global error handler [${requestId}]:`, err);
-
 	const apiError = handleApiError(err);
 	return c.json(
 		{

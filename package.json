@@ -33,7 +33,7 @@
 		"dotenv-cli": "^8.0.0",
 		"tsconfig": "workspace:*",
 		"turbo": "^2.5.1",
-		"type-fest": "^4.40.0",
+		"type-fest": "^4.40.1",
 		"typescript": "5.8.3"
 	},
 	"packageManager": "bun@1.2.10",

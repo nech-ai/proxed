@@ -11,7 +11,7 @@
 		"format": "biome format --write ."
 	},
 	"dependencies": {
-		"fumadocs-core": "^15.2.10",
+		"fumadocs-core": "^15.2.11",
 		"fumadocs-mdx": "^11.6.1",
 		"fumadocs-ui": "^15.2.10",
 		"next": "^15.3.1",

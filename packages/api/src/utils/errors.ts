@@ -94,13 +94,11 @@ export function createError(
 
 export function handleApiError(error: unknown): ApiError {
 	if (error instanceof AppError) {
-		logger.error(`[${error.code}] ${error.message}`, error.details || {});
 		return error.toResponse();
 	}
 
 	// Handle other known error types
 	if (error instanceof Error) {
-		logger.error(`Unhandled error: ${error.message}`, { stack: error.stack });
 		return {
 			code: ErrorCode.INTERNAL_ERROR,
 			message: "An unexpected error occurred",
@@ -109,7 +107,6 @@ export function handleApiError(error: unknown): ApiError {
 	}
 
 	// Unknown error type
-	logger.error("Unknown error type", { error });
 	return {
 		code: ErrorCode.INTERNAL_ERROR,
 		message: "An unexpected error occurred",

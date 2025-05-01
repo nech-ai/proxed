@@ -11,9 +11,9 @@
 		"format": "biome format --write ."
 	},
 	"dependencies": {
-		"fumadocs-core": "^15.2.10",
+		"fumadocs-core": "^15.2.12",
 		"fumadocs-mdx": "^11.6.1",
-		"fumadocs-ui": "^15.2.10",
+		"fumadocs-ui": "^15.2.12",
 		"next": "^15.3.1",
 		"react": "19.1.0",
 		"react-dom": "19.1.0"
@@ -22,7 +22,7 @@
 		"@types/mdx": "^2.0.13",
 		"@types/react": "^19.1.2",
 		"@types/react-dom": "19.1.2",
-		"algoliasearch": "^5.23.4",
+		"algoliasearch": "^5.24.0",
 		"typescript": "5.8.3"
 	}
 }

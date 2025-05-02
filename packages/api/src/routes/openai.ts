@@ -112,8 +112,6 @@ async function handleOpenAIProxy(
 			projectId,
 			teamId,
 			projectName: project.name,
-			timeWindowSeconds: 300,
-			callThreshold: 10,
 		});
 
 		return response;

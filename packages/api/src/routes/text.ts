@@ -146,8 +146,6 @@ async function handleStructuredResponse(
 			projectId,
 			teamId,
 			projectName: project.name,
-			timeWindowSeconds: 300,
-			callThreshold: 10,
 		});
 
 		return c.json(object);

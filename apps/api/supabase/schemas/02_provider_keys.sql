@@ -17,10 +17,11 @@ create index if not exists idx_provider_keys_team on public.provider_keys using 
 -- Server keys table (private part - stores sensitive key values)
 create table if not exists private.server_keys (
   id uuid default gen_random_uuid () not null primary key,
-  provider_key_id uuid not null unique references public.provider_keys (id) on delete cascade,
+  provider_key_id uuid not null references public.provider_keys (id) on delete cascade,
   key_value TEXT not null,
   created_at timestamp with time zone default now() not null,
-  updated_at timestamp with time zone default now() not null
+  updated_at timestamp with time zone default now() not null,
+  constraint server_keys_provider_key_id_key unique (provider_key_id)
 );
 
 alter table private.server_keys owner to postgres;
@@ -118,6 +119,9 @@ with
   );
 
 -- Note: No select/update/delete policies on private.server_keys for general users.
+-- Grant service_role direct access (bypasses RLS anyway, but explicit grant is clearer)
+grant all on table private.server_keys to service_role;
+
 -- Update Triggers (Function defined in 00_functions_pre.sql)
 create trigger provider_keys_updated_at before
 update on public.provider_keys for each row

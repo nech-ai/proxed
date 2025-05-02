@@ -16,8 +16,9 @@ create table if not exists public.projects (
   updated_at timestamp with time zone default now() not null,
   model TEXT,
   test_mode BOOLEAN default false,
-  test_key TEXT unique,
-  constraint unique_team_bundle unique (team_id, bundle_id)
+  test_key TEXT,
+  constraint unique_team_bundle unique (team_id, bundle_id),
+  constraint projects_test_key_key unique (test_key)
 );
 
 alter table public.projects owner to postgres;
@@ -25,8 +26,6 @@ alter table public.projects owner to postgres;
 create index if not exists idx_projects_team on public.projects using btree (team_id);
 
 create index if not exists idx_projects_device_check on public.projects using btree (device_check_id);
-
-create index if not exists idx_projects_test_mode_test_key on public.projects using btree (test_key);
 
 -- Function to generate test key when test_mode is enabled
 create or replace function public.generate_test_key () returns trigger language plpgsql as $$
@@ -74,7 +73,11 @@ create policy "allow delete for team owners" on public.projects for delete using
 
 -- Update & Test Key Triggers (update_updated_at defined in 00_functions_pre.sql)
 -- Note: Applying triggers might require a migration step.
--- create trigger generate_test_key_trigger before insert or update on public.projects for each row execute function public.generate_test_key ();
+create trigger generate_test_key_trigger before insert
+or
+update on public.projects for each row
+execute function public.generate_test_key ();
+
 create trigger projects_updated_at before
 update on public.projects for each row
 execute function public.update_updated_at ();

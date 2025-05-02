@@ -25,17 +25,18 @@ create table if not exists public.users (
   email TEXT unique not null,
   full_name TEXT,
   avatar_url TEXT,
-  team_id uuid references public.teams (id) on delete set null,
+  team_id uuid,
   onboarded BOOLEAN default false,
   is_admin BOOLEAN default false,
   created_at timestamp with time zone default now(),
-  updated_at timestamp with time zone default now()
+  updated_at timestamp with time zone default now(),
+  constraint users_team_id_fkey foreign key (team_id) references public.teams (id) on delete set null
 );
 
 alter table public.users owner to postgres;
 
-alter table only public.users
-add constraint fk_auth_user foreign key (id) references auth.users (id) on delete cascade;
+alter table public.users
+add constraint users_id_fkey foreign key (id) references auth.users (id) on delete cascade;
 
 -- team memberships table
 create table if not exists public.team_memberships (
@@ -124,7 +125,10 @@ $$;
 alter function public.handle_new_user () owner to postgres;
 
 -- Trigger (Note: Triggers themselves might not be fully declarative, consider applying manually or via migration)
--- create trigger on_auth_user_created after insert on auth.users for each row execute function public.handle_new_user ();
+create trigger on_auth_user_created
+after insert on auth.users for each row
+execute function public.handle_new_user ();
+
 grant all on function public.handle_new_user () to anon;
 
 grant all on function public.handle_new_user () to authenticated;

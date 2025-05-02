@@ -17,6 +17,7 @@ create table if not exists public.projects (
   model TEXT,
   test_mode BOOLEAN default false,
   test_key TEXT,
+  last_rate_limit_notified_at TIMESTAMPTZ NULL, -- Track last notification time
   constraint unique_team_bundle unique (team_id, bundle_id),
   constraint projects_test_key_key unique (test_key)
 );

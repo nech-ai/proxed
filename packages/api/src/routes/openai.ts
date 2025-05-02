@@ -11,6 +11,7 @@ import { logger } from "@proxed/logger";
 import { createError, ErrorCode } from "../utils/errors";
 import { getCommonExecutionParams } from "../utils/execution-params";
 import { mapOpenAIFinishReason, type OpenAIResponse } from "../utils/openai";
+import { checkAndNotifyRateLimit } from "../utils/rate-limit";
 
 const OPENAI_API_BASE = "https://api.openai.com/v1";
 
@@ -102,6 +103,17 @@ async function handleOpenAIProxy(
 			latency,
 			response_code: response.status,
 			response: JSON.stringify(responseData),
+		});
+
+		// Non-blocking: Check rate limit and trigger notification job
+		checkAndNotifyRateLimit({
+			c,
+			supabase,
+			projectId,
+			teamId,
+			projectName: project.name,
+			timeWindowSeconds: 300,
+			callThreshold: 10,
 		});
 
 		return response;

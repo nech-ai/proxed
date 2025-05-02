@@ -1,6 +1,7 @@
 import { Novu } from "@novu/node";
 import { v4 as uuidv4 } from "uuid";
 import { executionError } from "./workflows/execution-error/workflow";
+import { highConsumption } from "./workflows/high-consumption/workflow";
 
 const novu = new Novu(process.env.NOVU_SECRET_KEY!);
 
@@ -8,10 +9,13 @@ const API_ENDPOINT = "https://api.novu.co/v1";
 
 export enum TriggerEvents {
 	ExecutionError = "execution-error",
+	HighConsumption = "high-consumption",
 }
 
 export enum NotificationTypes {
 	Executions = "executions",
+	Projects = "projects",
+	Alerts = "alerts",
 }
 
 type TriggerUser = {
@@ -27,7 +31,7 @@ type TriggerPayload = {
 	payload: any;
 	user: TriggerUser;
 	replyTo?: string;
-	tenant?: string; // NOTE: Currently no way to listen for messages with tenant, we use team_id + user_id for unique
+	tenant?: string;
 };
 
 export async function trigger(data: TriggerPayload) {
@@ -35,7 +39,6 @@ export async function trigger(data: TriggerPayload) {
 		await novu.trigger(data.name, {
 			to: {
 				...data.user,
-				//   Prefix subscriber id with team id
 				subscriberId: `${data.user.teamId}_${data.user.subscriberId}`,
 			},
 			payload: data.payload,
@@ -61,7 +64,6 @@ export async function triggerBulk(events: TriggerPayload[]) {
 				name: data.name,
 				to: {
 					...data.user,
-					//   Prefix subscriber id with team id
 					subscriberId: `${data.user.teamId}_${data.user.subscriberId}`,
 				},
 				payload: data.payload,
@@ -140,6 +142,7 @@ export async function updateSubscriberPreference({
 
 const workflows = {
 	executionError,
+	highConsumption,
 };
 
 export { workflows };

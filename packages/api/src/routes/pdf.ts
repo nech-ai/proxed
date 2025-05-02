@@ -14,6 +14,7 @@ import { logger } from "@proxed/logger";
 import { createError, ErrorCode } from "../utils/errors";
 import { getCommonExecutionParams } from "../utils/execution-params";
 import { createAIClient } from "../utils/ai-client";
+import { checkAndNotifyRateLimit } from "../utils/rate-limit";
 
 async function handleStructuredResponse(
 	c: Context<{ Variables: AuthMiddlewareVariables }>,
@@ -166,6 +167,17 @@ async function handleStructuredResponse(
 			latency,
 			response_code: 200,
 			response: JSON.stringify(object),
+		});
+
+		// Non-blocking: Check rate limit and trigger notification job
+		checkAndNotifyRateLimit({
+			c,
+			supabase,
+			projectId,
+			teamId,
+			projectName: project.name,
+			timeWindowSeconds: 300,
+			callThreshold: 10,
 		});
 
 		return c.json(object);

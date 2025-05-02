@@ -25,7 +25,7 @@ export const config = {
 		],
 	},
 	mailing: {
-		provider: "resend",
+		provider: "console",
 		from: "ProxedAI <hello@mail.proxed.ai>",
 	},
 } as const satisfies Config;

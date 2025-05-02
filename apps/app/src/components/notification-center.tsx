@@ -17,7 +17,14 @@ import {
 import { BellIcon } from "@proxed/ui/icons";
 import { cn } from "@proxed/ui/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import { Archive, ClipboardCheck, Cog, FileText, Inbox } from "lucide-react";
+import {
+	Archive,
+	ClipboardCheck,
+	Cog,
+	FileText,
+	Inbox,
+	AlertTriangle,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -93,10 +100,9 @@ function NotificationItem({
 		case "executions":
 			IconComponent = ClipboardCheck;
 			break;
-		// Add other cases here for different notification types
-		// case 'projects':
-		//   IconComponent = FileText;
-		//   break;
+		case "alerts":
+			IconComponent = AlertTriangle;
+			break;
 	}
 
 	// Determine href based on type
@@ -104,7 +110,9 @@ function NotificationItem({
 	if (type === "executions" && recordId) {
 		href = `/executions/${recordId}`;
 	}
-	// Add other href logic here
+	if (type === "alerts" && recordId) {
+		href = `/projects/${recordId}`;
+	}
 
 	return (
 		<div className={wrapperClasses}>

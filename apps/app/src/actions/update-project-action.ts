@@ -22,6 +22,8 @@ export const updateProjectAction = authActionClient
 			system_prompt: data.systemPrompt,
 			default_user_prompt: data.defaultUserPrompt,
 			model: data.model,
+			notification_threshold: data.notificationThreshold,
+			notification_interval_seconds: data.notificationIntervalSeconds,
 		});
 
 		revalidateTag(`project_${data.id}`);

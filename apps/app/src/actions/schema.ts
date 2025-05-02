@@ -188,6 +188,8 @@ export const updateProjectSchema = z.object({
 			message: "Provider key is required",
 		})
 		.nullish(),
+	notificationThreshold: z.number().int().positive().nullish(),
+	notificationIntervalSeconds: z.number().int().positive().nullish(),
 });
 
 export type UpdateProjectFormValues = z.infer<typeof updateProjectSchema>;

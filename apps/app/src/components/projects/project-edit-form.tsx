@@ -159,6 +159,9 @@ export function ProjectEditForm({
 			systemPrompt: project.system_prompt || "",
 			defaultUserPrompt: project.default_user_prompt || "",
 			model: project.model || "none",
+			notificationThreshold: project.notification_threshold ?? undefined,
+			notificationIntervalSeconds:
+				project.notification_interval_seconds ?? undefined,
 		},
 	});
 
@@ -166,6 +169,9 @@ export function ProjectEditForm({
 	const [pendingDeviceCheckChange, setPendingDeviceCheckChange] = useState<
 		string | null
 	>(null);
+
+	// Watch the interval value to conditionally disable the threshold input
+	const watchedInterval = form.watch("notificationIntervalSeconds");
 
 	const handleKeyChange = (value: string) => {
 		if (form.getValues("keyId") === "none") {
@@ -517,6 +523,79 @@ export function ProjectEditForm({
 												</FormControl>
 												<FormDescription>
 													Optional starting prompt for new conversations
+												</FormDescription>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
+							</Section>
+
+							<Section title="Consumption Notifications">
+								<div className="grid gap-4 sm:grid-cols-2">
+									<FormField
+										control={form.control}
+										name="notificationThreshold"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Call Threshold</FormLabel>
+												<FormControl>
+													<Input
+														type="number"
+														placeholder="e.g., 100"
+														{...field}
+														value={field.value ?? ""}
+														onChange={(e) =>
+															field.onChange(
+																e.target.value
+																	? Number.parseInt(e.target.value)
+																	: null,
+															)
+														}
+														// Disable threshold input if interval is null or undefined
+														disabled={watchedInterval == null}
+													/>
+												</FormControl>
+												<FormDescription>
+													Number of API calls within the interval to trigger a
+													notification.
+												</FormDescription>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+
+									<FormField
+										control={form.control}
+										name="notificationIntervalSeconds"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Time Interval</FormLabel>
+												<Select
+													value={field.value?.toString() ?? "none"}
+													onValueChange={(value) =>
+														field.onChange(
+															value === "none" ? null : Number.parseInt(value),
+														)
+													}
+												>
+													<FormControl>
+														<SelectTrigger>
+															<SelectValue placeholder="Select an interval" />
+														</SelectTrigger>
+													</FormControl>
+													<SelectContent>
+														<SelectItem value="none">
+															None (Disable Notifications)
+														</SelectItem>
+														<SelectItem value="60">1 Minute</SelectItem>
+														<SelectItem value="300">5 Minutes</SelectItem>
+														<SelectItem value="3600">1 Hour</SelectItem>
+														<SelectItem value="86400">1 Day</SelectItem>
+													</SelectContent>
+												</Select>
+												<FormDescription>
+													Time window to check the call threshold.
 												</FormDescription>
 												<FormMessage />
 											</FormItem>

@@ -189,6 +189,8 @@ export type Database = {
 					last_rate_limit_notified_at: string | null;
 					model: string | null;
 					name: string;
+					notification_interval_seconds: number | null;
+					notification_threshold: number | null;
 					schema_config: Json | null;
 					system_prompt: string | null;
 					team_id: string;
@@ -209,6 +211,8 @@ export type Database = {
 					last_rate_limit_notified_at?: string | null;
 					model?: string | null;
 					name: string;
+					notification_interval_seconds?: number | null;
+					notification_threshold?: number | null;
 					schema_config?: Json | null;
 					system_prompt?: string | null;
 					team_id: string;
@@ -229,6 +233,8 @@ export type Database = {
 					last_rate_limit_notified_at?: string | null;
 					model?: string | null;
 					name?: string;
+					notification_interval_seconds?: number | null;
+					notification_threshold?: number | null;
 					schema_config?: Json | null;
 					system_prompt?: string | null;
 					team_id?: string;
@@ -471,12 +477,7 @@ export type Database = {
 		};
 		Functions: {
 			check_and_notify_rate_limit: {
-				Args: {
-					p_project_id: string;
-					p_team_id: string;
-					p_time_window_seconds: number;
-					p_call_threshold: number;
-				};
+				Args: { p_project_id: string; p_team_id: string };
 				Returns: boolean;
 			};
 			create_team: {

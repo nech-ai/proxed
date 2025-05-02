@@ -11,13 +11,13 @@ interface CheckRateLimitParams {
 	projectId: string;
 	teamId: string;
 	projectName: string;
-	timeWindowSeconds?: number;
-	callThreshold?: number;
+	// timeWindowSeconds and callThreshold are removed as they are now fetched from the project
 }
 
 /**
  * Checks the project's execution rate limit and triggers a notification job if the threshold is met.
  * This runs as a background task using safeWaitUntil.
+ * The threshold and interval are read directly from the project settings in the database.
  */
 export function checkAndNotifyRateLimit({
 	c,
@@ -25,27 +25,37 @@ export function checkAndNotifyRateLimit({
 	projectId,
 	teamId,
 	projectName,
-	timeWindowSeconds = 300, // Default: 5 minutes
-	callThreshold = 10, // Default: 10 calls
 }: CheckRateLimitParams): void {
 	safeWaitUntil(
 		c,
 		(async () => {
-			// TODO: Figure out how to get currentRate accurately if needed for the job payload
-			const currentRatePlaceholder = callThreshold; // Placeholder
+			// Fetch project settings to pass to the job payload if needed
+			// We still need them here if the job needs the specific values
+			const { data: projectSettings, error: settingsError } = await supabase
+				.from("projects")
+				.select("notification_threshold, notification_interval_seconds")
+				.eq("id", projectId)
+				.single();
 
+			if (settingsError) {
+				logger.error("Failed to fetch project notification settings", {
+					projectId,
+					error: settingsError.message,
+				});
+				return;
+			}
+
+			// Call the RPC function which now handles checking based on DB settings
 			const { data: shouldNotify, error: rpcError } = await supabase.rpc(
 				"check_and_notify_rate_limit",
 				{
 					p_project_id: projectId,
-					p_team_id: teamId,
-					p_time_window_seconds: timeWindowSeconds,
-					p_call_threshold: callThreshold,
+					p_team_id: teamId, // Pass team_id as the function still expects it
 				},
 			);
 
 			if (rpcError) {
-				logger.error("Failed to check project rate limit", {
+				logger.error("Failed to check project rate limit via RPC", {
 					projectId,
 					teamId,
 					error: rpcError.message,
@@ -53,20 +63,25 @@ export function checkAndNotifyRateLimit({
 				return;
 			}
 
-			if (shouldNotify) {
-				// Consider if the job payload needs more accurate 'currentRate'
+			// If shouldNotify is true and settings were fetched successfully
+			if (
+				shouldNotify &&
+				projectSettings?.notification_threshold &&
+				projectSettings?.notification_interval_seconds
+			) {
 				await sendHighConsumptionNotification.trigger({
 					projectId,
 					teamId,
 					projectName: projectName,
-					threshold: callThreshold,
-					timeWindowSeconds: timeWindowSeconds,
-					currentRate: currentRatePlaceholder, // Use placeholder or adjust RPC
+					threshold: projectSettings.notification_threshold,
+					timeWindowSeconds: projectSettings.notification_interval_seconds,
+					// TODO: currentRate might need separate calculation if required by the job accurately
+					currentRate: projectSettings.notification_threshold, // Using threshold as placeholder
 				});
-				logger.info("High consumption notification triggered", {
+				logger.info("High consumption notification triggered for project", {
 					projectId,
 					teamId,
-					threshold: callThreshold,
+					threshold: projectSettings.notification_threshold,
 				});
 			}
 		})(),

@@ -111,10 +111,8 @@ grant all on function public.get_team_limits_metrics (p_team_id uuid) to service
 -- Function to check project rate limit, update notification timestamp, and return if notification should be sent
 CREATE OR REPLACE FUNCTION public.check_and_notify_rate_limit (
   p_project_id UUID,
-  p_team_id UUID, -- Added team_id for potential future use or logging, though not strictly needed for project lookup
-  p_time_window_seconds INT,
-  p_call_threshold INT
-) RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER -- Ensures function runs with definer privileges, necessary for updating projects table
+  p_team_id UUID -- Keep team_id for potential future use or logging
+) RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER
 SET
   search_path = public AS $$
 DECLARE
@@ -122,23 +120,30 @@ DECLARE
     v_last_notified TIMESTAMPTZ;
     v_notify BOOLEAN := FALSE;
     v_now TIMESTAMPTZ := now();
+    v_threshold INT;
+    v_interval_seconds INT;
 BEGIN
-    -- Check current execution count within the time window
+    -- Fetch project-specific notification settings
+    SELECT notification_threshold, notification_interval_seconds, last_rate_limit_notified_at
+    INTO v_threshold, v_interval_seconds, v_last_notified
+    FROM public.projects
+    WHERE id = p_project_id;
+
+    -- Only proceed if notification settings are configured for the project
+    IF v_threshold IS NULL OR v_interval_seconds IS NULL THEN
+        RETURN FALSE; -- Notifications not enabled or configured
+    END IF;
+
+    -- Check current execution count within the project's defined time window
     SELECT COUNT(*)
     INTO v_execution_count
     FROM public.executions
     WHERE project_id = p_project_id
-      AND created_at >= (v_now - (p_time_window_seconds * interval '1 second'));
+      AND created_at >= (v_now - (v_interval_seconds * interval '1 second'));
 
-    IF v_execution_count > p_call_threshold THEN
-        -- Check when the last notification was sent for this project
-        SELECT last_rate_limit_notified_at
-        INTO v_last_notified
-        FROM public.projects
-        WHERE id = p_project_id;
-
+    IF v_execution_count > v_threshold THEN
         -- Notify if no notification sent before or if last notification is older than the window
-        IF v_last_notified IS NULL OR v_last_notified < (v_now - (p_time_window_seconds * interval '1 second')) THEN
+        IF v_last_notified IS NULL OR v_last_notified < (v_now - (v_interval_seconds * interval '1 second')) THEN
             -- Update the last notified timestamp *before* setting notify flag to reduce race conditions
             UPDATE public.projects
             SET last_rate_limit_notified_at = v_now
@@ -152,11 +157,11 @@ BEGIN
 END;
 $$;
 
-ALTER FUNCTION public.check_and_notify_rate_limit (UUID, UUID, INT, INT) OWNER TO postgres;
+ALTER FUNCTION public.check_and_notify_rate_limit (UUID, UUID) OWNER TO postgres;
 
 -- Grant execution permission to the authenticated role (or service_role if called server-side)
 GRANT
-EXECUTE ON FUNCTION public.check_and_notify_rate_limit (UUID, UUID, INT, INT) TO authenticated;
+EXECUTE ON FUNCTION public.check_and_notify_rate_limit (UUID, UUID) TO authenticated;
 
 GRANT
-EXECUTE ON FUNCTION public.check_and_notify_rate_limit (UUID, UUID, INT, INT) TO service_role;
+EXECUTE ON FUNCTION public.check_and_notify_rate_limit (UUID, UUID) TO service_role;

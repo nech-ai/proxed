@@ -1,0 +1,72 @@
+---
+title: "Stay Ahead of Usage Spikes: Introducing Consumption Notifications"
+publishedAt: "2025-05-02"
+summary: "Configure custom alerts for high API call volume to manage costs and detect anomalies early."
+image: "/images/consumption-notification-settings.png"
+tag: "Feature"
+---
+
+Unexpected spikes in API usage can lead to surprise costs and potentially indicate issues like infinite loops or unauthorized access. To help you stay informed and in control, we're introducing configurable Consumption Notifications for your projects.
+
+<br />
+### Why Monitor Consumption?
+
+Keeping an eye on API call volume is crucial for several reasons:
+
+1.  **Cost Management**: High usage directly translates to higher costs. Early warnings allow you to investigate and intervene before bills escalate unexpectedly.
+2.  **Abuse Detection**: Sudden, unexplained spikes might signal that your client-side keys or device tokens have been compromised and are being used maliciously.
+3.  **Performance Insights**: Consistently high usage might indicate inefficiencies in your app's logic or opportunities for optimization.
+4.  **Capacity Planning**: Understanding usage patterns helps you anticipate needs and ensure you're on the right plan.
+
+<br />
+### Introducing Configurable Notifications
+
+You can now set custom thresholds for API call volume within specific time windows directly in your project settings. When your project exceeds this threshold, Proxed will trigger a notification (initially via email, with more channels planned).
+
+![Consumption Notification Settings](/images/consumption-notification-settings.png) # Placeholder for an image of the new UI section
+
+This gives you the flexibility to define what constitutes "high consumption" for *your* specific application needs.
+
+<br />
+### How It Works
+
+In your project settings, you'll find two new fields:
+
+1.  **Call Threshold**: The number of API calls that must occur within the defined interval to trigger an alert.
+2.  **Time Interval**: The duration (e.g., 5 minutes, 1 hour) over which the calls are counted.
+
+For example:
+- **Threshold: 100, Interval: 5 Minutes**: Get notified if your project makes more than 100 calls within any 5-minute window. Useful for catching sudden, sharp spikes.
+- **Threshold: 5000, Interval: 1 Hour**: Get notified if usage exceeds 5000 calls in an hour. Better for detecting sustained high load.
+
+If you leave either field blank (or set the interval to "None"), notifications for that project will be disabled.
+
+Our backend periodically checks the execution count for each project against its configured threshold and interval. To avoid alert fatigue, once a notification is sent, another won't be sent for the same project until the defined time interval has passed, even if the high usage continues within that window.
+
+<br />
+### Setting Up Your Alerts
+
+Configuring notifications is simple:
+
+1.  Navigate to your Project Settings page in the Proxed dashboard.
+2.  Locate the new "Consumption Notifications" section.
+3.  Enter a positive integer for the "Call Threshold".
+4.  Select a "Time Interval" from the dropdown (1 Minute, 5 Minutes, 1 Hour, 1 Day).
+5.  Save your changes.
+
+That's it! Proxed will now monitor your project's usage based on your rules.
+
+<br />
+### What's Next?
+
+This is the first step in providing more robust monitoring and alerting capabilities. We're already planning:
+
+-   Notifications via Slack and Webhooks.
+-   More granular control over notification frequency.
+-   Alerts based on cost thresholds, not just call volume.
+-   Integration with the main analytics dashboard.
+
+<br />
+### Take Control of Your Usage
+
+Consumption Notifications provide an essential layer of visibility and control over your AI integration costs and security. Head over to your project settings today and configure alerts that make sense for your application. We believe this feature will offer valuable peace of mind and help prevent unexpected issues down the line.

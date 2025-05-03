@@ -58,6 +58,7 @@ export const sendHighConsumptionNotification = schemaTask({
 						threshold: threshold,
 						timeWindowSeconds: timeWindowSeconds,
 						currentRate: currentRate,
+						teamId: teamId,
 					},
 					user: {
 						subscriberId: user.id,

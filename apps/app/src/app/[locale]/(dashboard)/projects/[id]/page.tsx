@@ -29,6 +29,7 @@ import {
 } from "@proxed/ui/components/alert";
 import { AlertTriangleIcon } from "lucide-react";
 import { z } from "zod";
+import { ProjectConnectionDetails } from "@/components/projects/project-connection-details";
 
 export async function generateMetadata(props: {
 	params: Promise<{ id: string }>;
@@ -102,6 +103,8 @@ export default async function Page(props: {
 						deviceChecks={deviceChecks?.data || []}
 						keys={keys?.data || []}
 					/>
+
+					<ProjectConnectionDetails project={project} />
 
 					<Card>
 						<CardHeader>

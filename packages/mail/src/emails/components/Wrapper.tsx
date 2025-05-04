@@ -66,7 +66,7 @@ export default function Wrapper({ children, previewText }: WrapperProps) {
 								className="text-[13px] leading-[20px] m-0"
 								style={{ color: darkTheme.mutedForeground }}
 							>
-								© {new Date().getFullYear()} Proxed.AI. All rights reserved.
+								© {new Date().getFullYear()} proxed.ai. All rights reserved.
 							</Text>
 							<Text
 								className="text-[13px] leading-[20px] m-0"

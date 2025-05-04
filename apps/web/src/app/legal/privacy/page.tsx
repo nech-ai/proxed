@@ -2,8 +2,8 @@ import { Section } from "@/components/section";
 import { generateMetadata } from "@/lib/metadata";
 
 export const metadata = generateMetadata({
-	title: "Privacy Policy | Proxed.AI",
-	description: "Privacy Policy for the Proxed.AI Service",
+	title: "Privacy Policy | proxed.ai",
+	description: "Privacy Policy for the proxed.ai Service",
 	path: "/legal/privacy",
 	noIndex: true,
 });
@@ -20,7 +20,7 @@ export default function PrivacyPage() {
 						<p>
 							Comonad Limited (Company Number: 15713725) ("we", "us", "our")
 							respects your privacy and is committed to protecting the personal
-							data we process when you use the Proxed.AI service (the
+							data we process when you use the proxed.ai service (the
 							"Service"). This Privacy Policy explains how we collect, use,
 							store, and protect your personal data, as well as your rights
 							regarding that data.

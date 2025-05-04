@@ -224,7 +224,7 @@ export function Pricing() {
 								Self-Host For Free
 							</GradientText>
 							<p className="text-base">
-								Proxed.AI is 100% open-source. Deploy on your own infrastructure
+								proxed.ai is 100% open-source. Deploy on your own infrastructure
 								with <span className="font-semibold">no usage limits</span>,
 								subscription fees, or vendor lock-in.
 							</p>

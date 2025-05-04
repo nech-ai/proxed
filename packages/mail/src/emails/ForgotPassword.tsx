@@ -18,7 +18,7 @@ export function ForgotPassword({
 	otp: string;
 }): JSX.Element {
 	return (
-		<Wrapper previewText={`Your Proxed.AI password reset code: ${otp}`}>
+		<Wrapper previewText={`Your proxed.ai password reset code: ${otp}`}>
 			<Text
 				className="text-[16px] leading-[26px] mb-[28px]"
 				style={{ color: darkTheme.foreground }}

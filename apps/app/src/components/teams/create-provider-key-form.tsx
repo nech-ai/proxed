@@ -312,7 +312,7 @@ export function CreateProviderKeyForm() {
 									<AccordionContent className="px-3 pb-3 text-xs">
 										<p className="text-muted-foreground mb-2">
 											Include the client key part in your API requests to
-											Proxed.AI:
+											proxed.ai:
 										</p>
 										<div className="bg-muted p-2 rounded-md font-mono text-xs mb-2 overflow-x-auto">
 											const apiKey = "{savedClientPart}";

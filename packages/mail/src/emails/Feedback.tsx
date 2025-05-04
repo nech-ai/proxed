@@ -44,7 +44,7 @@ export function Feedback({
 }
 
 Feedback.subjects = {
-	en: "Feedback from Proxed.AI",
+	en: "Feedback from proxed.ai",
 };
 
 export default Feedback;

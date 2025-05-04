@@ -5,9 +5,9 @@ import { getBlogPosts } from "@/lib/blog";
 import { generateMetadata } from "@/lib/metadata";
 
 export const metadata = generateMetadata({
-	title: "Product Updates & Engineering Blog | Proxed.AI",
+	title: "Product Updates & Engineering Blog | proxed.ai",
 	description:
-		"Stay updated on Proxed.AI's development journey. Read about our latest features, engineering insights, and product announcements as we build the future of AI model management.",
+		"Stay updated on proxed.ai's development journey. Read about our latest features, engineering insights, and product announcements as we build the future of AI model management.",
 	path: "/updates",
 });
 

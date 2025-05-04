@@ -18,7 +18,7 @@ export default function TermsPage() {
 
 					<h2>1. Introduction</h2>
 					<p>
-						These Terms & Conditions ("Terms") govern your use of the Proxed.AI
+						These Terms & Conditions ("Terms") govern your use of the proxed.ai
 						service (the "Service") provided by Comonad Limited (Company Number:
 						15713725) ("we", "us", "our"). By accessing or using the Service,
 						you agree to be bound by these Terms. If you do not agree to these
@@ -27,7 +27,7 @@ export default function TermsPage() {
 
 					<h2>2. Description of Service</h2>
 					<p>
-						Proxed.AI provides an API proxy and related services designed to
+						proxed.ai provides an API proxy and related services designed to
 						enhance security, performance, and observability for API
 						interactions (the "Service"). The specific features and
 						functionalities are subject to change.
@@ -170,7 +170,7 @@ export default function TermsPage() {
 						</p>
 
 						<p className="mt-4 text-gray-400">
-							By using the Proxed.AI Service, you acknowledge that you have
+							By using the proxed.ai Service, you acknowledge that you have
 							read, understood, and agree to be bound by these Terms &
 							Conditions.
 						</p>

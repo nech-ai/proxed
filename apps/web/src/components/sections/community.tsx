@@ -30,7 +30,7 @@ export function Community() {
 				<Ripple />
 				<div className="p-6 text-center py-12">
 					<p className="text-muted-foreground mb-6 text-balance max-w-prose mx-auto font-medium">
-						Proxed.AI is built in the open by developers who believe security
+						proxed.ai is built in the open by developers who believe security
 						shouldn't require a PhD. Contribute code, report issues, or help
 						improve our documentation. Every contribution matters.
 					</p>

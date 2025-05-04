@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
 			);
 
 			await resend.emails.send({
-				from: "Proxed.AI <no-reply@mail.proxed.ai>",
+				from: "Proxedbot <no-reply@mail.proxed.ai>",
 				to: [user.email],
 				subject: "Reset your password",
 				html,
@@ -84,9 +84,9 @@ Deno.serve(async (req) => {
 			);
 
 			await resend.emails.send({
-				from: "Proxed.AI <no-reply@mail.proxed.ai>",
+				from: "Proxedbot <no-reply@mail.proxed.ai>",
 				to: [user.email],
-				subject: "Login to Proxed.AI",
+				subject: "Login to proxed.ai",
 				html,
 			});
 			break;

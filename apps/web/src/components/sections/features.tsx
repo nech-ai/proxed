@@ -94,7 +94,7 @@ export function Features() {
 			id="features"
 			title="Features"
 			subtitle="Everything you need to secure your AI integration"
-			description="Proxed.AI provides a comprehensive set of features to help you secure and manage your AI API keys and responses."
+			description="proxed.ai provides a comprehensive set of features to help you secure and manage your AI API keys and responses."
 			align="center"
 		>
 			<motion.div

@@ -22,9 +22,9 @@ export function generateMetadata({
 	const fullUrl = `${baseUrl}${normalizedPath}`;
 
 	const defaultTitle =
-		"Proxed.AI - Secure AI APIs in Seconds—No SDK, No Backend Needed";
+		"proxed.ai - Secure AI APIs in Seconds—No SDK, No Backend Needed";
 	const defaultDescription =
-		"Proxed.AI is the simplest way to protect AI API keys in iOS apps. Lock down your API credentials, verify device authenticity with Apple's DeviceCheck, and structure AI outputs—all without a backend. Open-source and available for self-hosting.";
+		"proxed.ai is the simplest way to protect AI API keys in iOS apps. Lock down your API credentials, verify device authenticity with Apple's DeviceCheck, and structure AI outputs—all without a backend. Open-source and available for self-hosting.";
 
 	const defaultKeywords = [
 		"AI API Security",
@@ -48,9 +48,9 @@ export function generateMetadata({
 		title: {
 			absolute: title || defaultTitle,
 			default: defaultTitle,
-			template: "%s | Proxed.AI",
+			template: "%s | proxed.ai",
 		},
-		applicationName: "Proxed.AI",
+		applicationName: "proxed.ai",
 
 		description: description || defaultDescription,
 		alternates: {
@@ -63,13 +63,13 @@ export function generateMetadata({
 			title: title || defaultTitle,
 			description: description || defaultDescription,
 			url: fullUrl,
-			siteName: "Proxed.AI",
+			siteName: "proxed.ai",
 			images: [
 				{
 					url: ogImage,
 					width: 800,
 					height: 600,
-					alt: "Proxed.AI - Secure AI APIs in Seconds",
+					alt: "proxed.ai - Secure AI APIs in Seconds",
 				},
 			],
 			locale: "en_GB",
@@ -114,11 +114,11 @@ export function generateMetadata({
 export const jsonLd = {
 	"@context": "https://schema.org",
 	"@type": "SoftwareApplication",
-	name: "Proxed.AI",
+	name: "proxed.ai",
 	applicationCategory: "DeveloperApplication",
 	operatingSystem: "iOS",
 	description:
-		"Secure AI APIs in Seconds—No SDK, No Backend Needed. Proxed.AI is the simplest way to protect AI API keys in iOS apps with DeviceCheck authentication.",
+		"Secure AI APIs in Seconds—No SDK, No Backend Needed. proxed.ai is the simplest way to protect AI API keys in iOS apps with DeviceCheck authentication.",
 	offers: {
 		"@type": "Offer",
 		price: "2.50",
@@ -143,7 +143,7 @@ export const jsonLd = {
 	},
 	provider: {
 		"@type": "Organization",
-		name: "Proxed.AI",
+		name: "proxed.ai",
 		url: "https://proxed.ai",
 		sameAs: ["https://github.com/nech-ai/proxed", "https://x.com/vahaah"],
 	},

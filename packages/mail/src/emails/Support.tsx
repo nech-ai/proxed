@@ -89,7 +89,7 @@ export function Support({
 }
 
 Support.subjects = {
-	en: "Support request from Proxed.AI",
+	en: "Support request from proxed.ai",
 };
 
 export default Support;

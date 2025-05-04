@@ -18,7 +18,7 @@ export function MagicLink({
 	otp: string;
 }): JSX.Element {
 	return (
-		<Wrapper previewText={`Your Proxed.AI login code: ${otp}`}>
+		<Wrapper previewText={`Your proxed.ai login code: ${otp}`}>
 			<Text
 				className="text-[16px] leading-[26px] mb-[28px]"
 				style={{ color: darkTheme.foreground }}
@@ -26,7 +26,7 @@ export function MagicLink({
 				Hey {name},
 				<br />
 				<br />
-				You requested a login email from Proxed.AI. You can authenticate using
+				You requested a login email from proxed.ai. You can authenticate using
 				either method below:
 			</Text>
 
@@ -35,7 +35,7 @@ export function MagicLink({
 			<Divider />
 
 			<div className="text-center mb-[28px]">
-				<PrimaryButton href={url}>Continue to Proxed.AI →</PrimaryButton>
+				<PrimaryButton href={url}>Continue to proxed.ai →</PrimaryButton>
 			</div>
 
 			<UrlCopy url={url} />
@@ -46,7 +46,7 @@ export function MagicLink({
 }
 
 MagicLink.subjects = {
-	en: "Login to Proxed.AI",
+	en: "Login to proxed.ai",
 };
 
 export default MagicLink;

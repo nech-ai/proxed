@@ -24,7 +24,7 @@ export function ConsentBanner() {
 			)}
 		>
 			<div className="text-sm text-muted-foreground leading-relaxed">
-				Proxed.AI uses tracking technologies. You may opt in or opt out of the
+				proxed.ai uses tracking technologies. You may opt in or opt out of the
 				use of these technologies.
 			</div>
 			<div className="flex justify-end space-x-3">

@@ -2,8 +2,8 @@ import { Section } from "@/components/section";
 import { generateMetadata } from "@/lib/metadata";
 
 export const metadata = generateMetadata({
-	title: "Cookie Policy | Proxed.AI",
-	description: "Cookie Policy for the Proxed.AI Service and Website",
+	title: "Cookie Policy | proxed.ai",
+	description: "Cookie Policy for the proxed.ai Service and Website",
 	path: "/legal/cookies",
 	noIndex: true,
 });

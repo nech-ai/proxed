@@ -78,7 +78,7 @@ export default async function Page() {
 								Hardware-Level Security
 							</GradientText>
 							<p className="text-gray-400 leading-relaxed">
-								Proxed.AI integrates Apple's DeviceCheck to ensure only
+								proxed.ai integrates Apple's DeviceCheck to ensure only
 								legitimate iOS devices can access your AI APIs. This powerful
 								authentication system verifies device authenticity at the
 								hardware level, blocking emulators, jailbroken devices, and
@@ -94,7 +94,7 @@ export default async function Page() {
 								Zero Configuration Required
 							</GradientText>
 							<p className="text-gray-400 leading-relaxed">
-								Every request through Proxed.AI is automatically validated using
+								Every request through proxed.ai is automatically validated using
 								Apple's secure DeviceCheck tokens. These cryptographic tokens
 								prove that the request comes from a genuine Apple device,
 								providing an additional layer of security beyond traditional API

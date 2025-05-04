@@ -1,10 +1,110 @@
 ---
 title: Structured Responses
 description: |
-  Return structured responses from AI APIs.
+  Define and enforce structured data formats for AI model outputs using proxed.ai's schema builder.
 ---
 
 # Structured Responses
 
-Coming soon.
+proxed.ai allows you to define a specific structure or schema for the data you want an AI model to return. Instead of receiving unpredictable free-form text, you get consistently formatted data (like JSON) that matches your predefined schema. This makes integrating AI outputs into your applications significantly more reliable and straightforward.
+
+## Why Use Structured Responses?
+
+- **Predictability:** Ensures the AI output always adheres to a known format.
+- **Reliability:** Reduces errors caused by variations in the AI's text generation.
+- **Easy Integration:** Directly use the structured output (e.g., JSON) without complex parsing logic.
+- **Data Extraction:** Precisely extract specific pieces of information from text.
+- **Type Safety:** Generate corresponding code (TypeScript/Zod, Swift) for type checking on the client-side.
+
+## Defining Your Schema
+
+You can define the output schema for your project directly within the proxed.ai dashboard using the Schema Builder. Navigate to your project's page to access it.
+
+### 1. Visual Builder
+
+The visual builder provides an intuitive interface to construct your schema:
+
+![Schema Builder Visual Editor](/images/docs/guides/structured-responses/schema-builder-visual.png)
+
+- **Add Fields:** Click "Add Field" to create a new entry in your schema. Define its name, type, and optionally a description.
+- **Supported Types:**
+    - `string`: Text data. Supports constraints like min/max length, format validation (email, URL, UUID).
+    - `number`: Numerical data. Supports constraints like min/max value and integer-only validation.
+    - `boolean`: True/false values.
+    - `array`: A list of items, all conforming to a specified `Item Type`. Supports min/max item count.
+    - `object`: A nested structure containing its own set of fields.
+    - `enum`: A field restricted to a predefined list of string values.
+- **Optional Fields:** Mark fields as optional if they are not required in the response.
+- **Descriptions:** Add descriptions to fields for clarity. These descriptions might also help guide the AI model.
+- **Nesting:** Create complex structures by nesting `object` and `array` types.
+- **Reordering:** Drag and drop fields to change their order within an object.
+- **Validation Rules:** Configure type-specific validation rules (e.g., min/max length for strings) using the settings icon for each field.
+
+### 2. Importing Code
+
+Alternatively, you can import an existing schema definition written in TypeScript (using Zod) or Swift.
+
+![Schema Builder Import Code](/images/docs/guides/structured-responses/schema-builder-import.png)
+
+- Click the "Import Code" button.
+- Select the language (Zod or Swift).
+- Paste your code into the editor.
+- Click "Import". proxed.ai will parse the code and translate it into the visual schema representation.
+
+**Example Zod Import:**
+```typescript
+import { z } from "zod";
+
+export const userSchema = z.object({
+  name: z.string().min(2).describe("User's full name"),
+  email: z.string().email(),
+  age: z.number().int().positive().optional(),
+  roles: z.array(z.enum(["admin", "user", "guest"])),
+});
+```
+
+**Example Swift Import:**
+```swift
+struct User: Codable {
+    var name: String // User's full name
+    var email: String
+    var age: Int?
+    var roles: [Role]
+
+    enum Role: String, Codable {
+        case admin
+        case user
+        case guest
+    }
+}
+```
+
+## Generated Code
+
+Once you define your schema, proxed.ai automatically generates corresponding code definitions for both TypeScript (Zod) and Swift. You can view and copy this code from the tabs in the Schema Builder section.
+
+![Schema Builder Code Views](/images/docs/guides/structured-responses/schema-builder-code-tabs.png)
+
+This generated code is useful for:
+- **Client-side Validation:** Ensuring data received from the API matches the expected schema.
+- **Type Safety:** Providing static types for the response data in your application code.
+
+## How It Works
+
+When you make a request through the proxed.ai proxy endpoint associated with your project:
+
+1.  proxed.ai retrieves the schema you defined for that project.
+2.  It instructs the underlying AI provider (e.g., OpenAI, Anthropic) using their specific function calling or tool use capabilities.
+3.  The AI model is constrained to generate an output that strictly conforms to your schema.
+4.  proxed.ai validates the model's output against the schema before returning it to you.
+
+This process ensures that the data you receive is structured, validated, and ready to use.
+
+## Use Cases
+
+- Extracting contact information (name, email, phone) from unstructured text.
+- Classifying sentiment (positive, negative, neutral) from user reviews.
+- Generating product descriptions with specific fields (name, features, price).
+- Summarizing articles into key bullet points (stored as an array of strings).
+- Routing user queries based on intent classification (e.g., sales, support, general).
 

@@ -1,0 +1,115 @@
+---
+title: "Beyond DeviceCheck: Future-Proofing Your iOS App's API Security"
+publishedAt: "2025-05-05"
+summary: "DeviceCheck is a strong foundation, but true mobile API security requires layers. Explore how Proxed.AI fits into a defense-in-depth strategy with certificate pinning, app integrity, and more."
+image: "/images/starting.png"
+tag: "Security"
+---
+
+Protecting AI API keys in mobile apps is critical. Missteps can lead to ballooning costs, unauthorized data access, and service disruption. We've previously discussed how [Apple's DeviceCheck is a powerful tool](https://proxed.ai/updates/devicecheck-security) for verifying that requests originate from legitimate iOS devices running your app, a core feature integrated deeply into [Proxed.AI](https://proxed.ai/).
+
+But while DeviceCheck provides a robust foundation, relying solely on one mechanism isn't enough for truly future-proof security. The best approach is "Defense in Depth" - layering multiple security measures so that if one fails, others still protect your application and backend. Let's explore these layers and see how Proxed.AI fits into this comprehensive strategy.
+
+<br />
+### Layer 1: Secure Gateway & Device Verification (Proxed.AI + DeviceCheck)
+
+This is the foundational layer Proxed.AI provides. When your app sends a request:
+
+1.  **Proxed Acts as a Secure Gateway**: Your app calls the Proxed API endpoint, not the AI provider directly.
+2.  **Partial Key Security**: Your app authenticates using a [partial API key](https://docs.proxed.ai/partial-keys), meaning the full provider key is never exposed client-side or stored completely on our servers.
+3.  **DeviceCheck Validation**: Proxed automatically verifies the included DeviceCheck token with Apple's servers, ensuring the request comes from a genuine instance of your app on a legitimate iOS device.
+
+This layer confirms the *request source* is trustworthy and protects the *provider API key* from exposure and direct abuse. It stops casual attackers, scrapers, and emulators cold.
+
+<br />
+### Layer 2: Securing the Client-to-Gateway Connection
+
+Your app needs to communicate securely with the Proxed.AI endpoint (or your self-hosted instance).
+
+*   **HTTPS is Mandatory**: This is non-negotiable. All traffic must be encrypted using TLS. Proxed.AI endpoints enforce this.
+*   **Certificate Pinning**: For an extra layer of protection against sophisticated Man-in-the-Middle (MITM) attacks, consider certificate pinning.
+    *   **What it is**: Instead of trusting any certificate signed by a known Certificate Authority (CA), your app is configured to *only* trust the specific certificate(s) used by your backend server (e.g., `api.proxed.ai`). If a different certificate is presented (even a valid one signed by a trusted CA), the connection fails.
+    *   **Pros**: Prevents MITM attacks even if a CA is compromised or a malicious certificate is installed on the user's device.
+    *   **Cons**: Requires careful implementation and maintenance. If the server certificate changes and your app's pin isn't updated, your app will stop working. Frameworks like TrustKit can help manage this.
+    *   **Recommendation**: Essential for high-security applications handling sensitive data. For many apps using Proxed, relying on standard HTTPS validation might be sufficient, but pinning adds significant resilience.
+
+<br />
+### Layer 3: Protecting the App Itself
+
+DeviceCheck verifies the *device*, but what about the *app binary* running on it?
+
+*   **App Integrity / Anti-Tampering**:
+    *   **What it is**: Techniques to detect if your app's code has been modified after installation (e.g., through repackaging or runtime manipulation on jailbroken devices).
+    *   **Why it matters**: Attackers might modify your app to bypass client-side logic (like input validation or rate limits) or attempt to extract embedded information.
+    *   **Proxed's Role**: Proxed relies on DeviceCheck for device/app validity, not runtime integrity checks. Implementing app integrity requires additional client-side SDKs or manual checks.
+*   **Secure Local Storage (Keychain)**:
+    *   **What it is**: Using the iOS Keychain to store sensitive client-side data instead of less secure options like `UserDefaults`.
+    *   **Why it matters**: While the Proxed partial key isn't the full API key, it's still sensitive information specific to your app's communication with the proxy. Storing it securely in the Keychain prevents other apps or trivial filesystem inspection from accessing it.
+
+```swift
+// Conceptual: Storing the partial key securely
+import Security
+
+func savePartialKey(_ key: String) {
+    guard let data = key.data(using: .utf8) else { return }
+    let query: [String: Any] = [
+        kSecClass as String: kSecClassGenericPassword,
+        kSecAttrAccount as String: "proxedPartialApiKey",
+        kSecValueData as String: data,
+        kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly // Example accessibility
+    ]
+    SecItemDelete(query as CFDictionary) // Delete existing item first
+    SecItemAdd(query as CFDictionary, nil)
+}
+
+// Conceptual: Retrieving the partial key
+func loadPartialKey() -> String? {
+    let query: [String: Any] = [
+        kSecClass as String: kSecClassGenericPassword,
+        kSecAttrAccount as String: "proxedPartialApiKey",
+        kSecReturnData as String: kCFBooleanTrue!,
+        kSecMatchLimit as String: kSecMatchLimitOne
+    ]
+    var dataTypeRef: AnyObject?
+    let status = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
+
+    if status == errSecSuccess, let retrievedData = dataTypeRef as? Data {
+        return String(data: retrievedData, encoding: .utf8)
+    }
+    return nil
+}
+```
+
+<br />
+### Layer 4: Client-Side Controls (Complementary to Server-Side)
+
+While Proxed handles crucial server-side validation, good client-side practices add efficiency and robustness:
+
+*   **Input Validation**: Don't rely solely on server-side (or Proxed's structured response) validation. Check user input *before* sending it to the Proxed API. This prevents unnecessary API calls for obviously invalid data, saving costs and improving responsiveness.
+*   **Client-Side Rate Limiting**: Implement basic throttling within the app itself (e.g., disabling a button temporarily after a request). This prevents users from accidentally spamming requests and provides a better user experience, acting as a first defense before server-side rate limits are hit.
+
+<br />
+### How Proxed.AI Fits Into Your Defense in Depth
+
+Proxed.AI isn't meant to be the *only* security measure you use, but it provides critical, complex-to-implement server-side layers out-of-the-box:
+
+*   ✅ Secure API Key Gateway (Partial Keys)
+*   ✅ Hardware-Level Device Verification (DeviceCheck)
+*   ✅ Server-Side Request Validation (via Structured Response Schemas)
+*   ✅ (Coming Soon) Centralized Usage Monitoring and Logging
+*   ✅ (Coming Soon) Server-Side Rate Limiting & Cost Controls
+
+By handling these server-side responsibilities, Proxed.AI frees you up to focus on implementing complementary client-side security measures like certificate pinning, app integrity checks, and secure local storage, creating a truly robust defense.
+
+<br />
+### Conclusion
+
+Securing AI APIs in mobile apps requires more than just hiding a key. A layered, defense-in-depth strategy is essential for future-proofing your application.
+
+1.  **Gateway Security**: Use a proxy like Proxed.AI.
+2.  **Device Verification**: Leverage DeviceCheck (handled by Proxed).
+3.  **Transport Security**: Enforce HTTPS; consider Certificate Pinning.
+4.  **App Security**: Implement integrity checks and secure local storage (Keychain).
+5.  **Client Controls**: Add client-side validation and rate limiting.
+
+No single layer is foolproof, but together they create a formidable barrier against abuse. Proxed.AI provides the foundational server-side layers, significantly simplifying the task of building secure, AI-powered iOS applications.

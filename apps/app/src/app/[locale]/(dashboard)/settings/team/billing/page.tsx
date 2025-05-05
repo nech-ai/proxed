@@ -3,7 +3,7 @@ import { Plans } from "@/components/settings/team/billings/plans";
 import { UsageSkeleton } from "@/components/settings/team/billings/usage";
 import { UsageServer } from "@/components/settings/team/billings/usage.server";
 import { canChooseStarterPlanQuery } from "@/utils/plans-server";
-import { getTeamBilling, getUser } from "@proxed/supabase/cached-queries";
+import { getUser } from "@proxed/supabase/cached-queries";
 import { Suspense } from "react";
 
 export async function generateMetadata() {
@@ -14,9 +14,8 @@ export async function generateMetadata() {
 
 export default async function Page() {
 	const { data: user } = await getUser();
-	const { data: billing } = await getTeamBilling();
-
 	const team = user?.team;
+
 	const canChooseStarterPlan = await canChooseStarterPlanQuery(team?.id);
 	return (
 		<div className="grid grid-cols-1 gap-6">
@@ -24,7 +23,7 @@ export default async function Page() {
 				<ManageSubscription
 					teamId={team?.id}
 					plan={team?.plan}
-					canceledAt={billing?.canceled_at}
+					canceledAt={team?.canceled_at}
 				/>
 			)}
 			{team?.plan === "trial" && (

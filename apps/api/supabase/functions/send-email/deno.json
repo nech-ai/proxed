@@ -1,11 +1,11 @@
 {
 	"imports": {
 		"@react-email/component": "npm:@react-email/components@0.0.36",
-		"@react-email/render": "npm:@react-email/render@1.0.6",
+		"@react-email/render": "npm:@react-email/render@1.1.0",
 		"react": "npm:react@19.1.0",
 		"react-dom": "npm:react-dom@19.1.0",
 		"resend": "npm:resend@4.0.1",
-		"react-email": "npm:react-email@4.0.4",
+		"react-email": "npm:react-email@4.0.11",
 		"standardwebhooks": "https://esm.sh/standardwebhooks@1.0.0",
 		"@proxed/mail": "https://esm.sh/gh/nech-ai/proxed/packages/mail/src/index.ts",
 		"@proxed/mail/emails/MagicLink": "https://esm.sh/gh/nech-ai/proxed/packages/mail/src/emails/MagicLink.tsx",
@@ -15,5 +15,6 @@
 	},
 	"lock": {
 		"frozen": true
-	}
+	},
+	"nodeModulesDir": "auto"
 }

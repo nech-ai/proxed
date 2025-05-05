@@ -259,7 +259,7 @@ export function ProjectTestMode({ project }: ProjectTestModeProps) {
 									</AccordionTrigger>
 									<AccordionContent className="px-3 pb-3 text-xs">
 										<p className="text-muted-foreground mb-2">
-											Include the test key in your API requests to proxed.ai:
+											Include the test key in your API requests to Proxed.AI:
 										</p>
 										<div className="bg-muted p-2 rounded-md font-mono text-xs mb-2 overflow-x-auto">
 											var request = URLRequest(url: URL(string: endpoint)!)

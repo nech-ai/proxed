@@ -1,12 +1,12 @@
 ---
 title: Structured Responses
 description: |
-  Define and enforce structured data formats for AI model outputs using proxed.ai's schema builder.
+  Define and enforce structured data formats for AI model outputs using Proxed.AI's schema builder.
 ---
 
 # Structured Responses
 
-proxed.ai allows you to define a specific structure or schema for the data you want an AI model to return. Instead of receiving unpredictable free-form text, you get consistently formatted data (like JSON) that matches your predefined schema. This makes integrating AI outputs into your applications significantly more reliable and straightforward.
+Proxed.AI allows you to define a specific structure or schema for the data you want an AI model to return. Instead of receiving unpredictable free-form text, you get consistently formatted data (like JSON) that matches your predefined schema. This makes integrating AI outputs into your applications significantly more reliable and straightforward.
 
 ## Why Use Structured Responses?
 
@@ -18,7 +18,7 @@ proxed.ai allows you to define a specific structure or schema for the data you w
 
 ## Defining Your Schema
 
-You can define the output schema for your project directly within the proxed.ai dashboard using the Schema Builder. Navigate to your project's page to access it.
+You can define the output schema for your project directly within the Proxed.AI dashboard using the Schema Builder. Navigate to your project's page to access it.
 
 ### 1. Visual Builder
 
@@ -49,7 +49,7 @@ Alternatively, you can import an existing schema definition written in TypeScrip
 - Click the "Import Code" button.
 - Select the language (Zod or Swift).
 - Paste your code into the editor.
-- Click "Import". proxed.ai will parse the code and translate it into the visual schema representation.
+- Click "Import". Proxed.AI will parse the code and translate it into the visual schema representation.
 
 **Example Zod Import:**
 ```typescript
@@ -81,7 +81,7 @@ struct User: Codable {
 
 ## Generated Code
 
-Once you define your schema, proxed.ai automatically generates corresponding code definitions for both TypeScript (Zod) and Swift. You can view and copy this code from the tabs in the Schema Builder section.
+Once you define your schema, Proxed.AI automatically generates corresponding code definitions for both TypeScript (Zod) and Swift. You can view and copy this code from the tabs in the Schema Builder section.
 
 ![Schema Builder Code Views](/images/docs/guides/structured-responses/schema-builder-code-tabs.png)
 
@@ -91,12 +91,12 @@ This generated code is useful for:
 
 ## How It Works
 
-When you make a request through the proxed.ai proxy endpoint associated with your project:
+When you make a request through the Proxed.AI proxy endpoint associated with your project:
 
-1.  proxed.ai retrieves the schema you defined for that project.
+1.  Proxed.AI retrieves the schema you defined for that project.
 2.  It instructs the underlying AI provider (e.g., OpenAI, Anthropic) using their specific function calling or tool use capabilities.
 3.  The AI model is constrained to generate an output that strictly conforms to your schema.
-4.  proxed.ai validates the model's output against the schema before returning it to you.
+4.  Proxed.AI validates the model's output against the schema before returning it to you.
 
 This process ensures that the data you receive is structured, validated, and ready to use.
 

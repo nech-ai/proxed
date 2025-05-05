@@ -77,7 +77,7 @@ export function Logo({
 				</g>
 			</svg>
 
-			{withLabel && <span className="ml-3 text-lg md:block">proxed.ai</span>}
+			{withLabel && <span className="ml-3 text-lg md:block">Proxed.AI</span>}
 		</span>
 	);
 }

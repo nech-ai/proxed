@@ -19,7 +19,7 @@ export function NewUser({
 }): JSX.Element {
 	return (
 		<Wrapper
-			previewText={`Welcome to proxed.ai! Confirm your email with code: ${otp}`}
+			previewText={`Welcome to Proxed.AI! Confirm your email with code: ${otp}`}
 		>
 			<Text
 				className="text-[16px] leading-[26px] mb-[28px]"
@@ -28,7 +28,7 @@ export function NewUser({
 				Hey {name},
 				<br />
 				<br />
-				Welcome to proxed.ai! Please confirm your email address using either
+				Welcome to Proxed.AI! Please confirm your email address using either
 				method below:
 			</Text>
 
@@ -48,7 +48,7 @@ export function NewUser({
 }
 
 NewUser.subjects = {
-	en: "Welcome to proxed.ai!",
+	en: "Welcome to Proxed.AI!",
 };
 
 export default NewUser;

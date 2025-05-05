@@ -12,7 +12,7 @@ import {
 export const BLUR_FADE_DELAY = 0.15;
 
 export const siteConfig = {
-	name: "proxed.ai",
+	name: "Proxed.AI",
 	description: "Secure AI API Integration for iOS Apps in Seconds",
 	cta: "Start Securing Your API",
 	url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
@@ -32,7 +32,7 @@ export const siteConfig = {
 	hero: {
 		title: "Secure Your AI Keys in iOS Apps—No Backend Required",
 		description:
-			"proxed.ai protects your AI API credentials in mobile apps with just one URL change. Instantly verify genuine iOS devices, prevent credential theft, and control AI costs—without building a custom backend or SDK integration.",
+			"Proxed.AI protects your AI API credentials in mobile apps with just one URL change. Instantly verify genuine iOS devices, prevent credential theft, and control AI costs—without building a custom backend or SDK integration.",
 		cta: "Secure Your AI APIs Now",
 		ctaDescription: "Open-source and self-hostable. No vendor lock-in.",
 	},
@@ -65,9 +65,9 @@ export const siteConfig = {
 		},
 
 		solution: {
-			title: "proxed.ai – One URL Change, Complete Protection",
+			title: "Proxed.AI - One URL Change, Complete Protection",
 			description:
-				"proxed.ai is a secure proxy for all your AI API calls. Just change your API endpoint and get enterprise-grade security instantly.",
+				"Proxed.AI is a secure proxy for all your AI API calls. Just change your API endpoint and get enterprise-grade security instantly.",
 			points: [
 				{
 					title: "Zero Backend Development",
@@ -203,8 +203,8 @@ export const siteConfig = {
 			{ text: "Privacy Policy", url: "/legal/privacy" },
 			{ text: "Terms of Service", url: "/legal/terms" },
 		],
-		bottomText: "All rights reserved. © proxed.ai",
-		brandText: "proxed.ai",
+		bottomText: "All rights reserved. © Proxed.AI",
+		brandText: "Proxed.AI",
 	},
 };
 

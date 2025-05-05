@@ -12,7 +12,7 @@ const AUTHORS: Record<string, Author> = {
 	alex: {
 		name: "Alex Vakhitov",
 		src: "https://pbs.twimg.com/profile_images/1771528956103016448/WcMTWAZp_400x400.jpg",
-		tagline: "Founder & CEO, proxed.ai",
+		tagline: "Founder & CEO, Proxed.AI",
 	},
 } as const;
 

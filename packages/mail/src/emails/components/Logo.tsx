@@ -92,7 +92,7 @@ export function Logo({
 						lineHeight: "1",
 					}}
 				>
-					proxed.ai
+					Proxed.AI
 				</span>
 			)}
 		</div>

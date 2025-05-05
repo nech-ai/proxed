@@ -2,8 +2,8 @@ import { Section } from "@/components/section";
 import { generateMetadata } from "@/lib/metadata";
 
 export const metadata = generateMetadata({
-	title: "Cookie Policy | proxed.ai",
-	description: "Cookie Policy for the proxed.ai Service and Website",
+	title: "Cookie Policy | Proxed.AI",
+	description: "Cookie Policy for the Proxed.AI Service and Website",
 	path: "/legal/cookies",
 	noIndex: true,
 });
@@ -19,7 +19,7 @@ export default function CookiesPage() {
 					<div className="mb-8">
 						<p>
 							Comonad Limited (Company Number: 15713725) ("we", "us", "our")
-							uses cookies and similar technologies on the proxed.ai website and
+							uses cookies and similar technologies on the Proxed.AI website and
 							related service platform (collectively, the "Service") to improve
 							user experience, analyse traffic, provide functionality, and
 							ensure security. This Cookie Policy explains what cookies are, how

@@ -13,7 +13,7 @@ export function TeamInvitation({
 	teamName: string;
 }): JSX.Element {
 	return (
-		<Wrapper previewText={`Join the team ${teamName} on proxed.ai`}>
+		<Wrapper previewText={`Join the team ${teamName} on Proxed.AI`}>
 			<Heading
 				className="text-[24px] font-bold mb-[24px]"
 				style={{ color: darkTheme.foreground }}

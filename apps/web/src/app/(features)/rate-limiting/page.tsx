@@ -7,7 +7,7 @@ import Link from "next/link";
 export const metadata = generateMetadata({
 	title: "Rate Limiting & Cost Control - Coming Soon",
 	description:
-		"Coming Soon: Monitor API usage, set request limits, and prevent runaway costs automatically with proxed.ai's comprehensive rate limiting system.",
+		"Coming Soon: Monitor API usage, set request limits, and prevent runaway costs automatically with Proxed.AI's comprehensive rate limiting system.",
 	path: "/rate-limiting",
 });
 

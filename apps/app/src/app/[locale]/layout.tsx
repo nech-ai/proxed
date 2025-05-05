@@ -10,8 +10,8 @@ import { I18nProviderClient } from "@/locales/client";
 
 export const metadata: Metadata = {
 	title: {
-		absolute: "proxed.ai",
-		default: "proxed.ai",
+		absolute: "Proxed.AI",
+		default: "Proxed.AI",
 	},
 };
 

@@ -8,7 +8,7 @@ import { codeToHtml } from "shiki";
 export const metadata = generateMetadata({
 	title: "Secure Your AI API",
 	description:
-		"proxed.ai acts as a secure proxy—just update your API URL and instantly protect your AI calls. Founded by Alex Vakhitov, we're building an open-source platform for secure AI integration.",
+		"Proxed.AI acts as a secure proxy—just update your API URL and instantly protect your AI calls. Founded by Alex Vakhitov, we're building an open-source platform for secure AI integration.",
 	path: "/secure",
 });
 
@@ -104,7 +104,7 @@ export default async function Page() {
 								Simple Yet Powerful
 							</GradientText>
 							<p className="text-gray-400 leading-relaxed">
-								proxed.ai makes securing your AI integration as simple as
+								Proxed.AI makes securing your AI integration as simple as
 								changing a URL. No complex setup, no infrastructure changes—just
 								point your API calls to our secure proxy and instantly gain
 								enterprise-grade protection for your AI services. We handle
@@ -121,7 +121,7 @@ export default async function Page() {
 								Open Source Security
 							</GradientText>
 							<p className="text-gray-400 leading-relaxed">
-								Security should be transparent. That's why proxed.ai is open
+								Security should be transparent. That's why Proxed.AI is open
 								source, letting you verify our protection mechanisms and
 								contribute to making AI integration safer for everyone. Our
 								proxy service combines DeviceCheck verification, secure API key

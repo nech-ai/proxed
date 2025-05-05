@@ -1,7 +1,7 @@
 ![hero](apps/web/public/opengraph-image.png)
 
 <p align="center">
-  <h1 align="center"><b>proxed.ai</b></h1>
+  <h1 align="center"><b>Proxed.AI</b></h1>
   <p align="center">
     Secure AI Integration for iOS Apps
     <br />
@@ -13,9 +13,9 @@
 </p>
 
 
-## About proxed.ai
+## About Proxed.AI
 
-proxed.ai is a secure proxy backend for iOS apps that protects your AI API keys and controls AI responses. It uses Apple's DeviceCheck to lock down your API keys and provides a visual schema builder to structure AI outputs. The platform is designed to help mobile developers integrate AI features securely and efficiently.
+Proxed.AI is a secure proxy backend for iOS apps that protects your AI API keys and controls AI responses. It uses Apple's DeviceCheck to lock down your API keys and provides a visual schema builder to structure AI outputs. The platform is designed to help mobile developers integrate AI features securely and efficiently.
 
 ## Features
 

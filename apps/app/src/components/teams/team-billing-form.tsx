@@ -4,17 +4,17 @@ import { Button } from "@proxed/ui/components/button";
 import { PLANS, formatPrice, formatCostPerCall } from "@/utils/plans";
 import { Tabs, TabsList, TabsTrigger } from "@proxed/ui/components/tabs";
 import { Check, ChevronRight, AlertCircle, Zap } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { TeamCard } from "./team-card";
 import { Alert, AlertDescription } from "@proxed/ui/components/alert";
 import { useToast } from "@proxed/ui/hooks/use-toast";
-import { cn } from "@proxed/ui/utils";
 import { Slider } from "@proxed/ui/components/slider";
 
-export function TeamBillingForm() {
+export function TeamBillingForm({ teamId }: { teamId: string }) {
 	const router = useRouter();
 	const { toast } = useToast();
+
 	const [isLoading, setIsLoading] = useState(false);
 	const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(
 		"yearly",
@@ -28,7 +28,7 @@ export function TeamBillingForm() {
 		setIsLoading(true);
 
 		// Redirect to checkout with the selected plan
-		const checkoutUrl = `/api/checkout?plan=${selectedPlan}&teamId=${new URLSearchParams(window.location.search).get("teamId") || ""}&planType=${plans[sliderValue]}`;
+		const checkoutUrl = `/api/checkout?plan=${selectedPlan}&teamId=${teamId}&planType=${plans[sliderValue]}`;
 		router.push(checkoutUrl);
 	};
 

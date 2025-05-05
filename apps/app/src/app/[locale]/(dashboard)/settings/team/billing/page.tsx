@@ -16,26 +16,27 @@ export default async function Page() {
 	const { data: user } = await getUser();
 	const { data: billing } = await getTeamBilling();
 
-	const canChooseStarterPlan = await canChooseStarterPlanQuery(user?.team_id);
+	const team = user?.team;
+	const canChooseStarterPlan = await canChooseStarterPlanQuery(team?.id);
 	return (
 		<div className="grid grid-cols-1 gap-6">
-			{billing?.plan !== "trial" && (
+			{team?.plan !== "trial" && (
 				<ManageSubscription
-					teamId={user?.team_id}
-					plan={billing?.plan}
+					teamId={team?.id}
+					plan={team?.plan}
 					canceledAt={billing?.canceled_at}
 				/>
 			)}
-			{billing?.plan === "trial" && (
+			{team?.plan === "trial" && (
 				<div>
 					<Plans
-						teamId={user?.team_id}
+						teamId={team?.id}
 						canChooseStarterPlan={canChooseStarterPlan}
 					/>
 				</div>
 			)}
 			<Suspense fallback={<UsageSkeleton />}>
-				<UsageServer teamId={user?.team_id} plan={billing?.plan} />
+				<UsageServer teamId={team?.id} plan={team?.plan} />
 			</Suspense>
 		</div>
 	);

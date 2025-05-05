@@ -7,6 +7,7 @@ export const POST = Webhooks({
 	webhookSecret: process.env.POLAR_WEBHOOK_SECRET!,
 	onPayload: async (payload) => {
 		switch (payload.type) {
+			case "subscription.uncanceled":
 			case "subscription.active": {
 				await updateTeamPlan(payload.data.metadata.organizationId as string, {
 					email: payload.data.customer.email ?? undefined,

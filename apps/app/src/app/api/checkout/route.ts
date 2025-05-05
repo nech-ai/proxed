@@ -39,14 +39,15 @@ export const GET = async (req: NextRequest) => {
 	const checkout = await api.checkouts.create({
 		products: [selectedPlan.id],
 		successUrl: successUrl.toString(),
-		customerExternalId: teamId,
+		customerExternalId: teamId ?? userData.data.team?.id,
 		customerEmail: userData.data.email ?? undefined,
 		customerName: userData.data.full_name ?? undefined,
 		customerBillingAddress: {
 			country: country ?? "US",
 		},
 		metadata: {
-			organizationId: teamId,
+			teamId: teamId ?? userData.data.team?.id ?? "",
+			companyName: userData.data.team?.name ?? "",
 		},
 	});
 

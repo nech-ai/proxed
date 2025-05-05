@@ -56,10 +56,13 @@ declare
   v_start_date date;
 begin
   -- get the team's plan
-  select plan, date_trunc('month', coalesce(canceled_at, now()))::date
-  into v_plan, v_start_date
+  select plan
+  into v_plan
   from teams
   where id = p_team_id;
+
+  -- set the start date to the beginning of the current month for usage calculation
+  v_start_date := date_trunc('month', now())::date;
 
   -- calculate limits based on plan
   projects_limit := case

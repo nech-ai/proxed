@@ -3,7 +3,7 @@ import { revalidateTag } from "next/cache";
 import type { PLANS } from "./plans";
 
 type UpdateTeamPlanData = {
-	plan: keyof (typeof PLANS)[keyof typeof PLANS];
+	plan?: keyof (typeof PLANS)[keyof typeof PLANS];
 	email?: string;
 	canceled_at?: string | null;
 };

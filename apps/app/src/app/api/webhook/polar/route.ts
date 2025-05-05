@@ -9,11 +9,13 @@ export const POST = Webhooks({
 		switch (payload.type) {
 			case "subscription.uncanceled":
 			case "subscription.active": {
-				await updateTeamPlan(payload.data.metadata.organizationId as string, {
-					email: payload.data.customer.email ?? undefined,
-					plan: getPlanByProductId(
-						payload.data.productId,
-					) as keyof (typeof PLANS)[keyof typeof PLANS],
+				const teamId =
+					payload.data.metadata?.teamId ||
+					payload.data.metadata?.organizationId;
+				const planKey = getPlanByProductId(payload.data.productId);
+				await updateTeamPlan(teamId as string, {
+					email: payload.data.customer?.email ?? undefined,
+					plan: planKey as keyof (typeof PLANS)[keyof typeof PLANS],
 					canceled_at: null,
 				});
 
@@ -22,25 +24,24 @@ export const POST = Webhooks({
 
 			// Subscription has been explicitly canceled by the user
 			case "subscription.canceled": {
-				await updateTeamPlan(payload.data.metadata.organizationId as string, {
-					plan: "trial",
-					canceled_at: new Date().toISOString(),
+				const teamId =
+					payload.data.metadata?.teamId ||
+					payload.data.metadata?.organizationId;
+				await updateTeamPlan(teamId as string, {
+					canceled_at: payload.data.endsAt
+						? payload.data.endsAt.toISOString()
+						: new Date().toISOString(),
 				});
 
 				break;
 			}
 
-			// Subscription has been revoked/peroid has ended with no renewal
+			// Subscription has been revoked/period has ended with no renewal
 			case "subscription.revoked": {
-				if (
-					!payload.data.metadata.organizationId ||
-					!payload.data.customer.email
-				) {
-					console.error("Customer ID or email is missing");
-					break;
-				}
-
-				await updateTeamPlan(payload.data.metadata.organizationId as string, {
+				const teamId =
+					payload.data.metadata?.teamId ||
+					payload.data.metadata?.organizationId;
+				await updateTeamPlan(teamId as string, {
 					plan: "trial",
 					canceled_at: new Date().toISOString(),
 				});

@@ -25,9 +25,9 @@ export const GET = async (req: NextRequest) => {
 		throw new Error("Invalid plan");
 	}
 
-	const userData = await getUser();
+	const { data: user } = await getUser();
 
-	if (!userData?.data?.team) {
+	if (!user?.team_id) {
 		throw new Error("Team not found");
 	}
 
@@ -39,15 +39,16 @@ export const GET = async (req: NextRequest) => {
 	const checkout = await api.checkouts.create({
 		products: [selectedPlan.id],
 		successUrl: successUrl.toString(),
-		customerExternalId: teamId ?? userData.data.team?.id,
-		customerEmail: userData.data.email ?? undefined,
-		customerName: userData.data.full_name ?? undefined,
+		customerExternalId: teamId ?? user.team_id,
+		customerEmail: user.email ?? undefined,
+		customerName: user.full_name ?? undefined,
 		customerBillingAddress: {
 			country: country ?? "US",
 		},
 		metadata: {
-			teamId: teamId ?? userData.data.team?.id ?? "",
-			companyName: userData.data.team?.name ?? "",
+			organizationId: teamId ?? user.team_id, // TODO: remove this
+			teamId: teamId ?? user.team_id,
+			companyName: user.team?.name ?? "",
 		},
 	});
 

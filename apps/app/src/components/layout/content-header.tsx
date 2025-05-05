@@ -15,7 +15,9 @@ interface ContentHeaderProps extends PropsWithChildren {
 
 export function ContentHeader({ children, className }: ContentHeaderProps) {
 	const { isMobile } = useSidebar();
-	const { user, teamMembership } = useTeamContext((state) => state.data);
+	const { user, teamMembership, billing } = useTeamContext(
+		(state) => state.data,
+	);
 
 	return (
 		<div className={cn("border-b bg-background sticky top-0 z-10", className)}>
@@ -32,8 +34,9 @@ export function ContentHeader({ children, className }: ContentHeaderProps) {
 				<div className="flex-shrink-0 ml-2 flex items-center gap-2">
 					<Trial
 						createdAt={teamMembership.team?.created_at}
+						canceledAt={billing?.canceled_at}
 						teamId={teamMembership.team?.id}
-						plan={teamMembership.team?.plan}
+						plan={billing?.plan}
 					/>
 					<FeedbackDialog />
 					<NotificationCenter />

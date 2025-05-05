@@ -13,14 +13,14 @@ interface ManageSubscriptionProps {
 	teamId: string;
 	plan: string | null;
 	email?: string;
-	canceled_at?: string | null;
+	canceledAt?: string | null;
 }
 
 export function ManageSubscription({
 	teamId,
 	plan,
 	email,
-	canceled_at,
+	canceledAt,
 }: ManageSubscriptionProps) {
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -65,9 +65,9 @@ export function ManageSubscription({
 						<div className="space-y-1">
 							<div className="flex items-center gap-2">
 								<h3 className="text-lg font-medium">{planName}</h3>
-								{canceled_at && (
+								{canceledAt && (
 									<Badge variant="destructive">
-										Cancels on {new Date(canceled_at).toLocaleDateString()}
+										Cancels on {new Date(canceledAt).toLocaleDateString()}
 									</Badge>
 								)}
 							</div>

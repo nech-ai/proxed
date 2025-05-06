@@ -8,6 +8,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Section } from "@/components/section";
 import { GradientText } from "@/components/gradient-text";
+import { RecommendedArticles } from "@/components/recommended-articles";
 
 export async function generateStaticParams() {
 	const posts = getBlogPosts();
@@ -64,11 +65,21 @@ export default async function Page(props: {
 	params: Promise<{ slug: string }>;
 }) {
 	const params = await props.params;
-	const post = getBlogPosts().find((post) => post.slug === params.slug);
+	const allPosts = getBlogPosts();
+	const post = allPosts.find((p) => p.slug === params.slug);
 
 	if (!post) {
 		notFound();
 	}
+
+	const recommendedPostsData = allPosts
+		.filter((p) => p.slug !== post.slug)
+		.sort(
+			(a, b) =>
+				new Date(b.metadata.publishedAt).getTime() -
+				new Date(a.metadata.publishedAt).getTime(),
+		)
+		.slice(0, 3);
 
 	return (
 		<div className="flex justify-center py-12">
@@ -112,14 +123,34 @@ export default async function Page(props: {
 
 						<div className="prose prose-invert prose-gray max-w-none">
 							{post.metadata.image && (
-								<div className="relative overflow-hidden border border-gray-800 flex justify-center">
-									<Image
-										src={post.metadata.image}
-										alt={post.metadata.title}
-										width={680}
-										height={442}
-										className="transition-transform hover:scale-105 duration-500 object-cover"
-									/>
+								<div className="relative w-full my-8 group">
+									{/* Halo Background Image - Spreads wide */}
+									<div className="absolute inset-0 overflow-hidden">
+										<Image
+											src={post.metadata.image} // Use the same image source
+											alt="" // Decorative
+											layout="fill"
+											objectFit="cover"
+											className="transform scale-150 blur-3xl opacity-40 pointer-events-none"
+											aria-hidden="true"
+											priority={true} // Match main image priority
+										/>
+									</div>
+
+									{/* Main Image Container - Centered with max-height */}
+									<div className="relative z-10 flex justify-center py-10">
+										<div className="max-w-[calc(100%-40px)]">
+											<Image
+												src={post.metadata.image}
+												alt={post.metadata.title}
+												width={post.metadata.imageWidth || 800} // Fallback width
+												height={post.metadata.imageHeight || 600} // Fallback height, will be constrained by max-h-96 or max-h-[440px]
+												objectFit="contain"
+												className="block w-auto h-auto max-h-[440px] rounded-md shadow-2xl transition-transform duration-300 group-hover:scale-105"
+												priority={true}
+											/>
+										</div>
+									</div>
 								</div>
 							)}
 							<CustomMDX source={post.content} />
@@ -130,6 +161,12 @@ export default async function Page(props: {
 						</div>
 					</article>
 				</div>
+
+				{recommendedPostsData.length > 0 && (
+					<div className="mt-16">
+						<RecommendedArticles posts={recommendedPostsData} />
+					</div>
+				)}
 			</Section>
 		</div>
 	);

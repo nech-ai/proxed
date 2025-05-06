@@ -10,6 +10,8 @@ interface ArticleMetadata {
 	tag: string;
 	title: string;
 	image?: string;
+	imageWidth?: number;
+	imageHeight?: number;
 	publishedAt: string;
 }
 
@@ -59,19 +61,43 @@ function ArticleHeader({
 function ArticleImage({
 	src,
 	alt,
+	imageWidth,
+	imageHeight,
 	firstPost,
-}: { src: string; alt: string; firstPost: boolean }) {
+}: {
+	src: string;
+	alt: string;
+	imageWidth?: number;
+	imageHeight?: number;
+	firstPost: boolean;
+}) {
 	return (
-		<div className="relative overflow-hidden border border-gray-800 flex justify-center">
-			<Image
-				src={src}
-				alt={alt}
-				width={680}
-				height={442}
-				className="transition-transform group-hover:scale-105 duration-500 object-cover"
-				loading={firstPost ? "eager" : "lazy"}
-				sizes="(min-width: 1280px) 680px, (min-width: 1024px) 580px, (min-width: 768px) 480px, 100vw"
-			/>
+		<div className="relative w-full my-6 group">
+			<div className="absolute inset-0 overflow-hidden">
+				<Image
+					src={src}
+					alt=""
+					layout="fill"
+					objectFit="cover"
+					className="transform scale-150 blur-2xl opacity-40 pointer-events-none"
+					aria-hidden="true"
+					loading={firstPost ? "eager" : "lazy"}
+				/>
+			</div>
+			<div className="relative z-10 flex justify-center py-6">
+				<div className="max-w-[calc(100%-30px)]">
+					<Image
+						src={src}
+						alt={alt}
+						width={imageWidth || 600}
+						height={imageHeight || 400}
+						objectFit="contain"
+						className="block w-auto h-auto max-h-[560px] rounded-md shadow-lg transition-transform duration-300 group-hover:scale-105"
+						loading={firstPost ? "eager" : "lazy"}
+						sizes="(min-width: 1280px) 500px, (min-width: 1024px) 400px, (min-width: 768px) 300px, 100vw"
+					/>
+				</div>
+			</div>
 		</div>
 	);
 }
@@ -98,6 +124,8 @@ export function Article({ data, firstPost, className }: ArticleProps) {
 						<ArticleImage
 							src={data.metadata.image}
 							alt={data.metadata.title}
+							imageWidth={data.metadata.imageWidth}
+							imageHeight={data.metadata.imageHeight}
 							firstPost={firstPost}
 						/>
 					)}

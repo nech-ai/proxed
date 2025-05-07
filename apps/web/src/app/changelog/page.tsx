@@ -51,13 +51,9 @@ export default async function Page() {
 	}
 
 	return (
-		<div className="flex justify-center py-12 md:py-16">
-			<Section
-				id="changelog-page-content"
-				className="w-full px-4 sm:px-6 lg:px-8"
-				noBorder
-			>
-				<div className="border p-8 backdrop-blur mb-12 md:mb-16">
+		<div className="flex justify-center py-12">
+			<Section id="changelog-page-content">
+				<div className="border-b p-8 backdrop-blur mb-12 md:mb-16">
 					<GradientText
 						as="h1"
 						className="font-medium text-center text-4xl md:text-5xl mb-6 leading-snug"

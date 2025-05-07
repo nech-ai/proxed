@@ -11,6 +11,7 @@
 		"format": "biome format --write ."
 	},
 	"dependencies": {
+		"@proxed/ui": "workspace:*",
 		"fumadocs-core": "^15.2.15",
 		"fumadocs-mdx": "^11.6.2",
 		"fumadocs-ui": "^15.2.15",

@@ -13,3 +13,4 @@ export * from "./scan-text";
 export * from "./settings";
 export * from "./sun";
 export * from "./companies";
+export * from "./logo";

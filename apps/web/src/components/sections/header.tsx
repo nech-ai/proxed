@@ -14,7 +14,7 @@ export function Header() {
 	const pathname = usePathname();
 
 	const isActive = (path: string) => {
-		return pathname === path;
+		return pathname.includes(path);
 	};
 
 	return (
@@ -52,6 +52,17 @@ export function Header() {
 								)}
 							>
 								Updates
+							</Link>
+							<Link
+								href="/changelog"
+								className={cn(
+									"transition-colors",
+									isActive("/changelog")
+										? "text-foreground font-medium"
+										: "text-muted-foreground hover:text-foreground",
+								)}
+							>
+								Changelog
 							</Link>
 						</nav>
 					</div>

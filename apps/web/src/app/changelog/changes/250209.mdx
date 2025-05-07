@@ -1,0 +1,16 @@
+---
+title: "Introducing the Proxed.AI Core Solution"
+publishedAt: "2025-02-09"
+summary: "Presenting the core architecture of Proxed.AI: a secure API gateway with split-key management and built-in DeviceCheck verification for robust AI API protection."
+---
+
+Today we're detailing the core Proxed.AI solution, designed to offer a simplified and secure way to integrate AI APIs into your iOS applications.
+
+### Key Architectural Highlights:
+
+*   **Secure API Gateway:** Proxed.AI acts as a managed (or self-hostable) proxy, meaning your app calls our endpoints, not AI providers directly.
+*   **Split-Key Management:** We employ a split-key approach where provider API keys are divided. A client-side partial key is used by your app, and the complementary server-side part is stored securely by Proxed. Full keys are only momentarily reconstructed during request processing, never fully stored in one place accessible from the client.
+*   **Built-in DeviceCheck Verification:** Every request routed through Proxed.AI undergoes automatic DeviceCheck token validation with Apple's servers, ensuring calls originate from legitimate instances of your app on genuine iOS devices.
+*   **Additional Safety Features:** The platform is built with rate limiting, usage tracking, and cost monitoring capabilities in mind.
+
+Our aim is to provide an easy-to-integrate solution that handles complex security measures like DeviceCheck and secure key management, allowing developers to focus on building features.

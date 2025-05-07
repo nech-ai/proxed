@@ -1,0 +1,15 @@
+---
+title: "Engineering Update: Secure Token Generation & Key Management Details"
+publishedAt: "2025-02-13"
+summary: "A deeper look into Proxed.AI's secure token generation process, combining client-side computation, split-key architecture, and Apple's DeviceCheck for zero-trust key management."
+---
+
+This update provides more insight into our multi-layered security approach for API key management and token generation.
+
+### Core Security Layers:
+
+1.  **Split-Key Architecture:** API keys are cryptographically split. The server part is stored securely within Proxed.AI infrastructure, while the client part (with metadata including version and a unique split ID) resides on the device. Both are required for key reconstruction, which only happens momentarily during request processing.
+2.  **Apple DeviceCheck Integration:** Every API request requires a valid DeviceCheck token, cryptographically signed by Apple, ensuring requests originate from genuine iOS devices running your application.
+3.  **Client-Side Key Splitting:** The process of splitting keys, generating cryptographic salt, and embedding metadata is designed to happen client-side, further minimizing exposure.
+
+This system ensures that no single location holds a complete API key and that only verified devices can initiate requests, forming the foundation of our zero-trust key management strategy.

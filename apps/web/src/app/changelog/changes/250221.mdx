@@ -1,0 +1,28 @@
+---
+title: "New API Routes: Text and PDF Analysis with Structured Responses"
+publishedAt: "2025-02-21"
+summary: "Introducing new dedicated API routes (/v1/text and /v1/pdf) for performing text and PDF analysis, fully integrated with our Structured Response schemas."
+---
+
+Expanding our AI analysis capabilities, Proxed.AI now offers new dedicated API routes for **Text and PDF analysis**, leveraging our Structured Response feature.
+
+### `/v1/text` - Text Analysis:
+
+*   Submit text content to this endpoint.
+*   Receive structured, schema-validated responses for tasks like:
+    *   Sentiment analysis
+    *   Topic extraction
+    *   Text summarization
+    *   Key phrase identification
+
+### `/v1/pdf` - PDF Analysis:
+
+*   Submit PDF documents (via URL or base64-encoded data).
+*   Ideal for:
+    *   Document summarization
+    *   Information extraction from PDFs
+    *   Table and figure analysis
+
+Both routes are fully integrated with the schema you define in your project settings, ensuring predictable and validated outputs. They also benefit from DeviceCheck security, metrics tracking, and comprehensive error handling.
+
+Check our [documentation](https://docs.proxed.ai/structured-responses) for implementation details.

@@ -1,0 +1,20 @@
+---
+title: "API Authentication Update: Bearer Token Method Recommended"
+publishedAt: "2025-03-28"
+summary: "Clarifying and enhancing API authentication: Bearer Token (Partial Key + Device/Test Token) is now the recommended method for secure and flexible request authentication."
+---
+
+This update focuses on refining our API authentication mechanisms, with the **Bearer Token method** now being the primary recommended approach for authenticating your requests to Proxed.AI.
+
+### Bearer Token Authentication (`Authorization: Bearer your-partial-key.your-token`):
+
+*   **Flexibility:** The `your-token` part can be either a **DeviceCheck token** (for production) or a **Test Key** (when Test Mode is enabled for your project).
+*   **SDK Compatibility:** This format is designed for better compatibility with standard AI SDKs that primarily support the `Authorization` header, allowing both the partial API key and the necessary token to be transmitted in a single, standard header.
+*   **Security:** Combines the security of partial keys with DeviceCheck or the convenience of test keys in a unified manner.
+
+### Other Supported Methods:
+
+*   **Test Key (Header):** Using `x-proxed-test-key` and `x-ai-key` for development when Test Mode is active.
+*   **Device Token (Header - Legacy):** Using `x-device-token` and `x-ai-key`. We encourage migration to the Bearer token method from this legacy approach.
+
+Refer to our [API Authentication documentation](https://docs.proxed.ai/authentication) for full details on each method and best practices.

@@ -4,6 +4,7 @@ import { Icons } from "@/components/icons";
 import { Button } from "@proxed/ui/components/button";
 import {
 	Drawer,
+	DrawerClose,
 	DrawerContent,
 	DrawerDescription,
 	DrawerFooter,
@@ -16,6 +17,7 @@ import { cn } from "@proxed/ui/lib/utils";
 import Link from "next/link";
 import { IoMenuSharp } from "react-icons/io5";
 import { CtaButton } from "@/components/cta-button";
+import { usePathname } from "next/navigation";
 
 interface DrawerHeaderContentProps {
 	className?: string;
@@ -49,11 +51,40 @@ function DrawerActions({ className }: DrawerActionsProps) {
 	);
 }
 
+interface NavLinkProps {
+	href: string;
+	children: React.ReactNode;
+	isActive: boolean;
+	onClose?: () => void;
+}
+
+function NavLink({ href, children, isActive, onClose }: NavLinkProps) {
+	return (
+		<DrawerClose asChild>
+			<Link
+				href={href}
+				onClick={onClose}
+				className={cn(
+					"block px-4 py-2 text-sm transition-colors",
+					isActive
+						? "text-foreground font-medium"
+						: "text-muted-foreground hover:text-foreground",
+				)}
+			>
+				{children}
+			</Link>
+		</DrawerClose>
+	);
+}
+
 interface MobileDrawerProps {
 	className?: string;
 }
 
 export function MobileDrawer({ className }: MobileDrawerProps) {
+	const pathname = usePathname();
+	const isActive = (path: string) => pathname.includes(path);
+
 	return (
 		<Drawer>
 			<DrawerTrigger asChild>
@@ -74,6 +105,17 @@ export function MobileDrawer({ className }: MobileDrawerProps) {
 						{siteConfig.description}
 					</DrawerDescription>
 				</DrawerHeader>
+				<nav className="flex flex-col px-2 py-2">
+					<NavLink href="/about" isActive={isActive("/about")}>
+						About
+					</NavLink>
+					<NavLink href="/updates" isActive={isActive("/updates")}>
+						Updates
+					</NavLink>
+					<NavLink href="/changelog" isActive={isActive("/changelog")}>
+						Changelog
+					</NavLink>
+				</nav>
 				<DrawerFooter className="px-6 pb-8">
 					<DrawerActions />
 				</DrawerFooter>

@@ -1,0 +1,92 @@
+---
+title: PDF Analysis API
+description: |
+  API reference for performing structured PDF analysis using the /v1/pdf endpoint. Submit PDF documents and receive schema-defined JSON outputs.
+---
+
+# PDF Analysis (`/v1/pdf`)
+
+The PDF Analysis endpoint allows you to submit a PDF document (either as a base64 encoded string or a publicly accessible URL) and receive a structured JSON response based on the schema defined in your project settings. This is useful for extracting information from invoices, summarizing research papers, or any task requiring structured data extraction from PDF files.
+
+## Endpoint
+
+*   `POST /v1/pdf`
+*   `POST /v1/pdf/{projectId}`
+
+If `{projectId}` is provided in the URL, it takes precedence over the `x-project-id` header.
+
+## Authentication
+
+Requires authentication. See the [API Authentication guide](/docs/authentication).
+
+## Headers
+
+*   `Authorization: Bearer {your-partial-api-key}.{your-token}` (Recommended method)
+*   `Content-Type: application/json`
+*   `x-project-id: {your-project-id}` (Required if projectId is not in the URL path)
+*   `x-ai-key: {your-partial-api-key}` (If using non-Bearer token auth methods that require it)
+*   `x-device-token: {your-device-token}` (If using legacy device token header auth)
+
+## Request Body
+
+```json
+{
+  "pdf": "<base64-encoded-pdf-string OR public-pdf-url>"
+}
+```
+
+*   `pdf` (string, required): Either a base64 encoded string of the PDF prefixed with `data:application/pdf;base64,` OR a publicly accessible URL to a PDF document.
+
+## Successful Response (200 OK)
+
+The response will be a JSON object whose structure is determined by the **output schema** you have configured for this project in the Proxed.AI dashboard (under Project Settings -> Schema Builder).
+
+**Example (assuming a schema for invoice extraction):**
+
+```json
+{
+  "invoice_number": "INV-2023-001",
+  "vendor_name": "Supplier Corp",
+  "total_amount": 150.75,
+  "items": [
+    { "description": "Product A", "quantity": 2, "unit_price": 50.00 },
+    { "description": "Service B", "quantity": 1, "unit_price": 50.75 }
+  ]
+}
+```
+
+## Error Responses
+
+Refer to the [API Errors guide](/docs/api-errors) for details on error codes and messages.
+Common errors include:
+*   `UNAUTHORIZED`: Authentication failure.
+*   `PROJECT_NOT_FOUND`: The specified project ID is invalid.
+*   `BAD_REQUEST`: Invalid JSON payload, missing `pdf` field, or invalid PDF format/URL.
+*   `VALIDATION_ERROR`: The project schema is invalid.
+*   `PROVIDER_ERROR`: An error occurred with the underlying AI model processing the PDF.
+
+## Example Request (curl)
+
+**Using Base64 Encoded PDF:**
+
+```bash
+curl -X POST \
+  https://api.proxed.ai/v1/pdf/{your-project-id} \
+  -H "Authorization: Bearer {your-partial-api-key}.{your-device-token-or-test-key}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "pdf": "data:application/pdf;base64,JVBERi0xLjcKJeLjz9MKMyAwIG9iago8PC9UeXBlL1BhZ2UvUGFyZW50IDIgMCBSL01lZGlhQm94WzAgMCA1OTUgODQyXS9SZXNvdXJjZXM8PC9Gb250PDwvRjEgMSAwIFI+Pj4vQ29udGVudHMgNCAwIFI+PgplbmRvYmoKNCAwIG9iago8PC9GaWx0ZXIvRmxhdGVEZWNvZGUvTGVuZ3RoIDc0Pj5zdHJlYW0KeJwr5HIK4TI0MjA0NDbSMTQzVDA0NzIzM9YxNzOwsDIwsAUitUIsSk0sKkpNLS7JzM9LVQAAOUkKDQplbmRzdHJlYW0KZW5kb2JqCjEgMCBvYmoKPDwvVHlwZS9Gb250L0Jhc2VGb250L0hlbHZldGljYS9TdWJ0eXBlL1R5cGUxPj4KZW5kb2JqCjIgMCBvYmoKPDwvVHlwZS9QYWdlcy9Db3VudCAxL0tpZHNbMyAwIFJdPj4KZW5kb2JqCnhyZWYKMCA1CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDE2MSAwMDAwMCBuIAowMDAwMDAwMjE5IDAwMDAwIG4gCjAwMDAwMDAwMTUgMDAwMDAgbiAKMDAwMDAwMDExMyAwMDAwMCBuIAp0cmFpbGVyCjw8L1Jvb3QgMiAwIFIvU2l6ZSA1Pj4Kc3RhcnR4cmVmCjI3MAolJUVPRgo=",
+  }'
+```
+
+**Using PDF URL:**
+
+```bash
+curl -X POST \
+  https://api.proxed.ai/v1/pdf/{your-project-id} \
+  -H "Authorization: Bearer {your-partial-api-key}.{your-device-token-or-test-key}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "pdf": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+  }'
+```

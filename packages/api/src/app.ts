@@ -12,9 +12,9 @@ import { textResponseRouter } from "./routes/text";
 import { pdfResponseRouter } from "./routes/pdf";
 import { logger } from "@proxed/logger";
 import { openaiRouter } from "./routes/openai";
-import { ErrorCode, handleApiError } from "./utils/errors";
+import { anthropicRouter } from "./routes/anthropic";
+import { handleApiError } from "./utils/errors";
 import type { AppVariables } from "./types";
-import { sendExecutionErrorNotifications } from "@proxed/jobs";
 
 const root = new Hono<{ Variables: AppVariables }>();
 
@@ -34,6 +34,7 @@ apiV1.route("/vision", visionResponseRouter);
 apiV1.route("/text", textResponseRouter);
 apiV1.route("/pdf", pdfResponseRouter);
 apiV1.route("/openai", openaiRouter);
+apiV1.route("/anthropic", anthropicRouter);
 export const app = new Hono<{ Variables: AppVariables }>();
 
 app.route("/", root);

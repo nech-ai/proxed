@@ -1,0 +1,74 @@
+---
+title: Text Analysis API
+description: |
+  API reference for performing structured text analysis using the /v1/text endpoint. Submit text and receive schema-defined JSON outputs.
+---
+
+# Text Analysis (`/v1/text`)
+
+The Text Analysis endpoint allows you to submit a string of text and receive a structured JSON response based on the schema defined in your project settings. This is useful for tasks like sentiment analysis, entity extraction, text classification, or summarizing text according to a predefined format.
+
+## Endpoint
+
+*   `POST /v1/text`
+*   `POST /v1/text/{projectId}`
+
+If `{projectId}` is provided in the URL, it takes precedence over the `x-project-id` header.
+
+## Authentication
+
+Requires authentication. See the [API Authentication guide](/docs/authentication).
+
+## Headers
+
+*   `Authorization: Bearer {your-partial-api-key}.{your-token}` (Recommended method)
+*   `Content-Type: application/json`
+*   `x-project-id: {your-project-id}` (Required if projectId is not in the URL path)
+*   `x-ai-key: {your-partial-api-key}` (If using non-Bearer token auth methods that require it)
+*   `x-device-token: {your-device-token}` (If using legacy device token header auth)
+
+## Request Body
+
+```json
+{
+  "text": "<string-to-be-analyzed>"
+}
+```
+
+*   `text` (string, required): The raw text string to be analyzed.
+
+## Successful Response (200 OK)
+
+The response will be a JSON object whose structure is determined by the **output schema** you have configured for this project in the Proxed.AI dashboard (under Project Settings -> Schema Builder).
+
+**Example (assuming a schema for sentiment analysis):**
+
+```json
+{
+  "sentiment": "positive",
+  "confidence": 0.98,
+  "keywords": ["great service", "friendly staff"]
+}
+```
+
+## Error Responses
+
+Refer to the [API Errors guide](/docs/api-errors) for details on error codes and messages.
+Common errors include:
+*   `UNAUTHORIZED`: Authentication failure.
+*   `PROJECT_NOT_FOUND`: The specified project ID is invalid.
+*   `BAD_REQUEST`: Invalid JSON payload or missing `text` field.
+*   `VALIDATION_ERROR`: The project schema is invalid.
+*   `PROVIDER_ERROR`: An error occurred with the underlying AI language model.
+
+## Example Request (curl)
+
+```bash
+curl -X POST \
+  https://api.proxed.ai/v1/text/{your-project-id} \
+  -H "Authorization: Bearer {your-partial-api-key}.{your-device-token-or-test-key}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "The quick brown fox jumps over the lazy dog. I loved the customer service, it was excellent!"
+  }'
+```

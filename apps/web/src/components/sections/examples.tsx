@@ -154,6 +154,63 @@ actor OpenAIAnalyzer {
     }
 }`,
 	},
+	{
+		id: 5,
+		title: "Anthropic Proxy",
+		comingSoon: false,
+		description:
+			"Securely proxy requests to Anthropic's powerful language models. Benefit from Proxed's security, monitoring, and control features while leveraging models like Claude.",
+		code: `import DeviceCheck
+
+actor AnthropicAnalyzer {
+    let clientApiKey = "<your-client-api-key>"
+    let endpoint = "https://api.proxed.ai/v1/anthropic/<your-project-id>/messages"
+
+    func generateMessage(prompt: String) async throws {
+        guard let url = URL(string: endpoint) else {
+            print("Error: Invalid endpoint URL")
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+
+        request.setValue(clientApiKey, forHTTPHeaderField: "x-ai-key")
+        if let deviceToken = await DeviceCheck.retrieveToken() {
+            request.setValue(deviceToken, forHTTPHeaderField: "x-device-token")
+        }
+
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let requestBody: [String: Any] = [
+            "model": "claude-3-opus-20240229",
+            "max_tokens": 1024,
+            "messages": [
+                ["role": "user", "content": prompt]
+            ]
+        ]
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+            let responseBodyString = String(data: data, encoding: .utf8) ?? "No response body"
+            print("Error: Request to Anthropic proxy failed with status code \(statusCode). Response: \(responseBodyString)")
+            return
+        }
+
+        if let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) {
+            print("Anthropic Proxy Response:", jsonResponse)
+        } else {
+            let responseString = String(data: data, encoding: .utf8) ?? "Could not decode data as UTF-8 string"
+            print("Anthropic Proxy Response (raw text):", responseString)
+        }
+    }
+}`,
+	},
 ];
 
 export async function Examples() {

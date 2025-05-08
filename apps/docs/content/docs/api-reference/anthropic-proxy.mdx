@@ -1,0 +1,102 @@
+---
+title: Anthropic Proxy API
+description: |
+  API reference for proxying requests to the Anthropic API via /v1/anthropic/{projectId}/*. Securely use Anthropic models like Claude with Proxed.AI's features.
+---
+
+# Anthropic Proxy (`/v1/anthropic/{projectId}/*`)
+
+The Anthropic Proxy endpoint allows you to securely route your requests to the official Anthropic API through Proxed.AI. This enables you to leverage Proxed.AI's security features (DeviceCheck, Partial Keys) and observability (usage tracking, rate limiting) while interacting with Anthropic models like Claude.
+
+## Endpoint
+
+*   `POST /v1/anthropic/{projectId}/{anthropic-api-path}`
+
+*   `{projectId}` (string, required): Your Proxed.AI project identifier.
+*   `{anthropic-api-path}` (string, required): The specific path for the Anthropic API you wish to target (e.g., `messages` for the Messages API).
+
+Currently, only `POST` requests to paths like `messages` are commonly used with Anthropic's API.
+
+## Authentication
+
+Requires authentication. See the [API Authentication guide](/docs/authentication).
+
+## Headers
+
+*   `Authorization: Bearer {your-partial-api-key}.{your-token}` (Recommended method)
+*   `Content-Type: application/json` (Required by Anthropic)
+*   Proxed.AI automatically injects the necessary Anthropic-specific headers:
+    *   `x-api-key: {ANTHROPIC_API_KEY}` (Full key reconstructed from your partial key)
+    *   `anthropic-version: 2023-06-01` (Or the version configured in the proxy)
+*   `x-project-id`: Not typically needed here as the project ID is in the URL path.
+*   `x-ai-key`, `x-device-token`: Only if using alternative authentication methods.
+
+## Request Body
+
+The request body should be **exactly** what the target Anthropic API endpoint expects.
+
+**Example (for `/v1/anthropic/{projectId}/messages`):**
+
+```json
+{
+  "model": "claude-3-opus-20240229",
+  "max_tokens": 1024,
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hello, Claude. Can you tell me a joke?"
+    }
+  ]
+}
+```
+
+Refer to the [official Anthropic API documentation](https://docs.anthropic.com/en/api/messages) for detailed request body structures.
+
+## Successful Response (Matches Anthropic's Response)
+
+The response from this endpoint will be the **direct response from the Anthropic API**.
+Proxed.AI does not modify the successful response body from Anthropic.
+
+**Example (from `/v1/anthropic/{projectId}/messages`):**
+
+```json
+{
+  "id": "msg_xxxxxxxxxxxxxxxxxxxxxxxxx",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-3-opus-20240229",
+  "content": [
+    {
+      "type": "text",
+      "text": "Why don't scientists trust atoms? Because they make up everything!"
+    }
+  ],
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "usage": {
+    "input_tokens": 15,
+    "output_tokens": 20
+  }
+}
+```
+
+## Error Responses
+
+*   **Proxed.AI Errors:** Refer to the [API Errors guide](/docs/api-errors) (e.g., `UNAUTHORIZED`, `PROJECT_NOT_FOUND`, `TOO_MANY_REQUESTS`).
+*   **Anthropic Errors:** If authentication with Proxed.AI is successful, but Anthropic returns an error, the proxy will forward Anthropic's error response.
+
+## Example Request (curl for Messages API)
+
+```bash
+curl -X POST \
+  https://api.proxed.ai/v1/anthropic/{your-project-id}/messages \
+  -H "Authorization: Bearer {your-partial-api-key}.{your-device-token-or-test-key}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-3-sonnet-20240229",
+    "max_tokens": 150,
+    "messages": [
+      {"role": "user", "content": "What is the weather like in London today?"}
+    ]
+  }'
+```

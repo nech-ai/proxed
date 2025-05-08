@@ -7,6 +7,7 @@ import { createMiddleware } from "hono/factory";
 import type { AuthMiddlewareVariables } from "../types";
 import { verifyDeviceCheckToken } from "../utils/verify-device-check";
 import { AppError, createError, ErrorCode } from "../utils/errors";
+import { parseCombinedToken } from "../utils/token-parser";
 
 export const authMiddleware = createMiddleware<{
 	Variables: AuthMiddlewareVariables;
@@ -78,7 +79,8 @@ export const authMiddleware = createMiddleware<{
 	// Handle concatenated token in Authorization header
 	if (authHeader?.startsWith("Bearer ")) {
 		const combinedToken = authHeader.replace("Bearer ", "");
-		const [bearerApiKeyPart, bearerTokenPart] = combinedToken.split("."); // Renamed for clarity
+		const { apiKeyPart: bearerApiKeyPart, tokenPart: bearerTokenPart } =
+			parseCombinedToken(combinedToken);
 
 		if (!bearerApiKeyPart || !bearerTokenPart) {
 			throw createError(
@@ -86,7 +88,6 @@ export const authMiddleware = createMiddleware<{
 				"Invalid authorization token format. Expected 'apiKey.tokenPart'.",
 			);
 		}
-
 		// Check if in test mode and tokenPart matches the test key
 		if (project.test_mode && bearerTokenPart === project.test_key) {
 			c.set("session", {

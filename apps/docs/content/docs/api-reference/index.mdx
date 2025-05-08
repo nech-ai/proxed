@@ -1,0 +1,29 @@
+---
+title: API Reference Overview
+description: |
+  Detailed reference for all Proxed.AI API endpoints, including authentication, request/response formats, and examples.
+---
+
+# API Reference Overview
+
+Welcome to the Proxed.AI API reference documentation. These pages provide detailed information about each available API endpoint, including how to authenticate, structure your requests, and interpret responses.
+
+All API endpoints are versioned under `/v1/`.
+
+## Authentication
+
+All API endpoints (except for `/health`) require authentication. Please refer to our [API Authentication guide](/docs/authentication) for detailed information on how to authenticate your requests.
+
+## Error Handling
+
+Consistent error responses are provided across the API. See the [API Errors guide](/docs/api-errors) for a comprehensive list of error codes and how to handle them.
+
+## Available Endpoints
+
+Select an endpoint from the navigation sidebar to view its specific documentation, including:
+
+*   **Structured Vision Analysis:** `/v1/vision`
+*   **Structured Text Analysis:** `/v1/text`
+*   **Structured PDF Analysis:** `/v1/pdf`
+*   **OpenAI Proxy:** `/v1/openai/{projectId}/*`
+*   **Anthropic Proxy:** `/v1/anthropic/{projectId}/*`

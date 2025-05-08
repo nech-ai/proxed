@@ -1,0 +1,102 @@
+---
+title: OpenAI Proxy API
+description: |
+  API reference for proxying requests to the OpenAI API via /v1/openai/{projectId}/*. Securely use OpenAI models with Proxed.AI's features.
+---
+
+# OpenAI Proxy (`/v1/openai/{projectId}/*`)
+
+The OpenAI Proxy endpoint allows you to securely route your requests to the official OpenAI API through Proxed.AI. This enables you to leverage Proxed.AI's security features, such as DeviceCheck and Partial Key management, along with usage tracking and rate limiting, while interacting with any OpenAI model or endpoint.
+
+## Endpoint
+
+*   `ANY /v1/openai/{projectId}/{openai-api-path}`
+
+*   `{projectId}` (string, required): Your Proxed.AI project identifier.
+*   `{openai-api-path}` (string, required): The specific path for the OpenAI API you wish to target (e.g., `chat/completions`, `embeddings`, `models`).
+
+The HTTP method used (GET, POST, etc.) should match what the target OpenAI API path expects.
+
+## Authentication
+
+Requires authentication. See the [API Authentication guide](/docs/authentication).
+
+## Headers
+
+*   `Authorization: Bearer {your-partial-api-key}.{your-token}` (Recommended method)
+*   Any headers required by the specific OpenAI API endpoint you are calling (e.g., `Content-Type: application/json` for POST requests).
+*   Proxed.AI automatically injects the full OpenAI API key (reconstructed from your partial key) into the `Authorization: Bearer {OPENAI_API_KEY}` header before forwarding the request to OpenAI.
+*   `x-project-id`: Not typically needed here as the project ID is in the URL path.
+*   `x-ai-key`, `x-device-token`: Only if using alternative authentication methods.
+
+## Request Body
+
+The request body should be **exactly** what the target OpenAI API endpoint expects.
+
+**Example (for `/v1/openai/{projectId}/chat/completions`):**
+
+```json
+{
+  "model": "gpt-4",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hello, what is the capital of France?"
+    }
+  ],
+  "max_tokens": 50
+}
+```
+
+Refer to the [official OpenAI API documentation](https://platform.openai.com/docs/api-reference) for detailed request body structures for each endpoint.
+
+## Successful Response (Matches OpenAI's Response)
+
+The response from this endpoint will be the **direct response from the OpenAI API**.
+Proxed.AI does not modify the successful response body from OpenAI.
+
+**Example (from `/v1/openai/{projectId}/chat/completions`):**
+
+```json
+{
+  "id": "chatcmpl-xxxxxxxxxxxxxxxxxxxxxxxxx",
+  "object": "chat.completion",
+  "created": 1677652288,
+  "model": "gpt-4-0613",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "The capital of France is Paris."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 10,
+    "completion_tokens": 7,
+    "total_tokens": 17
+  }
+}
+```
+
+## Error Responses
+
+*   **Proxed.AI Errors:** Refer to the [API Errors guide](/docs/api-errors) (e.g., `UNAUTHORIZED`, `PROJECT_NOT_FOUND`, `TOO_MANY_REQUESTS`).
+*   **OpenAI Errors:** If authentication with Proxed.AI is successful, but OpenAI returns an error, the proxy will forward OpenAI's error response (e.g., invalid OpenAI API key, model not found, rate limits on OpenAI side).
+
+## Example Request (curl for Chat Completions)
+
+```bash
+curl -X POST \
+  https://api.proxed.ai/v1/openai/{your-project-id}/chat/completions \
+  -H "Authorization: Bearer {your-partial-api-key}.{your-device-token-or-test-key}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+      {"role": "user", "content": "Translate \"hello\" to Spanish."}
+    ]
+  }'
+```

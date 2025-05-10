@@ -17,9 +17,11 @@ export const authMiddleware = createMiddleware<{
 	// Get tokens from headers
 	const deviceToken = c.req.header("x-device-token");
 	const testKey = c.req.header("x-proxed-test-key");
-	const projectId = c.req.param("projectId") || c.req.header("x-project-id");
+	const fromParam = c.req.param("projectId");
+	const fromHeader = c.req.header("x-project-id");
+	const projectId = fromParam || fromHeader;
 	const authHeader = c.req.header("Authorization");
-	const partialApiKey = c.req.header("x-ai-key"); // Read the partial API key header
+	const partialApiKey = c.req.header("x-ai-key");
 
 	if (!projectId) {
 		throw createError(ErrorCode.MISSING_PROJECT_ID);

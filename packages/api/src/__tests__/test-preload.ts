@@ -44,5 +44,23 @@ mock.module("@upstash/ratelimit", () => {
 	};
 });
 
+// Mock resend (avoids API key requirement)
+mock.module("resend", () => {
+	const mockSend = mock(async () => ({ id: "mock-email-id" }));
+	class MockResend {
+		emails = { send: mockSend };
+	}
+	return { Resend: MockResend };
+});
+
+// Mock @novu/node (avoids secret key requirement)
+mock.module("@novu/node", () => {
+	const mockEmit = mock(async () => ({ status: "ok" }));
+	class MockNovu {
+		triggers = { emit: mockEmit };
+	}
+	return { Novu: MockNovu };
+});
+
 // We are NOT exporting from preload. The test file will import the mocked module
 // and access the mock functions from there.

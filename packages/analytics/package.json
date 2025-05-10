@@ -13,7 +13,7 @@
 	"dependencies": {
 		"@openpanel/nextjs": "^1.0.8",
 		"@proxed/logger": "workspace:*",
-		"@vercel/functions": "^1.6.0",
+		"@vercel/functions": "^2.0.2",
 		"next": "^15.3.2"
 	},
 	"devDependencies": {

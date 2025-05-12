@@ -6,12 +6,14 @@ import { Button } from "@proxed/ui/components/button";
 import { siteConfig } from "@/lib/config";
 import { cn } from "@proxed/ui/utils";
 import Link from "next/link";
+import { usePlausible } from "next-plausible";
 import { usePathname } from "next/navigation";
 import { CtaButton } from "../cta-button";
 import { Suspense } from "react";
 
 export function Header() {
 	const pathname = usePathname();
+	const plausible = usePlausible();
 
 	const isActive = (path: string) => {
 		return pathname.includes(path);
@@ -70,6 +72,7 @@ export function Header() {
 						<Button
 							asChild
 							variant="ghost"
+							onClick={() => plausible("Login")}
 							className="h-8 tracking-tight font-medium"
 						>
 							<Link href="https://app.proxed.ai/login">Login</Link>

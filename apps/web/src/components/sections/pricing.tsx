@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { useState } from "react";
 import { GradientText } from "../gradient-text";
+import { usePlausible } from "next-plausible";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
 
@@ -104,6 +105,8 @@ function PricingTier({
 	tier: (typeof siteConfig.pricing)[0];
 	billingCycle: "monthly" | "yearly";
 }) {
+	const plausible = usePlausible();
+
 	// Get cost per call based on tier and billing cycle
 	const costPerCall =
 		COST_PER_CALL[billingCycle][
@@ -182,6 +185,7 @@ function PricingTier({
 				<div className="p-8 pt-0">
 					<Button
 						asChild
+						onClick={() => plausible("Signup")}
 						size="lg"
 						className={cn(
 							"w-full py-6 text-base font-medium",

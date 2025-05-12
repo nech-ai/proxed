@@ -37,7 +37,6 @@ export default function Page() {
 								<Link
 									href="/#features"
 									className="inline-flex items-center text-sm text-primary hover:text-primary/80 transition-colors"
-									legacyBehavior
 								>
 									<span className="border-b border-transparent transition-colors hover:border-current">
 										Explore other features

@@ -32,13 +32,17 @@ export function ContentHeader({ children, className }: ContentHeaderProps) {
 					<div className="overflow-x-auto w-full">{children}</div>
 				</div>
 				<div className="flex-shrink-0 ml-2 flex items-center gap-2">
-					<Trial
-						createdAt={teamMembership.team?.created_at}
-						canceledAt={billing?.canceled_at}
-						teamId={teamMembership.team?.id}
-						plan={billing?.plan}
-					/>
-					<FeedbackDialog />
+					{!isMobile && (
+						<>
+							<Trial
+								createdAt={teamMembership.team?.created_at}
+								canceledAt={billing?.canceled_at}
+								teamId={teamMembership.team?.id}
+								plan={billing?.plan}
+							/>
+							<FeedbackDialog />
+						</>
+					)}
 					<NotificationCenter />
 					<UserMenu user={user} />
 				</div>

@@ -21,6 +21,8 @@ import { TeamSwitcher } from "./team-switcher";
 import { Logo } from "./logo";
 import { cn } from "@proxed/ui/utils";
 import { useTeamContext } from "@/store/team/hook";
+import { Trial } from "../trial";
+import { FeedbackDialog } from "./feedback-dialog";
 
 const data = {
 	navMain: [
@@ -55,6 +57,8 @@ interface AppSidebarProps {
 export function AppSidebar({ teamMemberships, user }: AppSidebarProps) {
 	const { teamId } = useTeamContext((state) => state.data);
 	const { open } = useSidebar();
+	const { isMobile } = useSidebar();
+	const { teamMembership, billing } = useTeamContext((state) => state.data);
 
 	return (
 		<Sidebar collapsible="icon">
@@ -75,6 +79,17 @@ export function AppSidebar({ teamMemberships, user }: AppSidebarProps) {
 				<NavMain items={data.navMain} />
 			</SidebarContent>
 			<SidebarFooter>
+				{isMobile && (
+					<div className="pb-2 px-2 space-y-2">
+						<Trial
+							createdAt={teamMembership.team?.created_at}
+							canceledAt={billing?.canceled_at}
+							teamId={teamMembership.team?.id}
+							plan={billing?.plan}
+						/>
+						<FeedbackDialog />
+					</div>
+				)}
 				{!open && <SidebarTrigger />}
 				<TeamSwitcher teamMemberships={teamMemberships} activeTeamId={teamId} />
 			</SidebarFooter>

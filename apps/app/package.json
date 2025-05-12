@@ -24,7 +24,7 @@
 		"@proxed/ui": "workspace:*",
 		"@proxed/utils": "workspace:*",
 		"@sentry/esbuild-plugin": "^3.4.0",
-		"@sentry/nextjs": "^9.16.1",
+		"@sentry/nextjs": "^9.17.0",
 		"@sentry/node": "^9.16.1",
 		"@supabase/sentry-js-integration": "^0.3.0",
 		"@tanstack/react-table": "^8.21.3",

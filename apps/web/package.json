@@ -27,7 +27,7 @@
 		"content-collections": "^0.1.4",
 		"framer-motion": "^12.10.4",
 		"fumadocs-core": "^15.2.15",
-		"fumadocs-ui": "^15.2.15",
+		"fumadocs-ui": "^15.3.0",
 		"geist": "^1.4.2",
 		"lucide-react": "^0.503.0",
 		"next": "^15.3.2",

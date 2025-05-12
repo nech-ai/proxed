@@ -21,13 +21,13 @@
 		"@radix-ui/react-label": "^2.1.6",
 		"@radix-ui/react-slot": "^1.2.2",
 		"@splinetool/react-spline": "^4.0.0",
-		"@splinetool/runtime": "^1.9.91",
+		"@splinetool/runtime": "^1.9.93",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"content-collections": "^0.1.4",
-		"framer-motion": "^12.10.4",
-		"fumadocs-core": "^15.2.15",
-		"fumadocs-ui": "^15.2.15",
+		"framer-motion": "^12.11.0",
+		"fumadocs-core": "^15.3.1",
+		"fumadocs-ui": "^15.3.1",
 		"geist": "^1.4.2",
 		"lucide-react": "^0.503.0",
 		"next": "^15.3.2",
@@ -47,7 +47,7 @@
 		"resend": "^4.5.1",
 		"shiki": "^3.4.0",
 		"sugar-high": "^0.8.4",
-		"tailwind-merge": "^3.2.0",
+		"tailwind-merge": "^3.3.0",
 		"tailwindcss-animate": "^1.0.7",
 		"unified": "^11.0.5",
 		"vaul": "^1.1.2"
@@ -61,7 +61,7 @@
 		"@types/react-dom": "19.1.2",
 		"markdown-toc": "^1.2.0",
 		"mdx": "^0.3.1",
-		"tailwindcss": "^4.1.5",
+		"tailwindcss": "^4.1.6",
 		"tsconfig": "workspace:*"
 	}
 }

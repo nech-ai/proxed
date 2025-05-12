@@ -3,8 +3,8 @@
 import { Section } from "@/components/section";
 import { siteConfig } from "@/lib/config";
 import { Button } from "@proxed/ui/components/button";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { useSubscribeModal } from "@/context/subscribe-modal-context";
 // @ts-ignore
 import Spline from "@splinetool/react-spline";
 import { GradientText } from "../gradient-text";
@@ -76,17 +76,15 @@ function HeroTitles() {
 }
 
 function HeroCTA() {
-	const { openModal } = useSubscribeModal();
-
 	return (
 		<div className="relative mt-8">
 			<div className="flex w-full max-w-2xl flex-col items-start justify-start space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
 				<Button
-					onClick={openModal}
+					asChild
 					className="w-full sm:w-auto h-12 px-8 text-base"
 					size="lg"
 				>
-					{siteConfig.hero.cta}
+					<Link href="https://app.proxed.ai/signup">{siteConfig.hero.cta}</Link>
 				</Button>
 			</div>
 			<p className="mt-4 text-sm text-muted-foreground text-left max-w-xl">

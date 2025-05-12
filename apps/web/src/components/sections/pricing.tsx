@@ -8,9 +8,9 @@ import { cn } from "@proxed/ui/utils";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { useState } from "react";
-import { useSubscribeModal } from "@/context/subscribe-modal-context";
 import { GradientText } from "../gradient-text";
 import { Icons } from "@/components/icons";
+import Link from "next/link";
 
 // Define the cost per call for each plan
 const COST_PER_CALL = {
@@ -104,8 +104,6 @@ function PricingTier({
 	tier: (typeof siteConfig.pricing)[0];
 	billingCycle: "monthly" | "yearly";
 }) {
-	const { openModal } = useSubscribeModal();
-
 	// Get cost per call based on tier and billing cycle
 	const costPerCall =
 		COST_PER_CALL[billingCycle][
@@ -183,8 +181,8 @@ function PricingTier({
 
 				<div className="p-8 pt-0">
 					<Button
+						asChild
 						size="lg"
-						onClick={openModal}
 						className={cn(
 							"w-full py-6 text-base font-medium",
 							tier.popular
@@ -192,7 +190,7 @@ function PricingTier({
 								: "bg-muted text-foreground hover:bg-muted/80",
 						)}
 					>
-						{tier.cta}
+						<Link href="https://app.proxed.ai/signup">{tier.cta}</Link>
 					</Button>
 				</div>
 			</div>

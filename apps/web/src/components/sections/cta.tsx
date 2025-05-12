@@ -2,11 +2,9 @@
 
 import { Section } from "@/components/section";
 import { Button } from "@proxed/ui/components/button";
-import { useSubscribeModal } from "@/context/subscribe-modal-context";
+import Link from "next/link";
 
 export function CTA() {
-	const { openModal } = useSubscribeModal();
-
 	return (
 		<Section id="cta">
 			<div className="overflow-hidden relative text-center py-16 mx-auto">
@@ -20,8 +18,10 @@ export function CTA() {
 				</p>
 
 				<div className="flex justify-center">
-					<Button className="flex items-center gap-2" onClick={openModal}>
-						Secure your AI keys now
+					<Button asChild className="flex items-center gap-2">
+						<Link href="https://app.proxed.ai/signup">
+							Secure your AI keys now
+						</Link>
 					</Button>
 				</div>
 			</div>

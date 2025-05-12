@@ -2,13 +2,13 @@
 
 import { siteConfig } from "@/lib/config";
 import { Button } from "@proxed/ui/components/button";
-import { useSubscribeModal } from "@/context/subscribe-modal-context";
+import Link from "next/link";
 import { cn } from "@proxed/ui/utils";
 import type { ComponentProps } from "react";
 
 type ButtonProps = ComponentProps<typeof Button>;
 
-interface CtaButtonProps extends Omit<ButtonProps, "onClick" | "variant"> {
+interface CtaButtonProps extends Omit<ButtonProps, "variant"> {
 	variant?: ButtonProps["variant"];
 }
 
@@ -20,16 +20,14 @@ export function CtaButton({
 	variant = "default",
 	...props
 }: CtaButtonProps) {
-	const { openModal } = useSubscribeModal();
-
 	return (
 		<Button
+			asChild
 			variant={variant}
 			className={cn(CTA_BUTTON_CLASSES, className)}
-			onClick={openModal}
 			{...props}
 		>
-			{siteConfig.cta}
+			<Link href="https://app.proxed.ai/signup">{siteConfig.cta}</Link>
 		</Button>
 	);
 }

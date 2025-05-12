@@ -68,11 +68,11 @@ export function Header() {
 					</div>
 					<div className="hidden lg:flex items-center gap-4">
 						<Button
+							asChild
 							variant="ghost"
 							className="h-8 tracking-tight font-medium"
-							disabled={true}
 						>
-							Login
+							<Link href="https://app.proxed.ai/login">Login</Link>
 						</Button>
 						<Suspense fallback={null}>
 							<CtaButton />

@@ -4,8 +4,6 @@ import PlausibleProvider from "next-plausible";
 import type { Viewport } from "next";
 import "@proxed/ui/globals.css";
 import { generateMetadata, jsonLd } from "@/lib/metadata";
-import { SubscribeModalProvider } from "@/context/subscribe-modal-context";
-import { SubscribeModal } from "@/components/subscribe-modal";
 import { AnalyticsProvider } from "@proxed/analytics/client";
 
 export const metadata = generateMetadata();
@@ -58,10 +56,7 @@ export default function RootLayout({
 					monoFont.variable,
 				)}
 			>
-				<SubscribeModalProvider>
-					{children}
-					<SubscribeModal />
-				</SubscribeModalProvider>
+				{children}
 				<AnalyticsProvider />
 			</body>
 		</html>

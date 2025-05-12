@@ -51,10 +51,16 @@ export function Community() {
 						))}
 					</div>
 					<div className="flex justify-center">
-						<Link href="https://github.com/nech-ai/proxed">
-							<Button variant="secondary" className="flex items-center gap-2">
-								<Icons.github className="h-5 w-5" />
-								Star on GitHub
+						<Link href="https://github.com/nech-ai/proxed" target="_blank">
+							<Button
+								variant="secondary"
+								asChild
+								className="flex items-center gap-2"
+							>
+								<span>
+									<Icons.github className="h-5 w-5" />
+									Star on GitHub
+								</span>
 							</Button>
 						</Link>
 					</div>

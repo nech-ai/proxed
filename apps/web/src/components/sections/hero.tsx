@@ -124,7 +124,7 @@ export function Hero() {
 					<HeroCTA />
 				</div>
 				{!isMobile && (
-					<div className="relative lg:h-full lg:col-span-1">
+					<div className="relative lg:h-full lg:col-span-1  min-h-[540px]">
 						<SplineView />
 					</div>
 				)}

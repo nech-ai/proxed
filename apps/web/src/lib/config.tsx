@@ -14,7 +14,7 @@ export const BLUR_FADE_DELAY = 0.15;
 export const siteConfig = {
 	name: "Proxed.AI",
 	description: "Secure AI API Integration for iOS Apps in Seconds",
-	cta: "Start Securing Your API",
+	cta: "Start Free Trial",
 	url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
 	keywords: [
 		"AI API Security",
@@ -30,11 +30,11 @@ export const siteConfig = {
 	},
 
 	hero: {
-		title: "Secure Your AI Keys in iOS Apps—No Backend Required",
+		title: "Secure Your AI Keys Just Change the URL",
 		description:
-			"Proxed.AI protects your AI API credentials in mobile apps with just one URL change. Instantly verify genuine iOS devices, prevent credential theft, and control AI costs—without building a custom backend or SDK integration.",
-		cta: "Secure Your AI APIs Now",
-		ctaDescription: "Open-source and self-hostable. No vendor lock-in.",
+			"Instant DeviceCheck, split-key protection & cost guardrails. Open-source. No backend required.",
+		cta: "Start Free Trial",
+		ctaDescription: "14-day free trial · No credit card required",
 	},
 
 	problemSolution: {
@@ -44,53 +44,59 @@ export const siteConfig = {
 				"Embedding API keys in mobile apps is risky. Attackers can extract credentials, bypass authentication, and exploit your AI services—leading to data breaches, runaway costs, and compliance violations.",
 			points: [
 				{
-					title: "API Keys Get Stolen",
+					title: "Hard-coded Keys Are an Open Invitation",
 					description:
-						"Mobile app binaries can be easily decompiled. Any API key in your app will eventually be extracted and abused.",
+						"Shipping an AI key inside your mobile app is like leaving the vault door ajar. Attackers decompile, extract, and hammer your provider's API—skyrocketing costs and exposing sensitive data.",
 					icon: <AlertTriangleIcon className="h-6 w-6" />,
 				},
 				{
-					title: "Anyone Can Access Your AI",
+					title: "Keys Leak—Always",
 					description:
-						"Without proper device verification, attackers can bypass your app entirely and make unlimited API calls from anywhere.",
+						"Binary scraping and proxy tools make extracting secrets trivial. Once leaked, your key lives on the internet forever.",
 					icon: <AlertTriangleIcon className="h-6 w-6" />,
 				},
 				{
-					title: "Out-of-Control AI Costs",
+					title: "Bots Bypass Your App",
 					description:
-						"A single leaked API key can result in thousands of dollars in unauthorized usage before you detect and revoke it.",
+						"Without device attestation, anybody can hit your endpoint directly, ignoring any client-side limits.",
+					icon: <AlertTriangleIcon className="h-6 w-6" />,
+				},
+				{
+					title: "Runaway Bills",
+					description:
+						"A single compromised key can silently rack up thousands of dollars before you notice.",
 					icon: <AlertTriangleIcon className="h-6 w-6" />,
 				},
 			],
 		},
 
 		solution: {
-			title: "Proxed.AI - One URL Change, Complete Protection",
+			title: "Proxed.AI — Single URL, Complete Defense",
 			description:
-				"Proxed.AI is a secure proxy for all your AI API calls. Just change your API endpoint and get enterprise-grade security instantly.",
+				"Replace your provider URL with Proxed and get enterprise-grade security, observability, and cost control in seconds.",
 			points: [
 				{
-					title: "Zero Backend Development",
+					title: "Zero Backend, Zero SDK",
 					description:
-						"No need to build a custom backend or implement complex token exchange. Just update your API URL and you're secured.",
+						"Just swap the endpoint—our cloud or self-hosted proxy handles the heavy lifting.",
 					icon: <CheckCircleIcon className="h-6 w-6" />,
 				},
 				{
-					title: "No API Keys in Your App",
+					title: "Split-Key Architecture",
 					description:
-						"Your sensitive API credentials stay on the server. Your app only needs a lightweight, revocable access token.",
+						"Keep the sensitive half of your provider key on our server; store only a harmless fragment in the app.",
 					icon: <CheckCircleIcon className="h-6 w-6" />,
 				},
 				{
-					title: "Apple DeviceCheck Verification",
+					title: "Apple DeviceCheck Built-In",
 					description:
-						"Verify each request comes from a legitimate, non-jailbroken iOS device to block emulators, bots, and scripted attacks.",
+						"Hardware-level attestation blocks emulators, scripts, and jailbroken devices before they hit your quota.",
 					icon: <CheckCircleIcon className="h-6 w-6" />,
 				},
 				{
-					title: "Complete Cost Control",
+					title: "Granular Cost Guardrails",
 					description:
-						"Set granular rate limits, track usage patterns, and instantly revoke access to compromised devices or users.",
+						"Define per-project rate limits and spending ceilings; get alerts long before you blow the budget.",
 					icon: <CheckCircleIcon className="h-6 w-6" />,
 				},
 			],
@@ -142,7 +148,7 @@ export const siteConfig = {
 				"Basic analytics dashboard",
 				"Email support",
 			],
-			cta: "Get Started",
+			cta: "Start Free Trial",
 			popular: false,
 		},
 		{
@@ -160,7 +166,7 @@ export const siteConfig = {
 				"Custom rate limit configurations",
 				"Priority email support",
 			],
-			cta: "Upgrade to Pro",
+			cta: "Start Free Trial",
 			popular: true,
 		},
 		{
@@ -178,7 +184,7 @@ export const siteConfig = {
 				"Custom integrations",
 				"Dedicated support & SLA",
 			],
-			cta: "Get Ultimate Security",
+			cta: "Start Free Trial",
 			popular: false,
 		},
 	],

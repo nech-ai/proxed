@@ -46,7 +46,6 @@ export const GET = async (req: NextRequest) => {
 			country: country ?? "US",
 		},
 		metadata: {
-			organizationId: teamId ?? user.team_id, // TODO: remove this
 			teamId: teamId ?? user.team_id,
 			companyName: user.team?.name ?? "",
 		},

@@ -28,7 +28,7 @@ export default async function Page() {
 	return (
 		<div className="flex justify-center py-12">
 			<Section id="updates" className="flex-1" noBorder>
-				<div className="flex gap-8">
+				<div className="flex flex-col lg:flex-row gap-8">
 					<div className="space-y-16 flex-1">{posts}</div>
 					<UpdatesToolbar
 						posts={data.map((post) => ({

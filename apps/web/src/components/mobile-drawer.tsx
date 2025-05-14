@@ -29,7 +29,6 @@ function DrawerHeaderContent({ className }: DrawerHeaderContentProps) {
 			href="/"
 			title="brand-logo"
 			className={cn("relative mr-6 flex items-center space-x-2", className)}
-			legacyBehavior
 		>
 			<Icons.logo className="h-[40px] w-auto" />
 			<DrawerTitle>{siteConfig.name}</DrawerTitle>
@@ -71,7 +70,6 @@ function NavLink({ href, children, isActive, onClose }: NavLinkProps) {
 						? "text-foreground font-medium"
 						: "text-muted-foreground hover:text-foreground",
 				)}
-				legacyBehavior
 			>
 				{children}
 			</Link>

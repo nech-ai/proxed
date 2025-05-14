@@ -48,7 +48,7 @@ The request body should be **exactly** what the target OpenAI API endpoint expec
 }
 ```
 
-Refer to the [official OpenAI API documentation](https://platform.openai.com/docs/api-reference) for detailed request body structures for each endpoint.
+Refer to the [official OpenAI API documentation](https://platform.openai.com/api-reference) for detailed request body structures for each endpoint.
 
 ## Successful Response (Matches OpenAI's Response)
 
@@ -83,7 +83,7 @@ Proxed.AI does not modify the successful response body from OpenAI.
 
 ## Error Responses
 
-*   **Proxed.AI Errors:** Refer to the [API Errors guide](/docs/api-errors) (e.g., `UNAUTHORIZED`, `PROJECT_NOT_FOUND`, `TOO_MANY_REQUESTS`).
+*   **Proxed.AI Errors:** Refer to the [API Errors guide](/api-errors) (e.g., `UNAUTHORIZED`, `PROJECT_NOT_FOUND`, `TOO_MANY_REQUESTS`).
 *   **OpenAI Errors:** If authentication with Proxed.AI is successful, but OpenAI returns an error, the proxy will forward OpenAI's error response (e.g., invalid OpenAI API key, model not found, rate limits on OpenAI side).
 
 ## Example Request (curl for Chat Completions)

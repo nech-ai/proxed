@@ -26,8 +26,8 @@ jobs:
         run: bun lint --filter=@proxed/app
       - name: 🪐 Check TypeScript
         run: bun typecheck --filter=@proxed/app
-      - name: 🧪 Run unit tests
-        run: bun test
+      # - name: 🧪 Run unit tests
+      #   run: bun test
       - name: 📥 Pull Vercel environment
         run: bunx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗️ Build project

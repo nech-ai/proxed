@@ -108,8 +108,8 @@ export type userSchemaType = z.infer<typeof userSchema>;
 
 export const contactSchema = z.object({
   tags: z.array(z.string()),
-  email: z.string().email().optional(),
-  scores: z.array(z.number().int()).optional()
+  email: z.string().email().nullable(),
+  scores: z.array(z.number().int()).nullable()
 });
 
 export type contactSchemaType = z.infer<typeof contactSchema>;
@@ -318,6 +318,32 @@ export const mySchema = z.object({
 				(field: JsonSchema) => field.optional,
 			);
 			expect(hasOptionalField).toBe(false);
+		});
+	});
+
+	describe("enum parsing", () => {
+		test("should parse enum without 'as const'", () => {
+			const schemaCode = `import { z } from "zod";
+
+export const bleachSchema = z.enum(["bleach_any", "bleach_nonchlorine", "bleach_do_not"]);`;
+			const ast = parser.parse(schemaCode);
+			const jsonSchema = parser.toJsonSchema(ast);
+			expect(jsonSchema).toEqual({
+				type: "enum",
+				values: ["bleach_any", "bleach_nonchlorine", "bleach_do_not"],
+			});
+		});
+
+		test("should parse enum with 'as const'", () => {
+			const schemaCode = `import { z } from "zod";
+
+export const bleachSchema = z.enum(["bleach_any", "bleach_nonchlorine", "bleach_do_not"] as const);`;
+			const ast = parser.parse(schemaCode);
+			const jsonSchema = parser.toJsonSchema(ast);
+			expect(jsonSchema).toEqual({
+				type: "enum",
+				values: ["bleach_any", "bleach_nonchlorine", "bleach_do_not"],
+			});
 		});
 	});
 });

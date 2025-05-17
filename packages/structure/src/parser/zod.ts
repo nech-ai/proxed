@@ -43,7 +43,7 @@ export class ZodParser extends BaseParser<ExportNamedDeclaration> {
 
 	private parseIdentifier(): Identifier {
 		const token = this.consume();
-		if (!token || token.type !== "identifier") {
+		if (!token || (token.type !== "identifier" && token.type !== "keyword")) {
 			this.throwError(
 				`Expected identifier but got ${token?.type || "end of input"}`,
 			);
@@ -89,6 +89,20 @@ export class ZodParser extends BaseParser<ExportNamedDeclaration> {
 
 		while (this.peek() && this.peek()?.value !== ")") {
 			args.push(this.parseExpression());
+
+			// Skip TypeScript "as const" assertions if present
+			this.skipWhitespace();
+			if (this.peek()?.type === "keyword" && this.peek()?.value === "as") {
+				// consume 'as'
+				this.consume();
+				this.skipWhitespace();
+				// optionally consume 'const'
+				if (this.peek()?.type === "keyword" && this.peek()?.value === "const") {
+					this.consume();
+				}
+				this.skipWhitespace();
+			}
+
 			const next = this.peek();
 			if (next?.type === "punctuation" && next.value === ",") {
 				this.consume();
@@ -503,9 +517,7 @@ export type ${name}Type = z.infer<typeof ${name}>;
 				);
 		}
 
-		// Apply common modifiers
-		if (schema.optional) zodStr += ".optional()";
-		if (schema.nullable) zodStr += ".nullable()";
+		if (schema.optional || schema.nullable) zodStr += ".nullable()";
 		if (schema.description) zodStr += `.describe("${schema.description}")`;
 		if (schema.defaultValue !== undefined) {
 			const defaultVal =
@@ -917,7 +929,7 @@ export default schema;
 		schema: JsonSchema,
 	): z.ZodType {
 		let result: z.ZodType = validator;
-		if (schema.optional) result = result.optional();
+		if (schema.optional) result = result.nullable();
 		if (schema.nullable) result = result.nullable();
 		if (schema.description) result = result.describe(schema.description);
 		if (schema.defaultValue !== undefined)

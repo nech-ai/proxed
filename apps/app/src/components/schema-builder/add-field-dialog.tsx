@@ -57,7 +57,7 @@ export function AddFieldDialog({ open, onClose, onAdd }: AddFieldDialogProps) {
 	const [name, setName] = useState("");
 	const [type, setType] = useState<SchemaType>("string");
 	const [description, setDescription] = useState("");
-	const [isOptional, setIsOptional] = useState(false);
+	const [isNullable, setIsNullable] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	function validateName(name: string) {
@@ -77,8 +77,8 @@ export function AddFieldDialog({ open, onClose, onAdd }: AddFieldDialogProps) {
 
 		const baseSchema: JsonSchema = {
 			type,
-			optional: isOptional,
-			nullable: false,
+			nullable: isNullable,
+			optional: false,
 			description: description || undefined,
 		} as JsonSchema;
 
@@ -96,7 +96,7 @@ export function AddFieldDialog({ open, onClose, onAdd }: AddFieldDialogProps) {
 		setName("");
 		setType("string");
 		setDescription("");
-		setIsOptional(false);
+		setIsNullable(false);
 		setError(null);
 	}
 
@@ -174,8 +174,8 @@ export function AddFieldDialog({ open, onClose, onAdd }: AddFieldDialogProps) {
 							</div>
 
 							<div className="flex items-center gap-2">
-								<Switch checked={isOptional} onCheckedChange={setIsOptional} />
-								<Label className="!m-0">Optional Field</Label>
+								<Switch checked={isNullable} onCheckedChange={setIsNullable} />
+								<Label className="!m-0">Nullable Field</Label>
 							</div>
 						</div>
 
@@ -192,9 +192,9 @@ export function AddFieldDialog({ open, onClose, onAdd }: AddFieldDialogProps) {
 											<span className="font-medium text-sm">
 												{name || "fieldName"}
 											</span>
-											{isOptional && (
+											{isNullable && (
 												<Badge variant="outline" className="text-[10px]">
-													optional
+													nullable
 												</Badge>
 											)}
 										</div>
@@ -215,7 +215,7 @@ export function AddFieldDialog({ open, onClose, onAdd }: AddFieldDialogProps) {
 							<Alert>
 								<AlertDescription className="text-xs">
 									{typeDescriptions[type]}.{" "}
-									{isOptional && "This field is optional."}
+									{isNullable && "This field is nullable."}
 								</AlertDescription>
 							</Alert>
 						</div>

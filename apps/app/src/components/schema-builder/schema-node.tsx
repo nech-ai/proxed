@@ -58,8 +58,9 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@proxed/ui/components/dropdown-menu";
-import { ScrollArea } from "@proxed/ui/components/scroll-area";
+
 import { CodeView } from "./code-view";
+import { EnumControls as EnumValidationControls } from "./type-controls";
 
 interface SchemaNodeProps {
 	name: string;
@@ -94,14 +95,16 @@ function FieldHeader({
 	name: fieldName,
 	type,
 	description,
-	optional,
+	nullable,
 	onDescriptionClick,
+	values,
 }: {
 	name: string;
 	type: string;
 	description?: string;
-	optional?: boolean;
+	nullable?: boolean;
 	onDescriptionClick?: () => void;
+	values?: string[];
 }) {
 	const getTypeColor = (type: string) => {
 		switch (type) {
@@ -133,9 +136,9 @@ function FieldHeader({
 					>
 						{type}
 					</Badge>
-					{optional && (
+					{nullable && (
 						<Badge variant="outline" className="px-2 py-0.5 text-[10px]">
-							optional
+							nullable
 						</Badge>
 					)}
 				</div>
@@ -171,6 +174,24 @@ function FieldHeader({
 					</button>
 				)}
 			</div>
+			{type === "enum" && values && values.length > 0 && (
+				<div className="mt-1 flex flex-wrap gap-1">
+					{values.slice(0, 5).map((value: string) => (
+						<Badge
+							key={value}
+							variant="outline"
+							className="text-[10px] font-normal"
+						>
+							{value}
+						</Badge>
+					))}
+					{values.length > 5 && (
+						<Badge variant="outline" className="text-[10px] font-normal">
+							+{values.length - 5} more
+						</Badge>
+					)}
+				</div>
+			)}
 		</div>
 	);
 }
@@ -334,6 +355,8 @@ function TypeValidationControls({
 						</div>
 					</div>
 				);
+			case "enum":
+				return <EnumValidationControls schema={schema} onUpdate={onUpdate} />;
 			default:
 				return null;
 		}
@@ -445,7 +468,7 @@ function getTypeScriptPreview(
 	indentLevel = 0,
 ): string {
 	const indent = "  ".repeat(indentLevel);
-	const optional = schema.optional ? "?" : "";
+	const nullSuffix = schema.nullable ? " | null" : "";
 
 	let typeStr = "";
 	switch (schema.type) {
@@ -485,8 +508,8 @@ function getTypeScriptPreview(
 	}
 
 	return indentLevel === 0
-		? `${typeStr};\n`
-		: `${indent}${name}${optional}: ${typeStr};\n`;
+		? `${typeStr}${nullSuffix};\n`
+		: `${indent}${name}: ${typeStr}${nullSuffix};\n`;
 }
 
 function HotkeysDisplay({
@@ -497,7 +520,7 @@ function HotkeysDisplay({
 	const hotkeys = [
 		{ combo: ["Alt", "E"], label: "edit name" },
 		{ combo: ["Alt", "D"], label: "edit description" },
-		{ combo: ["Alt", "O"], label: "toggle optional" },
+		{ combo: ["Alt", "O"], label: "toggle nullable" },
 		{ combo: ["Alt", "T"], label: "change type" },
 		...(type === "object" ? [{ combo: ["Alt", "A"], label: "add field" }] : []),
 	];
@@ -596,8 +619,8 @@ export function SchemaNode({
 		(type: JsonSchema["type"]) => {
 			const baseProps = {
 				type,
-				optional: schema.optional,
 				nullable: schema.nullable,
+				optional: false,
 				description: schema.description,
 			};
 
@@ -620,7 +643,7 @@ export function SchemaNode({
 
 			onUpdate(newSchema);
 		},
-		[schema.optional, schema.nullable, schema.description, onUpdate],
+		[schema.nullable, schema.description, onUpdate],
 	);
 
 	const handleQuickAdd = (type: SchemaType) => {
@@ -628,8 +651,8 @@ export function SchemaNode({
 
 		const fieldSchema: JsonSchema = {
 			type,
-			optional: false,
 			nullable: false,
+			optional: false,
 		} as JsonSchema;
 
 		if (type === "object") {
@@ -710,7 +733,7 @@ export function SchemaNode({
 	);
 	useHotkeys(
 		"alt+o",
-		() => onUpdate({ ...schema, optional: !schema.optional }),
+		() => onUpdate({ ...schema, nullable: !schema.nullable, optional: false }),
 		{ enableOnFormTags: true },
 	);
 
@@ -804,8 +827,10 @@ export function SchemaNode({
 									name={fieldName}
 									type={schema.type}
 									description={schema.description}
-									optional={schema.optional}
+									nullable={schema.nullable}
 									onDescriptionClick={() => setIsEditingDescription(true)}
+									{...(schema.type === "enum" &&
+										schema.values && { values: schema.values })}
 								/>
 							</div>
 						)}
@@ -819,19 +844,23 @@ export function SchemaNode({
 								<TooltipTrigger asChild>
 									<div className="flex items-center gap-2">
 										<Switch
-											checked={schema.optional}
-											onCheckedChange={(optional) =>
-												onUpdate({ ...schema, optional })
+											checked={schema.nullable}
+											onCheckedChange={(isChecked) =>
+												onUpdate({
+													...schema,
+													nullable: isChecked,
+													optional: false,
+												})
 											}
 											className="scale-75"
 										/>
 										<span className="text-xs text-muted-foreground">
-											Optional
+											Nullable
 										</span>
 									</div>
 								</TooltipTrigger>
 								<TooltipContent>
-									<p>Make this field optional</p>
+									<p>Make this field nullable</p>
 								</TooltipContent>
 							</Tooltip>
 						</TooltipProvider>

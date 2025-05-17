@@ -226,6 +226,7 @@ describe("Zod Validation Cycle", () => {
 					id: 2,
 					roles: ["guest"],
 					profile: {
+						avatar: null,
 						bio: "Hello world",
 					},
 				},

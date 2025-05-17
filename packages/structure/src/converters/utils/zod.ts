@@ -136,7 +136,7 @@ export function generateZodSnippet(def: JsonSchema): string {
 	}
 
 	if (def.description) code += `.describe("${def.description}")`;
-	if (def.optional) code += ".optional()";
+	if (def.optional) code += ".nullable()";
 	if (def.nullable) code += ".nullable()";
 	if (def.defaultValue !== undefined)
 		code += `.default(${JSON.stringify(def.defaultValue)})`;

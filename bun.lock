@@ -292,13 +292,13 @@
       "version": "0.0.0",
       "dependencies": {
         "@react-email/components": "^0.0.36",
-        "@react-email/render": "^1.1.1",
+        "@react-email/render": "^1.1.2",
         "lodash-es": "^4.17.21",
         "next-intl": "^4.1.0",
-        "nodemailer": "^6.10.1",
+        "nodemailer": "^7.0.3",
         "react": "19.1.0",
         "react-dom": "19.1.0",
-        "react-email": "^4.0.13",
+        "react-email": "^4.0.14",
         "use-intl": "^4.1.0",
       },
       "devDependencies": {
@@ -2425,7 +2425,7 @@
 
     "node-releases": ["node-releases@2.0.19", "", {}, "sha512-xxOWJsBKtzAq7DY0J+DTzuz58K8e7sJbdgwkbMWQe8UYB6ekmsQ45q0M/tJDsGaZmbC+l7n57UV8Hl5tHxO9uw=="],
 
-    "nodemailer": ["nodemailer@6.10.1", "", {}, "sha512-Z+iLaBGVaSjbIzQ4pX6XV41HrooLsQ10ZWPUehGmuantvzWoDVBnmsdUcOIDM1t+yPor5pDhVlDESgOMEGxhHA=="],
+    "nodemailer": ["nodemailer@7.0.3", "", {}, "sha512-Ajq6Sz1x7cIK3pN6KesGTah+1gnwMnx5gKl3piQlQQE/PwyJ4Mbc8is2psWYxK3RJTVeqsDaCv8ZzXLCDHMTZw=="],
 
     "normalize-package-data": ["normalize-package-data@2.5.0", "", { "dependencies": { "hosted-git-info": "^2.1.4", "resolve": "^1.10.0", "semver": "2 || 3 || 4 || 5", "validate-npm-package-license": "^3.0.1" } }, "sha512-/5CMN3T0R4XTj4DcGaexo+roZSdSFW/0AOOTROrjxzCG1wrWXEsGbRKevjlIL+ZDE4sZlJr5ED4YW0yqmkK+eA=="],
 

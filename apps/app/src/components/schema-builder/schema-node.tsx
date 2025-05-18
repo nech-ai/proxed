@@ -17,6 +17,7 @@ import {
 	ArrowDownIcon,
 	KeyboardIcon,
 	CodeIcon,
+	PencilIcon,
 } from "lucide-react";
 import type { JsonSchema } from "@proxed/structure";
 import { cn } from "@proxed/ui/utils";
@@ -49,7 +50,6 @@ import {
 	CommandGroup,
 	CommandItem,
 } from "@proxed/ui/components/command";
-import { useHotkeys } from "react-hotkeys-hook";
 import { Label } from "@proxed/ui/components/label";
 import {
 	DropdownMenu,
@@ -512,70 +512,6 @@ function getTypeScriptPreview(
 		: `${indent}${name}: ${typeStr}${nullSuffix};\n`;
 }
 
-function HotkeysDisplay({
-	type,
-	name,
-	schema,
-}: { type: JsonSchema["type"]; name: string; schema: JsonSchema }) {
-	const hotkeys = [
-		{ combo: ["Alt", "E"], label: "edit name" },
-		{ combo: ["Alt", "D"], label: "edit description" },
-		{ combo: ["Alt", "O"], label: "toggle nullable" },
-		{ combo: ["Alt", "T"], label: "change type" },
-		...(type === "object" ? [{ combo: ["Alt", "A"], label: "add field" }] : []),
-	];
-
-	const typeScriptCode = `interface Schema {\n${getTypeScriptPreview(name, schema, 1)}}`;
-
-	return (
-		<Popover>
-			<PopoverTrigger asChild>
-				<Button
-					variant="ghost"
-					size="sm"
-					className="text-muted-foreground hover:text-foreground gap-1.5"
-				>
-					<KeyboardIcon className="h-3.5 w-3.5" />
-					<span className="text-xs">Shortcuts</span>
-				</Button>
-			</PopoverTrigger>
-			<PopoverContent className="w-[400px] p-3" align="end">
-				<div className="space-y-4">
-					<div className="flex items-center gap-2 pb-2 border-b">
-						<KeyboardIcon className="h-4 w-4 text-muted-foreground" />
-						<span className="text-sm font-medium">Keyboard Shortcuts</span>
-					</div>
-					<div className="grid gap-2">
-						{hotkeys.map((hotkey) => (
-							<HotkeyBadge
-								key={hotkey.combo.join("+")}
-								combo={hotkey.combo}
-								label={hotkey.label}
-							/>
-						))}
-					</div>
-					<div className="space-y-2">
-						<div className="flex items-center gap-2 pb-1 border-b">
-							<CodeIcon className="h-4 w-4 text-muted-foreground" />
-							<span className="text-sm font-medium">TypeScript Preview</span>
-						</div>
-						<div className="rounded-md overflow-hidden">
-							<CodeView code={typeScriptCode} language="typescript" />
-						</div>
-					</div>
-					<div className="pt-2 border-t">
-						<p className="text-[10px] text-muted-foreground">
-							Press{" "}
-							<kbd className="px-1 bg-muted rounded border text-[10px]">?</kbd>{" "}
-							anywhere to show all shortcuts
-						</p>
-					</div>
-				</div>
-			</PopoverContent>
-		</Popover>
-	);
-}
-
 export function SchemaNode({
 	name,
 	schema,
@@ -586,9 +522,9 @@ export function SchemaNode({
 }: SchemaNodeProps) {
 	const [isExpanded, setIsExpanded] = useState(true);
 	const [isHovered, setIsHovered] = useState(false);
-	const [fieldName, setFieldName] = useState(name);
-	const [isEditing, setIsEditing] = useState(false);
-	const [isEditingDescription, setIsEditingDescription] = useState(false);
+	const [currentFieldName, setCurrentFieldName] = useState(name);
+	const [isEditingName, setIsEditingName] = useState(false);
+	const [isEditingDesc, setIsEditingDesc] = useState(false);
 	const [newFieldName, setNewFieldName] = useState("");
 	const [isAddingField, setIsAddingField] = useState(false);
 
@@ -620,7 +556,6 @@ export function SchemaNode({
 			const baseProps = {
 				type,
 				nullable: schema.nullable,
-				optional: false,
 				description: schema.description,
 			};
 
@@ -652,7 +587,6 @@ export function SchemaNode({
 		const fieldSchema: JsonSchema = {
 			type,
 			nullable: false,
-			optional: false,
 		} as JsonSchema;
 
 		if (type === "object") {
@@ -721,35 +655,6 @@ export function SchemaNode({
 		});
 	}, [name, schema, onUpdate]);
 
-	// Keyboard shortcuts
-	useHotkeys("alt+e", () => setIsEditing(true), { enableOnFormTags: true });
-	useHotkeys("alt+d", () => setIsEditingDescription(true), {
-		enableOnFormTags: true,
-	});
-	useHotkeys(
-		"alt+a",
-		() => schema.type === "object" && setIsAddingField(true),
-		{ enableOnFormTags: true },
-	);
-	useHotkeys(
-		"alt+o",
-		() => onUpdate({ ...schema, nullable: !schema.nullable, optional: false }),
-		{ enableOnFormTags: true },
-	);
-
-	// Quick type change with keyboard
-	useHotkeys(
-		"alt+t",
-		(e) => {
-			e.preventDefault();
-			const typeList = Object.keys(typeDescriptions) as SchemaType[];
-			const currentIndex = typeList.indexOf(schema.type as SchemaType);
-			const nextIndex = (currentIndex + 1) % typeList.length;
-			handleTypeChange(typeList[nextIndex] as JsonSchema["type"]);
-		},
-		{ enableOnFormTags: true },
-	);
-
 	return (
 		<Card
 			ref={setNodeRef}
@@ -765,12 +670,12 @@ export function SchemaNode({
 			tabIndex={0}
 			onKeyDown={(e) => {
 				if (e.key === "Enter" || e.key === " ") {
-					setIsEditing(true);
+					setIsEditingName(true);
 				}
 			}}
 		>
 			<CardContent className="p-4">
-				<div className="flex items-center gap-4">
+				<div className="flex items-start gap-4">
 					<div
 						{...attributes}
 						{...listeners}
@@ -798,46 +703,126 @@ export function SchemaNode({
 					)}
 
 					<div className="flex-1 min-w-0">
-						{isEditing ? (
+						{isEditingName ? (
 							<Input
-								value={fieldName}
-								onChange={(e) => setFieldName(e.target.value)}
+								value={currentFieldName}
+								onChange={(e) => setCurrentFieldName(e.target.value)}
 								onBlur={() => {
-									handleRename(fieldName);
-									setIsEditing(false);
+									handleRename(currentFieldName);
+									setIsEditingName(false);
 								}}
 								onKeyDown={(e) => {
 									if (e.key === "Enter") {
-										handleRename(fieldName);
-										setIsEditing(false);
+										handleRename(currentFieldName);
+										setIsEditingName(false);
 									} else if (e.key === "Escape") {
-										setFieldName(name);
-										setIsEditing(false);
+										setCurrentFieldName(name);
+										setIsEditingName(false);
 									}
 								}}
 								autoFocus
-								className="w-full"
+								className="w-full h-8 text-sm"
 							/>
 						) : (
-							<div
-								onClick={() => setIsEditing(true)}
-								className="cursor-pointer hover:opacity-80"
-							>
-								<FieldHeader
-									name={fieldName}
-									type={schema.type}
-									description={schema.description}
-									nullable={schema.nullable}
-									onDescriptionClick={() => setIsEditingDescription(true)}
-									{...(schema.type === "enum" &&
-										schema.values && { values: schema.values })}
-								/>
+							<div className="flex items-center gap-2">
+								<span
+									className="font-medium text-sm truncate"
+									title={currentFieldName}
+								>
+									{currentFieldName}
+								</span>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="h-6 w-6"
+									onClick={() => setIsEditingName(true)}
+								>
+									<PencilIcon className="h-3.5 w-3.5 text-muted-foreground" />
+								</Button>
 							</div>
 						)}
+
+						{/* Description Area */}
+						{isEditingDesc ? (
+							<Textarea
+								value={schema.description || ""}
+								onChange={(e) =>
+									onUpdate({ ...schema, description: e.target.value })
+								}
+								onBlur={() => setIsEditingDesc(false)}
+								onKeyDown={(e) => {
+									if (e.key === "Escape") {
+										setIsEditingDesc(false);
+									}
+								}}
+								placeholder="Add a description for this field..."
+								className="mt-1 text-xs resize-none h-20"
+								autoFocus
+							/>
+						) : (
+							<div className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5 group">
+								<span
+									className="truncate max-w-[300px]"
+									title={schema.description}
+								>
+									{schema.description || <em>No description</em>}
+								</span>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="h-5 w-5 opacity-0 group-hover:opacity-100 focus:opacity-100"
+									onClick={() => setIsEditingDesc(true)}
+								>
+									<PencilIcon className="h-3 w-3" />
+								</Button>
+							</div>
+						)}
+
+						{/* Type and Nullable Badges */}
+						<div className="flex items-center gap-1.5 mt-1.5">
+							<Badge
+								variant="secondary"
+								className={cn(
+									"px-2 py-0.5 text-[10px]",
+									typeColors[schema.type as SchemaType],
+								)}
+							>
+								{schema.type}
+							</Badge>
+							{schema.nullable && (
+								<Badge variant="outline" className="px-2 py-0.5 text-[10px]">
+									nullable
+								</Badge>
+							)}
+						</div>
+
+						{/* Enum Values Preview */}
+						{schema.type === "enum" &&
+							schema.values &&
+							schema.values.length > 0 && (
+								<div className="mt-1.5 flex flex-wrap gap-1">
+									{schema.values.slice(0, 3).map((value: string) => (
+										<Badge
+											key={value}
+											variant="outline"
+											className="text-[10px] font-normal"
+										>
+											{value}
+										</Badge>
+									))}
+									{schema.values.length > 3 && (
+										<Badge
+											variant="outline"
+											className="text-[10px] font-normal"
+										>
+											+{schema.values.length - 3} more
+										</Badge>
+									)}
+								</div>
+							)}
 					</div>
 
-					<div className="flex items-center gap-2">
-						<HotkeysDisplay type={schema.type} name={name} schema={schema} />
+					<div className="flex items-center gap-1 ml-auto">
 						<TypeValidationControls schema={schema} onUpdate={onUpdate} />
 						<TooltipProvider>
 							<Tooltip>
@@ -849,7 +834,6 @@ export function SchemaNode({
 												onUpdate({
 													...schema,
 													nullable: isChecked,
-													optional: false,
 												})
 											}
 											className="scale-75"
@@ -875,26 +859,6 @@ export function SchemaNode({
 						/>
 					</div>
 				</div>
-
-				{isEditingDescription && (
-					<div className="mt-4">
-						<Textarea
-							value={schema.description || ""}
-							onChange={(e) =>
-								onUpdate({ ...schema, description: e.target.value })
-							}
-							onBlur={() => setIsEditingDescription(false)}
-							onKeyDown={(e) => {
-								if (e.key === "Escape") {
-									setIsEditingDescription(false);
-								}
-							}}
-							placeholder="Add a description for this field..."
-							className="mt-1 text-sm resize-none h-20"
-							autoFocus
-						/>
-					</div>
-				)}
 
 				{isExpanded && schema.type === "object" && (
 					<div className="mt-4 pl-4 border-l border-border space-y-3">
@@ -937,14 +901,14 @@ export function SchemaNode({
 						))}
 
 						{/* Inline field creation */}
-						<div className="flex items-center gap-2">
+						<div className="flex items-center gap-2 pt-2 border-t border-dashed border-border/60">
 							{isAddingField ? (
-								<div className="flex-1 flex items-center gap-2">
+								<div className="flex-1 flex items-center gap-2 p-1 bg-muted/50 rounded-md">
 									<Input
 										value={newFieldName}
 										onChange={(e) => setNewFieldName(e.target.value)}
-										placeholder="Field name..."
-										className="h-8"
+										placeholder="Enter field name..."
+										className="h-8 text-xs flex-grow"
 										autoFocus
 										onKeyDown={(e) => {
 											if (e.key === "Escape") {
@@ -953,35 +917,54 @@ export function SchemaNode({
 											}
 										}}
 									/>
-									<Popover>
+									<Popover
+										open={isAddingField}
+										onOpenChange={(open) => !open && setIsAddingField(false)}
+									>
+										{" "}
+										{/* Auto close popover */}
 										<PopoverTrigger asChild>
-											<Button variant="outline" size="sm">
-												Select Type
+											<Button
+												variant="outline"
+												size="sm"
+												className="h-8 text-xs"
+											>
+												{schema.type || "Select Type"}{" "}
+												<ChevronRightIcon className="h-3 w-3 ml-1 opacity-50 rotate-90" />
 											</Button>
 										</PopoverTrigger>
-										<PopoverContent className="p-0" align="start">
+										<PopoverContent className="p-0 w-[250px]" align="start">
 											<Command>
-												<CommandInput placeholder="Search type..." />
+												<CommandInput
+													placeholder="Search type..."
+													className="text-xs"
+												/>
 												<CommandEmpty>No type found.</CommandEmpty>
 												<CommandGroup>
 													{Object.entries(typeDescriptions).map(
 														([key, desc]) => (
 															<CommandItem
 																key={key}
-																onSelect={() =>
-																	handleQuickAdd(key as SchemaType)
-																}
-																className="flex items-center gap-2"
+																onSelect={() => {
+																	handleQuickAdd(key as SchemaType);
+																}}
+																className="flex items-center justify-between cursor-pointer text-xs px-2 py-1.5"
 															>
-																<Badge
-																	variant="secondary"
-																	className={typeColors[key as SchemaType]}
-																>
-																	{key}
-																</Badge>
-																<span className="text-xs text-muted-foreground">
-																	{desc}
-																</span>
+																<div className="flex items-center gap-2">
+																	<Badge
+																		variant="secondary"
+																		className={cn(
+																			"text-[9px] px-1.5 py-0.5",
+																			typeColors[key as SchemaType],
+																		)}
+																	>
+																		{key}
+																	</Badge>
+																	<span className="text-muted-foreground text-[11px]">
+																		{desc}
+																	</span>
+																</div>
+																<ChevronRightIcon className="h-3.5 w-3.5 text-muted-foreground opacity-70" />
 															</CommandItem>
 														),
 													)}
@@ -992,6 +975,7 @@ export function SchemaNode({
 									<Button
 										variant="ghost"
 										size="sm"
+										className="h-8 text-xs text-muted-foreground hover:text-foreground"
 										onClick={() => {
 											setIsAddingField(false);
 											setNewFieldName("");
@@ -1005,10 +989,10 @@ export function SchemaNode({
 									variant="ghost"
 									size="sm"
 									onClick={() => setIsAddingField(true)}
-									className="gap-1 text-muted-foreground hover:text-foreground"
+									className="gap-1.5 text-xs text-muted-foreground hover:text-primary h-8 w-full justify-start px-2"
 								>
-									<PlusIcon className="h-4 w-4" />
-									Add Field
+									<PlusIcon className="h-3.5 w-3.5" />
+									Add field to this object
 								</Button>
 							)}
 						</div>

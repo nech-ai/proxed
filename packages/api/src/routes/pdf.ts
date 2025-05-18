@@ -1,4 +1,3 @@
-import { createOpenAI } from "@ai-sdk/openai";
 import { ZodParser, type JsonSchema } from "@proxed/structure";
 import { createClient } from "@proxed/supabase/api";
 import { getProjectQuery } from "@proxed/supabase/queries";

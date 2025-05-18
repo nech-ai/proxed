@@ -78,7 +78,6 @@ export function AddFieldDialog({ open, onClose, onAdd }: AddFieldDialogProps) {
 		const baseSchema: JsonSchema = {
 			type,
 			nullable: isNullable,
-			optional: false,
 			description: description || undefined,
 		} as JsonSchema;
 

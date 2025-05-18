@@ -585,17 +585,23 @@ export type ${name}Type = z.infer<typeof ${name}>;
 
 				// Handle required method
 				if (method === "required") {
+					const stripOptionalAndNullable = <T extends JsonSchema>(
+						schema: T,
+					): T => {
+						const { optional, nullable, ...rest } = schema as any;
+						return rest as T;
+					};
+
 					if (baseSchema.type === "object") {
 						// Make all fields required
 						const fields: Record<string, JsonSchema> = {};
 						for (const [key, field] of Object.entries(baseSchema.fields)) {
-							const { optional, ...rest } = field;
-							fields[key] = rest;
+							fields[key] = stripOptionalAndNullable(field);
 						}
-						return { ...baseSchema, fields };
+						return { ...stripOptionalAndNullable(baseSchema), fields };
 					}
-					const { optional, ...rest } = baseSchema;
-					return rest;
+
+					return stripOptionalAndNullable(baseSchema);
 				}
 
 				// Handle describe method
@@ -635,12 +641,12 @@ export type ${name}Type = z.infer<typeof ${name}>;
 					}
 				}
 
-				// Handle optional modifier
-				if (method === "optional") {
-					return { ...baseSchema, optional: true };
+				// Handle optional and nullish modifiers -> convert to nullable to satisfy OpenAI structured outputs
+				if (method === "optional" || method === "nullish") {
+					return { ...baseSchema, nullable: true };
 				}
 
-				// Handle nullable modifier
+				// Handle explicit nullable modifier
 				if (method === "nullable") {
 					return { ...baseSchema, nullable: true };
 				}
@@ -859,7 +865,9 @@ export default schema;
 				for (const [key, value] of Object.entries(schema.fields)) {
 					shape[key] = this.convertJsonSchemaToZodValidator(value);
 				}
-				return this.applyCommonValidators(z.object(shape), schema);
+				// OpenAI structured outputs demand additionalProperties: false
+				// Map this to Zod's .strict() so unexpected keys are disallowed
+				return this.applyCommonValidators(z.object(shape).strict(), schema);
 			}
 
 			case "union": {

@@ -38,12 +38,11 @@ describe("createAIClient", () => {
 
 	test("should throw an error for an unsupported provider", () => {
 		const unsupportedProvider = "UNSUPPORTED_PROVIDER" as any;
-		expect(() => createAIClient(unsupportedProvider, apiKey)).toThrow(
-			createError(
-				ErrorCode.INTERNAL_ERROR,
-				`Unsupported AI provider: ${unsupportedProvider}`,
-			),
-		);
+		expect(() => createAIClient(unsupportedProvider, apiKey)).toThrowError({
+			name: "AppError",
+			message: `Unsupported AI provider: ${unsupportedProvider}`,
+			code: ErrorCode.INTERNAL_ERROR,
+		});
 		expect(mockCreateOpenAI).not.toHaveBeenCalled();
 		expect(mockCreateAnthropic).not.toHaveBeenCalled();
 	});

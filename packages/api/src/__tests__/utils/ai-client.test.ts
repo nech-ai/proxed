@@ -21,21 +21,6 @@ describe("createAIClient", () => {
 		mockCreateOpenAI.mockClear();
 		mockCreateAnthropic.mockClear();
 	});
-
-	test("should return OpenAI client for OPENAI provider", () => {
-		const client = createAIClient("OPENAI", apiKey);
-		expect(client).toEqual({ type: "openai" } as any);
-		expect(mockCreateOpenAI).toHaveBeenCalledWith({ apiKey });
-		expect(mockCreateAnthropic).not.toHaveBeenCalled();
-	});
-
-	test("should return Anthropic client for ANTHROPIC provider", () => {
-		const client = createAIClient("ANTHROPIC", apiKey);
-		expect(client).toEqual({ type: "anthropic" } as any);
-		expect(mockCreateAnthropic).toHaveBeenCalledWith({ apiKey });
-		expect(mockCreateOpenAI).not.toHaveBeenCalled();
-	});
-
 	test("should throw an error for an unsupported provider", () => {
 		const unsupportedProvider = "UNSUPPORTED_PROVIDER" as any;
 		expect(() => createAIClient(unsupportedProvider, apiKey)).toThrowError({

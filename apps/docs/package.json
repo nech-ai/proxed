@@ -14,7 +14,7 @@
 		"@proxed/ui": "workspace:*",
 		"fumadocs-core": "^15.3.1",
 		"fumadocs-mdx": "^11.6.3",
-		"fumadocs-ui": "^15.3.1",
+		"fumadocs-ui": "^15.3.3",
 		"next": "^15.3.2",
 		"react": "19.1.0",
 		"react-dom": "19.1.0"

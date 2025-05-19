@@ -26,7 +26,7 @@
 		"clsx": "^2.1.1",
 		"content-collections": "^0.1.4",
 		"framer-motion": "^12.11.0",
-		"fumadocs-core": "^15.3.1",
+		"fumadocs-core": "^15.3.3",
 		"fumadocs-ui": "^15.3.1",
 		"geist": "^1.4.2",
 		"lucide-react": "^0.509.0",

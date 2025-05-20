@@ -1,0 +1,152 @@
+---
+title: Expo & React Native + Proxed.AI DeviceCheck
+description: |
+  End-to-end guide to securing your Expo / React Native app's calls to Proxed.AI using Apple's DeviceCheck, partial API keys and the Bearer-token authentication flow.
+---
+
+# Secure Proxed.AI Calls in Expo / React Native Using Apple DeviceCheck
+
+> TL;DR – You'll build a custom Expo dev client, fetch a DeviceCheck token on iOS, then send `Authorization: Bearer <partialKey>.<token>` to Proxed.AI. That's it.
+
+## Why Do I Need This?
+
+• **Protect the real provider key.** Proxed uses a *split-key* model. Your app only knows the client part (``partialKey``) – the server part lives safely on Proxed.
+• **Block emulators, scripts & jail-broken devices.** DeviceCheck proves the request came from a legitimate iOS installation of *your* app.
+• **Keep development friction-free.** Test Mode + a *test key* lets you skip DeviceCheck when you're iterating.
+
+## How Authentication Works with Proxed
+
+| Scenario | Header | Notes |
+| --- | --- | --- |
+| **Prod** | `Authorization: Bearer <partialKey>.<deviceToken>` | *Recommended*. Device token is the `DCDevice` base64 string. No extra headers required. |
+| **Dev / Test Mode** | `x-proxed-test-key`, `x-ai-key` | Use when Test Mode **ON** in your project settings. DeviceCheck not required. |
+| **Legacy** | `x-device-token`, `x-ai-key` | Still supported but will be deprecated – migrate to Bearer. |
+
+The first segment of the Bearer token is *always* treated as the partial key, so you never have to send `x-ai-key` when using the recommended flow.
+
+---
+
+## 1 – Prerequisites
+
+1. Apple Developer account.
+2. DeviceCheck enabled for your **App ID** + a DeviceCheck **private key** (`.p8`), **Key ID** and **Team ID** (see [Apple DeviceCheck guide](/docs/device-check)).
+3. A Proxed project with:
+   • Device Check **configured** (upload that `.p8`).
+   • A **partial API key** (OpenAI, Anthropic, etc.).
+4. Expo SDK ✹ 49+ and EAS CLI installed.
+
+## 2 – Install Packages
+
+```bash
+npx expo install react-native-device-info
+# optional, but handy for custom config plugins
+bun add -D @expo/config-plugins
+```
+
+> `react-native-device-info` already wraps the DeviceCheck native APIs.
+
+## 3 – Create a Custom Dev Client
+
+DeviceCheck isn't available in Expo Go. Generate native projects and build a dev client:
+
+```bash
+npx expo prebuild --clean          # generates ios/ & android/ directories
+EAS_BUILD_PROFILE=development \
+  eas build --platform ios
+```
+
+Install the resulting `.ipa` on a **physical** device – no simulators.
+
+## 4 – Fetch the Token & Talk to Proxed
+
+`lib/proxed-service.ts`:
+
+```ts
+import DeviceInfo from "react-native-device-info";
+import { z } from "zod";
+
+const ENDPOINT = "https://api.proxed.ai/v1/vision";          // or /text, /pdf, /openai/{projectId}/* ...
+const PROJECT_ID = "YOUR_PROJECT_UUID";                       // path variant also works
+const PARTIAL_KEY = "pk-abc123…";                             // client half of your provider key
+
+// Define expected response structure to keep TS happy
+const resultSchema = z.object({ /* … */ });
+export type VisionResponse = z.infer<typeof resultSchema>;
+
+export async function analyzeImage(base64: string): Promise<VisionResponse> {
+  // 1 – Get DeviceCheck token (skip on Android / emulator)
+  const isEmu = await DeviceInfo.isEmulator();
+  let dcToken: string | null = null;
+  if (!isEmu && DeviceInfo.getSystemName() === "iOS") {
+    dcToken = await DeviceInfo.getDeviceToken(); // throws on sim
+  }
+
+  // 2 – Build headers
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "x-project-id": PROJECT_ID,
+    Authorization: `Bearer ${PARTIAL_KEY}.${dcToken ?? ""}`,
+  };
+
+  // 3 – POST to Proxed
+  const res = await fetch(`${ENDPOINT}/${PROJECT_ID}`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ image: base64 }),
+  });
+
+  if (!res.ok) throw new Error(`Proxed error ${res.status}`);
+
+  const json = await res.json();
+  return resultSchema.parse(json);
+}
+```
+
+### Development Shortcut: Test Mode
+
+When *Test Mode* is enabled in the Proxed dashboard:
+
+```ts
+headers["x-ai-key"] = PARTIAL_KEY;
+headers["x-proxed-test-key"] = "YOUR_TEST_KEY"; // no Bearer needed
+```
+
+This bypasses DeviceCheck, letting you test on simulator / Android.
+
+---
+
+## 5 – Common Pitfalls
+
+1. **Expo Go?** Won't work – needs custom client.
+2. **Simulators?** `generateToken()` always fails. Use Test Mode or a real device.
+3. **Entitlements missing?** Inspect the built `.ipa` – you need `com.apple.developer.devicecheck = true`.
+4. **Wrong Bearer format?** Must be `partialKey.token`. No spaces, no `Bearer:` prefix inside the string.
+5. **401 UNAUTHORIZED**? Check
+   • Project ID matches.
+   • Partial key matches the server half.
+   • DeviceCheck is enabled in the project.
+   • Token is valid (base64). Use Apple's sandbox endpoint for dev keys.
+
+---
+
+## 6 – What Happens Server-Side?
+
+1. Proxed splits the Bearer at the first `.` → `partialKey`, `token`.
+2. Looks up the **server part** of the key.
+3. Verifies the DeviceCheck token with Apple *unless* Test Mode is on.
+4. Reassembles the full provider key **in-memory only**.
+5. Forwards the request to OpenAI/Anthropic/etc.
+6. Validates the model's response against your **schema**.
+7. Streams / returns the validated JSON back to the app.
+
+All within a few hundred ms.
+
+---
+
+## 7 – Next Steps
+
+• Build Android variant (skip DeviceCheck but still benefits from partial keys).
+• Use [structured responses](/docs/structured-responses) to get type-safe JSON back.
+• Add [consumption notifications](/updates/consumption-notifications) to watch for spikes.
+
+Happy shipping ✌️

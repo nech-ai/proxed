@@ -7,7 +7,7 @@
 		"nodemailer": "^7.0.3",
 		"react": "19.1.0",
 		"react-dom": "19.1.0",
-		"react-email": "^4.0.14",
+		"react-email": "^4.0.15",
 		"use-intl": "^4.1.0"
 	},
 	"devDependencies": {

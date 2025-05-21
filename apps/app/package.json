@@ -24,8 +24,8 @@
 		"@proxed/ui": "workspace:*",
 		"@proxed/utils": "workspace:*",
 		"@sentry/esbuild-plugin": "^3.4.0",
-		"@sentry/nextjs": "^9.20.0",
-		"@sentry/node": "^9.20.0",
+		"@sentry/nextjs": "^9.22.0",
+		"@sentry/node": "^9.22.0",
 		"@supabase/sentry-js-integration": "^0.3.0",
 		"@tanstack/react-table": "^8.21.3",
 		"@trigger.dev/react": "^3.3.12",
@@ -63,7 +63,7 @@
 		"remark-gfm": "^4.0.1",
 		"swr": "^2.3.3",
 		"uuid": "^11.1.0",
-		"zod": "^3.25.7",
+		"zod": "^3.25.13",
 		"zustand": "^5.0.4"
 	},
 	"devDependencies": {

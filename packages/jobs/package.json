@@ -18,12 +18,12 @@
 		"@proxed/notifications": "workspace:*",
 		"@proxed/supabase": "workspace:*",
 		"@trigger.dev/sdk": "^3.3.17",
-		"zod": "^3.25.7"
+		"zod": "^3.25.13"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"@trigger.dev/build": "^3.3.17",
-		"@types/node": "^22.15.19",
+		"@types/node": "^22.15.21",
 		"tsconfig": "workspace:*"
 	}
 }

@@ -11,7 +11,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"zod": "^3.25.7"
+		"zod": "^3.25.13"
 	},
 	"devDependencies": {
 		"@types/react": "^19.1.4",

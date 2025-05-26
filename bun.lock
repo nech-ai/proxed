@@ -39,7 +39,7 @@
         "@novu/headless": "^2.6.6",
         "@number-flow/react": "^0.5.9",
         "@polar-sh/nextjs": "^0.4.0",
-        "@polar-sh/sdk": "^0.32.15",
+        "@polar-sh/sdk": "^0.32.16",
         "@proxed/analytics": "workspace:*",
         "@proxed/jobs": "workspace:*",
         "@proxed/location": "workspace:*",
@@ -911,7 +911,7 @@
 
     "@polar-sh/nextjs": ["@polar-sh/nextjs@0.4.0", "", { "dependencies": { "@polar-sh/adapter-utils": "0.2.0", "@polar-sh/sdk": "^0.32.11" }, "peerDependencies": { "next": "^15.0.0 || ^15.2.0-canary.*" } }, "sha512-D7UibCAo5mUnaNvD6/81PZtQkw44x3ga0lMtPNxbwO7t7LonwSiyKEBiwtgLyxErSvUTnevvay9Hone9t4KRxg=="],
 
-    "@polar-sh/sdk": ["@polar-sh/sdk@0.32.15", "", { "dependencies": { "standardwebhooks": "^1.0.0" }, "peerDependencies": { "@modelcontextprotocol/sdk": ">=1.5.0 <1.10.0", "zod": ">= 3" }, "optionalPeers": ["@modelcontextprotocol/sdk"], "bin": { "mcp": "bin/mcp-server.js" } }, "sha512-LUpV5z8+8QYiZ8kSYYhq8mtdr97l0NVHQhw8y4b+2ajW8halYQ761lLJ1bRMgmemWyHqpKuBnnfIqgCKv10jwg=="],
+    "@polar-sh/sdk": ["@polar-sh/sdk@0.32.16", "", { "dependencies": { "standardwebhooks": "^1.0.0" }, "peerDependencies": { "@modelcontextprotocol/sdk": ">=1.5.0 <1.10.0", "zod": ">= 3" }, "optionalPeers": ["@modelcontextprotocol/sdk"], "bin": { "mcp": "bin/mcp-server.js" } }, "sha512-s+FvSJieNv9KcXGFNSbVzXpTY/hW8oYk8soa3Ow7NgWw/dY+pJ1py+qv+hNwxIuEmlHlpBIBHJVYQqPI9lLzCA=="],
 
     "@prisma/instrumentation": ["@prisma/instrumentation@6.7.0", "", { "dependencies": { "@opentelemetry/instrumentation": "^0.52.0 || ^0.53.0 || ^0.54.0 || ^0.55.0 || ^0.56.0 || ^0.57.0" }, "peerDependencies": { "@opentelemetry/api": "^1.8" } }, "sha512-3NuxWlbzYNevgPZbV0ktA2z6r0bfh0g22ONTxcK09a6+6MdIPjHsYx1Hnyu4yOq+j7LmupO5J69hhuOnuvj8oQ=="],
 

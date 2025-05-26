@@ -16,7 +16,7 @@
 		"@proxed/structure": "workspace:*",
 		"@proxed/supabase": "workspace:*",
 		"@proxed/utils": "workspace:*",
-		"@scalar/hono-api-reference": "^0.8.10",
+		"@scalar/hono-api-reference": "^0.9.1",
 		"@sindresorhus/slugify": "^2.2.1",
 		"axios": "^1.9.0",
 		"hono": "^4.7.10",

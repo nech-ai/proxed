@@ -64,7 +64,7 @@
 		"swr": "^2.3.3",
 		"uuid": "^11.1.0",
 		"zod": "^3.25.13",
-		"zustand": "^5.0.4"
+		"zustand": "^5.0.5"
 	},
 	"devDependencies": {
 		"@proxed/logger": "workspace:*",

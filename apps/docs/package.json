@@ -12,7 +12,7 @@
 	},
 	"dependencies": {
 		"@proxed/ui": "workspace:*",
-		"fumadocs-core": "^15.3.4",
+		"fumadocs-core": "^15.4.0",
 		"fumadocs-mdx": "^11.6.5",
 		"fumadocs-ui": "^15.3.4",
 		"next": "^15.3.2",

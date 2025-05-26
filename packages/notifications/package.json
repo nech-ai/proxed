@@ -1,6 +1,6 @@
 {
 	"dependencies": {
-		"@novu/framework": "^2.6.6",
+		"@novu/framework": "^2.6.7",
 		"@novu/node": "^2.6.6",
 		"@proxed/logger": "workspace:*",
 		"@proxed/mail": "workspace:*",

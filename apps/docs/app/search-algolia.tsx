@@ -18,5 +18,5 @@ const index = client.initIndex(indexName);
 export default function CustomSearchDialog(
 	props: SharedProps,
 ): React.ReactElement {
-	return <SearchDialog index={index} {...props} showAlgolia />;
+	return <SearchDialog searchOptions={index} {...props} showAlgolia />;
 }

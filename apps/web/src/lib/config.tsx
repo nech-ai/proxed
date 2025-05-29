@@ -208,6 +208,7 @@ export const siteConfig = {
 			},
 			{ text: "Privacy Policy", url: "/legal/privacy" },
 			{ text: "Terms of Service", url: "/legal/terms" },
+			{ text: "Status", url: "https://status.proxed.ai" },
 		],
 		bottomText: "All rights reserved. © Proxed.AI",
 		brandText: "Proxed.AI",

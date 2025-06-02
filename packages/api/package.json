@@ -19,7 +19,7 @@
 		"@scalar/hono-api-reference": "^0.8.10",
 		"@sindresorhus/slugify": "^2.2.1",
 		"axios": "^1.9.0",
-		"hono": "^4.7.10",
+		"hono": "^4.7.11",
 		"hono-openapi": "^0.4.8",
 		"jsonwebtoken": "^9.0.2",
 		"nanoid": "^5.1.5",

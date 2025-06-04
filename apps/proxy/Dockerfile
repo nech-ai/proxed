@@ -19,11 +19,15 @@ WORKDIR /app
 
 # First install the dependencies (as they change less often)
 COPY --from=builder /app/out/json/ .
+# Copy the config.ts file from the root (needed by @config imports)
+COPY --from=builder /app/config.ts ./config.ts
 # Don't copy the lockfile, allow Bun to generate a fresh one
 RUN bun install
 
 # Copy the full source code
 COPY --from=builder /app/out/full/ .
+# Copy config.ts again to ensure it's in the full build
+COPY --from=builder /app/config.ts ./config.ts
 
 # Runner stage (same as installer to avoid another copy)
 FROM installer AS runner

@@ -1,24 +1,12 @@
 {
-	"extends": "tsconfig/nextjs.json",
+	"extends": "tsconfig/base.json",
+	"include": ["**/*.ts", "**/*.tsx", "src/**/*.ts", "src/**/*.tsx"],
+	"exclude": ["dist", "build", "node_modules"],
 	"compilerOptions": {
 		"baseUrl": ".",
 		"paths": {
-			"@/*": ["./src/*"],
-			"@config": ["../../config"]
+			"@/*": ["./src/*"]
 		},
-		"strict": true,
-		"incremental": true,
-		"esModuleInterop": true,
-		"resolveJsonModule": true
-	},
-	"include": [
-		"next-env.d.ts",
-		"next.config.js",
-		"**/*.ts",
-		"**/*.tsx",
-		".next/types/**/*.ts",
-		"tailwind.config.ts",
-		"../../config.ts"
-	],
-	"exclude": ["node_modules"]
+		"strict": true
+	}
 }

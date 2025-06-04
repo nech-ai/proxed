@@ -1,15 +1,13 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../types/db";
 
-export const createClient = () =>
+export const createClient = (accessToken?: string) =>
 	createSupabaseClient<Database>(
-		process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-		process.env.SUPABASE_SERVICE_ROLE_KEY as string,
+		process.env.SUPABASE_URL!,
+		process.env.SUPABASE_SERVICE_ROLE_KEY!,
 		{
-			global: {
-				headers: {
-					"sb-lb-routing-mode": "alpha-all-services",
-				},
+			accessToken() {
+				return Promise.resolve(accessToken || "");
 			},
 		},
 	);

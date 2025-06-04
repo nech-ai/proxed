@@ -1,0 +1,1201 @@
+{
+	"id": "00000000-0000-0000-0000-000000000000",
+	"prevId": "",
+	"version": "7",
+	"dialect": "postgresql",
+	"tables": {
+		"public.users": {
+			"name": "users",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"email": {
+					"name": "email",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"full_name": {
+					"name": "full_name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"avatar_url": {
+					"name": "avatar_url",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"team_id": {
+					"name": "team_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"onboarded": {
+					"name": "onboarded",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": false,
+					"default": false
+				},
+				"is_admin": {
+					"name": "is_admin",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": false,
+					"default": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"users_id_fkey": {
+					"name": "users_id_fkey",
+					"tableFrom": "users",
+					"tableTo": "users",
+					"schemaTo": "auth",
+					"columnsFrom": ["id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"users_team_id_fkey": {
+					"name": "users_team_id_fkey",
+					"tableFrom": "users",
+					"tableTo": "teams",
+					"schemaTo": "public",
+					"columnsFrom": ["team_id"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"users_email_key": {
+					"columns": ["email"],
+					"nullsNotDistinct": false,
+					"name": "users_email_key"
+				}
+			},
+			"checkConstraints": {},
+			"policies": {
+				"allow select own profile": {
+					"name": "allow select own profile",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"],
+					"using": "(( SELECT auth.uid() AS uid) = id)"
+				},
+				"allow update own profile": {
+					"name": "allow update own profile",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.team_memberships": {
+			"name": "team_memberships",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"team_id": {
+					"name": "team_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"role": {
+					"name": "role",
+					"type": "team_role",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'MEMBER'"
+				},
+				"is_creator": {
+					"name": "is_creator",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"idx_team_memberships_user_id": {
+					"name": "idx_team_memberships_user_id",
+					"columns": [
+						{
+							"expression": "user_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"team_memberships_team_id_fkey": {
+					"name": "team_memberships_team_id_fkey",
+					"tableFrom": "team_memberships",
+					"tableTo": "teams",
+					"schemaTo": "public",
+					"columnsFrom": ["team_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"team_memberships_user_id_fkey": {
+					"name": "team_memberships_user_id_fkey",
+					"tableFrom": "team_memberships",
+					"tableTo": "users",
+					"schemaTo": "public",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"unique_team_user": {
+					"columns": ["team_id", "user_id"],
+					"nullsNotDistinct": false,
+					"name": "unique_team_user"
+				}
+			},
+			"checkConstraints": {},
+			"policies": {
+				"allow insert for authenticated users": {
+					"name": "allow insert for authenticated users",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["public"],
+					"withCheck": "true"
+				},
+				"allow select own memberships": {
+					"name": "allow select own memberships",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.team_invitations": {
+			"name": "team_invitations",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"team_id": {
+					"name": "team_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"email": {
+					"name": "email",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"role": {
+					"name": "role",
+					"type": "team_role",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'MEMBER'"
+				},
+				"invited_by_id": {
+					"name": "invited_by_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"expires_at": {
+					"name": "expires_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "(now() + '48:00:00'::interval)"
+				}
+			},
+			"indexes": {
+				"idx_team_invitations_team_id": {
+					"name": "idx_team_invitations_team_id",
+					"columns": [
+						{
+							"expression": "team_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"team_invitations_team_id_fkey": {
+					"name": "team_invitations_team_id_fkey",
+					"tableFrom": "team_invitations",
+					"tableTo": "teams",
+					"schemaTo": "public",
+					"columnsFrom": ["team_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"team_invitations_invited_by_id_fkey": {
+					"name": "team_invitations_invited_by_id_fkey",
+					"tableFrom": "team_invitations",
+					"tableTo": "users",
+					"schemaTo": "public",
+					"columnsFrom": ["invited_by_id"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"unique_team_email": {
+					"columns": ["team_id", "email"],
+					"nullsNotDistinct": false,
+					"name": "unique_team_email"
+				}
+			},
+			"checkConstraints": {
+				"valid_email": {
+					"name": "valid_email",
+					"value": "email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'::text"
+				}
+			},
+			"policies": {
+				"allow delete invitations for team owners": {
+					"name": "allow delete invitations for team owners",
+					"as": "PERMISSIVE",
+					"for": "DELETE",
+					"to": ["public"],
+					"using": "is_owner_of(( SELECT auth.uid() AS uid), team_id)"
+				},
+				"allow insert invitations for team owners": {
+					"name": "allow insert invitations for team owners",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["public"]
+				},
+				"allow select invitations for team members": {
+					"name": "allow select invitations for team members",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.device_checks": {
+			"name": "device_checks",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"team_id": {
+					"name": "team_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'device check'"
+				},
+				"key_id": {
+					"name": "key_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"private_key_p8": {
+					"name": "private_key_p8",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"apple_team_id": {
+					"name": "apple_team_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"idx_device_checks_team_id": {
+					"name": "idx_device_checks_team_id",
+					"columns": [
+						{
+							"expression": "team_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"device_checks_team_id_fkey": {
+					"name": "device_checks_team_id_fkey",
+					"tableFrom": "device_checks",
+					"tableTo": "teams",
+					"schemaTo": "public",
+					"columnsFrom": ["team_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"unique_team_apple_id": {
+					"columns": ["team_id", "apple_team_id"],
+					"nullsNotDistinct": false,
+					"name": "unique_team_apple_id"
+				}
+			},
+			"checkConstraints": {},
+			"policies": {
+				"allow delete for team owners": {
+					"name": "allow delete for team owners",
+					"as": "PERMISSIVE",
+					"for": "DELETE",
+					"to": ["public"],
+					"using": "is_owner_of(( SELECT auth.uid() AS uid), team_id)"
+				},
+				"allow insert for team owners": {
+					"name": "allow insert for team owners",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["public"]
+				},
+				"allow select for team members": {
+					"name": "allow select for team members",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				},
+				"allow update for team owners": {
+					"name": "allow update for team owners",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.provider_keys": {
+			"name": "provider_keys",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"team_id": {
+					"name": "team_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"provider": {
+					"name": "provider",
+					"type": "provider_type",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"is_active": {
+					"name": "is_active",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": true
+				},
+				"display_name": {
+					"name": "display_name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"idx_provider_keys_team_id": {
+					"name": "idx_provider_keys_team_id",
+					"columns": [
+						{
+							"expression": "team_id",
+							"asc": true,
+							"nulls": "last",
+							"opclass": "uuid_ops",
+							"isExpression": false
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"provider_keys_team_id_fkey": {
+					"name": "provider_keys_team_id_fkey",
+					"tableFrom": "provider_keys",
+					"tableTo": "teams",
+					"schemaTo": "public",
+					"columnsFrom": ["team_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {},
+			"policies": {
+				"allow delete for team owners": {
+					"name": "allow delete for team owners",
+					"as": "PERMISSIVE",
+					"for": "DELETE",
+					"to": ["public"],
+					"using": "is_owner_of(( SELECT auth.uid() AS uid), team_id)"
+				},
+				"allow insert for team owners": {
+					"name": "allow insert for team owners",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["public"]
+				},
+				"allow select for team members": {
+					"name": "allow select for team members",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				},
+				"allow update for team owners": {
+					"name": "allow update for team owners",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.projects": {
+			"name": "projects",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"team_id": {
+					"name": "team_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"description": {
+					"name": "description",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"bundle_id": {
+					"name": "bundle_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"icon_url": {
+					"name": "icon_url",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"device_check_id": {
+					"name": "device_check_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"key_id": {
+					"name": "key_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"system_prompt": {
+					"name": "system_prompt",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"default_user_prompt": {
+					"name": "default_user_prompt",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"model": {
+					"name": "model",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"is_active": {
+					"name": "is_active",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": true
+				},
+				"schema_config": {
+					"name": "schema_config",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "'{}'::jsonb"
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"test_mode": {
+					"name": "test_mode",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": false,
+					"default": false
+				},
+				"test_key": {
+					"name": "test_key",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"last_rate_limit_notified_at": {
+					"name": "last_rate_limit_notified_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"notification_interval_seconds": {
+					"name": "notification_interval_seconds",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"notification_threshold": {
+					"name": "notification_threshold",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"projects_team_id_fkey": {
+					"name": "projects_team_id_fkey",
+					"tableFrom": "projects",
+					"tableTo": "teams",
+					"schemaTo": "public",
+					"columnsFrom": ["team_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"projects_device_check_id_fkey": {
+					"name": "projects_device_check_id_fkey",
+					"tableFrom": "projects",
+					"tableTo": "device_checks",
+					"schemaTo": "public",
+					"columnsFrom": ["device_check_id"],
+					"columnsTo": ["id"],
+					"onDelete": "restrict",
+					"onUpdate": "no action"
+				},
+				"projects_key_id_fkey": {
+					"name": "projects_key_id_fkey",
+					"tableFrom": "projects",
+					"tableTo": "provider_keys",
+					"schemaTo": "public",
+					"columnsFrom": ["key_id"],
+					"columnsTo": ["id"],
+					"onDelete": "restrict",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"unique_team_bundle": {
+					"columns": ["team_id", "bundle_id"],
+					"nullsNotDistinct": false,
+					"name": "unique_team_bundle"
+				},
+				"projects_test_key_key": {
+					"columns": ["test_key"],
+					"nullsNotDistinct": false,
+					"name": "projects_test_key_key"
+				}
+			},
+			"checkConstraints": {},
+			"policies": {
+				"allow delete for team owners": {
+					"name": "allow delete for team owners",
+					"as": "PERMISSIVE",
+					"for": "DELETE",
+					"to": ["public"],
+					"using": "is_owner_of(( SELECT auth.uid() AS uid), team_id)"
+				},
+				"allow insert for team owners": {
+					"name": "allow insert for team owners",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["public"]
+				},
+				"allow select for team members": {
+					"name": "allow select for team members",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				},
+				"allow update for team owners": {
+					"name": "allow update for team owners",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.teams": {
+			"name": "teams",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"avatar_url": {
+					"name": "avatar_url",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"plan": {
+					"name": "plan",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "'trial'"
+				},
+				"email": {
+					"name": "email",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"canceled_at": {
+					"name": "canceled_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {},
+			"policies": {
+				"allow delete for team owners": {
+					"name": "allow delete for team owners",
+					"as": "PERMISSIVE",
+					"for": "DELETE",
+					"to": ["public"],
+					"using": "is_owner_of(( SELECT auth.uid() AS uid), id)"
+				},
+				"allow insert for authenticated users": {
+					"name": "allow insert for authenticated users",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["public"]
+				},
+				"allow select for team members": {
+					"name": "allow select for team members",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				},
+				"allow update for team owners": {
+					"name": "allow update for team owners",
+					"as": "PERMISSIVE",
+					"for": "UPDATE",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"public.executions": {
+			"name": "executions",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"team_id": {
+					"name": "team_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"project_id": {
+					"name": "project_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"device_check_id": {
+					"name": "device_check_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"key_id": {
+					"name": "key_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"ip": {
+					"name": "ip",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"user_agent": {
+					"name": "user_agent",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"model": {
+					"name": "model",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"provider": {
+					"name": "provider",
+					"type": "provider_type",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"prompt_tokens": {
+					"name": "prompt_tokens",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"completion_tokens": {
+					"name": "completion_tokens",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"total_tokens": {
+					"name": "total_tokens",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"finish_reason": {
+					"name": "finish_reason",
+					"type": "finish_reason",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"latency": {
+					"name": "latency",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"response_code": {
+					"name": "response_code",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"prompt_cost": {
+					"name": "prompt_cost",
+					"type": "numeric(10, 6)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'0'"
+				},
+				"completion_cost": {
+					"name": "completion_cost",
+					"type": "numeric(10, 6)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'0'"
+				},
+				"total_cost": {
+					"name": "total_cost",
+					"type": "numeric(10, 6)",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'0'"
+				},
+				"prompt": {
+					"name": "prompt",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"response": {
+					"name": "response",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"error_message": {
+					"name": "error_message",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"error_code": {
+					"name": "error_code",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"country_code": {
+					"name": "country_code",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"region_code": {
+					"name": "region_code",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"city": {
+					"name": "city",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"longitude": {
+					"name": "longitude",
+					"type": "double precision",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"latitude": {
+					"name": "latitude",
+					"type": "double precision",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"executions_team_id_fkey": {
+					"name": "executions_team_id_fkey",
+					"tableFrom": "executions",
+					"tableTo": "teams",
+					"schemaTo": "public",
+					"columnsFrom": ["team_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"executions_project_id_fkey": {
+					"name": "executions_project_id_fkey",
+					"tableFrom": "executions",
+					"tableTo": "projects",
+					"schemaTo": "public",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"executions_device_check_id_fkey": {
+					"name": "executions_device_check_id_fkey",
+					"tableFrom": "executions",
+					"tableTo": "device_checks",
+					"schemaTo": "public",
+					"columnsFrom": ["device_check_id"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				},
+				"executions_key_id_fkey": {
+					"name": "executions_key_id_fkey",
+					"tableFrom": "executions",
+					"tableTo": "provider_keys",
+					"schemaTo": "public",
+					"columnsFrom": ["key_id"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {},
+			"policies": {
+				"allow insert for team members": {
+					"name": "allow insert for team members",
+					"as": "PERMISSIVE",
+					"for": "INSERT",
+					"to": ["public"],
+					"withCheck": "is_member_of(( SELECT auth.uid() AS uid), team_id)"
+				},
+				"allow select for team members": {
+					"name": "allow select for team members",
+					"as": "PERMISSIVE",
+					"for": "SELECT",
+					"to": ["public"]
+				}
+			},
+			"isRLSEnabled": true
+		}
+	},
+	"enums": {
+		"public.finish_reason": {
+			"name": "finish_reason",
+			"values": [
+				"stop",
+				"length",
+				"content-filter",
+				"tool-calls",
+				"error",
+				"other",
+				"unknown"
+			],
+			"schema": "public"
+		},
+		"public.provider_type": {
+			"name": "provider_type",
+			"values": ["OPENAI", "ANTHROPIC"],
+			"schema": "public"
+		},
+		"public.team_role": {
+			"name": "team_role",
+			"values": ["OWNER", "MEMBER"],
+			"schema": "public"
+		}
+	},
+	"schemas": {},
+	"sequences": {},
+	"roles": {},
+	"policies": {},
+	"views": {},
+	"_meta": {
+		"schemas": {},
+		"tables": {},
+		"columns": {}
+	},
+	"internal": {
+		"tables": {
+			"team_invitations": {
+				"columns": {
+					"expires_at": {
+						"isDefaultAnExpression": true
+					}
+				}
+			}
+		}
+	}
+}

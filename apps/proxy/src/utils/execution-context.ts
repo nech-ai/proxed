@@ -1,6 +1,9 @@
 import type { Context } from "hono";
 import { logger } from "./logger";
 
+// Track if we've already logged the warning
+let hasLoggedWaitUntilWarning = false;
+
 /**
  * Safely executes a background task using `c.executionCtx.waitUntil` if available,
  * otherwise logs a warning and potentially awaits the promise (or lets it run without awaiting).
@@ -16,12 +19,23 @@ export async function safeWaitUntil(
 		c.executionCtx.waitUntil(promise);
 	} catch (e) {
 		// executionCtx might not be available (e.g., running in Bun locally)
-		logger.warn(
-			"executionCtx.waitUntil is not available in this environment. Background task might run synchronously or not be guaranteed completion.",
-			{ error: e instanceof Error ? e.message : String(e) },
-		);
-		// If waitUntil is not available, run the promise synchronously.
-		// Be aware this makes the request synchronous in these environments.
-		await promise;
+		if (
+			!hasLoggedWaitUntilWarning &&
+			process.env.SUPPRESS_WAITUNTIL_WARNING !== "true"
+		) {
+			hasLoggedWaitUntilWarning = true;
+			logger.info(
+				"Running in local/development mode - background tasks will execute synchronously. This is expected behavior outside of Cloudflare Workers.",
+			);
+		}
+
+		// In development, we can choose to either:
+		// 1. Run synchronously (current behavior - safer but slower)
+		// await promise;
+
+		// 2. Fire and forget (faster but no guarantees)
+		promise.catch((error) => {
+			logger.error("Background task failed:", error);
+		});
 	}
 }

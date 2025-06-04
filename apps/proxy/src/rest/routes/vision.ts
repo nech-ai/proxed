@@ -1,12 +1,12 @@
 import { ZodParser, type JsonSchema } from "@proxed/structure";
-import { createClient } from "@proxed/supabase/api";
-import { getProjectQuery } from "@proxed/supabase/queries";
-import { createExecution } from "@proxed/supabase/mutations";
+import { getProjectQuery } from "../../db/queries/projects";
+import { createExecution } from "../../db/queries/executions";
+import { getServerKey } from "../../db/queries/server-keys";
 import { generateObject } from "ai";
 import { type Context, Hono } from "hono";
 import { describeRoute } from "hono-openapi";
-import { authMiddleware } from "../middleware/auth";
-import type { AuthMiddlewareVariables, FinishReason } from "../types";
+import { protectedMiddleware } from "../middleware";
+import type { Context as AppContext, FinishReason } from "../types";
 import { reassembleKey } from "@proxed/utils/lib/partial-keys";
 import { z } from "zod";
 import { logger } from "../../utils/logger";
@@ -16,18 +16,15 @@ import { createAIClient } from "../../utils/ai-client";
 import { checkAndNotifyRateLimit } from "../../utils/rate-limit";
 
 // MARK: - Handle Structured Response
-async function handleStructuredResponse(
-	c: Context<{ Variables: AuthMiddlewareVariables }>,
-) {
+async function handleStructuredResponse(c: Context<AppContext>) {
 	const { projectId, teamId, apiKey } = c.get("session");
-	const ip =
-		c.req.header("x-forwarded-for") ?? c.req.header("cf-connecting-ip");
+	const db = c.get("db");
+	const geo = c.get("geo");
 	const userAgent = c.req.header("user-agent");
 
-	const supabase = createClient();
-	const { data: project, error } = await getProjectQuery(supabase, projectId);
+	const project = await getProjectQuery(db, projectId);
 
-	if (error || !project || !project.key) {
+	if (!project || !project.key) {
 		throw createError(ErrorCode.PROJECT_NOT_FOUND);
 	}
 
@@ -58,14 +55,14 @@ async function handleStructuredResponse(
 	// Convert project schema config using jsonToZod
 	const parser = new ZodParser();
 	const schema = parser.convertJsonSchemaToZodValidator(
-		project.schema_config as unknown as JsonSchema,
+		project.schemaConfig as unknown as JsonSchema,
 	);
 	if (!schema) {
 		throw createError(ErrorCode.VALIDATION_ERROR, "Invalid schema");
 	}
 
-	const deviceCheckId = project.device_check_id;
-	const keyId = project.key_id;
+	const deviceCheckId = project.deviceCheckId;
+	const keyId = project.keyId;
 
 	if (!apiKey) {
 		throw createError(ErrorCode.INTERNAL_ERROR, "API key not found in session");
@@ -74,20 +71,12 @@ async function handleStructuredResponse(
 	const startTime = Date.now();
 
 	// Get the server key part using the function instead of accessing partial_key_server directly
-	const { data: serverKey, error: serverKeyError } = await supabase.rpc(
-		"get_server_key",
-		{
-			p_provider_key_id: project.key_id,
-		},
-	);
+	const serverKey = await getServerKey(db, project.keyId);
 
-	if (serverKeyError || !serverKey) {
+	if (!serverKey) {
 		throw createError(
 			ErrorCode.INTERNAL_ERROR,
 			"Failed to retrieve server key",
-			{
-				error: serverKeyError?.message,
-			},
 		);
 	}
 
@@ -98,11 +87,11 @@ async function handleStructuredResponse(
 		projectId,
 		deviceCheckId,
 		keyId,
-		ip,
+		ip: geo.ip ?? undefined,
 		userAgent,
 		model: project.model,
 		provider: project.key.provider,
-		c,
+		geo,
 	});
 
 	try {
@@ -114,15 +103,14 @@ async function handleStructuredResponse(
 			messages: [
 				{
 					role: "system",
-					content: project.system_prompt,
+					content: project.systemPrompt,
 				},
 				{
 					role: "user",
 					content: [
 						{
 							type: "text",
-							text:
-								project.default_user_prompt ?? "You are a helpful assistant.",
+							text: project.defaultUserPrompt ?? "You are a helpful assistant.",
 						},
 						{
 							type: "image",
@@ -136,20 +124,21 @@ async function handleStructuredResponse(
 
 		const latency = Date.now() - startTime;
 
-		await createExecution(supabase, {
+		await createExecution(db, {
 			...commonParams,
-			prompt_tokens: usage.promptTokens,
-			completion_tokens: usage.completionTokens,
-			finish_reason: finishReason as FinishReason,
+			promptTokens: usage.promptTokens,
+			completionTokens: usage.completionTokens,
+			totalTokens: usage.promptTokens + usage.completionTokens,
+			finishReason: finishReason as FinishReason,
 			latency,
-			response_code: 200,
+			responseCode: 200,
 			response: JSON.stringify(object),
 		});
 
 		// Non-blocking: Check rate limit and trigger notification job
 		checkAndNotifyRateLimit({
 			c,
-			supabase,
+			db,
 			projectId,
 			teamId,
 			projectName: project.name,
@@ -160,15 +149,16 @@ async function handleStructuredResponse(
 		logger.error("Structured response error:", error);
 		const latency = Date.now() - startTime;
 
-		await createExecution(supabase, {
+		await createExecution(db, {
 			...commonParams,
-			prompt_tokens: 0,
-			completion_tokens: 0,
-			finish_reason: "error" as FinishReason,
+			promptTokens: 0,
+			completionTokens: 0,
+			totalTokens: 0,
+			finishReason: "error" as FinishReason,
 			latency,
-			response_code: 500,
-			error_message: error instanceof Error ? error.message : "Unknown error",
-			error_code: error instanceof Error ? error.name : "UNKNOWN_ERROR",
+			responseCode: 500,
+			errorMessage: error instanceof Error ? error.message : "Unknown error",
+			errorCode: error instanceof Error ? error.name : "UNKNOWN_ERROR",
 		});
 
 		throw createError(
@@ -183,12 +173,10 @@ async function handleStructuredResponse(
 	}
 }
 
-export const visionResponseRouter = new Hono<{
-	Variables: AuthMiddlewareVariables;
-}>()
+export const visionResponseRouter = new Hono<AppContext>()
 
 	// ProjectId provided as header
-	.use("/", authMiddleware)
+	.use("/", ...protectedMiddleware)
 	.post(
 		"/",
 		describeRoute({
@@ -205,7 +193,7 @@ export const visionResponseRouter = new Hono<{
 		handleStructuredResponse,
 	)
 	// ProjectId provided as part of the URL
-	.use("/:projectId", authMiddleware)
+	.use("/:projectId", ...protectedMiddleware)
 	.post(
 		"/:projectId",
 		describeRoute({

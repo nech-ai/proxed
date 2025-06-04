@@ -1,4 +1,4 @@
-import { logger } from "@proxed/logger";
+import { logger } from "../utils/logger";
 import type { FinishReason } from "../rest/types";
 
 /**

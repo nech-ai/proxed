@@ -1,52 +1,79 @@
-import { trpcServer } from "@hono/trpc-server";
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { cors } from "hono/cors";
+import { Scalar } from "@scalar/hono-api-reference";
 import { secureHeaders } from "hono/secure-headers";
+import { routers, publicRouters } from "./rest/routers";
 import type { Context } from "./rest/types";
-import { createTRPCContext } from "./trpc/init";
-import { appRouter } from "./trpc/routers/_app";
-import { checkHealth } from "./utils/health";
+import { errorHandlerMiddleware } from "./rest/middleware/error-handler";
+import { loggerMiddleware } from "./rest/middleware/logger";
+import { withCors } from "./rest/middleware/cors";
 
 const app = new OpenAPIHono<Context>();
 
+// Apply global middleware
 app.use(secureHeaders());
+app.use(loggerMiddleware);
+app.use(errorHandlerMiddleware);
 
-app.use(
-	"/trpc/*",
-	cors({
-		origin: process.env.ALLOWED_API_ORIGINS?.split(",") ?? [],
-		allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-		allowHeaders: [
-			"Authorization",
-			"Content-Type",
-			"accept-language",
-			"x-trpc-source",
-			"x-user-locale",
-			"x-user-timezone",
-			"x-user-country",
-		],
-		exposeHeaders: ["Content-Length"],
-		maxAge: 86400,
-	}),
-);
+// CORS for REST API
+app.use("/v1/*", withCors);
 
-app.use(
-	"/trpc/*",
-	trpcServer({
-		router: appRouter,
-		createContext: createTRPCContext,
-	}),
-);
-
-app.get("/health", async (c) => {
-	try {
-		await checkHealth();
-
-		return c.json({ status: "ok" }, 200);
-	} catch (error) {
-		return c.json({ status: "error" }, 500);
-	}
+// OpenAPI documentation
+app.doc("/openapi", {
+	openapi: "3.1.0",
+	info: {
+		version: "1.0.0",
+		title: "Proxed API",
+		description:
+			"Proxed is a secure API proxy service for AI models with device authentication and rate limiting.",
+		contact: {
+			name: "Proxed Support",
+			email: "support@proxed.ai",
+			url: "https://proxed.ai",
+		},
+		license: {
+			name: "MIT",
+			url: "https://github.com/proxed-ai/proxed/blob/main/LICENSE",
+		},
+	},
+	servers: [
+		{
+			url: "https://api.proxed.ai",
+			description: "Production API",
+		},
+		{
+			url: "http://localhost:3000",
+			description: "Local Development",
+		},
+	],
+	security: [
+		{
+			bearerAuth: [],
+		},
+	],
 });
+
+// Register security scheme
+app.openAPIRegistry.registerComponent("securitySchemes", "bearerAuth", {
+	type: "http",
+	scheme: "bearer",
+	description: "Bearer token authentication using 'apiKey.deviceToken' format",
+});
+
+// Scalar API documentation UI
+app.get(
+	"/",
+	Scalar({
+		url: "/openapi",
+		pageTitle: "Proxed API Documentation",
+		theme: "purple",
+	}),
+);
+
+// Mount public routes (health check)
+app.route("/", publicRouters);
+
+// Mount protected routes
+app.route("/", routers);
 
 export default {
 	port: process.env.PORT ? Number.parseInt(process.env.PORT) : 3000,

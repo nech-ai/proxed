@@ -1,6 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
-import type { Provider } from "../rest/types";
+import type { ProviderType } from "../rest/types";
 import { createError, ErrorCode } from "./errors";
 
 /**
@@ -10,7 +10,7 @@ import { createError, ErrorCode } from "./errors";
  * @returns An instance of the AI SDK client for the specified provider.
  * @throws {AppError} If the provider is unsupported.
  */
-export function createAIClient(provider: Provider, apiKey: string) {
+export function createAIClient(provider: ProviderType, apiKey: string) {
 	switch (provider) {
 		case "OPENAI":
 			return createOpenAI({ apiKey });

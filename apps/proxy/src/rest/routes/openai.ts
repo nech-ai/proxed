@@ -1,11 +1,11 @@
-import { createClient } from "@proxed/supabase/api";
-import { getProjectQuery } from "@proxed/supabase/queries";
-import { createExecution } from "@proxed/supabase/mutations";
+import { getProjectQuery } from "../../db/queries/projects";
+import { createExecution } from "../../db/queries/executions";
+import { getServerKey } from "../../db/queries/server-keys";
 import { type Context, Hono } from "hono";
 import { proxy } from "hono/proxy";
 import { describeRoute } from "hono-openapi";
-import { authMiddleware } from "../middleware/auth";
-import type { AuthMiddlewareVariables, FinishReason } from "../types";
+import { protectedMiddleware } from "../middleware";
+import type { Context as AppContext, FinishReason } from "../types";
 import { reassembleKey } from "@proxed/utils/lib/partial-keys";
 import { logger } from "../../utils/logger";
 import { createError, ErrorCode } from "../../utils/errors";
@@ -15,19 +15,15 @@ import { checkAndNotifyRateLimit } from "../../utils/rate-limit";
 
 const OPENAI_API_BASE = "https://api.openai.com/v1";
 
-async function handleOpenAIProxy(
-	c: Context<{ Variables: AuthMiddlewareVariables }>,
-	targetUrl: string,
-) {
+async function handleOpenAIProxy(c: Context<AppContext>, targetUrl: string) {
 	const { projectId, teamId, apiKey } = c.get("session");
-	const ip =
-		c.req.header("x-forwarded-for") ?? c.req.header("cf-connecting-ip");
+	const db = c.get("db");
+	const geo = c.get("geo");
 	const userAgent = c.req.header("user-agent");
 
-	const supabase = createClient();
-	const { data: project, error } = await getProjectQuery(supabase, projectId);
+	const project = await getProjectQuery(db, projectId);
 
-	if (error || !project || !project.key) {
+	if (!project || !project.key) {
 		throw createError(ErrorCode.PROJECT_NOT_FOUND);
 	}
 
@@ -36,20 +32,12 @@ async function handleOpenAIProxy(
 	}
 
 	// Get the server key part using the function
-	const { data: serverKey, error: serverKeyError } = await supabase.rpc(
-		"get_server_key",
-		{
-			p_provider_key_id: project.key_id,
-		},
-	);
+	const serverKey = await getServerKey(db, project.keyId);
 
-	if (serverKeyError || !serverKey) {
+	if (!serverKey) {
 		throw createError(
 			ErrorCode.INTERNAL_ERROR,
 			"Failed to retrieve server key",
-			{
-				error: serverKeyError?.message,
-			},
 		);
 	}
 
@@ -71,7 +59,7 @@ async function handleOpenAIProxy(
 		// Extract usage information from OpenAI response
 		let responseData: OpenAIResponse = {};
 		try {
-			responseData = await response.clone().json();
+			responseData = (await response.clone().json()) as OpenAIResponse;
 		} catch (err) {
 			logger.warn("Failed to parse OpenAI response as JSON", { error: err });
 		}
@@ -85,30 +73,31 @@ async function handleOpenAIProxy(
 		const openaiFinishReason = responseData.choices?.[0]?.finish_reason;
 		const finishReason = mapOpenAIFinishReason(openaiFinishReason);
 
-		await createExecution(supabase, {
+		await createExecution(db, {
 			...getCommonExecutionParams({
 				teamId,
 				projectId,
-				deviceCheckId: project.device_check_id,
-				keyId: project.key_id,
-				ip,
+				deviceCheckId: project.deviceCheckId,
+				keyId: project.keyId,
+				ip: geo.ip ?? undefined,
 				userAgent,
 				model: project.model,
 				provider: project.key.provider,
-				c,
+				geo,
 			}),
-			prompt_tokens: usage.prompt_tokens,
-			completion_tokens: usage.completion_tokens,
-			finish_reason: finishReason,
+			promptTokens: usage.prompt_tokens,
+			completionTokens: usage.completion_tokens,
+			totalTokens: usage.total_tokens || 0,
+			finishReason: finishReason,
 			latency,
-			response_code: response.status,
+			responseCode: response.status,
 			response: JSON.stringify(responseData),
 		});
 
 		// Non-blocking: Check rate limit and trigger notification job
 		checkAndNotifyRateLimit({
 			c,
-			supabase,
+			db,
 			projectId,
 			teamId,
 			projectName: project.name,
@@ -119,25 +108,26 @@ async function handleOpenAIProxy(
 		const latency = Date.now() - startTime;
 		logger.error("OpenAI proxy error:", error);
 
-		await createExecution(supabase, {
+		await createExecution(db, {
 			...getCommonExecutionParams({
 				teamId,
 				projectId,
-				deviceCheckId: project.device_check_id,
-				keyId: project.key_id,
-				ip,
+				deviceCheckId: project.deviceCheckId,
+				keyId: project.keyId,
+				ip: geo.ip ?? undefined,
 				userAgent,
 				model: project.model,
 				provider: project.key.provider,
-				c,
+				geo,
 			}),
-			prompt_tokens: 0,
-			completion_tokens: 0,
-			finish_reason: "error" as FinishReason,
+			promptTokens: 0,
+			completionTokens: 0,
+			totalTokens: 0,
+			finishReason: "error" as FinishReason,
 			latency,
-			response_code: 500,
-			error_message: error instanceof Error ? error.message : "Unknown error",
-			error_code: error instanceof Error ? error.name : "UNKNOWN_ERROR",
+			responseCode: 500,
+			errorMessage: error instanceof Error ? error.message : "Unknown error",
+			errorCode: error instanceof Error ? error.name : "UNKNOWN_ERROR",
 		});
 
 		throw createError(
@@ -150,10 +140,8 @@ async function handleOpenAIProxy(
 	}
 }
 
-export const openaiRouter = new Hono<{
-	Variables: AuthMiddlewareVariables;
-}>()
-	.use("/:projectId/*", authMiddleware)
+export const openaiRouter = new Hono<AppContext>()
+	.use("/:projectId/*", ...protectedMiddleware)
 	.all(
 		"/:projectId/*",
 		describeRoute({

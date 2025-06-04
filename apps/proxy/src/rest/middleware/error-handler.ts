@@ -1,12 +1,13 @@
-import type { Context, MiddlewareHandler, Next } from "hono";
-import { AppError, ErrorCode, handleApiError } from "../utils/errors";
-import { logger } from "@proxed/logger";
+import type { MiddlewareHandler } from "hono";
+import { AppError, handleApiError } from "../../utils/errors";
+import { logger } from "../../utils/logger";
 import { v4 as uuidv4 } from "uuid";
-import type { AppVariables } from "../types";
+import type { Context as AppContext } from "../types";
 
-export const errorHandlerMiddleware: MiddlewareHandler<{
-	Variables: AppVariables;
-}> = async (c, next) => {
+export const errorHandlerMiddleware: MiddlewareHandler<AppContext> = async (
+	c,
+	next,
+) => {
 	// Add request ID for tracking
 	const requestId = uuidv4();
 	c.set("requestId", requestId);

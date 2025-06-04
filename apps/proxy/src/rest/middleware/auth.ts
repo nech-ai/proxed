@@ -1,4 +1,4 @@
-import { getTeamLimitsMetricsQuery } from "@proxed/supabase/queries";
+import { getTeamLimitsMetricsQuery } from "../../db/queries/teams";
 import { verifyDeviceCheckToken } from "../../utils/verify-device-check";
 import { AppError, createError, ErrorCode } from "../../utils/errors";
 import { parseCombinedToken } from "../../utils/token-parser";
@@ -52,10 +52,7 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
 		return;
 	}
 
-	const { data: limits } = await getTeamLimitsMetricsQuery(
-		supabase,
-		project.team_id,
-	);
+	const limits = await getTeamLimitsMetricsQuery(db, project.teamId);
 	if (!limits) {
 		throw createError(ErrorCode.UNAUTHORIZED, "No billing information found");
 	}
@@ -183,3 +180,6 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
 	// If neither Bearer token nor separate device token is valid/present
 	throw createError(ErrorCode.UNAUTHORIZED, "Invalid or missing credentials");
 };
+
+// Export as named export for consistency with the example
+export const authMiddleware = withAuth;

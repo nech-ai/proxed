@@ -1,14 +1,24 @@
-import type { Database } from "@proxed/supabase/types";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Session } from "../utils/auth";
+import type { Database } from "../db";
+import type { GeoContext } from "../utils/geo";
 
-export type Context = {
-	Variables: {
-		supabase: SupabaseClient<Database>;
-		session: Session;
-		teamId: string;
-	};
-};
+export interface Session {
+	teamId: string;
+	projectId: string;
+	token?: string;
+	apiKey?: string;
+}
+
+export interface AuthMiddlewareVariables {
+	session: Session;
+	db: Database;
+	teamId?: string | null;
+	requestId?: string;
+	geo: GeoContext;
+}
+
+export interface Context {
+	Variables: AuthMiddlewareVariables;
+}
 
 /**
  * Standard finish reasons for AI model completions
@@ -25,7 +35,7 @@ export type FinishReason =
 /**
  * Provider types
  */
-export type Provider = "OPENAI" | "ANTHROPIC";
+export type ProviderType = "OPENAI" | "ANTHROPIC";
 
 /**
  * Common parameters for execution tracking
@@ -33,11 +43,15 @@ export type Provider = "OPENAI" | "ANTHROPIC";
 export type CommonExecutionParams = {
 	teamId: string;
 	projectId: string;
-	deviceCheckId: string;
-	keyId: string;
+	deviceCheckId: string | null | undefined;
+	keyId: string | null | undefined;
 	ip: string | undefined;
 	userAgent: string | undefined;
-	model: string;
-	provider: Provider;
-	c: Context;
+	model: string | null;
+	provider: ProviderType;
+	countryCode?: string | null;
+	regionCode?: string | null;
+	city?: string | null;
+	longitude?: number | null;
+	latitude?: number | null;
 };

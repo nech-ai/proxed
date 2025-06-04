@@ -13,12 +13,20 @@ export async function getProjectQuery(db: Database, projectId: string) {
 			testKey: projects.testKey,
 			deviceCheckId: projects.deviceCheckId,
 			keyId: projects.keyId,
+			model: projects.model,
+			systemPrompt: projects.systemPrompt,
+			defaultUserPrompt: projects.defaultUserPrompt,
+			schemaConfig: projects.schemaConfig,
+			isActive: projects.isActive,
+			description: projects.description,
+			bundleId: projects.bundleId,
+			iconUrl: projects.iconUrl,
 			deviceCheck: deviceChecks,
 			key: providerKeys,
 		})
 		.from(projects)
-		.fullJoin(deviceChecks, eq(projects.deviceCheckId, deviceChecks.id))
-		.fullJoin(providerKeys, eq(projects.keyId, providerKeys.id))
+		.leftJoin(deviceChecks, eq(projects.deviceCheckId, deviceChecks.id))
+		.leftJoin(providerKeys, eq(projects.keyId, providerKeys.id))
 		.where(eq(projects.id, projectId))
 		.limit(1);
 

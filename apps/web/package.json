@@ -25,7 +25,7 @@
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"content-collections": "^0.1.4",
-		"framer-motion": "^12.13.0",
+		"framer-motion": "^12.16.0",
 		"fumadocs-core": "^15.4.0",
 		"fumadocs-ui": "^15.4.0",
 		"geist": "^1.4.2",

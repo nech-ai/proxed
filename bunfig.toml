@@ -1,2 +1,1 @@
 [test]
-preload = ["./packages/api/src/__tests__/test-preload.ts"]

@@ -6,7 +6,11 @@
 		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./src/*"],
-			"@config": ["../../config"]
+			"@config": ["../../config"],
+			"@proxed/structure": ["../../packages/structure/src"],
+			"@proxed/utils": ["../../packages/utils/src"],
+			"@proxed/jobs": ["../../packages/jobs/src"],
+			"@proxed/kv": ["../../packages/kv/src"]
 		},
 		"strict": true
 	}

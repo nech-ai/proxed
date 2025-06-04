@@ -1,0 +1,74 @@
+---
+title: "Proxed.AI Gets a Major Upgrade: Enhanced Proxy & Global Multi-Region Hosting with Fly.io (Coming Soon!)"
+publishedAt: "2025-06-04"
+summary: "Discover the latest enhancements to Proxed.AI's core proxy service and get a sneak peek at our upcoming global multi-region hosting on Fly.io for even lower latency and higher availability."
+image: "/images/proxed-fly-io-multiregion.png"
+tag: "Product Updates"
+---
+
+We've been hard at work refining the core of Proxed.AI, and we're thrilled to share some significant upgrades to our proxy service. But that's not all – we're also preparing for a massive leap in performance and reliability by bringing Proxed.AI to a global multi-region infrastructure, powered by [Fly.io](https://fly.io)!
+
+**(Note: Multi-region hosting on Fly.io is currently in testing and will be available soon. The proxy enhancements are live now for self-hosted instances and will roll out to our current hosted version shortly.)**
+
+<br />
+### Core Proxy Enhancements: More Robust & Resilient
+
+Our API proxy is the heart of Proxed.AI, ensuring your AI requests are secure, authenticated, and correctly routed. We've implemented several key improvements under the hood:
+
+1.  **Smarter Header Management**:
+    *   We've refined how headers are handled when proxying requests to upstream AI providers like OpenAI and Anthropic.
+    *   A new centralized `proxy-headers.ts` utility now intelligently sanitizes request headers, blocking a comprehensive list of potentially problematic or sensitive headers (e.g., `Host`, platform-specific ones like `cf-connecting-ip`, `x-vercel-id`) while ensuring essential ones are passed through or correctly overridden.
+    *   Response headers are also filtered, forwarding only a curated list of `ALLOWED_RESPONSE_HEADERS` to your client, reducing clutter and potential information leakage.
+
+2.  **Advanced Base Proxy Handler (`base-proxy.ts`)**:
+    *   **Automatic Retries**: The new `baseProxy` function implements robust retry logic with exponential backoff and jitter for transient errors (like 429s, 502s, 503s, 504s), making your integrations more resilient.
+    *   **Configurable Timeouts**: Requests now have configurable timeouts managed by an `AbortController`.
+    *   **Detailed Error Logging**: Failed requests and retries are logged with more context for easier debugging.
+    *   **Standardized Metrics**: Latency and retry counts are consistently captured.
+
+3.  **Centralized Provider Configuration (`provider-config.ts`)**:
+    *   All provider-specific settings (base URLs, retry strategies, timeouts, required headers, auth header construction) are now managed in one place.
+    *   This makes it easier to add new AI providers in the future and ensures consistent behavior.
+    *   Configurations are now loaded using new typed environment variable helpers (`env.ts`) for better startup validation and clarity.
+
+4.  **Enhanced Request Validation (`request-validation.ts`)**:
+    *   Our `requestValidation` middleware has been beefed up to check for more potential security issues, including suspicious header values (e.g., containing newlines) and potential request smuggling attempts by checking for conflicting `Transfer-Encoding` and `Content-Length` headers.
+
+5.  **Comprehensive Metrics Collection (`metrics.ts`)**:
+    *   We've introduced a `MetricsCollector` utility to track request counts, error rates, and latency histograms.
+    *   These metrics are exportable (currently logged, with a `/metrics` endpoint for development) and provide crucial observability into your proxy's performance.
+
+These updates make the self-hosted version of Proxed.AI even more secure, reliable, and observable.
+
+<br />
+### Coming Soon: Global Low-Latency with Fly.io Multi-Region Hosting
+
+While the proxy enhancements are exciting, we're taking an even bigger step to elevate the Proxed.AI experience: **multi-region hosting on Fly.io!**
+
+[Fly.io](https://fly.io) allows us to deploy Proxed.AI instances in multiple regions around the world, bringing the proxy physically closer to your users and the AI providers.
+
+**What does this mean for you?**
+
+*   **Reduced Latency**: By routing your requests through a Proxed.AI edge server nearest to your users, we can significantly cut down round-trip times. This is especially crucial for interactive AI applications where every millisecond counts.
+*   **Higher Availability**: A multi-region setup inherently provides better fault tolerance. If one region experiences issues, traffic can be dynamically routed to healthy instances.
+*   **Read Replicas for Databases**: Our database architecture is designed to leverage Fly.io's support for read replicas. This means read-heavy operations (like fetching project configurations) can be served from a database replica close to the edge server, further speeding up requests and reducing load on the primary database. We've implemented smart "read-after-write" consistency for our database connections.
+*   **Global Scale**: As your user base grows worldwide, Proxed.AI will be there to serve them efficiently.
+
+We are currently rigorously testing this new infrastructure to ensure it meets our high standards for performance and reliability. Expect a full announcement with details on availability and how to leverage this new global network soon!
+
+<br />
+### Why These Changes Matter
+
+*   **For Self-Hosters**: The proxy enhancements provide a more production-ready, secure, and observable core that you can deploy with greater confidence. The new configuration options offer more control.
+*   **For Future Hosted Plan Users**: The Fly.io migration will translate to a faster, more reliable managed service, making Proxed.AI an even more compelling solution for hassle-free, secure AI integration.
+
+<br />
+### What's Next?
+
+1.  **Rollout to Hosted Version**: The core proxy enhancements will be rolled out to our existing hosted infrastructure shortly.
+2.  **Fly.io Multi-Region Launch**: We'll announce the official availability of our Fly.io-powered global network as soon as testing is complete.
+3.  **Updated Documentation**: We're updating our [documentation](https://docs.proxed.ai) to reflect these new features and provide guidance on best practices.
+
+We're committed to providing the most secure, reliable, and developer-friendly AI proxy solution. These updates are a significant step in that direction.
+
+Stay tuned for more news on the Fly.io launch! As always, check out our [GitHub repository](https://github.com/proxed-ai/proxed) and follow us on [X (formerly Twitter)](https://x.com/proxed_ai) for the latest updates.

@@ -1,4 +1,4 @@
-import { createClient as createSuperClient } from "@proxed/supabase/api";
+import { createClient as createSuperClient } from "@proxed/supabase/job";
 import { getTeamInviteQuery } from "@proxed/supabase/queries";
 import { createClient } from "@proxed/supabase/server";
 import { redirect } from "next/navigation";

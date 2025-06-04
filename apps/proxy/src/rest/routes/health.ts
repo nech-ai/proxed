@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 import { publicMiddleware } from "../middleware";
 import type { Context } from "../types";
+import { metrics } from "../../utils/metrics";
 
 export const healthRouter = new Hono<Context>()
 	.get(
@@ -51,5 +52,44 @@ export const healthRouter = new Hono<Context>()
 		(c) => {
 			const geo = c.get("geo");
 			return c.json(geo);
+		},
+	)
+	.get(
+		"/metrics",
+		describeRoute({
+			tags: ["Health"],
+			summary: "Metrics",
+			description:
+				"Returns current metrics (only available in development mode)",
+			responses: {
+				200: {
+					description: "Metrics data",
+					content: {
+						"application/json": {
+							schema: {
+								type: "object",
+								properties: {
+									requests: { type: "object" },
+									errors: { type: "object" },
+									latency: { type: "object" },
+								},
+							},
+						},
+					},
+				},
+				403: { description: "Forbidden - only available in development mode" },
+			},
+		}),
+		(c) => {
+			// Only expose metrics in development mode for security
+			if (process.env.NODE_ENV === "production") {
+				return c.json(
+					{ error: "Metrics endpoint is only available in development mode" },
+					403,
+				);
+			}
+
+			const currentMetrics = metrics.getMetrics();
+			return c.json(currentMetrics);
 		},
 	);

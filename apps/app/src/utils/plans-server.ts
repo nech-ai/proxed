@@ -1,4 +1,4 @@
-import { createClient } from "@proxed/supabase/api";
+import { createClient } from "@proxed/supabase/job";
 import { revalidateTag } from "next/cache";
 import type { PLANS } from "./plans";
 

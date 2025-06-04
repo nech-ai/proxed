@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@proxed/supabase/api";
+import { createClient } from "@proxed/supabase/job";
 import { acceptInvitation } from "@proxed/supabase/mutations";
 import { getTeamInviteQuery } from "@proxed/supabase/queries";
 import { revalidatePath, revalidateTag } from "next/cache";

@@ -2,7 +2,6 @@ import { getProjectQuery } from "../../db/queries/projects";
 import { createExecution } from "../../db/queries/executions";
 import { getServerKey } from "../../db/queries/server-keys";
 import { type Context, Hono } from "hono";
-import { proxy } from "hono/proxy";
 import { describeRoute } from "hono-openapi";
 import { protectedMiddleware } from "../middleware";
 import type { Context as AppContext, FinishReason } from "../types";
@@ -15,8 +14,12 @@ import {
 	type AnthropicResponse,
 } from "../../utils/anthropic";
 import { checkAndNotifyRateLimit } from "../../utils/rate-limit";
-
-const ANTHROPIC_API_BASE = "https://api.anthropic.com/v1";
+import { baseProxy } from "../../utils/base-proxy";
+import {
+	getProviderConfig,
+	buildProviderHeaders,
+} from "../../utils/provider-config";
+import { collectMetrics } from "../../utils/metrics";
 
 async function handleAnthropicProxy(c: Context<AppContext>, targetUrl: string) {
 	const { projectId, teamId, apiKey } = c.get("session");
@@ -45,20 +48,35 @@ async function handleAnthropicProxy(c: Context<AppContext>, targetUrl: string) {
 
 	const [fullApiKey] = reassembleKey(serverKey, apiKey).split(".");
 
+	// Get provider configuration
+	const providerConfig = getProviderConfig("ANTHROPIC");
+
 	const startTime = Date.now();
 
 	try {
-		const response = await proxy(targetUrl, {
-			...c.req,
-			headers: {
-				...c.req.header(),
-				"x-api-key": fullApiKey,
-				"anthropic-version": "2023-06-01",
-				"content-type": "application/json",
-			},
+		// Build headers using provider config
+		const headers = buildProviderHeaders("ANTHROPIC", fullApiKey, {
+			...c.req.header(),
+			"User-Agent": userAgent || "Proxed-API",
 		});
 
-		const latency = Date.now() - startTime;
+		// Use the base proxy with provider-specific configuration
+		const { response, latency, retries } = await baseProxy(c, targetUrl, {
+			headers,
+			maxRetries: providerConfig.maxRetries,
+			retryDelay: providerConfig.retryDelay,
+			timeout: providerConfig.timeout,
+			debug: providerConfig.debug || process.env.NODE_ENV === "development",
+		});
+
+		// Collect metrics
+		collectMetrics(
+			"ANTHROPIC",
+			projectId,
+			c.req.method,
+			response.status,
+			latency,
+		);
 
 		let responseData: AnthropicResponse = {};
 		try {
@@ -104,10 +122,24 @@ async function handleAnthropicProxy(c: Context<AppContext>, targetUrl: string) {
 			projectName: project.name,
 		});
 
+		// Add custom headers for debugging
+		response.headers.set("X-Proxed-Retries", retries.toString());
+		response.headers.set("X-Proxed-Latency", latency.toString());
+
 		return response;
 	} catch (error) {
 		const latency = Date.now() - startTime;
 		logger.error("Anthropic proxy error:", error);
+
+		// Collect error metrics
+		collectMetrics(
+			"ANTHROPIC",
+			projectId,
+			c.req.method,
+			500,
+			latency,
+			error instanceof Error ? error.name : "UNKNOWN_ERROR",
+		);
 
 		await createExecution(db, {
 			...getCommonExecutionParams({
@@ -175,7 +207,8 @@ export const anthropicRouter = new Hono<AppContext>()
 		}),
 		async (c) => {
 			const proxyPath = c.req.path.split(`/${c.req.param("projectId")}/`)[1];
-			const targetUrl = `${ANTHROPIC_API_BASE}/${proxyPath}`;
+			const config = getProviderConfig("ANTHROPIC");
+			const targetUrl = `${config.baseUrl}/${proxyPath}`;
 			return handleAnthropicProxy(c, targetUrl);
 		},
 	);

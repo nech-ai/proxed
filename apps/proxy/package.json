@@ -34,6 +34,7 @@
 	},
 	"devDependencies": {
 		"@types/bun": "^1.2.15",
+		"@types/jsonwebtoken": "^9.0.9",
 		"@types/pg": "^8.15.4",
 		"drizzle-kit": "^0.31.1"
 	},

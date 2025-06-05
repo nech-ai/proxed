@@ -21,24 +21,61 @@ export function getGeoContext(req: HonoRequest): GeoContext {
 	// Extract IP - try multiple headers in order of preference
 	const ip =
 		headers["cf-connecting-ip"] ??
+		headers["x-vercel-forwarded-for"] ??
 		headers["x-real-ip"] ??
 		headers["x-forwarded-for"]?.split(",")[0]?.trim() ??
 		headers["x-client-ip"] ??
 		null;
 
-	// Cloudflare specific headers
-	const country = headers["cf-ipcountry"] ?? headers["x-user-country"] ?? null;
-	const region = headers["cf-region"] ?? headers["x-user-region"] ?? null;
-	const city = headers["cf-ipcity"] ?? headers["x-user-city"] ?? null;
-	const continent = headers["cf-ipcontinent"] ?? null;
+	// Country - Cloudflare and Vercel headers
+	const country =
+		headers["cf-ipcountry"] ??
+		headers["x-vercel-ip-country"] ??
+		headers["x-user-country"] ??
+		null;
+
+	// Region - Cloudflare and Vercel headers
+	const region =
+		headers["cf-region"] ??
+		headers["x-vercel-ip-country-region"] ??
+		headers["x-user-region"] ??
+		null;
+
+	// City - Cloudflare and Vercel headers
+	const city =
+		headers["cf-ipcity"] ??
+		headers["x-vercel-ip-city"] ??
+		headers["x-user-city"] ??
+		null;
+
+	// Continent - Cloudflare and Vercel headers
+	const continent =
+		headers["cf-ipcontinent"] ?? headers["x-vercel-ip-continent"] ?? null;
+
+	// Latitude - Cloudflare and Vercel headers
 	const latitude = headers["cf-iplat"]
 		? Number.parseFloat(headers["cf-iplat"])
-		: null;
+		: headers["x-vercel-ip-latitude"]
+			? Number.parseFloat(headers["x-vercel-ip-latitude"])
+			: null;
+
+	// Longitude - Cloudflare and Vercel headers
 	const longitude = headers["cf-iplon"]
 		? Number.parseFloat(headers["cf-iplon"])
-		: null;
-	const timezone = headers["cf-timezone"] ?? headers["x-user-timezone"] ?? null;
-	const postalCode = headers["cf-postal-code"] ?? null;
+		: headers["x-vercel-ip-longitude"]
+			? Number.parseFloat(headers["x-vercel-ip-longitude"])
+			: null;
+
+	// Timezone - Cloudflare and Vercel headers
+	const timezone =
+		headers["cf-timezone"] ??
+		headers["x-vercel-ip-timezone"] ??
+		headers["x-user-timezone"] ??
+		null;
+
+	// Postal code - Cloudflare and Vercel headers
+	const postalCode =
+		headers["cf-postal-code"] ?? headers["x-vercel-ip-postal-code"] ?? null;
 
 	// Additional headers
 	const locale =

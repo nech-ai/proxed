@@ -1,0 +1,27 @@
+---
+title: "Major Proxy Engine Upgrade: Enhanced Reliability, Security & Observability"
+publishedAt: "2025-06-06"
+summary: "The core API proxy has been rebuilt for improved resilience with automatic retries, better security with advanced request validation, and deeper observability with new metrics."
+---
+
+We've rolled out a significant overhaul of our core proxy engine, making it more robust, secure, and observable. These updates are now live for all self-hosted instances and are being deployed to our hosted infrastructure.
+
+### Key Enhancements:
+
+*   **Increased Resilience**:
+    *   The proxy now automatically retries failed requests from transient errors (e.g., `429`, `502`, `503`) using an exponential backoff strategy.
+    *   Requests have configurable timeouts to prevent them from hanging.
+
+*   **Advanced Security**:
+    *   We've implemented stricter sanitization of both request and response headers to block sensitive information and prevent potential vulnerabilities.
+    *   Request validation has been enhanced to protect against issues like HTTP request smuggling.
+
+*   **Improved Observability**:
+    *   A new internal metrics collection system tracks request counts, error rates, and latency histograms, providing better insight into performance.
+
+*   **Centralized & Future-Proofed Configuration**:
+    *   All AI provider-specific settings are now managed in a centralized, type-safe configuration, making the system easier to maintain and extend.
+
+These foundational improvements enhance the reliability and security of all requests proxied through Proxed.AI and pave the way for our upcoming global multi-region hosting for lower latency worldwide.
+
+For more technical details, see our [latest blog post](/updates/posts/proxy-enhancements-and-fly-io).

@@ -187,7 +187,7 @@ export async function deleteDeviceCheck(supabase: Client, id: string) {
 type CreateProviderKeyParams = {
 	display_name: string;
 	partial_key_server: string;
-	provider: "OPENAI" | "ANTHROPIC" | "GOOGLE";
+	provider: "OPENAI" | "ANTHROPIC";
 	team_id: string;
 };
 

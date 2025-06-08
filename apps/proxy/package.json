@@ -27,7 +27,7 @@
 		"jsonwebtoken": "^9.0.2",
 		"lru-cache": "^11.1.0",
 		"nanoid": "^5.1.5",
-		"openai": "^4.104.0",
+		"openai": "^5.1.1",
 		"pino": "^9.7.0",
 		"postgres": "^3.4.7",
 		"resend": "^4.5.2",

@@ -42,9 +42,7 @@ export function SignupForm() {
 	const email = searchParams.get("email");
 
 	const form = useForm<FormValues>({
-		resolver: zodResolver(formSchema, {
-			errorMap: zodErrorMap,
-		}),
+		resolver: zodResolver(formSchema),
 		defaultValues: {
 			name: "",
 			email: email ?? "",

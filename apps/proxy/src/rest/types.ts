@@ -1,5 +1,9 @@
 import type { Database } from "../db";
 import type { GeoContext } from "../utils/geo";
+import type {
+	ProviderValue as ProviderType,
+	FinishReason,
+} from "@proxed/utils/lib/providers";
 
 export interface Session {
 	teamId: string;
@@ -20,22 +24,8 @@ export interface Context {
 	Variables: AuthMiddlewareVariables;
 }
 
-/**
- * Standard finish reasons for AI model completions
- */
-export type FinishReason =
-	| "stop"
-	| "length"
-	| "content-filter"
-	| "tool-calls"
-	| "error"
-	| "other"
-	| "unknown";
-
-/**
- * Provider types
- */
-export type ProviderType = "OPENAI" | "ANTHROPIC";
+// Re-export types for backward compatibility
+export type { ProviderType, FinishReason };
 
 /**
  * Common parameters for execution tracking

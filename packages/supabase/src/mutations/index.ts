@@ -1,6 +1,7 @@
 import { getUserQuery } from "../queries";
 import type { Client, TablesUpdate } from "../types/index";
 import { calculateCosts } from "@proxed/utils";
+import type { ProviderValue, FinishReason } from "@proxed/utils/lib/providers";
 
 export async function updateUser(
 	supabase: Client,
@@ -187,7 +188,7 @@ export async function deleteDeviceCheck(supabase: Client, id: string) {
 type CreateProviderKeyParams = {
 	display_name: string;
 	partial_key_server: string;
-	provider: "OPENAI" | "ANTHROPIC";
+	provider: ProviderValue;
 	team_id: string;
 };
 
@@ -300,17 +301,10 @@ type CreateExecutionParams = Omit<
 		ip: string;
 		user_agent?: string;
 		model: string;
-		provider: "OPENAI" | "ANTHROPIC";
+		provider: ProviderValue;
 		prompt_tokens: number;
 		completion_tokens: number;
-		finish_reason:
-			| "stop"
-			| "length"
-			| "content-filter"
-			| "tool-calls"
-			| "error"
-			| "other"
-			| "unknown";
+		finish_reason: FinishReason;
 		latency: number;
 		response_code: number;
 		prompt?: string;

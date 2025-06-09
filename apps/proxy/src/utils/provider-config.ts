@@ -1,5 +1,6 @@
 import type { ProviderType } from "../rest/types";
 import { getEnv, getNumericEnv, getBooleanEnv } from "./env";
+import { PROVIDERS } from "@proxed/utils/lib/providers";
 
 export interface ProviderConfig {
 	/**
@@ -69,8 +70,8 @@ const ANTHROPIC_CONFIG: ProviderConfig = {
 };
 
 export const PROVIDER_CONFIGS: Record<ProviderType, ProviderConfig> = {
-	OPENAI: OPENAI_CONFIG,
-	ANTHROPIC: ANTHROPIC_CONFIG,
+	[PROVIDERS.OPENAI]: OPENAI_CONFIG,
+	[PROVIDERS.ANTHROPIC]: ANTHROPIC_CONFIG,
 };
 
 /**

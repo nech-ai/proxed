@@ -1,16 +1,6 @@
 import type { Database } from "../index";
 import { executions } from "../schema";
-
-// Define types based on the schema
-type FinishReason =
-	| "stop"
-	| "length"
-	| "content-filter"
-	| "tool-calls"
-	| "error"
-	| "other"
-	| "unknown";
-type ProviderType = "OPENAI" | "ANTHROPIC";
+import type { ProviderType, FinishReason } from "../../rest/types";
 
 export interface CreateExecutionParams {
 	teamId: string;

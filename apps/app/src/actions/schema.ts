@@ -1,4 +1,10 @@
 import { z } from "zod";
+import {
+	PROVIDER_VALUES,
+	MODEL_VALUES,
+	FINISH_REASONS,
+	type ProviderValue,
+} from "@proxed/utils/lib/providers";
 
 export const updateUserSchema = z.object({
 	full_name: z.string().min(2).max(32).optional(),
@@ -122,7 +128,7 @@ export const createProviderKeySchema = z.object({
 		message: "Name must be at least 2 characters.",
 	}),
 	partial_key_server: z.string().min(1),
-	provider: z.enum(["OPENAI", "ANTHROPIC"]),
+	provider: z.enum(PROVIDER_VALUES as [ProviderValue, ...ProviderValue[]]),
 	revalidatePath: z.string().optional(),
 });
 
@@ -169,19 +175,9 @@ export const updateProjectSchema = z.object({
 		.min(1, {
 			message: "Model is required",
 		})
-		.refine(
-			(val) =>
-				[
-					"gpt-4o",
-					"gpt-4o-mini",
-					"claude-3-7-sonnet-latest",
-					"gpt-4.1",
-					"gpt-4.1-mini",
-					"gpt-4.1-nano",
-					"none",
-				].includes(val),
-			{ message: "Invalid model selected" },
-		),
+		.refine((val) => val === "none" || MODEL_VALUES.includes(val as any), {
+			message: "Invalid model selected",
+		}),
 	keyId: z
 		.string()
 		.min(1, {
@@ -207,30 +203,15 @@ export type ToggleProjectTestModeFormValues = z.infer<
 export const filterExecutionsSchema = z.object({
 	projectId: z.string().optional().describe("The project ID to filter by"),
 	provider: z
-		.enum(["OPENAI"])
+		.enum(PROVIDER_VALUES as [ProviderValue, ...ProviderValue[]])
 		.optional()
 		.describe("The AI provider to filter by"),
 	model: z
-		.enum([
-			"gpt-4o",
-			"gpt-4o-mini",
-			"claude-3-7-sonnet-latest",
-			"gpt-4.1",
-			"gpt-4.1-mini",
-			"gpt-4.1-nano",
-		])
+		.enum(MODEL_VALUES as [string, ...string[]])
 		.optional()
 		.describe("The model to filter by"),
 	finishReason: z
-		.enum([
-			"stop",
-			"length",
-			"content-filter",
-			"tool-calls",
-			"error",
-			"other",
-			"unknown",
-		])
+		.enum(FINISH_REASONS)
 		.optional()
 		.describe("The finish reason to filter by"),
 	start: parseDateSchema

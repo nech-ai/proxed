@@ -4,6 +4,12 @@ import {
 	parseAsString,
 	parseAsStringLiteral,
 } from "nuqs/server";
+import {
+	PROVIDER_VALUES,
+	MODEL_VALUES,
+	FINISH_REASONS,
+	type ProviderValue,
+} from "@proxed/utils/lib/providers";
 
 export const searchParamsCache = createSearchParamsCache({
 	q: parseAsString,
@@ -12,24 +18,9 @@ export const searchParamsCache = createSearchParamsCache({
 	start: parseAsString,
 	end: parseAsString,
 	projectId: parseAsString,
-	provider: parseAsStringLiteral(["OPENAI", "ANTHROPIC"] as const),
-	model: parseAsStringLiteral([
-		"gpt-4o",
-		"gpt-4o-mini",
-		"claude-3-7-sonnet-latest",
-		"gpt-4.1",
-		"gpt-4.1-mini",
-		"gpt-4.1-nano",
-	] as const),
-	finishReason: parseAsStringLiteral([
-		"stop",
-		"length",
-		"content-filter",
-		"tool-calls",
-		"error",
-		"other",
-		"unknown",
-	] as const),
+	provider: parseAsStringLiteral(PROVIDER_VALUES),
+	model: parseAsStringLiteral(MODEL_VALUES),
+	finishReason: parseAsStringLiteral(FINISH_REASONS),
 	deviceCheckId: parseAsString,
 	keyId: parseAsString,
 });

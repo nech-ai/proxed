@@ -8,6 +8,7 @@ import {
 } from "@/actions/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@proxed/ui/components/button";
+import { ModelBadge } from "@proxed/ui/components/model-badge";
 import {
 	Card,
 	CardContent,
@@ -52,24 +53,7 @@ import {
 } from "@proxed/ui/components/alert-dialog";
 import Link from "next/link";
 import { useState } from "react";
-
-type Provider = "OPENAI" | "ANTHROPIC";
-
-interface ModelOption {
-	value: string;
-	label: string;
-}
-
-const MODEL_OPTIONS: Record<Provider, ModelOption[]> = {
-	OPENAI: [
-		{ value: "gpt-4o", label: "GPT-4o" },
-		{ value: "gpt-4o-mini", label: "GPT-4o Mini" },
-		{ value: "gpt-4.1", label: "GPT-4.1" },
-		{ value: "gpt-4.1-mini", label: "GPT-4.1 Mini" },
-		{ value: "gpt-4.1-nano", label: "GPT-4.1 Nano" },
-	],
-	ANTHROPIC: [{ value: "claude-3-7-sonnet-latest", label: "Claude 3 Sonnet" }],
-};
+import { getModelOptions, type Provider } from "@proxed/utils/lib/providers";
 
 interface SectionProps {
 	title: string;
@@ -233,6 +217,9 @@ export function ProjectEditForm({
 
 	const selectedKey = keys.find((k) => k.id === form.watch("keyId"));
 	const selectedProvider = selectedKey?.provider as Provider | undefined;
+	const modelOptions = selectedProvider
+		? getModelOptions(selectedProvider)
+		: [];
 
 	return (
 		<Form {...form}>
@@ -467,16 +454,19 @@ export function ProjectEditForm({
 														) : (
 															<>
 																<SelectItem value="none">None</SelectItem>
-																{MODEL_OPTIONS[selectedProvider].map(
-																	(option) => (
-																		<SelectItem
-																			key={option.value}
-																			value={option.value}
-																		>
-																			{option.label}
-																		</SelectItem>
-																	),
-																)}
+																{modelOptions.map((option) => (
+																	<SelectItem
+																		key={option.value}
+																		value={option.value}
+																	>
+																		<div className="flex items-center justify-between w-full">
+																			<span>{option.label}</span>
+																			{option.badge && (
+																				<ModelBadge badge={option.badge} />
+																			)}
+																		</div>
+																	</SelectItem>
+																))}
 															</>
 														)}
 													</SelectContent>

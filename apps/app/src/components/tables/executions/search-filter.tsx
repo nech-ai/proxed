@@ -2,6 +2,7 @@
 
 import { generateExecutionsFilters } from "@/actions/ai/filters/generate-executions-filters";
 import { Calendar } from "@proxed/ui/components/calendar";
+import { ModelBadge } from "@proxed/ui/components/model-badge";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -29,6 +30,12 @@ import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FilterList } from "./filter-list";
 import { Button } from "@proxed/ui/components/button";
+import {
+	PROVIDERS,
+	FINISH_REASONS,
+	getModelOptions,
+	type Provider,
+} from "@proxed/utils/lib/providers";
 
 type Props = {
 	placeholder: string;
@@ -44,25 +51,6 @@ const defaultSearch = {
 	start: "",
 	end: "",
 };
-
-const finishReasons = [
-	"stop",
-	"length",
-	"content-filter",
-	"tool-calls",
-	"error",
-	"other",
-	"unknown",
-] as const;
-
-const models = [
-	"gpt-4o",
-	"gpt-4o-mini",
-	"claude-3-7-sonnet-latest",
-	"gpt-4.1",
-	"gpt-4.1-mini",
-	"gpt-4.1-nano",
-] as const;
 
 export function SearchFilter({ placeholder, className }: Props) {
 	const [prompt, setPrompt] = useState("");
@@ -243,16 +231,14 @@ export function SearchFilter({ placeholder, className }: Props) {
 							<span>Provider</span>
 						</DropdownMenuSubTrigger>
 						<DropdownMenuSubContent>
-							<DropdownMenuItem
-								onClick={() => setFilters({ provider: "OPENAI" })}
-							>
-								OpenAI
-							</DropdownMenuItem>
-							<DropdownMenuItem
-								onClick={() => setFilters({ provider: "ANTHROPIC" })}
-							>
-								Anthropic
-							</DropdownMenuItem>
+							{Object.entries(PROVIDERS).map(([key, value]) => (
+								<DropdownMenuItem
+									key={key}
+									onClick={() => setFilters({ provider: value })}
+								>
+									{key}
+								</DropdownMenuItem>
+							))}
 						</DropdownMenuSubContent>
 					</DropdownMenuSub>
 
@@ -262,12 +248,14 @@ export function SearchFilter({ placeholder, className }: Props) {
 							<span>Model</span>
 						</DropdownMenuSubTrigger>
 						<DropdownMenuSubContent>
-							{models.map((model) => (
+							{getModelOptions().map((model) => (
 								<DropdownMenuItem
-									key={model}
-									onClick={() => setFilters({ model })}
+									key={model.value}
+									onClick={() => setFilters({ model: model.value })}
+									className="flex items-center justify-between"
 								>
-									{model}
+									<span>{model.label}</span>
+									{model.badge && <ModelBadge badge={model.badge} />}
 								</DropdownMenuItem>
 							))}
 						</DropdownMenuSubContent>
@@ -279,7 +267,7 @@ export function SearchFilter({ placeholder, className }: Props) {
 							<span>Status</span>
 						</DropdownMenuSubTrigger>
 						<DropdownMenuSubContent>
-							{finishReasons.map((reason) => (
+							{FINISH_REASONS.map((reason) => (
 								<DropdownMenuItem
 									key={reason}
 									onClick={() => setFilters({ finishReason: reason })}

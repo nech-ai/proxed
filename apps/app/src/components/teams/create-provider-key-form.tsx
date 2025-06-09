@@ -60,16 +60,12 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@proxed/ui/components/accordion";
+import { PROVIDERS, type ProviderValue } from "@proxed/utils/lib/providers";
 
 const cryptoProvider =
 	typeof window !== "undefined"
 		? window.crypto
 		: require("node:crypto").webcrypto;
-
-export enum ProviderType {
-	OPENAI = "OPENAI",
-	ANTHROPIC = "ANTHROPIC",
-}
 
 interface FormState {
 	isCreating: boolean;
@@ -97,7 +93,7 @@ export function CreateProviderKeyForm() {
 		defaultValues: {
 			display_name: "",
 			partial_key_server: "",
-			provider: ProviderType.OPENAI,
+			provider: "OPENAI" as ProviderValue,
 		},
 	});
 
@@ -123,7 +119,7 @@ export function CreateProviderKeyForm() {
 			form.reset({
 				display_name: "",
 				partial_key_server: "",
-				provider: ProviderType.OPENAI,
+				provider: "OPENAI" as ProviderValue,
 			});
 
 			setKeyValidation({ isValid: false });
@@ -204,7 +200,7 @@ export function CreateProviderKeyForm() {
 		form.reset({
 			display_name: "",
 			partial_key_server: "",
-			provider: ProviderType.OPENAI,
+			provider: "OPENAI" as ProviderValue,
 		});
 	};
 
@@ -423,9 +419,9 @@ export function CreateProviderKeyForm() {
 														<SelectValue placeholder="Select a provider" />
 													</SelectTrigger>
 													<SelectContent>
-														{Object.values(ProviderType).map((provider) => (
-															<SelectItem key={provider} value={provider}>
-																{provider}
+														{Object.entries(PROVIDERS).map(([key, value]) => (
+															<SelectItem key={value} value={value}>
+																{key}
 															</SelectItem>
 														))}
 													</SelectContent>

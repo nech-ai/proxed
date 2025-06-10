@@ -27,21 +27,7 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 
 	// Validate request body
 	const bodySchema = z.object({
-		image: z
-			.string()
-			.min(1, "Image is required")
-			.refine(
-				(img) => {
-					// Check if it's a valid base64 image or URL
-					const base64Regex = /^data:image\/(png|jpg|jpeg|gif|webp);base64,/;
-					const urlRegex = /^https?:\/\/.+\.(png|jpg|jpeg|gif|webp)/i;
-					return base64Regex.test(img) || urlRegex.test(img);
-				},
-				{
-					message:
-						"Invalid image format. Must be base64 data URI or valid image URL",
-				},
-			),
+		image: z.string().min(1, "Image is required"),
 	});
 	const { image } = await validateRequestBody(c, bodySchema);
 

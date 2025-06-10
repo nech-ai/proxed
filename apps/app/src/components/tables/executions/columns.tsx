@@ -4,6 +4,7 @@ import { Badge } from "@proxed/ui/components/badge";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ActionsCell } from "./actions-cell";
+import { formatCost } from "@/utils/format-cost";
 
 export type ExecutionOutput =
 	Database["public"]["Tables"]["executions"]["Row"] & {
@@ -54,9 +55,10 @@ export const columns: ColumnDef<ExecutionOutput>[] = [
 		enableSorting: true,
 		cell: ({ row }) => (
 			<div className="flex flex-col">
-				<span>{row.original.total_tokens}</span>
+				<span>{row.original.total_tokens?.toLocaleString() || 0}</span>
 				<span className="text-muted-foreground text-sm">
-					{row.original.prompt_tokens} / {row.original.completion_tokens}
+					{row.original.prompt_tokens?.toLocaleString() || 0} /{" "}
+					{row.original.completion_tokens?.toLocaleString() || 0}
 				</span>
 			</div>
 		),
@@ -65,15 +67,22 @@ export const columns: ColumnDef<ExecutionOutput>[] = [
 		header: "Cost",
 		accessorKey: "total_cost",
 		enableSorting: true,
-		cell: ({ row }) => (
-			<div className="flex flex-col">
-				<span>${row.original?.total_cost?.toFixed(4)}</span>
-				<span className="text-muted-foreground text-sm">
-					${row.original.prompt_cost?.toFixed(4)} / $
-					{row.original.completion_cost?.toFixed(4)}
-				</span>
-			</div>
-		),
+		cell: ({ row }) => {
+			const totalCost = row.original.total_cost;
+			const promptCost = row.original.prompt_cost;
+			const completionCost = row.original.completion_cost;
+
+			return (
+				<div className="flex flex-col">
+					<span className="font-medium">{formatCost(totalCost)}</span>
+					{(promptCost || completionCost) && (
+						<span className="text-muted-foreground text-xs">
+							{formatCost(promptCost)} / {formatCost(completionCost)}
+						</span>
+					)}
+				</div>
+			);
+		},
 	},
 	{
 		header: "Status",

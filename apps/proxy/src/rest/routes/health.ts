@@ -3,6 +3,21 @@ import { describeRoute } from "hono-openapi";
 import { publicMiddleware } from "../middleware";
 import type { Context } from "../types";
 import { metrics } from "../../utils/metrics";
+import { logger } from "../../utils/logger";
+
+interface HealthStatus {
+	status: "healthy" | "degraded" | "unhealthy";
+	timestamp: string;
+	uptime: number;
+	checks: {
+		database?: "ok" | "error";
+		redis?: "ok" | "error";
+	};
+	version: string;
+}
+
+// Track server start time
+const serverStartTime = Date.now();
 
 export const healthRouter = new Hono<Context>()
 	.get(
@@ -10,10 +25,65 @@ export const healthRouter = new Hono<Context>()
 		describeRoute({
 			tags: ["Health"],
 			summary: "Health check",
-			description: "Returns 200 if the server is healthy",
-			responses: { 200: { description: "OK" } },
+			description: "Returns 200 if the server is healthy with detailed status",
+			responses: {
+				200: {
+					description: "Service is healthy",
+					content: {
+						"application/json": {
+							schema: {
+								type: "object",
+								properties: {
+									status: {
+										type: "string",
+										enum: ["healthy", "degraded", "unhealthy"],
+									},
+									timestamp: { type: "string" },
+									uptime: { type: "number" },
+									checks: { type: "object" },
+									version: { type: "string" },
+								},
+							},
+						},
+					},
+				},
+			},
 		}),
-		() => new Response("OK"),
+		async (c) => {
+			const healthStatus: HealthStatus = {
+				status: "healthy",
+				timestamp: new Date().toISOString(),
+				uptime: Date.now() - serverStartTime,
+				checks: {},
+				version: process.env.npm_package_version || "unknown",
+			};
+
+			// Quick DB check - don't want health check to be slow
+			try {
+				const db = c.get("db");
+				if (db) {
+					// Simple query to check DB connectivity
+					await Promise.race([
+						db.execute("SELECT 1"),
+						new Promise((_, reject) =>
+							setTimeout(
+								() => reject(new Error("DB health check timeout")),
+								1000,
+							),
+						),
+					]);
+					healthStatus.checks.database = "ok";
+				}
+			} catch (error) {
+				healthStatus.checks.database = "error";
+				healthStatus.status = "degraded";
+				logger.warn("Database health check failed", { error });
+			}
+
+			// Return appropriate status code
+			const statusCode = healthStatus.status === "healthy" ? 200 : 503;
+			return c.json(healthStatus, statusCode);
+		},
 	)
 	.use("/geo-info", ...publicMiddleware)
 	.get(

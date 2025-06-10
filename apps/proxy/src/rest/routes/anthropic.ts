@@ -1,57 +1,40 @@
-import { getProjectQuery } from "../../db/queries/projects";
-import { createExecution } from "../../db/queries/executions";
-import { getServerKey } from "../../db/queries/server-keys";
 import { type Context, Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 import { protectedMiddleware } from "../middleware";
 import type { Context as AppContext, FinishReason } from "../types";
-import { reassembleKey } from "@proxed/utils/lib/partial-keys";
 import { logger } from "../../utils/logger";
 import { createError, ErrorCode } from "../../utils/errors";
-import { getCommonExecutionParams } from "../../utils/execution-params";
 import {
 	mapAnthropicFinishReason,
 	type AnthropicResponse,
 } from "../../utils/anthropic";
-import { checkAndNotifyRateLimit } from "../../utils/rate-limit";
 import { baseProxy } from "../../utils/base-proxy";
 import {
 	getProviderConfig,
 	buildProviderHeaders,
 } from "../../utils/provider-config";
 import { collectMetrics } from "../../utils/metrics";
+import {
+	validateAndGetProject,
+	getFullApiKey,
+	recordExecution,
+	withTimeout,
+} from "../../utils/route-handlers";
 
 async function handleAnthropicProxy(c: Context<AppContext>, targetUrl: string) {
-	const { projectId, teamId, apiKey } = c.get("session");
-	const db = c.get("db");
-	const geo = c.get("geo");
-	const userAgent = c.req.header("user-agent");
+	const startTime = Date.now();
 
-	const project = await getProjectQuery(db, projectId);
+	// Validate project and get configuration
+	const { project, teamId, apiKey, db } = await validateAndGetProject(c, {
+		requireApiKey: true,
+	});
 
-	if (!project || !project.key) {
-		throw createError(ErrorCode.PROJECT_NOT_FOUND);
-	}
-
-	if (!apiKey) {
-		throw createError(ErrorCode.INTERNAL_ERROR, "API key not found in session");
-	}
-
-	const serverKey = await getServerKey(db, project.keyId);
-
-	if (!serverKey) {
-		throw createError(
-			ErrorCode.INTERNAL_ERROR,
-			"Failed to retrieve server key",
-		);
-	}
-
-	const [fullApiKey] = reassembleKey(serverKey, apiKey).split(".");
+	// Get full API key
+	const fullApiKey = await getFullApiKey(db, project.keyId, apiKey!);
 
 	// Get provider configuration
 	const providerConfig = getProviderConfig("ANTHROPIC");
-
-	const startTime = Date.now();
+	const userAgent = c.req.header("user-agent");
 
 	try {
 		// Build headers using provider config
@@ -60,8 +43,8 @@ async function handleAnthropicProxy(c: Context<AppContext>, targetUrl: string) {
 			"User-Agent": userAgent || "Proxed-API",
 		});
 
-		// Use the base proxy with provider-specific configuration
-		const { response, latency, retries } = await baseProxy(c, targetUrl, {
+		// Use the base proxy with provider-specific configuration and timeout
+		const proxyOperation = baseProxy(c, targetUrl, {
 			headers,
 			maxRetries: providerConfig.maxRetries,
 			retryDelay: providerConfig.retryDelay,
@@ -69,10 +52,16 @@ async function handleAnthropicProxy(c: Context<AppContext>, targetUrl: string) {
 			debug: providerConfig.debug || process.env.NODE_ENV === "development",
 		});
 
+		const { response, latency, retries } = await withTimeout(
+			proxyOperation,
+			providerConfig.timeout || 30000,
+			"Anthropic API request timed out",
+		);
+
 		// Collect metrics
 		collectMetrics(
 			"ANTHROPIC",
-			projectId,
+			project.id,
 			c.req.method,
 			response.status,
 			latency,
@@ -82,7 +71,10 @@ async function handleAnthropicProxy(c: Context<AppContext>, targetUrl: string) {
 		try {
 			responseData = (await response.clone().json()) as AnthropicResponse;
 		} catch (err) {
-			logger.warn("Failed to parse Anthropic response as JSON", { error: err });
+			logger.warn("Failed to parse Anthropic response as JSON", {
+				error: err,
+				projectId: project.id,
+			});
 		}
 
 		const usage = responseData.usage ?? {
@@ -93,34 +85,19 @@ async function handleAnthropicProxy(c: Context<AppContext>, targetUrl: string) {
 		const anthropicFinishReason = responseData.stop_reason;
 		const finishReason = mapAnthropicFinishReason(anthropicFinishReason);
 
-		await createExecution(db, {
-			...getCommonExecutionParams({
-				teamId,
-				projectId,
-				deviceCheckId: project.deviceCheckId,
-				keyId: project.keyId,
-				ip: geo.ip ?? undefined,
-				userAgent,
-				model: project.model,
-				provider: project.key.provider,
-				geo,
-			}),
-			promptTokens: usage.input_tokens,
-			completionTokens: usage.output_tokens,
-			totalTokens: usage.input_tokens + usage.output_tokens,
-			finishReason: finishReason,
-			latency,
-			responseCode: response.status,
-			response: JSON.stringify(responseData),
-		});
-
-		checkAndNotifyRateLimit({
+		// Record successful execution
+		await recordExecution(
 			c,
-			db,
-			projectId,
-			teamId,
-			projectName: project.name,
-		});
+			startTime,
+			{
+				promptTokens: usage.input_tokens,
+				completionTokens: usage.output_tokens,
+				totalTokens: usage.input_tokens + usage.output_tokens,
+				finishReason: finishReason,
+				response: responseData,
+			},
+			{ project, teamId },
+		);
 
 		// Add custom headers for debugging
 		response.headers.set("X-Proxed-Retries", retries.toString());
@@ -129,45 +106,46 @@ async function handleAnthropicProxy(c: Context<AppContext>, targetUrl: string) {
 		return response;
 	} catch (error) {
 		const latency = Date.now() - startTime;
-		logger.error("Anthropic proxy error:", error);
+		logger.error("Anthropic proxy error:", {
+			error: error instanceof Error ? error.message : error,
+			projectId: project.id,
+			teamId,
+			provider: "ANTHROPIC",
+		});
 
 		// Collect error metrics
 		collectMetrics(
 			"ANTHROPIC",
-			projectId,
+			project.id,
 			c.req.method,
 			500,
 			latency,
 			error instanceof Error ? error.name : "UNKNOWN_ERROR",
 		);
 
-		await createExecution(db, {
-			...getCommonExecutionParams({
-				teamId,
-				projectId,
-				deviceCheckId: project.deviceCheckId,
-				keyId: project.keyId,
-				ip: geo.ip ?? undefined,
-				userAgent,
-				model: project.model,
-				provider: project.key.provider,
-				geo,
-			}),
-			promptTokens: 0,
-			completionTokens: 0,
-			totalTokens: 0,
-			finishReason: "error" as FinishReason,
-			latency,
-			responseCode: 500,
-			errorMessage: error instanceof Error ? error.message : "Unknown error",
-			errorCode: error instanceof Error ? error.name : "UNKNOWN_ERROR",
-		});
+		// Record failed execution
+		await recordExecution(
+			c,
+			startTime,
+			{
+				promptTokens: 0,
+				completionTokens: 0,
+				totalTokens: 0,
+				finishReason: "error" as FinishReason,
+				error: {
+					message: error instanceof Error ? error.message : "Unknown error",
+					code: error instanceof Error ? error.name : "UNKNOWN_ERROR",
+				},
+			},
+			{ project, teamId },
+		);
 
 		throw createError(
 			ErrorCode.PROVIDER_ERROR,
 			error instanceof Error ? error.message : "Anthropic service error",
 			{
-				originalError: error instanceof Error ? error.message : "Unknown error",
+				originalError: error instanceof Error ? error.message : String(error),
+				projectId: project.id,
 			},
 		);
 	}

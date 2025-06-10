@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { formatCost } from "@/utils/format-cost";
 
 interface ExecutionMetricsProps {
 	promptTokens: number;
@@ -35,17 +36,20 @@ export function ExecutionMetrics({
 			<div className="p-4 border rounded-lg bg-background">
 				<p className="mb-1 text-sm text-muted-foreground">Tokens Usage</p>
 				<div className="grid grid-cols-3 gap-2">
-					<MetricItem label="Prompt" value={promptTokens} />
-					<MetricItem label="Completion" value={completionTokens} />
-					<MetricItem label="Total" value={totalTokens} />
+					<MetricItem label="Prompt" value={promptTokens.toLocaleString()} />
+					<MetricItem
+						label="Completion"
+						value={completionTokens.toLocaleString()}
+					/>
+					<MetricItem label="Total" value={totalTokens.toLocaleString()} />
 				</div>
 			</div>
 			<div className="p-4 border rounded-lg bg-background">
-				<p className="mb-1 text-sm text-muted-foreground">Costs (USD)</p>
+				<p className="mb-1 text-sm text-muted-foreground">Costs</p>
 				<div className="grid grid-cols-3 gap-2">
-					<MetricItem label="Prompt" value={`$${promptCost}`} />
-					<MetricItem label="Completion" value={`$${completionCost}`} />
-					<MetricItem label="Total" value={`$${totalCost}`} />
+					<MetricItem label="Prompt" value={formatCost(promptCost)} />
+					<MetricItem label="Completion" value={formatCost(completionCost)} />
+					<MetricItem label="Total" value={formatCost(totalCost)} />
 				</div>
 			</div>
 		</div>

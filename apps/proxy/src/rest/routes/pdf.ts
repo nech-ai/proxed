@@ -1,99 +1,63 @@
 import { ZodParser, type JsonSchema } from "@proxed/structure";
-import { getProjectQuery } from "../../db/queries/projects";
-import { createExecution } from "../../db/queries/executions";
-import { getServerKey } from "../../db/queries/server-keys";
 import { generateObject } from "ai";
 import { type Context, Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 import { protectedMiddleware } from "../middleware";
 import type { Context as AppContext, FinishReason } from "../types";
-import { reassembleKey } from "@proxed/utils/lib/partial-keys";
 import { z } from "zod";
 import { logger } from "../../utils/logger";
 import { createError, ErrorCode } from "../../utils/errors";
-import { getCommonExecutionParams } from "../../utils/execution-params";
 import { createAIClient } from "../../utils/ai-client";
-import { checkAndNotifyRateLimit } from "../../utils/rate-limit";
+import {
+	validateAndGetProject,
+	getFullApiKey,
+	validateRequestBody,
+	recordExecution,
+	withTimeout,
+} from "../../utils/route-handlers";
 
 async function handleStructuredResponse(c: Context<AppContext>) {
-	const { projectId, teamId, apiKey } = c.get("session");
-	const db = c.get("db");
-	const geo = c.get("geo");
-	const userAgent = c.req.header("user-agent");
+	const startTime = Date.now();
 
-	const project = await getProjectQuery(db, projectId);
+	// Validate project and get configuration
+	const { project, teamId, apiKey, db } = await validateAndGetProject(c, {
+		requireApiKey: true,
+	});
 
-	if (!project || !project.key) {
-		throw createError(ErrorCode.PROJECT_NOT_FOUND);
-	}
-
-	const contentType = c.req.header("content-type");
-	if (!contentType || !contentType.includes("application/json")) {
-		throw createError(ErrorCode.BAD_REQUEST, "Invalid content type");
-	}
-
-	let bodyData: unknown;
-	try {
-		bodyData = await c.req.json();
-	} catch (err) {
-		throw createError(ErrorCode.BAD_REQUEST, "Invalid JSON payload");
-	}
-
+	// Validate request body
 	const bodySchema = z.object({
 		pdf: z
 			.string()
-			.nonempty("PDF content is required")
-			.regex(/^data:application\/pdf;base64,/, "Invalid PDF base64 format")
-			.or(z.string().url("Invalid PDF URL")),
+			.min(1, "PDF content is required")
+			.refine(
+				(pdf) => {
+					// Check if it's a valid base64 PDF or URL
+					const base64Regex = /^data:application\/pdf;base64,/;
+					const urlRegex = /^https?:\/\/.+\.(pdf)$/i;
+					return base64Regex.test(pdf) || urlRegex.test(pdf);
+				},
+				{
+					message:
+						"Invalid PDF format. Must be base64 data URI or valid PDF URL",
+				},
+			),
 	});
-	const result = bodySchema.safeParse(bodyData);
-	if (!result.success) {
-		throw createError(ErrorCode.VALIDATION_ERROR, "Validation failed", {
-			details: result.error.flatten(),
-		});
-	}
-	const { pdf } = result.data;
+	const { pdf } = await validateRequestBody(c, bodySchema);
 
+	// Validate and parse schema
 	const parser = new ZodParser();
 	const schema = parser.convertJsonSchemaToZodValidator(
 		project.schemaConfig as unknown as JsonSchema,
 	);
 	if (!schema) {
-		throw createError(ErrorCode.VALIDATION_ERROR, "Invalid schema");
-	}
-
-	const deviceCheckId = project.deviceCheckId;
-	const keyId = project.keyId;
-
-	if (!apiKey) {
-		throw createError(ErrorCode.INTERNAL_ERROR, "API key not found in session");
-	}
-
-	const startTime = Date.now();
-
-	// Get the server key part using the function
-	const serverKey = await getServerKey(db, project.keyId);
-
-	if (!serverKey) {
 		throw createError(
-			ErrorCode.INTERNAL_ERROR,
-			"Failed to retrieve server key",
+			ErrorCode.VALIDATION_ERROR,
+			"Invalid project schema configuration",
 		);
 	}
 
-	const [fullApiKey] = reassembleKey(serverKey, apiKey).split(".");
-
-	const commonParams = getCommonExecutionParams({
-		teamId,
-		projectId,
-		deviceCheckId,
-		keyId,
-		ip: geo.ip ?? undefined,
-		userAgent,
-		model: project.model,
-		provider: project.key.provider,
-		geo,
-	});
+	// Get full API key
+	const fullApiKey = await getFullApiKey(db, project.keyId, apiKey!);
 
 	try {
 		const aiClient = createAIClient(project.key.provider, fullApiKey);
@@ -105,90 +69,105 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 				"base64",
 			);
 		} else {
-			// If it's a URL, fetch the PDF
-			const response = await fetch(pdf);
+			// If it's a URL, fetch the PDF with timeout
+			const fetchWithTimeout = withTimeout(
+				fetch(pdf),
+				10000, // 10 second timeout for fetch
+				"PDF fetch timed out",
+			);
+
+			const response = await fetchWithTimeout;
 			if (!response.ok) {
 				throw createError(
 					ErrorCode.BAD_REQUEST,
 					`Failed to fetch PDF from URL: ${response.statusText}`,
 				);
 			}
+
 			const arrayBuffer = await response.arrayBuffer();
 			pdfData = Buffer.from(arrayBuffer);
 		}
 
-		const { object, usage, finishReason } = await generateObject({
-			model: aiClient(project.model, { structuredOutputs: true }),
-			schema,
-			messages: [
-				{
-					role: "system",
-					content: project.systemPrompt,
-				},
-				{
-					role: "user",
-					content: [
-						{
-							type: "text",
-							text:
-								project.defaultUserPrompt ??
-								"Analyze the following PDF and generate a structured response.",
-						},
-						{
-							type: "file",
-							data: pdfData,
-							mimeType: "application/pdf",
-						},
-					],
-				},
-			],
-			maxTokens: 4000,
-		});
+		// Generate object with timeout
+		const { object, usage, finishReason } = await withTimeout(
+			generateObject({
+				model: aiClient(project.model || "gpt-4o", { structuredOutputs: true }),
+				schema,
+				messages: [
+					{
+						role: "system",
+						content:
+							project.systemPrompt ||
+							"You are a helpful assistant that analyzes PDF documents and returns structured data.",
+					},
+					{
+						role: "user",
+						content: [
+							{
+								type: "text",
+								text:
+									project.defaultUserPrompt ??
+									"Analyze the following PDF and generate a structured response according to the schema.",
+							},
+							{
+								type: "file",
+								data: pdfData,
+								mimeType: "application/pdf",
+							},
+						],
+					},
+				],
+				maxTokens: 4000,
+			}),
+			60000, // 60 second timeout for PDF processing
+			"PDF AI generation timed out after 60 seconds",
+		);
 
-		const latency = Date.now() - startTime;
-
-		await createExecution(db, {
-			...commonParams,
-			promptTokens: usage.promptTokens,
-			completionTokens: usage.completionTokens,
-			totalTokens: usage.promptTokens + usage.completionTokens,
-			finishReason: finishReason as FinishReason,
-			latency,
-			responseCode: 200,
-			response: JSON.stringify(object),
-		});
-
-		// Non-blocking: Check rate limit and trigger notification job
-		checkAndNotifyRateLimit({
+		// Record successful execution
+		await recordExecution(
 			c,
-			db,
-			projectId,
-			teamId,
-			projectName: project.name,
-		});
+			startTime,
+			{
+				promptTokens: usage.promptTokens,
+				completionTokens: usage.completionTokens,
+				totalTokens: usage.promptTokens + usage.completionTokens,
+				finishReason: finishReason as FinishReason,
+				response: object,
+			},
+			{ project, teamId },
+		);
 
 		return c.json(object);
 	} catch (error) {
-		logger.error("Structured response error:", error);
-		const latency = Date.now() - startTime;
-
-		await createExecution(db, {
-			...commonParams,
-			promptTokens: 0,
-			completionTokens: 0,
-			totalTokens: 0,
-			finishReason: "error" as FinishReason,
-			latency,
-			responseCode: 500,
-			errorMessage: error instanceof Error ? error.message : "Unknown error",
-			errorCode: error instanceof Error ? error.name : "UNKNOWN_ERROR",
+		logger.error("PDF structured response error:", {
+			error: error instanceof Error ? error.message : error,
+			projectId: project.id,
+			teamId,
 		});
+
+		// Record failed execution
+		await recordExecution(
+			c,
+			startTime,
+			{
+				promptTokens: 0,
+				completionTokens: 0,
+				totalTokens: 0,
+				finishReason: "error" as FinishReason,
+				error: {
+					message: error instanceof Error ? error.message : "Unknown error",
+					code: error instanceof Error ? error.name : "UNKNOWN_ERROR",
+				},
+			},
+			{ project, teamId },
+		);
 
 		throw createError(
 			ErrorCode.PROVIDER_ERROR,
 			error instanceof Error ? error.message : "PDF structured response failed",
 			{
-				originalError: error instanceof Error ? error.message : "Unknown error",
+				originalError: error instanceof Error ? error.message : String(error),
+				projectId: project.id,
 			},
 		);
 	}

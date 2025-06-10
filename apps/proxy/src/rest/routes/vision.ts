@@ -1,165 +1,140 @@
 import { ZodParser, type JsonSchema } from "@proxed/structure";
-import { getProjectQuery } from "../../db/queries/projects";
-import { createExecution } from "../../db/queries/executions";
-import { getServerKey } from "../../db/queries/server-keys";
 import { generateObject } from "ai";
 import { type Context, Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 import { protectedMiddleware } from "../middleware";
 import type { Context as AppContext, FinishReason } from "../types";
-import { reassembleKey } from "@proxed/utils/lib/partial-keys";
 import { z } from "zod";
 import { logger } from "../../utils/logger";
 import { createError, ErrorCode } from "../../utils/errors";
-import { getCommonExecutionParams } from "../../utils/execution-params";
 import { createAIClient } from "../../utils/ai-client";
-import { checkAndNotifyRateLimit } from "../../utils/rate-limit";
+import {
+	validateAndGetProject,
+	getFullApiKey,
+	validateRequestBody,
+	recordExecution,
+	withTimeout,
+} from "../../utils/route-handlers";
 
 // MARK: - Handle Structured Response
 async function handleStructuredResponse(c: Context<AppContext>) {
-	const { projectId, teamId, apiKey } = c.get("session");
-	const db = c.get("db");
-	const geo = c.get("geo");
-	const userAgent = c.req.header("user-agent");
+	const startTime = Date.now();
 
-	const project = await getProjectQuery(db, projectId);
-
-	if (!project || !project.key) {
-		throw createError(ErrorCode.PROJECT_NOT_FOUND);
-	}
-
-	// Validate the request body: check content-type, safely parse JSON, and validate with zod
-	const contentType = c.req.header("content-type");
-	if (!contentType || !contentType.includes("application/json")) {
-		throw createError(ErrorCode.BAD_REQUEST, "Invalid content type");
-	}
-
-	let bodyData: unknown;
-	try {
-		bodyData = await c.req.json();
-	} catch (err) {
-		throw createError(ErrorCode.BAD_REQUEST, "Invalid JSON payload");
-	}
-
-	const bodySchema = z.object({
-		image: z.string().nonempty("Image is required"),
+	// Validate project and get configuration
+	const { project, teamId, apiKey, db } = await validateAndGetProject(c, {
+		requireApiKey: true,
 	});
-	const result = bodySchema.safeParse(bodyData);
-	if (!result.success) {
-		throw createError(ErrorCode.VALIDATION_ERROR, "Validation failed", {
-			details: result.error.flatten(),
-		});
-	}
-	const { image } = result.data;
 
-	// Convert project schema config using jsonToZod
+	// Validate request body
+	const bodySchema = z.object({
+		image: z
+			.string()
+			.min(1, "Image is required")
+			.refine(
+				(img) => {
+					// Check if it's a valid base64 image or URL
+					const base64Regex = /^data:image\/(png|jpg|jpeg|gif|webp);base64,/;
+					const urlRegex = /^https?:\/\/.+\.(png|jpg|jpeg|gif|webp)/i;
+					return base64Regex.test(img) || urlRegex.test(img);
+				},
+				{
+					message:
+						"Invalid image format. Must be base64 data URI or valid image URL",
+				},
+			),
+	});
+	const { image } = await validateRequestBody(c, bodySchema);
+
+	// Validate and parse schema
 	const parser = new ZodParser();
 	const schema = parser.convertJsonSchemaToZodValidator(
 		project.schemaConfig as unknown as JsonSchema,
 	);
 	if (!schema) {
-		throw createError(ErrorCode.VALIDATION_ERROR, "Invalid schema");
-	}
-
-	const deviceCheckId = project.deviceCheckId;
-	const keyId = project.keyId;
-
-	if (!apiKey) {
-		throw createError(ErrorCode.INTERNAL_ERROR, "API key not found in session");
-	}
-
-	const startTime = Date.now();
-
-	// Get the server key part using the function instead of accessing partial_key_server directly
-	const serverKey = await getServerKey(db, project.keyId);
-
-	if (!serverKey) {
 		throw createError(
-			ErrorCode.INTERNAL_ERROR,
-			"Failed to retrieve server key",
+			ErrorCode.VALIDATION_ERROR,
+			"Invalid project schema configuration",
 		);
 	}
 
-	const [fullApiKey] = reassembleKey(serverKey, apiKey).split(".");
-
-	const commonParams = getCommonExecutionParams({
-		teamId,
-		projectId,
-		deviceCheckId,
-		keyId,
-		ip: geo.ip ?? undefined,
-		userAgent,
-		model: project.model,
-		provider: project.key.provider,
-		geo,
-	});
+	// Get full API key
+	const fullApiKey = await getFullApiKey(db, project.keyId, apiKey!);
 
 	try {
 		const aiClient = createAIClient(project.key.provider, fullApiKey);
 
-		const { object, usage, finishReason } = await generateObject({
-			model: aiClient(project.model, { structuredOutputs: true }),
-			schema,
-			messages: [
-				{
-					role: "system",
-					content: project.systemPrompt,
-				},
-				{
-					role: "user",
-					content: [
-						{
-							type: "text",
-							text: project.defaultUserPrompt ?? "You are a helpful assistant.",
-						},
-						{
-							type: "image",
-							image: image,
-						},
-					],
-				},
-			],
-			maxTokens: 1000,
-		});
+		// Generate object with timeout
+		const { object, usage, finishReason } = await withTimeout(
+			generateObject({
+				model: aiClient(project.model, { structuredOutputs: true }),
+				schema,
+				messages: [
+					{
+						role: "system",
+						content:
+							project.systemPrompt ||
+							"You are a helpful assistant that analyzes images and returns structured data.",
+					},
+					{
+						role: "user",
+						content: [
+							{
+								type: "text",
+								text:
+									project.defaultUserPrompt ??
+									"Analyze this image and extract information according to the schema.",
+							},
+							{
+								type: "image",
+								image: image,
+							},
+						],
+					},
+				],
+				maxTokens: 1000,
+			}),
+			30000, // 30 second timeout
+			"Vision AI generation timed out after 30 seconds",
+		);
 
-		const latency = Date.now() - startTime;
-
-		await createExecution(db, {
-			...commonParams,
-			promptTokens: usage.promptTokens,
-			completionTokens: usage.completionTokens,
-			totalTokens: usage.promptTokens + usage.completionTokens,
-			finishReason: finishReason as FinishReason,
-			latency,
-			responseCode: 200,
-			response: JSON.stringify(object),
-		});
-
-		// Non-blocking: Check rate limit and trigger notification job
-		checkAndNotifyRateLimit({
+		// Record successful execution
+		await recordExecution(
 			c,
-			db,
-			projectId,
-			teamId,
-			projectName: project.name,
-		});
+			startTime,
+			{
+				promptTokens: usage.promptTokens,
+				completionTokens: usage.completionTokens,
+				totalTokens: usage.promptTokens + usage.completionTokens,
+				finishReason: finishReason as FinishReason,
+				response: object,
+			},
+			{ project, teamId },
+		);
 
 		return c.json(object);
 	} catch (error) {
-		logger.error("Structured response error:", error);
-		const latency = Date.now() - startTime;
-
-		await createExecution(db, {
-			...commonParams,
-			promptTokens: 0,
-			completionTokens: 0,
-			totalTokens: 0,
-			finishReason: "error" as FinishReason,
-			latency,
-			responseCode: 500,
-			errorMessage: error instanceof Error ? error.message : "Unknown error",
-			errorCode: error instanceof Error ? error.name : "UNKNOWN_ERROR",
+		logger.error("Vision structured response error:", {
+			error: error instanceof Error ? error.message : error,
+			projectId: project.id,
+			teamId,
 		});
+
+		// Record failed execution
+		await recordExecution(
+			c,
+			startTime,
+			{
+				promptTokens: 0,
+				completionTokens: 0,
+				totalTokens: 0,
+				finishReason: "error" as FinishReason,
+				error: {
+					message: error instanceof Error ? error.message : "Unknown error",
+					code: error instanceof Error ? error.name : "UNKNOWN_ERROR",
+				},
+			},
+			{ project, teamId },
+		);
 
 		throw createError(
 			ErrorCode.PROVIDER_ERROR,
@@ -167,7 +142,8 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 				? error.message
 				: "Vision structured response failed",
 			{
-				originalError: error instanceof Error ? error.message : "Unknown error",
+				originalError: error instanceof Error ? error.message : String(error),
+				projectId: project.id,
 			},
 		);
 	}

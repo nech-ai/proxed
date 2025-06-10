@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { deviceChecks } from "../db/schema";
 import axios from "axios";
 import jwt from "jsonwebtoken";
-import { logger } from "./logger";
+import { logger } from "../utils/logger";
 
 export async function verifyDeviceCheckToken(
 	deviceToken: Buffer,
@@ -18,12 +18,13 @@ export async function verifyDeviceCheckToken(
 		sub: config.keyId,
 	};
 
-	const headers = {
+	const signedJwt = jwt.sign(payload, config.privateKeyP8, {
 		algorithm: "ES256",
-		keyid: config.keyId,
-	} as jwt.SignOptions;
-
-	const signedJwt = jwt.sign(payload, config.privateKeyP8, headers);
+		header: {
+			kid: config.keyId,
+			alg: "ES256",
+		},
+	});
 
 	// 2. POST to Apple device check endpoint
 	try {

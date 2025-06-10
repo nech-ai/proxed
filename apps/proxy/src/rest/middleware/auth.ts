@@ -4,9 +4,17 @@ import { AppError, createError, ErrorCode } from "../../utils/errors";
 import { parseCombinedToken } from "../../utils/token-parser";
 import type { MiddlewareHandler } from "hono";
 import { getProjectQuery } from "../../db/queries/projects";
+import type { Context } from "../types";
 
-export const withAuth: MiddlewareHandler = async (c, next) => {
+export const withAuth: MiddlewareHandler<Context> = async (c, next) => {
 	const db = c.get("db");
+	if (!db) {
+		throw createError(
+			ErrorCode.INTERNAL_ERROR,
+			"Database connection not available",
+		);
+	}
+
 	// Get tokens from headers
 	const deviceToken = c.req.header("x-device-token");
 	const testKey = c.req.header("x-proxed-test-key");
@@ -17,7 +25,17 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
 	const partialApiKey = c.req.header("x-ai-key");
 
 	if (!projectId) {
-		throw createError(ErrorCode.MISSING_PROJECT_ID);
+		throw createError(
+			ErrorCode.MISSING_PROJECT_ID,
+			"Project ID is required in either URL parameter or x-project-id header",
+		);
+	}
+
+	// Validate project ID format (assuming UUID)
+	const uuidRegex =
+		/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+	if (!uuidRegex.test(projectId)) {
+		throw createError(ErrorCode.BAD_REQUEST, "Invalid project ID format");
 	}
 
 	// Require partial API key for all valid auth paths except potentially the legacy deviceToken flow

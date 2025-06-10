@@ -222,29 +222,83 @@ const PROVIDER_MODELS = {
 	ANTHROPIC: ANTHROPIC_MODELS,
 } as const;
 
+// Default pricing fallbacks for unknown models
+const DEFAULT_OPENAI_PRICING: ModelPricing = {
+	prompt: 0.003, // $3.00 per 1M tokens (reasonable default)
+	completion: 0.006, // $6.00 per 1M tokens
+};
+
+const DEFAULT_ANTHROPIC_PRICING: ModelPricing = {
+	prompt: 0.003, // $3.00 per 1M tokens
+	completion: 0.015, // $15.00 per 1M tokens
+};
+
+function getModelPricingWithFallback(
+	provider: Provider,
+	model: string,
+): ModelPricing {
+	if (provider === "OPENAI") {
+		// Check if it's a known model
+		if (model in OPENAI_MODELS) {
+			return OPENAI_MODELS[model as OpenAIModel];
+		}
+
+		// Default OpenAI pricing for unknown models
+		return DEFAULT_OPENAI_PRICING;
+	}
+
+	// Anthropic models
+	if (model in ANTHROPIC_MODELS) {
+		return ANTHROPIC_MODELS[model as AnthropicModel];
+	}
+
+	// Default Anthropic pricing
+	return DEFAULT_ANTHROPIC_PRICING;
+}
+
 export function calculateCosts(params: {
 	provider: Provider;
-	model: Model;
+	model: Model | string; // Allow string for flexibility
 	promptTokens: number;
 	completionTokens: number;
 }) {
 	const { provider, model, promptTokens, completionTokens } = params;
-	const pricing =
-		provider === "OPENAI"
-			? OPENAI_MODELS[model as OpenAIModel]
-			: ANTHROPIC_MODELS[model as AnthropicModel];
+	const pricing = getModelPricingWithFallback(provider, model);
 
-	if (!pricing) {
-		throw new Error(`Unknown model: ${model} for provider: ${provider}`);
+	// Log warning for unknown models
+	if (!(model in OPENAI_MODELS) && !(model in ANTHROPIC_MODELS)) {
+		console.warn(
+			`Unknown model: ${model} for provider: ${provider}. Using default pricing.`,
+			{ pricing },
+		);
 	}
 
-	const promptCost = (promptTokens / 1000) * pricing.prompt;
-	const completionCost = (completionTokens / 1000) * pricing.completion;
+	// Pricing is per 1M tokens, so divide by 1,000,000
+	const promptCost = (promptTokens / 1_000_000) * pricing.prompt;
+	const completionCost = (completionTokens / 1_000_000) * pricing.completion;
+	const totalCost = promptCost + completionCost;
+
+	// Debug logging for cost calculation
+	if (process.env.NODE_ENV === "development") {
+		console.log("Cost calculation debug:", {
+			model,
+			provider,
+			promptTokens,
+			completionTokens,
+			pricing,
+			promptCost,
+			completionCost,
+			totalCost,
+			promptCostFormatted: promptCost.toFixed(6),
+			completionCostFormatted: completionCost.toFixed(6),
+			totalCostFormatted: totalCost.toFixed(6),
+		});
+	}
 
 	return {
 		promptCost,
 		completionCost,
-		totalCost: promptCost + completionCost,
+		totalCost,
 	};
 }
 
@@ -255,4 +309,66 @@ export function getModelPricing(
 	return provider === "OPENAI"
 		? OPENAI_MODELS[model as OpenAIModel]
 		: ANTHROPIC_MODELS[model as AnthropicModel];
+}
+
+/**
+ * Helper function to format costs for database storage
+ * Returns string values with 6 decimal places
+ */
+export function formatCostsForDB(params: {
+	provider: Provider;
+	model: Model | string;
+	promptTokens: number;
+	completionTokens: number;
+}) {
+	const costs = calculateCosts(params);
+
+	// Use more decimal places for very small amounts
+	const formatCost = (cost: number): string => {
+		if (cost === 0) return "0";
+		// Always use at least 6 decimals, but ensure we don't lose precision for small values
+		// Database supports numeric(10,6) so we can't exceed 6 decimal places
+		const formatted = cost.toFixed(6);
+		// If the formatted value is "0.000000" but cost is not zero, use the minimum representable value
+		if (formatted === "0.000000" && cost > 0) {
+			return "0.000001"; // Minimum value that can be stored with 6 decimal places
+		}
+		return formatted;
+	};
+
+	return {
+		promptCost: formatCost(costs.promptCost),
+		completionCost: formatCost(costs.completionCost),
+		totalCost: formatCost(costs.totalCost),
+	};
+}
+
+// Test function to debug pricing calculation
+export function testPricingCalculation(model = "gpt-4o-mini", tokens = 1045) {
+	console.log(`\n=== Testing pricing for ${model} with ${tokens} tokens ===`);
+
+	const result = calculateCosts({
+		provider: "OPENAI",
+		model,
+		promptTokens: tokens,
+		completionTokens: 0,
+	});
+
+	const formatted = formatCostsForDB({
+		provider: "OPENAI",
+		model,
+		promptTokens: tokens,
+		completionTokens: 0,
+	});
+
+	console.log("Raw calculation:", result);
+	console.log("Formatted for DB:", formatted);
+	console.log(
+		`Price per 1M tokens: $${getModelPricingWithFallback("OPENAI", model).prompt}`,
+	);
+	console.log(
+		`Calculation: ${tokens} / 1,000,000 * ${getModelPricingWithFallback("OPENAI", model).prompt} = $${result.promptCost}`,
+	);
+
+	return { raw: result, formatted };
 }

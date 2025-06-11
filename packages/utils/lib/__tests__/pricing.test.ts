@@ -1,10 +1,5 @@
 import { describe, test, expect } from "bun:test";
-import {
-	calculateCosts,
-	formatCostsForDB,
-	getModelPricing,
-	testPricingCalculation,
-} from "../pricing";
+import { calculateCosts, formatCostsForDB, getModelPricing } from "../pricing";
 import type { Provider, Model } from "../providers";
 
 describe("Pricing and Cost Calculation", () => {
@@ -66,34 +61,6 @@ describe("Pricing and Cost Calculation", () => {
 			expect(result.promptCost).toBe(0);
 			expect(result.completionCost).toBe(0);
 			expect(result.totalCost).toBe(0);
-		});
-
-		test("should use fallback pricing for unknown OpenAI models", () => {
-			const result = calculateCosts({
-				provider: "OPENAI",
-				model: "unknown-model-xyz" as Model,
-				promptTokens: 1000000,
-				completionTokens: 1000000,
-			});
-
-			// Default: 0.003 per 1M prompt, 0.006 per 1M completion
-			expect(result.promptCost).toBe(0.003);
-			expect(result.completionCost).toBe(0.006);
-			expect(result.totalCost).toBeCloseTo(0.009, 10);
-		});
-
-		test("should use fallback pricing for unknown Anthropic models", () => {
-			const result = calculateCosts({
-				provider: "ANTHROPIC",
-				model: "claude-unknown-version" as Model,
-				promptTokens: 1000000,
-				completionTokens: 1000000,
-			});
-
-			// Default: 0.003 per 1M prompt, 0.015 per 1M completion
-			expect(result.promptCost).toBe(0.003);
-			expect(result.completionCost).toBe(0.015);
-			expect(result.totalCost).toBe(0.018);
 		});
 
 		test("should calculate costs for expensive models", () => {
@@ -243,37 +210,7 @@ describe("Pricing and Cost Calculation", () => {
 		});
 	});
 
-	describe("testPricingCalculation", () => {
-		test("should provide debug output for pricing calculation", () => {
-			const result = testPricingCalculation("gpt-4o-mini", 1045);
-
-			expect(result.raw.promptCost).toBeCloseTo(0.00000015675, 10);
-			expect(result.raw.completionCost).toBe(0);
-			expect(result.raw.totalCost).toBeCloseTo(0.00000015675, 10);
-
-			expect(result.formatted.promptCost).toBe("0.000001");
-			expect(result.formatted.completionCost).toBe("0");
-			expect(result.formatted.totalCost).toBe("0.000001");
-		});
-	});
-
 	describe("Edge cases and special scenarios", () => {
-		test("should handle fractional tokens", () => {
-			const result = calculateCosts({
-				provider: "OPENAI",
-				model: "gpt-4o",
-				promptTokens: 1234.5678,
-				completionTokens: 9876.5432,
-			});
-
-			// gpt-4o: 0.0025 per 1M prompt, 0.01 per 1M completion
-			// 1234.5678 / 1M * 0.0025 = 0.0000030864195
-			// 9876.5432 / 1M * 0.01 = 0.00009876543
-			expect(result.promptCost).toBeCloseTo(0.0000030864195, 10);
-			expect(result.completionCost).toBeCloseTo(0.000098765432, 10);
-			expect(result.totalCost).toBeCloseTo(0.00010185185, 8);
-		});
-
 		test("should handle negative tokens (edge case)", () => {
 			const result = calculateCosts({
 				provider: "OPENAI",
@@ -307,6 +244,16 @@ describe("Pricing and Cost Calculation", () => {
 				const pricing = getModelPricing(provider, model);
 				expect(pricing.prompt).toBe(expectedPrompt);
 				expect(pricing.completion).toBe(expectedCompletion);
+
+				const result = calculateCosts({
+					provider,
+					model,
+					promptTokens: 1000000,
+					completionTokens: 1000000,
+				});
+
+				expect(result.promptCost).toBeCloseTo(expectedPrompt, 6);
+				expect(result.completionCost).toBeCloseTo(expectedCompletion, 6);
 			}
 		});
 

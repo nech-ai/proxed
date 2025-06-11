@@ -6,13 +6,88 @@ import type { Context } from "./rest/types";
 import { errorHandlerMiddleware } from "./rest/middleware/error-handler";
 import { loggerMiddleware } from "./rest/middleware/logger";
 import { withCors } from "./rest/middleware/cors";
+import { AppError, handleApiError } from "./utils/errors";
+import { logger } from "./utils/logger";
+import { v4 as uuidv4 } from "uuid";
 
-const app = new OpenAPIHono<Context>();
+export const app = new OpenAPIHono<Context>();
 
 // Apply global middleware
 app.use(secureHeaders());
+
+// Add request ID middleware
+app.use(async (c, next) => {
+	const requestId = uuidv4();
+	c.set("requestId", requestId);
+	c.res.headers.set("x-request-id", requestId);
+	await next();
+});
+
 app.use(loggerMiddleware);
-app.use(errorHandlerMiddleware);
+
+// Global error handler
+app.onError((err, c) => {
+	const requestId = c.get("requestId") || uuidv4();
+	const apiError = handleApiError(err);
+	const session = c.get("session");
+	const geo = c.get("geo");
+
+	// Build error context
+	const errorContext = {
+		requestId,
+		path: c.req.path,
+		method: c.req.method,
+		headers: {
+			"user-agent": c.req.header("user-agent"),
+			"content-type": c.req.header("content-type"),
+		},
+		ip: geo?.ip,
+		userAgent: c.req.header("user-agent"),
+		projectId: session?.projectId,
+		teamId: session?.teamId,
+		timestamp: new Date().toISOString(),
+	};
+
+	// Log error with full context
+	const logData = {
+		...errorContext,
+		error: {
+			code: apiError.code,
+			message: apiError.message,
+			status: apiError.status,
+			...(err instanceof AppError ? { details: err.details } : {}),
+		},
+		stack: err instanceof Error ? err.stack : undefined,
+	};
+
+	// Use appropriate log level based on status code
+	if (apiError.status >= 500) {
+		logger.error("Server error", logData);
+	} else if (apiError.status >= 400) {
+		logger.warn("Client error", logData);
+	} else {
+		logger.info("Request error", logData);
+	}
+
+	// Add security headers
+	c.res.headers.set("X-Content-Type-Options", "nosniff");
+	c.res.headers.set("X-Frame-Options", "DENY");
+	c.res.headers.set("X-XSS-Protection", "1; mode=block");
+	c.res.headers.set("x-request-id", requestId);
+
+	return c.json(
+		{
+			error: apiError.code,
+			message: apiError.message,
+			...(apiError.details && process.env.NODE_ENV !== "production"
+				? { details: apiError.details }
+				: {}),
+			requestId,
+			timestamp: new Date().toISOString(),
+		},
+		apiError.status as 400 | 401 | 403 | 404 | 429 | 500 | 502 | 503,
+	);
+});
 
 // CORS for REST API
 app.use("/v1/*", withCors);

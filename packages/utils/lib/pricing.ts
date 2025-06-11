@@ -265,35 +265,10 @@ export function calculateCosts(params: {
 	const { provider, model, promptTokens, completionTokens } = params;
 	const pricing = getModelPricingWithFallback(provider, model);
 
-	// Log warning for unknown models
-	if (!(model in OPENAI_MODELS) && !(model in ANTHROPIC_MODELS)) {
-		console.warn(
-			`Unknown model: ${model} for provider: ${provider}. Using default pricing.`,
-			{ pricing },
-		);
-	}
-
 	// Pricing is per 1M tokens, so divide by 1,000,000
 	const promptCost = (promptTokens / 1_000_000) * pricing.prompt;
 	const completionCost = (completionTokens / 1_000_000) * pricing.completion;
 	const totalCost = promptCost + completionCost;
-
-	// Debug logging for cost calculation
-	if (process.env.NODE_ENV === "development") {
-		console.log("Cost calculation debug:", {
-			model,
-			provider,
-			promptTokens,
-			completionTokens,
-			pricing,
-			promptCost,
-			completionCost,
-			totalCost,
-			promptCostFormatted: promptCost.toFixed(6),
-			completionCostFormatted: completionCost.toFixed(6),
-			totalCostFormatted: totalCost.toFixed(6),
-		});
-	}
 
 	return {
 		promptCost,
@@ -341,34 +316,4 @@ export function formatCostsForDB(params: {
 		completionCost: formatCost(costs.completionCost),
 		totalCost: formatCost(costs.totalCost),
 	};
-}
-
-// Test function to debug pricing calculation
-export function testPricingCalculation(model = "gpt-4o-mini", tokens = 1045) {
-	console.log(`\n=== Testing pricing for ${model} with ${tokens} tokens ===`);
-
-	const result = calculateCosts({
-		provider: "OPENAI",
-		model,
-		promptTokens: tokens,
-		completionTokens: 0,
-	});
-
-	const formatted = formatCostsForDB({
-		provider: "OPENAI",
-		model,
-		promptTokens: tokens,
-		completionTokens: 0,
-	});
-
-	console.log("Raw calculation:", result);
-	console.log("Formatted for DB:", formatted);
-	console.log(
-		`Price per 1M tokens: $${getModelPricingWithFallback("OPENAI", model).prompt}`,
-	);
-	console.log(
-		`Calculation: ${tokens} / 1,000,000 * ${getModelPricingWithFallback("OPENAI", model).prompt} = $${result.promptCost}`,
-	);
-
-	return { raw: result, formatted };
 }

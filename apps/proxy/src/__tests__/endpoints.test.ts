@@ -215,15 +215,6 @@ mock.module(resolve(__dirname, "../db/queries/executions.ts"), () => {
 	};
 });
 
-// Mock partial keys utility
-mock.module("@proxed/utils/lib/partial-keys", () => {
-	return {
-		reassembleKey: (serverKey: string, partialKey: string) => {
-			return `${partialKey}.${serverKey}`;
-		},
-	};
-});
-
 // Mock jobs
 mock.module("@proxed/jobs", () => {
 	return {

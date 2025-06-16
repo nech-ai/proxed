@@ -74,7 +74,7 @@
 		"@types/react": "^19.1.6",
 		"@types/react-dom": "19.1.6",
 		"@types/react-syntax-highlighter": "^15.5.13",
-		"tailwindcss": "^4.1.8",
+		"tailwindcss": "^4.1.10",
 		"tsconfig": "workspace:*"
 	},
 	"name": "@proxed/app",

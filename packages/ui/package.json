@@ -13,7 +13,7 @@
 	"devDependencies": {
 		"@types/mertasan__tailwindcss-variables": "^2.6.5",
 		"@types/papaparse": "^5.3.16",
-		"@types/react": "^19.1.6",
+		"@types/react": "^19.1.8",
 		"@types/react-dom": "19.1.6",
 		"@types/uuid": "^10.0.0",
 		"dotenv-cli": "^8.0.0",

@@ -18,7 +18,7 @@
 		"@proxed/notifications": "workspace:*",
 		"@proxed/supabase": "workspace:*",
 		"@trigger.dev/sdk": "^3.3.17",
-		"zod": "^3.25.56"
+		"zod": "^3.25.64"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",

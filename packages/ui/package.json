@@ -17,7 +17,7 @@
 		"@types/react-dom": "19.1.6",
 		"@types/uuid": "^10.0.0",
 		"dotenv-cli": "^8.0.0",
-		"postcss": "8.5.4",
+		"postcss": "8.5.5",
 		"tsconfig": "workspace:*"
 	},
 	"exports": {

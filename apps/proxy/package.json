@@ -30,7 +30,7 @@
 		"openai": "^5.1.1",
 		"pino": "^9.7.0",
 		"postgres": "^3.4.7",
-		"resend": "^4.5.2",
+		"resend": "^4.6.0",
 		"snakecase-keys": "^8.0.1",
 		"superjson": "2.2.2",
 		"uuid": "^11.1.0",

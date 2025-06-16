@@ -44,7 +44,7 @@
 		"remark-gfm": "^4.0.1",
 		"remark-parse": "^11.0.0",
 		"remark-rehype": "^11.1.2",
-		"resend": "^4.5.2",
+		"resend": "^4.6.0",
 		"shiki": "^3.6.0",
 		"sugar-high": "^0.9.3",
 		"tailwind-merge": "^3.3.0",

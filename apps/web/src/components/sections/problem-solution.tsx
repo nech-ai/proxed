@@ -1,12 +1,10 @@
 "use client";
 
 import { siteConfig } from "@/lib/config";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Section } from "../section";
-import { cn } from "@proxed/ui/utils";
-import { GradientText } from "../gradient-text";
 
-const ease = [0.16, 1, 0.3, 1];
+const ease = [0.16, 1, 0.3, 1] as const;
 
 function ProblemCard({
 	title,

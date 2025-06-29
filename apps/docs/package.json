@@ -12,18 +12,18 @@
 	},
 	"dependencies": {
 		"@proxed/ui": "workspace:*",
-		"fumadocs-core": "^15.5.1",
-		"fumadocs-mdx": "^11.6.7",
-		"fumadocs-ui": "^15.5.1",
-		"next": "^15.3.3",
+		"fumadocs-core": "^15.5.5",
+		"fumadocs-mdx": "^11.6.9",
+		"fumadocs-ui": "^15.5.5",
+		"next": "^15.3.4",
 		"react": "19.1.0",
 		"react-dom": "19.1.0"
 	},
 	"devDependencies": {
 		"@types/mdx": "^2.0.13",
-		"@types/react": "^19.1.6",
+		"@types/react": "^19.1.8",
 		"@types/react-dom": "19.1.6",
-		"algoliasearch": "^5.27.0",
+		"algoliasearch": "^5.29.0",
 		"typescript": "5.8.3"
 	}
 }

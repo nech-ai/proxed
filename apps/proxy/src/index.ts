@@ -1,18 +1,22 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
 import { secureHeaders } from "hono/secure-headers";
+import { etag } from "hono/etag";
+import { timing } from "hono/timing";
 import { routers, publicRouters } from "./rest/routers";
 import type { Context } from "./rest/types";
-import { errorHandlerMiddleware } from "./rest/middleware/error-handler";
-import { loggerMiddleware } from "./rest/middleware/logger";
 import { withCors } from "./rest/middleware/cors";
-import { AppError, handleApiError } from "./utils/errors";
+import { handleApiError } from "./utils/errors";
 import { logger } from "./utils/logger";
 import { v4 as uuidv4 } from "uuid";
 
 export const app = new OpenAPIHono<Context>();
 
-// Apply global middleware
+// Apply performance-enhancing middleware first
+app.use(etag()); // Enable ETag for caching
+app.use(timing()); // Add Server-Timing header
+
+// Apply security headers
 app.use(secureHeaders());
 
 // Add request ID middleware
@@ -23,9 +27,7 @@ app.use(async (c, next) => {
 	await next();
 });
 
-app.use(loggerMiddleware);
-
-// Global error handler
+// Global error handler (single instance)
 app.onError((err, c) => {
 	const requestId = c.get("requestId") || uuidv4();
 	const apiError = handleApiError(err);
@@ -55,9 +57,13 @@ app.onError((err, c) => {
 			code: apiError.code,
 			message: apiError.message,
 			status: apiError.status,
-			...(err instanceof AppError ? { details: err.details } : {}),
+			details: apiError.details,
 		},
-		stack: err instanceof Error ? err.stack : undefined,
+		stack:
+			process.env.NODE_ENV !== "production" && err instanceof Error
+				? err.stack
+				: undefined,
+		timing: c.res.headers.get("server-timing"), // Include timing info
 	};
 
 	// Use appropriate log level based on status code

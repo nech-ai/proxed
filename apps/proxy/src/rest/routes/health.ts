@@ -3,7 +3,8 @@ import { describeRoute } from "hono-openapi";
 import { publicMiddleware } from "../middleware";
 import type { Context } from "../types";
 import { metrics } from "../../utils/metrics";
-import { logger } from "../../utils/logger";
+import { performHealthCheck } from "../../utils/health-checks";
+import { circuitBreakers } from "../../utils/circuit-breaker";
 
 interface HealthStatus {
 	status: "healthy" | "degraded" | "unhealthy";
@@ -40,8 +41,32 @@ export const healthRouter = new Hono<Context>()
 									},
 									timestamp: { type: "string" },
 									uptime: { type: "number" },
-									checks: { type: "object" },
+									checks: {
+										type: "array",
+										items: { type: "object" },
+									},
 									version: { type: "string" },
+									environment: { type: "string" },
+									metrics: { type: "object" },
+									circuitBreakers: { type: "object" },
+								},
+							},
+						},
+					},
+				},
+				503: {
+					description: "Service is unhealthy",
+					content: {
+						"application/json": {
+							schema: {
+								type: "object",
+								properties: {
+									status: { type: "string" },
+									timestamp: { type: "string" },
+									checks: {
+										type: "array",
+										items: { type: "object" },
+									},
 								},
 							},
 						},
@@ -50,39 +75,33 @@ export const healthRouter = new Hono<Context>()
 			},
 		}),
 		async (c) => {
-			const healthStatus: HealthStatus = {
-				status: "healthy",
-				timestamp: new Date().toISOString(),
-				uptime: Date.now() - serverStartTime,
-				checks: {},
-				version: process.env.npm_package_version || "unknown",
+			const db = c.get("db");
+
+			// Perform comprehensive health check
+			const healthStatus = await performHealthCheck(db, serverStartTime);
+
+			// Add circuit breaker states
+			const circuitBreakerStates = {
+				openai: circuitBreakers.openai.getState(),
+				anthropic: circuitBreakers.anthropic.getState(),
+				database: circuitBreakers.database.getState(),
+				redis: circuitBreakers.redis.getState(),
 			};
 
-			// Quick DB check - don't want health check to be slow
-			try {
-				const db = c.get("db");
-				if (db) {
-					// Simple query to check DB connectivity
-					await Promise.race([
-						db.execute("SELECT 1"),
-						new Promise((_, reject) =>
-							setTimeout(
-								() => reject(new Error("DB health check timeout")),
-								1000,
-							),
-						),
-					]);
-					healthStatus.checks.database = "ok";
-				}
-			} catch (error) {
-				healthStatus.checks.database = "error";
-				healthStatus.status = "degraded";
-				logger.warn("Database health check failed", { error });
-			}
+			const fullHealthStatus = {
+				...healthStatus,
+				circuitBreakers: circuitBreakerStates,
+			};
 
 			// Return appropriate status code
-			const statusCode = healthStatus.status === "healthy" ? 200 : 503;
-			return c.json(healthStatus, statusCode);
+			const statusCode =
+				healthStatus.status === "healthy"
+					? 200
+					: healthStatus.status === "degraded"
+						? 200
+						: 503;
+
+			return c.json(fullHealthStatus, statusCode);
 		},
 	)
 	.use("/geo-info", ...publicMiddleware)

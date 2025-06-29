@@ -47,6 +47,7 @@ async function handleOpenAIProxy(c: Context<AppContext>, targetUrl: string) {
 			retryDelay: providerConfig.retryDelay,
 			timeout: providerConfig.timeout,
 			debug: providerConfig.debug || process.env.NODE_ENV === "development",
+			provider: "openai",
 		});
 
 		const { response, latency, retries } = await withTimeout(

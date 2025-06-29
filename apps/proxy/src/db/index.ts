@@ -7,9 +7,23 @@ import * as schema from "./schema";
 
 const primaryPool = postgres(process.env.DATABASE_PRIMARY_URL!, {
 	prepare: false,
+	max: 10,
+	idle_timeout: 20,
+	connect_timeout: 10,
+	connection: {
+		application_name: "proxed-api",
+	},
 });
 
-const lhrPool = postgres(process.env.DATABASE_LHR_URL!, { prepare: false });
+const lhrPool = postgres(process.env.DATABASE_LHR_URL!, {
+	prepare: false,
+	max: 10,
+	idle_timeout: 20,
+	connect_timeout: 10,
+	connection: {
+		application_name: "proxed-api-lhr",
+	},
+});
 
 export const primaryDb = drizzle(primaryPool, {
 	schema,

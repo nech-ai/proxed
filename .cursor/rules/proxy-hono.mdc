@@ -1,0 +1,393 @@
+---
+description:
+globs: apps/proxy/*
+alwaysApply: false
+---
+# Hono Proxy API Implementation Rules
+
+## 🚨 CRITICAL: Use Hono Framework, NOT Next.js
+
+This proxy application uses **Hono** framework with **Bun** runtime. Do NOT generate Next.js code.
+
+## Core Dependencies
+
+```json
+{
+  "@hono/node-server": "^1.x",
+  "@hono/zod-openapi": "^0.x",
+  "hono": "^4.x",
+  "@proxed/supabase": "workspace:*",
+  "@proxed/utils": "workspace:*",
+  "drizzle-orm": "^0.x",
+  "postgres": "^3.x"
+}
+```
+
+## Project Structure
+
+```
+apps/proxy/
+├── src/
+│   ├── index.ts              # Main Hono app entry
+│   ├── rest/
+│   │   ├── middleware/       # All middleware
+│   │   ├── routes/          # Route handlers
+│   │   ├── routers.ts       # Route registration
+│   │   └── types.ts         # Shared types
+│   ├── utils/               # Utilities
+│   │   ├── circuit-breaker.ts
+│   │   ├── stream-handler.ts
+│   │   ├── health-checks.ts
+│   │   └── base-proxy.ts
+│   └── db/
+│       ├── index.ts         # Database client
+│       ├── schema.ts        # Drizzle schema
+│       └── queries/         # Database queries
+└── drizzle.config.ts       # Drizzle configuration
+```
+
+## Core Implementation Patterns
+
+### 1. Main Application Setup
+
+```typescript
+import { Hono } from "hono";
+import { logger } from "hono/logger";
+import { cors } from "hono/cors";
+import { timing } from "hono/timing";
+import { etag } from "hono/etag";
+import { requestId } from "hono/request-id";
+
+const app = new Hono();
+
+// Middleware order matters!
+app.use("*", requestId());
+app.use("*", logger());
+app.use("*", timing());
+app.use("*", cors());
+app.use("*", etag());
+
+// Apply routers
+app.route("/v1", v1Router);
+
+export default {
+  port: process.env.PORT || 3002,
+  fetch: app.fetch,
+};
+```
+
+### 2. Route Handler Pattern
+
+```typescript
+import { Hono } from "hono";
+import { z } from "zod";
+import { zValidator } from "@hono/zod-validator";
+
+const router = new Hono<{ Variables: ContextVariables }>();
+
+// Schema definition
+const requestSchema = z.object({
+  model: z.string(),
+  messages: z.array(z.object({
+    role: z.enum(["user", "assistant", "system"]),
+    content: z.string(),
+  })),
+  stream: z.boolean().optional(),
+});
+
+// Route implementation
+router.post(
+  "/chat/completions",
+  zValidator("json", requestSchema),
+  rateLimitMiddleware({ tier: "standard" }),
+  authMiddleware,
+  async (c) => {
+    const body = c.req.valid("json");
+    const { projectId, teamId } = c.get("auth");
+
+    try {
+      // Implementation
+      return c.json({ success: true });
+    } catch (error) {
+      throw createError(ErrorCode.INTERNAL_ERROR, "Failed to process");
+    }
+  }
+);
+```
+
+### 3. Middleware Pattern
+
+```typescript
+import type { MiddlewareHandler } from "hono";
+
+export const authMiddleware: MiddlewareHandler<{
+  Variables: ContextVariables;
+}> = async (c, next) => {
+  const apiKey = c.req.header("Authorization")?.replace("Bearer ", "");
+
+  if (!apiKey) {
+    return c.json(
+      createError(ErrorCode.UNAUTHORIZED).toResponse(),
+      401
+    );
+  }
+
+  try {
+    // Validate and set context
+    const auth = await validateApiKey(apiKey);
+    c.set("auth", auth);
+    await next();
+  } catch (error) {
+    return c.json(
+      createError(ErrorCode.UNAUTHORIZED).toResponse(),
+      401
+    );
+  }
+};
+```
+
+### 4. Stream Handling
+
+```typescript
+import { streamSSE } from "hono/streaming";
+
+// For SSE streams
+router.post("/stream", async (c) => {
+  return streamSSE(c, async (stream) => {
+    try {
+      for await (const chunk of dataStream) {
+        await stream.writeSSE({
+          data: JSON.stringify(chunk),
+          event: "message",
+        });
+      }
+    } catch (error) {
+      await stream.writeSSE({
+        data: JSON.stringify({ error: error.message }),
+        event: "error",
+      });
+    }
+  });
+});
+
+// For raw streams
+router.post("/raw-stream", async (c) => {
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        for await (const chunk of dataStream) {
+          controller.enqueue(chunk);
+        }
+        controller.close();
+      } catch (error) {
+        controller.error(error);
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "application/octet-stream",
+      "Transfer-Encoding": "chunked",
+    },
+  });
+});
+```
+
+### 5. Database Queries with Drizzle
+
+```typescript
+import { db } from "@/db";
+import { apiKeys, projects, teams } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
+
+// Query patterns
+export async function getProjectById(projectId: string) {
+  const [project] = await db
+    .select()
+    .from(projects)
+    .where(eq(projects.id, projectId))
+    .limit(1);
+
+  return project;
+}
+
+// With joins
+export async function getProjectWithTeam(projectId: string) {
+  const [result] = await db
+    .select({
+      project: projects,
+      team: teams,
+    })
+    .from(projects)
+    .innerJoin(teams, eq(projects.teamId, teams.id))
+    .where(eq(projects.id, projectId))
+    .limit(1);
+
+  return result;
+}
+```
+
+### 6. Circuit Breaker Implementation
+
+```typescript
+import { CircuitBreaker } from "@/utils/circuit-breaker";
+
+const anthropicBreaker = new CircuitBreaker({
+  failureThreshold: 5,
+  recoveryTimeout: 60000,
+  monitoringPeriod: 120000,
+});
+
+// Usage in route
+router.post("/anthropic/*", async (c) => {
+  return anthropicBreaker.execute(async () => {
+    // Proxy to Anthropic
+    return await proxyToAnthropic(c);
+  });
+});
+```
+
+### 7. Error Handling
+
+```typescript
+import { HTTPException } from "hono/http-exception";
+
+// Global error handler
+app.onError((err, c) => {
+  if (err instanceof HTTPException) {
+    return err.getResponse();
+  }
+
+  if (err instanceof AppError) {
+    return c.json(err.toResponse(), err.status);
+  }
+
+  console.error("Unhandled error:", err);
+  return c.json(
+    createError(ErrorCode.INTERNAL_ERROR).toResponse(),
+    500
+  );
+});
+```
+
+### 8. Health Checks
+
+```typescript
+router.get("/health", async (c) => {
+  const health = await performHealthChecks({
+    checkDatabase: true,
+    checkRedis: true,
+    checkExternalAPIs: true,
+  });
+
+  const status = health.status === "healthy" ? 200 : 503;
+  return c.json(health, status);
+});
+```
+
+### 9. Rate Limiting
+
+```typescript
+export const rateLimitMiddleware = (options: RateLimitOptions) => {
+  return async (c: Context, next: Next) => {
+    const identifier = c.get("auth")?.teamId || c.req.header("CF-Connecting-IP");
+
+    const { allowed, remaining, reset } = await checkRateLimit(
+      identifier,
+      options.tier
+    );
+
+    c.header("X-RateLimit-Limit", String(options.limit));
+    c.header("X-RateLimit-Remaining", String(remaining));
+    c.header("X-RateLimit-Reset", String(reset));
+
+    if (!allowed) {
+      return c.json(
+        createError(ErrorCode.TOO_MANY_REQUESTS).toResponse(),
+        429
+      );
+    }
+
+    await next();
+  };
+};
+```
+
+### 10. Type Safety
+
+```typescript
+// Define context variables
+export interface ContextVariables {
+  auth: {
+    projectId: string;
+    teamId: string;
+    apiKeyId: string;
+  };
+  requestId: string;
+  startTime: number;
+}
+
+// Use in Hono instance
+const app = new Hono<{ Variables: ContextVariables }>();
+```
+
+## Testing Patterns
+
+```typescript
+import { describe, it, expect, beforeEach, mock } from "bun:test";
+import app from "@/index";
+
+describe("API Routes", () => {
+  it("should handle chat completions", async () => {
+    const response = await app.fetch(
+      new Request("http://localhost/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer test-key",
+        },
+        body: JSON.stringify({
+          model: "gpt-4",
+          messages: [{ role: "user", content: "Hello" }],
+        }),
+      })
+    );
+
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data).toHaveProperty("choices");
+  });
+});
+```
+
+## Performance Best Practices
+
+1. **Use streaming for large responses**
+2. **Implement connection pooling for database**
+3. **Add caching where appropriate**
+4. **Use ETags for HTTP caching**
+5. **Implement circuit breakers for external services**
+
+## Security Requirements
+
+1. **Always validate API keys**
+2. **Implement rate limiting**
+3. **Validate request bodies with Zod**
+4. **Add security headers**
+5. **Log security events**
+
+## Bun-specific Considerations
+
+1. **Compression**: Handle via reverse proxy (Cloudflare/Nginx)
+2. **Use Bun's built-in test runner**
+3. **Leverage Bun's speed for TypeScript**
+4. **Use native Bun APIs where beneficial**
+
+## Common Pitfalls to Avoid
+
+❌ Don't use Next.js patterns
+❌ Don't create new database connections per request
+❌ Don't forget to handle streaming responses
+❌ Don't skip request validation
+❌ Don't ignore circuit breaker states

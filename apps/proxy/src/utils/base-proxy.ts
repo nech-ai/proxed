@@ -4,6 +4,12 @@ import type { Context as AppContext } from "../rest/types";
 import { logger } from "./logger";
 import { sanitizeRequestHeaders, filterResponseHeaders } from "./proxy-headers";
 import { AppError, ErrorCode } from "./errors";
+import {
+	shouldStream,
+	handleSSEStream,
+	handleRawStream,
+} from "./stream-handler";
+import { circuitBreakers } from "./circuit-breaker";
 
 export interface ProxyConfig {
 	/**
@@ -26,6 +32,10 @@ export interface ProxyConfig {
 	 * Whether to log request/response details
 	 */
 	debug?: boolean;
+	/**
+	 * Provider name for circuit breaker
+	 */
+	provider?: "openai" | "anthropic";
 }
 
 export interface ProxyResult {
@@ -74,7 +84,11 @@ export async function baseProxy(
 		timeout = 30000,
 		headers,
 		debug = false,
+		provider,
 	} = config;
+
+	// Get circuit breaker if provider is specified
+	const circuitBreaker = provider ? circuitBreakers[provider] : null;
 
 	// Sanitize headers
 	const sanitizedHeaders = sanitizeRequestHeaders(c.req.header(), headers);
@@ -106,11 +120,19 @@ export async function baseProxy(
 			const timeoutId = setTimeout(() => controller.abort(), timeout);
 
 			try {
-				const response = await proxy(targetUrl, {
-					...c.req,
-					headers: sanitizedHeaders,
-					signal: controller.signal,
-				});
+				// Execute the proxy request with circuit breaker if available
+				const executeRequest = async () => {
+					const response = await proxy(targetUrl, {
+						...c.req,
+						headers: sanitizedHeaders,
+						signal: controller.signal,
+					});
+					return response;
+				};
+
+				const response = circuitBreaker
+					? await circuitBreaker.execute(executeRequest)
+					: await executeRequest();
 
 				clearTimeout(timeoutId);
 
@@ -158,6 +180,40 @@ export async function baseProxy(
 					statusText: response.statusText,
 					headers: filteredHeaders,
 				});
+
+				// Check if we need to handle streaming
+				if (shouldStream(response)) {
+					logger.debug("Detected streaming response", {
+						contentType: response.headers.get("content-type"),
+						transferEncoding: response.headers.get("transfer-encoding"),
+					});
+
+					// For SSE streams, use SSE handler
+					if (
+						response.headers.get("content-type")?.includes("text/event-stream")
+					) {
+						return {
+							response: await handleSSEStream(c, filteredResponse, {
+								onStart: () => logger.debug("SSE stream started"),
+								onEnd: () => logger.debug("SSE stream ended"),
+								onError: (error) => logger.error("SSE stream error", { error }),
+							}),
+							latency,
+							retries,
+						};
+					}
+
+					// For other streams, use raw handler
+					return {
+						response: await handleRawStream(c, filteredResponse, {
+							onStart: () => logger.debug("Raw stream started"),
+							onEnd: () => logger.debug("Raw stream ended"),
+							onError: (error) => logger.error("Raw stream error", { error }),
+						}),
+						latency,
+						retries,
+					};
+				}
 
 				return {
 					response: filteredResponse,

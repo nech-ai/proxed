@@ -2,6 +2,10 @@
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4"
 	},
+	"scripts": {
+		"clean": "rm -rf .turbo node_modules",
+		"format": "biome format --write ."
+	},
 	"name": "tsconfig",
 	"private": true,
 	"version": "0.0.0",

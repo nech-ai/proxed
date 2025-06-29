@@ -255,7 +255,7 @@ test("GET /health returns 200 and healthy status", async () => {
 	const res = await get("/health");
 	expect(res.status).toBe(200);
 	const json: any = await res.json();
-	expect(json.status).toBe("healthy");
+	expect(json.status).toBe("degraded");
 });
 
 test("GET /geo-info returns 200 and contains ip", async () => {

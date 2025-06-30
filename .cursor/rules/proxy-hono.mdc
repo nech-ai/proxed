@@ -1,6 +1,6 @@
 ---
-description:
-globs: apps/proxy/*
+description: Hono API proxy with Bun runtime - Core service for AI provider proxying
+globs: ["apps/proxy/**/*"]
 alwaysApply: false
 ---
 # Hono Proxy API Implementation Rules
@@ -13,13 +13,12 @@ This proxy application uses **Hono** framework with **Bun** runtime. Do NOT gene
 
 ```json
 {
-  "@hono/node-server": "^1.x",
-  "@hono/zod-openapi": "^0.x",
-  "hono": "^4.x",
+  "@hono/zod-openapi": "^0.16.0",
+  "hono": "^4.6.0",
   "@proxed/supabase": "workspace:*",
   "@proxed/utils": "workspace:*",
-  "drizzle-orm": "^0.x",
-  "postgres": "^3.x"
+  "drizzle-orm": "^0.35.0",
+  "postgres": "^3.4.0"
 }
 ```
 
@@ -48,71 +47,146 @@ apps/proxy/
 
 ## Core Implementation Patterns
 
-### 1. Main Application Setup
+### 1. Main Application Setup (OpenAPI)
 
 ```typescript
-import { Hono } from "hono";
+import { OpenAPIHono } from "@hono/zod-openapi";
 import { logger } from "hono/logger";
 import { cors } from "hono/cors";
 import { timing } from "hono/timing";
 import { etag } from "hono/etag";
-import { requestId } from "hono/request-id";
+import { secureHeaders } from "hono/secure-headers";
 
-const app = new Hono();
+// Define context type for type safety
+type Context = {
+  Variables: {
+    auth: AuthData;
+    db: Database;
+    requestId: string;
+    startTime: number;
+  };
+};
+
+const app = new OpenAPIHono<Context>();
 
 // Middleware order matters!
-app.use("*", requestId());
-app.use("*", logger());
-app.use("*", timing());
-app.use("*", cors());
-app.use("*", etag());
+app.use(etag());
+app.use(timing());
+app.use(secureHeaders());
+app.use(logger());
+app.use(cors({
+  origin: ["https://proxed.ai", "https://app.proxed.ai"],
+  credentials: true,
+}));
+
+// Custom middleware
+app.use("*", databaseMiddleware);
+app.use("*", requestIdMiddleware);
 
 // Apply routers
 app.route("/v1", v1Router);
 
-export default {
-  port: process.env.PORT || 3002,
-  fetch: app.fetch,
-};
+// Global error handler
+app.onError((error, c) => {
+  console.error(`Request ${c.get("requestId")} failed:`, error);
+  
+  if (error instanceof AppError) {
+    return c.json(error.toResponse(), error.status);
+  }
+  
+  return c.json({ error: "Internal server error" }, 500);
+});
+
+// OpenAPI documentation
+app.doc("/openapi.json", {
+  openapi: "3.0.0",
+  info: { title: "Proxed API", version: "1.0.0" },
+});
+
+export default app;
 ```
 
-### 2. Route Handler Pattern
+### 2. OpenAPI Route Handler Pattern
 
 ```typescript
-import { Hono } from "hono";
-import { z } from "zod";
-import { zValidator } from "@hono/zod-validator";
+import { createRoute, z } from "@hono/zod-openapi";
+import { OpenAPIHono } from "@hono/zod-openapi";
 
-const router = new Hono<{ Variables: ContextVariables }>();
+const router = new OpenAPIHono<Context>();
 
-// Schema definition
-const requestSchema = z.object({
-  model: z.string(),
+// Schema definitions
+const ChatRequestSchema = z.object({
+  model: z.string().openapi({ example: "gpt-4" }),
   messages: z.array(z.object({
     role: z.enum(["user", "assistant", "system"]),
     content: z.string(),
-  })),
+  })).openapi({ example: [{ role: "user", content: "Hello" }] }),
   stream: z.boolean().optional(),
+  max_tokens: z.number().int().positive().optional(),
+}).openapi("ChatRequest");
+
+const ChatResponseSchema = z.object({
+  id: z.string(),
+  object: z.literal("chat.completion"),
+  created: z.number(),
+  model: z.string(),
+  choices: z.array(z.object({
+    index: z.number(),
+    message: z.object({
+      role: z.enum(["assistant"]),
+      content: z.string(),
+    }),
+    finish_reason: z.string(),
+  })),
+}).openapi("ChatResponse");
+
+// Route definition with OpenAPI spec
+const chatRoute = createRoute({
+  method: "post",
+  path: "/chat/completions",
+  request: {
+    body: {
+      content: { "application/json": { schema: ChatRequestSchema } },
+      required: true,
+    },
+    headers: z.object({
+      authorization: z.string().openapi({ example: "Bearer your-api-key" }),
+    }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: ChatResponseSchema } },
+      description: "Successful chat completion",
+    },
+    401: { description: "Unauthorized" },
+    429: { description: "Too many requests" },
+  },
+  tags: ["Chat"],
+  summary: "Create chat completion",
 });
 
 // Route implementation
-router.post(
-  "/chat/completions",
-  zValidator("json", requestSchema),
-  rateLimitMiddleware({ tier: "standard" }),
-  authMiddleware,
-  async (c) => {
-    const body = c.req.valid("json");
-    const { projectId, teamId } = c.get("auth");
+router.openapi(chatRoute, async (c) => {
+  const { model, messages, stream, max_tokens } = c.req.valid("json");
+  const auth = c.get("auth");
 
-    try {
-      // Implementation
-      return c.json({ success: true });
-    } catch (error) {
-      throw createError(ErrorCode.INTERNAL_ERROR, "Failed to process");
+  try {
+    const response = await processChatCompletion({
+      model,
+      messages,
+      stream,
+      max_tokens,
+      projectId: auth.projectId,
+    });
+
+    return c.json(response);
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
     }
+    throw new AppError(ErrorCode.INTERNAL_ERROR, "Failed to process chat completion");
   }
-);
+});
 ```
 
 ### 3. Middleware Pattern
@@ -377,17 +451,90 @@ describe("API Routes", () => {
 4. **Add security headers**
 5. **Log security events**
 
-## Bun-specific Considerations
+## Bun-specific Optimizations
 
-1. **Compression**: Handle via reverse proxy (Cloudflare/Nginx)
-2. **Use Bun's built-in test runner**
-3. **Leverage Bun's speed for TypeScript**
-4. **Use native Bun APIs where beneficial**
+### 1. Environment Validation at Startup
+```typescript
+// Always validate environment at startup
+import { validateEnv } from "./utils/env";
+validateEnv(); // Fail fast if config is invalid
+```
 
-## Common Pitfalls to Avoid
+### 2. Database Connection Management
+```typescript
+// Use connection pooling and health checks
+export const databaseMiddleware: MiddlewareHandler<Context> = async (c, next) => {
+  if (!dbConnection || !isConnectionHealthy(dbConnection)) {
+    dbConnection = await createDatabaseConnection();
+  }
+  c.set("db", dbConnection);
+  await next();
+};
+```
 
-❌ Don't use Next.js patterns
-❌ Don't create new database connections per request
-❌ Don't forget to handle streaming responses
-❌ Don't skip request validation
-❌ Don't ignore circuit breaker states
+### 3. No Compression Middleware
+- **Don't use** `compress()` middleware - not supported in Bun
+- Handle compression via reverse proxy (Cloudflare/Nginx)
+- The existing placeholder in `bun-compression.ts` is correct
+
+### 4. Streaming Performance
+```typescript
+// Use Bun's native streaming capabilities
+export const streamResponse = (c: Context, generator: AsyncGenerator) => {
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        for await (const chunk of generator) {
+          controller.enqueue(new TextEncoder().encode(chunk));
+        }
+        controller.close();
+      } catch (error) {
+        controller.error(error);
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: { "Content-Type": "text/plain; charset=utf-8" },
+  });
+};
+```
+
+### 5. Testing with Bun
+```typescript
+import { describe, it, expect, beforeAll } from "bun:test";
+import app from "../src/index";
+
+describe("API", () => {
+  beforeAll(async () => {
+    // Setup test database or mocks
+    await setupTestEnvironment();
+  });
+
+  it("handles requests", async () => {
+    const res = await app.request("/health");
+    expect(res.status).toBe(200);
+  });
+});
+```
+
+## Required Patterns
+
+### ✅ Always Do
+- Use `OpenAPIHono` for type-safe API documentation
+- Validate environment variables at startup
+- Use proper TypeScript context typing
+- Implement comprehensive error handling
+- Add request ID middleware for tracing
+- Use circuit breakers for external services
+- Cache database connections properly
+- Stream large responses
+
+### ❌ Never Do
+- Use `compress()` middleware (Bun incompatible)
+- Create new DB connections per request  
+- Use Next.js patterns or imports
+- Skip request/response validation
+- Ignore circuit breaker states
+- Use deprecated Hono APIs
+- Block the event loop with sync operations

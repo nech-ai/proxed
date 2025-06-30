@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: Marketing website - Next.js 15 with animations and landing pages
+globs: ["apps/web/**/*"]
 alwaysApply: false
 ---
 # Marketing Website Implementation Rules

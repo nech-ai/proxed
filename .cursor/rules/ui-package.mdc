@@ -1,20 +1,21 @@
 ---
-description:
-globs: packages/ui/*,apps/app/*
+description: UI package - Shadcn UI components, hooks, icons, and design system
+globs: ["packages/ui/**/*", "apps/app/**/*"]
 alwaysApply: false
 ---
 # UI Package Implementation Rules
 
 ## Overview
 
-The UI package contains shared Shadcn UI components, hooks, icons, and global styles used across all applications.
+The UI package provides a comprehensive design system built on Shadcn UI, offering reusable components, hooks, icons, and styling utilities for consistent user interfaces across all Proxed applications.
 
 ## Core Technologies
 
-- **Components**: Shadcn UI (Radix UI + Tailwind)
-- **Styling**: Tailwind CSS with CSS variables
-- **Icons**: Custom icon components
-- **Build**: TypeScript with proper exports
+- **Components**: Shadcn UI v2 (Radix UI + Tailwind CSS)
+- **Styling**: Tailwind CSS v4 with CSS variables
+- **Icons**: Custom icon components + Lucide React
+- **Animation**: Tailwind Animate + Framer Motion
+- **Build**: TypeScript with proper ESM exports
 
 ## Project Structure
 

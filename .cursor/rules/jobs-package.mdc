@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: Background jobs package - Trigger.dev v3 tasks for notifications and processing
+globs: ["packages/jobs/**/*"]
 alwaysApply: false
 ---
 # Jobs Package Implementation Rules

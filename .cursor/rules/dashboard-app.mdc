@@ -1,16 +1,16 @@
 ---
-description:
-globs: apps/app/*
+description: Dashboard app - Next.js 15 with React 19, Supabase auth, and modern patterns
+globs: ["apps/app/**/*"]
 alwaysApply: false
 ---
 # Dashboard App Implementation Rules
 
 ## Core Technologies
 
-- **Framework**: Next.js 15 App Router
+- **Framework**: Next.js 15 App Router  
 - **UI**: React 19, Tailwind CSS, Shadcn UI
 - **Database**: Supabase (Auth, Database, Storage)
-- **State Management**: nuqs (URL state), Zustand (client state)
+- **State Management**: nuqs (URL state), Zustand (client state), Jotai (atoms)
 - **Forms**: next-safe-action, react-hook-form, zod
 - **Background Jobs**: Trigger.dev v3
 - **Internationalization**: next-intl
@@ -37,7 +37,7 @@ apps/app/
 
 ## Authentication Implementation
 
-### Middleware Setup
+### Middleware Setup (Next.js 15 Compatible)
 
 ```typescript
 // middleware.ts
@@ -47,7 +47,8 @@ import createMiddleware from 'next-intl/middleware'
 
 const intlMiddleware = createMiddleware({
   locales: ['en'],
-  defaultLocale: 'en'
+  defaultLocale: 'en',
+  localePrefix: 'as-needed',
 })
 
 export async function middleware(request: NextRequest) {
@@ -67,7 +68,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
             headers: response.headers,
@@ -80,12 +81,23 @@ export async function middleware(request: NextRequest) {
     }
   )
 
+  // IMPORTANT: Always call getUser() to refresh session
   const { data: { user } } = await supabase.auth.getUser()
 
   // Protect dashboard routes
-  if (request.nextUrl.pathname.includes('/(dashboard)') && !user) {
+  const isDashboardRoute = request.nextUrl.pathname.includes('/(dashboard)')
+  const isAuthRoute = request.nextUrl.pathname.includes('/(auth)')
+
+  if (isDashboardRoute && !user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    url.pathname = '/auth/login'
+    return NextResponse.redirect(url)
+  }
+
+  // Redirect authenticated users away from auth pages
+  if (isAuthRoute && user) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 
@@ -93,7 +105,9 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 }
 ```
 
@@ -103,20 +117,24 @@ export const config = {
 // app/[locale]/(dashboard)/layout.tsx
 import { createClient } from "@proxed/supabase/server";
 import { redirect } from "next/navigation";
+import { requireUser } from "@proxed/supabase/queries";
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  // Use helper function that throws if no user
+  const user = await requireUser();
 
-  if (!user) {
-    redirect("/login");
-  }
-
-  return <>{children}</>;
+  return (
+    <div className="min-h-screen bg-background">
+      <DashboardHeader user={user} />
+      <main className="container mx-auto py-6">
+        {children}
+      </main>
+    </div>
+  );
 }
 ```
 
@@ -307,77 +325,270 @@ export default async function ProjectsPage({
 }
 ```
 
-## Zustand Store Pattern
+## State Management Patterns
+
+### Zustand Store Pattern
 
 ```typescript
 // store/user/store.ts
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
+import { immer } from "zustand/middleware/immer";
 
 interface UserStore {
   user: User | null;
   setUser: (user: User | null) => void;
   preferences: UserPreferences;
   updatePreferences: (preferences: Partial<UserPreferences>) => void;
+  clearUser: () => void;
 }
 
 export const useUserStore = create<UserStore>()(
   devtools(
     persist(
-      (set) => ({
+      immer((set) => ({
         user: null,
-        setUser: (user) => set({ user }),
+        setUser: (user) => set((state) => {
+          state.user = user;
+        }),
         preferences: {
           theme: "light",
           notifications: true,
+          timezone: "UTC",
         },
-        updatePreferences: (preferences) =>
-          set((state) => ({
-            preferences: { ...state.preferences, ...preferences },
-          })),
-      }),
+        updatePreferences: (preferences) => set((state) => {
+          Object.assign(state.preferences, preferences);
+        }),
+        clearUser: () => set((state) => {
+          state.user = null;
+        }),
+      })),
       {
         name: "user-storage",
         partialize: (state) => ({ preferences: state.preferences }),
       }
-    )
+    ),
+    { name: "user-store" }
   )
 );
 ```
 
-## Component Patterns
+### Jotai Atoms for Fine-Grained State
 
-### Data Fetching Component
+```typescript
+// store/atoms/project.ts
+import { atom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
+
+// Current selected project
+export const currentProjectAtom = atom<Project | null>(null);
+
+// Project filters
+export const projectFiltersAtom = atomWithStorage("project-filters", {
+  status: "active" as const,
+  sortBy: "created_at" as const,
+  sortOrder: "desc" as const,
+});
+
+// Derived atom for filtered projects
+export const filteredProjectsAtom = atom((get) => {
+  const projects = get(projectsAtom);
+  const filters = get(projectFiltersAtom);
+  
+  return projects.filter(project => 
+    filters.status === "all" || project.status === filters.status
+  );
+});
+
+// Usage in components
+function ProjectsList() {
+  const [projects] = useAtom(filteredProjectsAtom);
+  const [, setFilters] = useAtom(projectFiltersAtom);
+  
+  return (
+    <div>
+      <ProjectFilters onFiltersChange={setFilters} />
+      {projects.map(project => <ProjectCard key={project.id} project={project} />)}
+    </div>
+  );
+}
+```
+
+## React 19 Component Patterns
+
+### Async Server Components with Error Handling
 
 ```typescript
 // components/projects/projects-list.tsx
 import { Suspense } from "react";
 import { getProjects } from "@proxed/supabase/cached-queries";
+import { ErrorBoundary } from "react-error-boundary";
 
-async function ProjectsContent() {
-  const { data: projects, error } = await getProjects();
+async function ProjectsContent({ userId }: { userId: string }) {
+  try {
+    const projects = await getProjects(userId);
 
-  if (error) {
-    return <ErrorState message={error.message} />;
+    if (!projects?.length) {
+      return <EmptyState />;
+    }
+
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {projects.map((project) => (
+          <ProjectCard key={project.id} project={project} />
+        ))}
+      </div>
+    );
+  } catch (error) {
+    throw new Error(`Failed to load projects: ${error.message}`);
   }
+}
 
-  if (!projects?.length) {
-    return <EmptyState />;
-  }
+export function ProjectsList({ userId }: { userId: string }) {
+  return (
+    <ErrorBoundary fallback={<ProjectsError />}>
+      <Suspense fallback={<ProjectsSkeleton />}>
+        <ProjectsContent userId={userId} />
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+```
+
+### Form Component with React 19 Features
+
+```typescript
+// components/projects/create-project-form.tsx
+'use client'
+
+import { useActionState } from "react";
+import { useOptimistic } from "react";
+import { createProject } from "@/actions/project-actions";
+import { Button } from "@proxed/ui";
+
+type FormState = {
+  message?: string;
+  errors?: Record<string, string[]>;
+};
+
+export function CreateProjectForm({ teamId }: { teamId: string }) {
+  const [state, formAction, isPending] = useActionState<FormState, FormData>(
+    async (prevState, formData) => {
+      const result = await createProject(formData);
+      
+      if (result?.serverError) {
+        return { message: result.serverError };
+      }
+      
+      if (result?.validationErrors) {
+        return { errors: result.validationErrors };
+      }
+      
+      return { message: "Project created successfully!" };
+    },
+    {}
+  );
+
+  const [optimisticProjects, addOptimisticProject] = useOptimistic(
+    [],
+    (state, newProject: Partial<Project>) => [...state, newProject]
+  );
+
+  const handleSubmit = (formData: FormData) => {
+    // Optimistically add project
+    addOptimisticProject({
+      id: crypto.randomUUID(),
+      name: formData.get("name") as string,
+      status: "active",
+    });
+    
+    formAction(formData);
+  };
 
   return (
-    <div className="grid gap-4">
-      {projects.map((project) => (
-        <ProjectCard key={project.id} project={project} />
-      ))}
+    <form action={handleSubmit} className="space-y-4">
+      <input type="hidden" name="teamId" value={teamId} />
+      
+      <div>
+        <label htmlFor="name" className="block text-sm font-medium">
+          Project Name
+        </label>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          required
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+          aria-describedby={state.errors?.name ? "name-error" : undefined}
+        />
+        {state.errors?.name && (
+          <p id="name-error" className="mt-1 text-sm text-red-600">
+            {state.errors.name[0]}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor="description" className="block text-sm font-medium">
+          Description
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          rows={3}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+        />
+      </div>
+
+      <Button type="submit" disabled={isPending}>
+        {isPending ? "Creating..." : "Create Project"}
+      </Button>
+
+      {state.message && (
+        <p className={`text-sm ${state.errors ? "text-red-600" : "text-green-600"}`}>
+          {state.message}
+        </p>
+      )}
+    </form>
+  );
+}
+```
+
+### Real-time Data with use() Hook
+
+```typescript
+// components/projects/project-stats.tsx
+'use client'
+
+import { use, Suspense } from "react";
+import { getProjectStats } from "@proxed/supabase/queries";
+
+function ProjectStatsContent({ projectId }: { projectId: string }) {
+  // React 19 use() hook for async data
+  const stats = use(getProjectStats(projectId));
+
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      <div className="text-center">
+        <div className="text-2xl font-bold">{stats.totalRequests}</div>
+        <div className="text-sm text-muted-foreground">Total Requests</div>
+      </div>
+      <div className="text-center">
+        <div className="text-2xl font-bold">{stats.avgLatency}ms</div>
+        <div className="text-sm text-muted-foreground">Avg Latency</div>
+      </div>
+      <div className="text-center">
+        <div className="text-2xl font-bold">{stats.errorRate}%</div>
+        <div className="text-sm text-muted-foreground">Error Rate</div>
+      </div>
     </div>
   );
 }
 
-export function ProjectsList() {
+export function ProjectStats({ projectId }: { projectId: string }) {
   return (
-    <Suspense fallback={<ProjectsSkeleton />}>
-      <ProjectsContent />
+    <Suspense fallback={<StatsSkeleton />}>
+      <ProjectStatsContent projectId={projectId} />
     </Suspense>
   );
 }
@@ -561,27 +772,213 @@ export function ProjectsSkeleton() {
 }
 ```
 
-## Performance Optimizations
+## React 19 & Next.js 15 Best Practices
 
-1. **Use React Server Components by default**
-2. **Implement proper Suspense boundaries**
-3. **Cache Supabase queries with Next.js cache**
-4. **Use dynamic imports for heavy client components**
-5. **Optimize images with next/image**
-6. **Implement proper error boundaries**
+### Performance Optimizations
 
-## Security Best Practices
+1. **Default to React Server Components** - Only use 'use client' when necessary
+2. **Leverage React 19 compiler** - Automatic memoization and optimization
+3. **Use Next.js 15 caching** - Aggressive caching with granular invalidation
+4. **Implement concurrent features** - useActionState, useOptimistic for better UX
+5. **Optimize bundle with Turbopack** - Faster builds and hot reloading
+6. **Use streaming with Suspense** - Progressive loading for better perceived performance
 
-1. **Always validate user permissions in server actions**
-2. **Use Row Level Security (RLS) in Supabase**
-3. **Sanitize user inputs with zod schemas**
-4. **Implement CSRF protection (built into server actions)**
-5. **Use environment variables for sensitive data**
+```typescript
+// Concurrent rendering example
+'use client'
 
-## Common Pitfalls
+import { useOptimistic, useActionState, startTransition } from "react";
 
-❌ Don't use 'use client' unnecessarily
-❌ Don't fetch data in client components
-❌ Don't store sensitive data in Zustand
-❌ Don't skip RLS policies
-❌ Don't forget to revalidate cache after mutations
+export function OptimisticProjectList({ projects }: { projects: Project[] }) {
+  const [optimisticProjects, addOptimisticProject] = useOptimistic(
+    projects,
+    (state, newProject: Project) => [...state, newProject]
+  );
+
+  const [, formAction, isPending] = useActionState(createProjectAction, null);
+
+  const handleCreate = (formData: FormData) => {
+    startTransition(() => {
+      addOptimisticProject({
+        id: crypto.randomUUID(),
+        name: formData.get("name") as string,
+        status: "active",
+      });
+    });
+    formAction(formData);
+  };
+
+  return (
+    <div>
+      {optimisticProjects.map(project => (
+        <ProjectCard key={project.id} project={project} />
+      ))}
+      <CreateProjectForm action={handleCreate} isPending={isPending} />
+    </div>
+  );
+}
+```
+
+### Modern State Management
+
+```typescript
+// Combine Zustand with React 19 features
+import { create } from "zustand";
+import { subscribeWithSelector } from "zustand/middleware";
+
+export const useAppStore = create(
+  subscribeWithSelector<AppState>((set, get) => ({
+    projects: [],
+    setProjects: (projects) => set({ projects }),
+    optimisticAdd: (project) => set((state) => ({
+      projects: [...state.projects, project]
+    })),
+  }))
+);
+
+// React 19 concurrent features integration
+function ProjectManager() {
+  const projects = useAppStore(state => state.projects);
+  const [optimisticProjects, addOptimistic] = useOptimistic(projects);
+  
+  // Sync Zustand with React 19 optimistic updates
+  useEffect(() => {
+    return useAppStore.subscribe(
+      (state) => state.projects,
+      (projects) => {
+        // Only sync if not in optimistic state
+        if (!isPending) {
+          setProjects(projects);
+        }
+      }
+    );
+  }, [isPending]);
+}
+```
+
+### Security Best Practices
+
+1. **Server Actions Security** - Always validate permissions and sanitize inputs
+2. **Row Level Security** - Enforce database-level security with RLS
+3. **Type-safe forms** - Use Zod schemas for validation
+4. **CSRF Protection** - Built into Next.js server actions
+5. **Environment Security** - Never expose secrets to client
+
+```typescript
+// Secure server action pattern
+import { z } from "zod";
+import { requireUser } from "@proxed/supabase/queries";
+
+const createProjectSchema = z.object({
+  name: z.string().min(1).max(100),
+  teamId: z.string().uuid(),
+});
+
+export async function createProjectAction(formData: FormData) {
+  // 1. Authenticate user
+  const user = await requireUser();
+  
+  // 2. Validate input
+  const result = createProjectSchema.safeParse({
+    name: formData.get("name"),
+    teamId: formData.get("teamId"),
+  });
+  
+  if (!result.success) {
+    return { errors: result.error.flatten().fieldErrors };
+  }
+  
+  // 3. Authorize user for team
+  const hasAccess = await verifyTeamAccess(user.id, result.data.teamId);
+  if (!hasAccess) {
+    throw new Error("Unauthorized");
+  }
+  
+  // 4. Perform operation with RLS
+  const project = await createProject(result.data);
+  
+  // 5. Revalidate cache
+  revalidatePath(`/teams/${result.data.teamId}`);
+  
+  return { data: project };
+}
+```
+
+### Required Patterns
+
+#### ✅ Always Do
+- Use React Server Components by default
+- Implement proper error boundaries with ErrorBoundary
+- Use React 19 hooks (useActionState, useOptimistic) for better UX
+- Validate all inputs with Zod schemas
+- Use Suspense boundaries for loading states
+- Cache database queries appropriately
+- Use TypeScript for type safety
+- Implement proper RLS policies
+
+#### ❌ Never Do
+- Use 'use client' unnecessarily
+- Fetch data in client components without proper error handling
+- Store sensitive data in client-side state
+- Skip input validation in server actions
+- Forget to handle loading and error states
+- Use deprecated React patterns (useEffect for data fetching)
+- Ignore accessibility requirements
+- Skip cache revalidation after mutations
+
+### Testing Patterns
+
+```typescript
+// Testing server actions
+import { describe, it, expect, beforeEach } from "bun:test";
+import { createProjectAction } from "@/actions/project-actions";
+
+describe("createProjectAction", () => {
+  beforeEach(() => {
+    // Setup test user and team
+  });
+
+  it("should create project with valid input", async () => {
+    const formData = new FormData();
+    formData.set("name", "Test Project");
+    formData.set("teamId", "valid-team-id");
+
+    const result = await createProjectAction(formData);
+    
+    expect(result.data).toBeDefined();
+    expect(result.data.name).toBe("Test Project");
+  });
+
+  it("should return errors for invalid input", async () => {
+    const formData = new FormData();
+    formData.set("name", ""); // Invalid empty name
+
+    const result = await createProjectAction(formData);
+    
+    expect(result.errors).toBeDefined();
+    expect(result.errors.name).toContain("Required");
+  });
+});
+```
+
+### Deployment Considerations
+
+1. **Edge Runtime** - Use for lightweight operations
+2. **Streaming** - Enable for better perceived performance
+3. **Caching Strategy** - Configure appropriate cache headers
+4. **Monitoring** - Add performance monitoring and error tracking
+
+```typescript
+// Edge runtime configuration
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
+// Streaming configuration
+export default function StreamingPage() {
+  return (
+    <Suspense fallback={<GlobalLoading />}>
+      <StreamingContent />
+    </Suspense>
+  );
+}
+```

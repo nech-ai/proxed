@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: Utils package - Shared utilities, constants, and helper functions
+globs: ["packages/utils/**/*"]
 alwaysApply: false
 ---
 # Utils Package Implementation Rules

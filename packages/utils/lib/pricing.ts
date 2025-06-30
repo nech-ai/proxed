@@ -1,4 +1,4 @@
-import type { Provider, Model, OpenAIModel, AnthropicModel } from "./providers";
+import type { Provider, Model, OpenAIModel, AnthropicModel, GoogleModel } from "./providers";
 
 type ModelPricing = {
 	prompt: number;
@@ -217,9 +217,74 @@ const ANTHROPIC_MODELS: Record<AnthropicModel, ModelPricing> = {
 	},
 };
 
+const GOOGLE_MODELS: Record<GoogleModel, ModelPricing> = {
+	// Gemini 2.5 series
+	"gemini-2.5-pro": {
+		prompt: 1.25, // $1.25 per 1M tokens (≤200k), $2.50 (>200k)
+		completion: 10.0, // $10.00 per 1M tokens (≤200k), $15.00 (>200k)
+	},
+	"gemini-2.5-flash": {
+		prompt: 0.3, // $0.30 per 1M tokens (text/image/video), $1.00 (audio)
+		completion: 2.5, // $2.50 per 1M tokens
+	},
+	"gemini-2.5-flash-lite-preview-06-17": {
+		prompt: 0.1, // $0.10 per 1M tokens (text/image/video), $0.50 (audio)
+		completion: 0.4, // $0.40 per 1M tokens
+	},
+
+	// Gemini 2.0 series
+	"gemini-2.0-flash": {
+		prompt: 0.1, // $0.10 per 1M tokens (text/image/video), $0.70 (audio)
+		completion: 0.4, // $0.40 per 1M tokens
+	},
+	"gemini-2.0-flash-lite": {
+		prompt: 0.075, // $0.075 per 1M tokens
+		completion: 0.3, // $0.30 per 1M tokens
+	},
+
+	// Gemini 1.5 series
+	"gemini-1.5-flash": {
+		prompt: 0.075, // $0.075 per 1M tokens (≤128k), $0.15 (>128k)
+		completion: 0.3, // $0.30 per 1M tokens (≤128k), $0.60 (>128k)
+	},
+	"gemini-1.5-flash-8b": {
+		prompt: 0.0375, // $0.0375 per 1M tokens (≤128k), $0.075 (>128k)
+		completion: 0.15, // $0.15 per 1M tokens (≤128k), $0.30 (>128k)
+	},
+	"gemini-1.5-pro": {
+		prompt: 1.25, // $1.25 per 1M tokens (≤128k), $2.50 (>128k)
+		completion: 5.0, // $5.00 per 1M tokens (≤128k), $10.00 (>128k)
+	},
+
+	// Gemini Pro models
+	"gemini-pro": {
+		prompt: 0.5, // $0.50 per 1M tokens (estimated based on 1.5 series)
+		completion: 1.5, // $1.50 per 1M tokens (estimated)
+	},
+	"gemini-pro-vision": {
+		prompt: 0.5, // $0.50 per 1M tokens (estimated)
+		completion: 1.5, // $1.50 per 1M tokens (estimated)
+	},
+
+	// Embedding models (typically no completion cost)
+	"gemini-embedding-exp": {
+		prompt: 0.0625, // $0.0625 per 1M tokens (estimated)
+		completion: 0.0, // Embedding models don't generate completions
+	},
+	"text-embedding-004": {
+		prompt: 0.0625, // $0.0625 per 1M tokens (estimated)
+		completion: 0.0, // Embedding models don't generate completions
+	},
+	"embedding-001": {
+		prompt: 0.0625, // $0.0625 per 1M tokens (estimated)
+		completion: 0.0, // Embedding models don't generate completions
+	},
+};
+
 const PROVIDER_MODELS = {
 	OPENAI: OPENAI_MODELS,
 	ANTHROPIC: ANTHROPIC_MODELS,
+	GOOGLE: GOOGLE_MODELS,
 } as const;
 
 // Default pricing fallbacks for unknown models
@@ -231,6 +296,11 @@ const DEFAULT_OPENAI_PRICING: ModelPricing = {
 const DEFAULT_ANTHROPIC_PRICING: ModelPricing = {
 	prompt: 0.003, // $3.00 per 1M tokens
 	completion: 0.015, // $15.00 per 1M tokens
+};
+
+const DEFAULT_GOOGLE_PRICING: ModelPricing = {
+	prompt: 0.3, // $0.30 per 1M tokens (based on Flash models)
+	completion: 1.5, // $1.50 per 1M tokens
 };
 
 function getModelPricingWithFallback(
@@ -247,13 +317,28 @@ function getModelPricingWithFallback(
 		return DEFAULT_OPENAI_PRICING;
 	}
 
-	// Anthropic models
-	if (model in ANTHROPIC_MODELS) {
-		return ANTHROPIC_MODELS[model as AnthropicModel];
+	if (provider === "ANTHROPIC") {
+		// Check if it's a known model
+		if (model in ANTHROPIC_MODELS) {
+			return ANTHROPIC_MODELS[model as AnthropicModel];
+		}
+
+		// Default Anthropic pricing
+		return DEFAULT_ANTHROPIC_PRICING;
 	}
 
-	// Default Anthropic pricing
-	return DEFAULT_ANTHROPIC_PRICING;
+	if (provider === "GOOGLE") {
+		// Check if it's a known model
+		if (model in GOOGLE_MODELS) {
+			return GOOGLE_MODELS[model as GoogleModel];
+		}
+
+		// Default Google pricing
+		return DEFAULT_GOOGLE_PRICING;
+	}
+
+	// Fallback for any unknown provider
+	return DEFAULT_OPENAI_PRICING;
 }
 
 export function calculateCosts(params: {
@@ -281,9 +366,17 @@ export function getModelPricing(
 	provider: Provider,
 	model: Model,
 ): ModelPricing {
-	return provider === "OPENAI"
-		? OPENAI_MODELS[model as OpenAIModel]
-		: ANTHROPIC_MODELS[model as AnthropicModel];
+	if (provider === "OPENAI") {
+		return OPENAI_MODELS[model as OpenAIModel];
+	}
+	if (provider === "ANTHROPIC") {
+		return ANTHROPIC_MODELS[model as AnthropicModel];
+	}
+	if (provider === "GOOGLE") {
+		return GOOGLE_MODELS[model as GoogleModel];
+	}
+	// Fallback, should not happen with proper typing
+	return DEFAULT_OPENAI_PRICING;
 }
 
 /**

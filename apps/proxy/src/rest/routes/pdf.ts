@@ -8,6 +8,7 @@ import { z } from "zod";
 import { logger } from "../../utils/logger";
 import { createError, ErrorCode } from "../../utils/errors";
 import { createAIClient } from "../../utils/ai-client";
+import { getDefaultModel, supportsPDF } from "../../utils/default-models";
 import {
 	validateAndGetProject,
 	getFullApiKey,
@@ -59,6 +60,17 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 	// Get full API key
 	const fullApiKey = await getFullApiKey(db, project.keyId, apiKey!);
 
+	// Determine the model to use
+	const modelToUse = project.model || getDefaultModel(project.key.provider);
+	
+	// Validate that the model supports PDF inputs
+	if (!supportsPDF(project.key.provider, modelToUse)) {
+		throw createError(
+			ErrorCode.VALIDATION_ERROR,
+			`Model ${modelToUse} does not support PDF inputs for provider ${project.key.provider}`,
+		);
+	}
+
 	try {
 		const aiClient = createAIClient(project.key.provider, fullApiKey);
 
@@ -91,7 +103,7 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 		// Generate object with timeout
 		const { object, usage, finishReason } = await withTimeout(
 			generateObject({
-				model: aiClient(project.model || "gpt-4o", { structuredOutputs: true }),
+				model: aiClient(modelToUse, { structuredOutputs: true }),
 				schema,
 				messages: [
 					{

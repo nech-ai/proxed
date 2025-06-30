@@ -22,6 +22,13 @@ export interface ProxyEnv {
 	ANTHROPIC_TIMEOUT?: string;
 	ANTHROPIC_DEBUG?: string;
 
+	// Google
+	GOOGLE_API_BASE?: string;
+	GOOGLE_MAX_RETRIES?: string;
+	GOOGLE_RETRY_DELAY?: string;
+	GOOGLE_TIMEOUT?: string;
+	GOOGLE_DEBUG?: string;
+
 	// General
 	NODE_ENV?: string;
 	LOG_LEVEL?: string;

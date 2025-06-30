@@ -69,9 +69,23 @@ const ANTHROPIC_CONFIG: ProviderConfig = {
 	debug: getBooleanEnv("ANTHROPIC_DEBUG", false),
 };
 
+const GOOGLE_CONFIG: ProviderConfig = {
+	baseUrl: getEnv("GOOGLE_API_BASE") || "https://generativelanguage.googleapis.com/v1beta",
+	maxRetries: getNumericEnv("GOOGLE_MAX_RETRIES", 2),
+	retryDelay: getNumericEnv("GOOGLE_RETRY_DELAY", 1000),
+	timeout: getNumericEnv("GOOGLE_TIMEOUT", 120000), // 2 minutes
+	requiredHeaders: ["content-type"],
+	optionalHeaders: ["accept", "accept-encoding"],
+	buildAuthHeaders: (apiKey: string) => ({
+		"x-goog-api-key": apiKey,
+	}),
+	debug: getBooleanEnv("GOOGLE_DEBUG", false),
+};
+
 export const PROVIDER_CONFIGS: Record<ProviderType, ProviderConfig> = {
 	[PROVIDERS.OPENAI]: OPENAI_CONFIG,
 	[PROVIDERS.ANTHROPIC]: ANTHROPIC_CONFIG,
+	[PROVIDERS.GOOGLE]: GOOGLE_CONFIG,
 };
 
 /**

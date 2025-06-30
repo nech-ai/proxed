@@ -106,13 +106,14 @@ export async function checkRedisHealth(
  * Check external API health (e.g., OpenAI)
  */
 export async function checkExternalAPIHealth(
-	provider: "openai" | "anthropic",
+	provider: "openai" | "anthropic" | "google",
 	timeout = 5000,
 ): Promise<HealthCheckResult> {
 	const start = Date.now();
 	const urls = {
 		openai: "https://api.openai.com/v1/models",
 		anthropic: "https://api.anthropic.com/v1/messages",
+		google: "https://generativelanguage.googleapis.com/v1beta/models",
 	};
 
 	try {
@@ -180,11 +181,12 @@ export async function performHealthCheck(
 	checks.push(await checkRedisHealth());
 
 	// External API checks (run in parallel)
-	const [openaiHealth, anthropicHealth] = await Promise.all([
+	const [openaiHealth, anthropicHealth, googleHealth] = await Promise.all([
 		checkExternalAPIHealth("openai"),
 		checkExternalAPIHealth("anthropic"),
+		checkExternalAPIHealth("google"),
 	]);
-	checks.push(openaiHealth, anthropicHealth);
+	checks.push(openaiHealth, anthropicHealth, googleHealth);
 
 	// Determine overall status
 	const hasUnhealthy = checks.some((check) => check.status === "unhealthy");

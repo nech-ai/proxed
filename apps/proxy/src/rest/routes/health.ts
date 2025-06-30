@@ -81,12 +81,13 @@ export const healthRouter = new Hono<Context>()
 			const healthStatus = await performHealthCheck(db, serverStartTime);
 
 			// Add circuit breaker states
-			const circuitBreakerStates = {
-				openai: circuitBreakers.openai.getState(),
-				anthropic: circuitBreakers.anthropic.getState(),
-				database: circuitBreakers.database.getState(),
-				redis: circuitBreakers.redis.getState(),
-			};
+					const circuitBreakerStates = {
+			openai: circuitBreakers.openai.getState(),
+			anthropic: circuitBreakers.anthropic.getState(),
+			google: circuitBreakers.google.getState(),
+			database: circuitBreakers.database.getState(),
+			redis: circuitBreakers.redis.getState(),
+		};
 
 			const fullHealthStatus = {
 				...healthStatus,

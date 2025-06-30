@@ -11,7 +11,7 @@ CREATE TYPE "public"."finish_reason" AS ENUM(
 
 ALTER TYPE "public"."finish_reason" OWNER TO "postgres";
 
-CREATE TYPE "public"."provider_type" AS ENUM('OPENAI', 'ANTHROPIC');
+CREATE TYPE "public"."provider_type" AS ENUM('OPENAI', 'ANTHROPIC', 'GOOGLE');
 
 ALTER TYPE "public"."provider_type" OWNER TO "postgres";
 

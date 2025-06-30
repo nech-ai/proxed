@@ -23,7 +23,7 @@ describe("Provider Functions", () => {
 				OPENAI: "OPENAI",
 				ANTHROPIC: "ANTHROPIC",
 			});
-			expect(PROVIDER_VALUES).toEqual(["OPENAI", "ANTHROPIC"]);
+			expect(PROVIDER_VALUES).toEqual(["OPENAI", "ANTHROPIC", "GOOGLE"]);
 		});
 
 		test("should have correct finish reasons", () => {
@@ -216,7 +216,7 @@ describe("Provider Functions", () => {
 				expect(model).toHaveProperty("model");
 				expect(model).toHaveProperty("displayName");
 				expect(model).toHaveProperty("order");
-				expect(["OPENAI", "ANTHROPIC"]).toContain(model.provider);
+				expect(["OPENAI", "ANTHROPIC", "GOOGLE"]).toContain(model.provider);
 			}
 		});
 	});

@@ -206,6 +206,7 @@ export function createAPICircuitBreaker(
 export const circuitBreakers = {
 	openai: createAPICircuitBreaker("OpenAI"),
 	anthropic: createAPICircuitBreaker("Anthropic"),
+	google: createAPICircuitBreaker("Google"),
 	database: createAPICircuitBreaker("Database", {
 		failureThreshold: 3,
 		resetTimeout: 30000, // 30 seconds

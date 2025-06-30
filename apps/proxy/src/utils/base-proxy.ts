@@ -35,7 +35,7 @@ export interface ProxyConfig {
 	/**
 	 * Provider name for circuit breaker
 	 */
-	provider?: "openai" | "anthropic";
+	provider?: "openai" | "anthropic" | "google";
 }
 
 export interface ProxyResult {

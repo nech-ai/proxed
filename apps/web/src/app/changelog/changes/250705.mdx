@@ -1,0 +1,45 @@
+---
+title: "Google AI (Gemini) Support Now Live!"
+publishedAt: "2025-12-29"
+summary: "Proxed.AI now supports Google's Gemini models! Secure your Google AI API keys with the same DeviceCheck protection, partial key management, and structured responses available for OpenAI and Anthropic."
+---
+
+We're excited to announce that **Google AI (Gemini) is now fully supported** by Proxed.AI! You can now proxy requests to Google's powerful Gemini models with the same enterprise-grade security and features you've come to expect.
+
+### What's New:
+
+*   **Complete Google AI Integration**: Route all your Gemini API calls through Proxed.AI's secure gateway
+*   **Latest Gemini Models**: Support for Gemini 2.5 Pro/Flash, 2.0 series, 1.5 series, and more
+*   **Unified Security**: Same DeviceCheck verification and partial key system for your Google AI keys
+*   **Structured Responses**: Full support for text, vision, and PDF analysis with schema validation
+*   **Transparent Pricing**: Accurate cost tracking based on Google's official pricing tiers
+
+### Supported Models:
+
+*   **Gemini 2.5 Series**: `gemini-2.5-pro` (state-of-the-art), `gemini-2.5-flash` (best price-performance)
+*   **Gemini 2.0 Series**: `gemini-2.0-flash`, `gemini-2.0-flash-lite`
+*   **Gemini 1.5 Series**: `gemini-1.5-pro`, `gemini-1.5-flash`, `gemini-1.5-flash-8b`
+*   **Specialized Models**: Vision models, embedding models, and more
+
+### API Endpoints:
+
+Route your Google AI requests through:
+```
+https://api.proxed.ai/v1/google/{projectId}/{googleApiPath}
+```
+
+For example:
+```
+https://api.proxed.ai/v1/google/your-project-id/models/gemini-pro:generateContent
+```
+
+### Getting Started:
+
+1. Add your Google AI API key to your Proxed account
+2. Create or update a project to use the Google provider
+3. Use the same authentication methods (Bearer token, DeviceCheck)
+4. Start making secure requests to Gemini models!
+
+This brings our supported providers to three major AI platforms, giving you more flexibility and choice while maintaining consistent security across all your AI integrations.
+
+Check out our [documentation](https://docs.proxed.ai) and new [blog post](/updates/google-ai-integration) for implementation details.

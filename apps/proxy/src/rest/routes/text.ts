@@ -8,7 +8,10 @@ import { z } from "zod";
 import { logger } from "../../utils/logger";
 import { createError, ErrorCode } from "../../utils/errors";
 import { createAIClient } from "../../utils/ai-client";
-import { getDefaultModel, supportsStructuredOutputs } from "../../utils/default-models";
+import {
+	getDefaultModel,
+	supportsStructuredOutputs,
+} from "../../utils/default-models";
 import {
 	validateAndGetProject,
 	getFullApiKey,
@@ -51,7 +54,7 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 
 	// Determine the model to use
 	const modelToUse = project.model || getDefaultModel(project.key.provider);
-	
+
 	// Validate that the model supports structured outputs
 	if (!supportsStructuredOutputs(project.key.provider, modelToUse)) {
 		throw createError(

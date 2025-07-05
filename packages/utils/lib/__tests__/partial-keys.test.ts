@@ -33,6 +33,8 @@ const TEST_KEYS = {
 		"sk-proj-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 	OPENAI_PROJECT_COMPLEX:
 		"sk-proj-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	GOOGLE: "AIzaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	GOOGLE_WITH_UNDERSCORE: "AIzaXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX_XX-XXXXXXXXX",
 	INVALID_SHORT: "sk-abc",
 	MALFORMED: "invalid-key-format",
 } as const;
@@ -94,6 +96,28 @@ describe("API Key Utilities", () => {
 			});
 		});
 
+		test("should validate Google keys", () => {
+			const validResult = validateApiKey(TEST_KEYS.GOOGLE);
+			expect(validResult).toEqual({
+				isValid: true,
+				provider: "GOOGLE",
+			});
+
+			const invalidResult = validateApiKey("AIzaShortKey");
+			expect(invalidResult).toMatchObject({
+				isValid: false,
+				error: { code: "UNRECOGNIZED_PROVIDER" },
+			});
+		});
+
+		test("should validate Google keys with underscores and hyphens", () => {
+			const validResult = validateApiKey(TEST_KEYS.GOOGLE_WITH_UNDERSCORE);
+			expect(validResult).toEqual({
+				isValid: true,
+				provider: "GOOGLE",
+			});
+		});
+
 		test("should handle unrecognized formats", () => {
 			const result = validateApiKey(TEST_KEYS.MALFORMED);
 			expect(result).toMatchObject({
@@ -117,6 +141,22 @@ describe("API Key Utilities", () => {
 			expect(result.metadata?.timestamp).toBeDefined();
 			expect(result.metadata?.splitId).toBeDefined();
 		});
+
+		test("should validate and extract metadata from Google key", () => {
+			const { serverPart, clientPart } = splitKeyWithPrefix(
+				TEST_KEYS.GOOGLE,
+				testCrypto,
+			);
+			const reconstructed = reassembleKey(serverPart, clientPart);
+			const result = validateApiKey(reconstructed);
+
+			expect(result.isValid).toBe(true);
+			expect(result.provider).toBe("GOOGLE");
+			expect(result.metadata).toBeDefined();
+			expect(result.metadata?.version).toBe(1);
+			expect(result.metadata?.timestamp).toBeDefined();
+			expect(result.metadata?.splitId).toBeDefined();
+		});
 	});
 
 	describe("extractPrefix", () => {
@@ -130,6 +170,13 @@ describe("API Key Utilities", () => {
 			const { prefix, leftover } = extractPrefix(TEST_KEYS.OPENAI);
 			expect(prefix).toStartWith("sk-");
 			expect(leftover.length).toBeGreaterThan(0);
+		});
+
+		test("should extract Google prefix", () => {
+			const { prefix, leftover } = extractPrefix(TEST_KEYS.GOOGLE);
+			expect(prefix).toBe("AIza");
+			expect(leftover).toBe("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+			expect(leftover.length).toBeGreaterThan(MIN_KEY_LENGTH);
 		});
 
 		test("should handle keys without prefix", () => {
@@ -186,6 +233,36 @@ describe("API Key Utilities", () => {
 			// Remove metadata for comparison
 			const [baseKey] = reconstructed.split(".");
 			expect(baseKey).toBe(TEST_KEYS.OPENAI_PROJECT);
+		});
+
+		test("should split and reassemble Google key", () => {
+			const { serverPart, clientPart } = splitKeyWithPrefix(
+				TEST_KEYS.GOOGLE,
+				testCrypto,
+			);
+			const reconstructed = reassembleKey(serverPart, clientPart);
+			// Remove metadata for comparison
+			const [baseKey] = reconstructed.split(".");
+			expect(baseKey).toBe(TEST_KEYS.GOOGLE);
+
+			// Verify the parts structure
+			expect(serverPart).toStartWith("AIza");
+			expect(serverPart.length).toBeGreaterThan(SALT_LENGTH);
+			const [clientKeyPart, metadata] = clientPart.split(".");
+			expect(clientKeyPart.length).toBeGreaterThan(SALT_LENGTH);
+			expect(metadata).toBeDefined();
+			expect(metadata.length).toBe(METADATA_LENGTH);
+		});
+
+		test("should split and reassemble Google key with underscores", () => {
+			const { serverPart, clientPart } = splitKeyWithPrefix(
+				TEST_KEYS.GOOGLE_WITH_UNDERSCORE,
+				testCrypto,
+			);
+			const reconstructed = reassembleKey(serverPart, clientPart);
+			// Remove metadata for comparison
+			const [baseKey] = reconstructed.split(".");
+			expect(baseKey).toBe(TEST_KEYS.GOOGLE_WITH_UNDERSCORE);
 		});
 
 		test("should split and reassemble complex OpenAI project key", () => {

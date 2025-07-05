@@ -4,10 +4,7 @@ import { protectedMiddleware } from "../middleware";
 import type { Context as AppContext, FinishReason } from "../types";
 import { logger } from "../../utils/logger";
 import { createError, ErrorCode } from "../../utils/errors";
-import {
-	mapGoogleFinishReason,
-	type GoogleResponse,
-} from "../../utils/google";
+import { mapGoogleFinishReason, type GoogleResponse } from "../../utils/google";
 import { baseProxy } from "../../utils/base-proxy";
 import {
 	getProviderConfig,

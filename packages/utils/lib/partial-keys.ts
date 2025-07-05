@@ -32,6 +32,9 @@ const KEY_PATTERNS = {
 	// Use negative lookahead (?!ant-) to prevent matching Anthropic keys
 	// Ensure length is at least MIN_KEY_LENGTH after prefix
 	OPENAI: /^sk-(?!ant-)(?:proj-[a-zA-Z0-9_-]{12,}|[a-zA-Z0-9-]{12,})$/,
+	// Google: AIza<random_chars_with_hyphen_and_underscore>
+	// Ensure length is at least MIN_KEY_LENGTH after prefix
+	GOOGLE: /^AIza[a-zA-Z0-9_-]{12,}$/,
 } as const;
 
 export class KeyValidationError extends Error {
@@ -161,6 +164,14 @@ export function extractPrefix(baseKey: string): {
 		return {
 			prefix: openAIMatch[1],
 			leftover: baseKey.slice(openAIMatch[1].length),
+		};
+	}
+
+	const googleMatch = baseKey.match(/^(AIza)/);
+	if (googleMatch) {
+		return {
+			prefix: googleMatch[1],
+			leftover: baseKey.slice(googleMatch[1].length),
 		};
 	}
 

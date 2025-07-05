@@ -36,6 +36,36 @@ describe("Pricing and Cost Calculation", () => {
 			expect(result.totalCost).toBe(0.00175);
 		});
 
+		test("should calculate costs correctly for Google models", () => {
+			const result = calculateCosts({
+				provider: "GOOGLE",
+				model: "gemini-1.5-flash",
+				promptTokens: 2000000, // 2M tokens
+				completionTokens: 1000000, // 1M tokens
+			});
+
+			// gemini-1.5-flash: 0.075 per 1M prompt, 0.3 per 1M completion
+			// 2M tokens: 2 * 0.075 = 0.15
+			// 1M tokens: 1 * 0.3 = 0.3
+			expect(result.promptCost).toBe(0.15);
+			expect(result.completionCost).toBe(0.3);
+			expect(result.totalCost).toBeCloseTo(0.45, 10);
+		});
+
+		test("should handle Google embedding models with zero completion cost", () => {
+			const result = calculateCosts({
+				provider: "GOOGLE",
+				model: "text-embedding-004",
+				promptTokens: 1000000, // 1M tokens
+				completionTokens: 0, // Embedding models don't generate completions
+			});
+
+			// text-embedding-004: 0.0625 per 1M prompt, 0 per 1M completion
+			expect(result.promptCost).toBe(0.0625);
+			expect(result.completionCost).toBe(0);
+			expect(result.totalCost).toBe(0.0625);
+		});
+
 		test("should handle very small token counts", () => {
 			const result = calculateCosts({
 				provider: "OPENAI",
@@ -201,6 +231,26 @@ describe("Pricing and Cost Calculation", () => {
 			});
 		});
 
+		test("should return correct pricing for Google models", () => {
+			const pricing = getModelPricing("GOOGLE", "gemini-2.5-pro");
+			expect(pricing).toEqual({
+				prompt: 1.25,
+				completion: 10.0,
+			});
+
+			const flashPricing = getModelPricing("GOOGLE", "gemini-1.5-flash");
+			expect(flashPricing).toEqual({
+				prompt: 0.075,
+				completion: 0.3,
+			});
+
+			const embeddingPricing = getModelPricing("GOOGLE", "text-embedding-004");
+			expect(embeddingPricing).toEqual({
+				prompt: 0.0625,
+				completion: 0.0,
+			});
+		});
+
 		test("should return correct pricing for expensive models", () => {
 			const pricing = getModelPricing("OPENAI", "gpt-4.5-preview");
 			expect(pricing).toEqual({
@@ -233,6 +283,9 @@ describe("Pricing and Cost Calculation", () => {
 				["OPENAI", "o3-mini", 0.0011, 0.0044],
 				["ANTHROPIC", "claude-opus-4-20250514", 0.015, 0.075],
 				["ANTHROPIC", "claude-3-7-sonnet-latest", 0.003, 0.015],
+				["GOOGLE", "gemini-2.5-flash", 0.3, 2.5],
+				["GOOGLE", "gemini-2.0-flash-lite", 0.075, 0.3],
+				["GOOGLE", "gemini-embedding-exp", 0.0625, 0.0],
 			];
 
 			for (const [

@@ -1,4 +1,10 @@
-import type { Provider, Model, OpenAIModel, AnthropicModel, GoogleModel } from "./providers";
+import type {
+	Provider,
+	Model,
+	OpenAIModel,
+	AnthropicModel,
+	GoogleModel,
+} from "./providers";
 
 type ModelPricing = {
 	prompt: number;

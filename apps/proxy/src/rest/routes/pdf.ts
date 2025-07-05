@@ -62,7 +62,7 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 
 	// Determine the model to use
 	const modelToUse = project.model || getDefaultModel(project.key.provider);
-	
+
 	// Validate that the model supports PDF inputs
 	if (!supportsPDF(project.key.provider, modelToUse)) {
 		throw createError(

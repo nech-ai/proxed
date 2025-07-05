@@ -22,6 +22,7 @@ describe("Provider Functions", () => {
 			expect(PROVIDERS).toEqual({
 				OPENAI: "OPENAI",
 				ANTHROPIC: "ANTHROPIC",
+				GOOGLE: "GOOGLE",
 			});
 			expect(PROVIDER_VALUES).toEqual(["OPENAI", "ANTHROPIC", "GOOGLE"]);
 		});
@@ -55,6 +56,15 @@ describe("Provider Functions", () => {
 			expect(models).toContain("claude-3-haiku-20240307");
 			expect(models.length).toBeGreaterThan(10);
 		});
+
+		test("should return Google models", () => {
+			const models = getModelsForProvider("GOOGLE");
+			expect(models).toContain("gemini-2.5-pro");
+			expect(models).toContain("gemini-1.5-flash");
+			expect(models).toContain("gemini-pro");
+			expect(models).toContain("text-embedding-004");
+			expect(models.length).toBeGreaterThan(10);
+		});
 	});
 
 	describe("getModelDisplayName", () => {
@@ -77,6 +87,17 @@ describe("Provider Functions", () => {
 			);
 		});
 
+		test("should return correct display names for Google models", () => {
+			expect(getModelDisplayName("gemini-2.5-pro")).toBe("Gemini 2.5 Pro");
+			expect(getModelDisplayName("gemini-1.5-flash")).toBe("Gemini 1.5 Flash");
+			expect(getModelDisplayName("gemini-pro-vision")).toBe(
+				"Gemini Pro Vision",
+			);
+			expect(getModelDisplayName("text-embedding-004")).toBe(
+				"Text Embedding 004",
+			);
+		});
+
 		test("should return model ID for unknown models", () => {
 			expect(getModelDisplayName("unknown-model" as Model)).toBe(
 				"unknown-model",
@@ -89,6 +110,11 @@ describe("Provider Functions", () => {
 			expect(getModelBadge("gpt-4.1")).toBe("new");
 			expect(getModelBadge("gpt-4.5-preview")).toBe("preview");
 			expect(getModelBadge("gpt-4o-2024-05-13")).toBe("deprecated");
+			expect(getModelBadge("gemini-2.5-pro")).toBe("new");
+			expect(getModelBadge("gemini-2.5-flash-lite-preview-06-17")).toBe(
+				"preview",
+			);
+			expect(getModelBadge("gemini-embedding-exp")).toBe("experimental");
 			expect(getModelBadge("gpt-4o")).toBeUndefined();
 		});
 
@@ -117,9 +143,19 @@ describe("Provider Functions", () => {
 			expect(isModelForProvider("gpt-4o", "ANTHROPIC")).toBe(false);
 		});
 
+		test("should correctly identify Google models", () => {
+			expect(isModelForProvider("gemini-2.5-pro", "GOOGLE")).toBe(true);
+			expect(isModelForProvider("gemini-1.5-flash", "GOOGLE")).toBe(true);
+			expect(isModelForProvider("gpt-4o", "GOOGLE")).toBe(false);
+			expect(isModelForProvider("claude-3-opus-20240229", "GOOGLE")).toBe(
+				false,
+			);
+		});
+
 		test("should handle unknown models", () => {
 			expect(isModelForProvider("unknown-model", "OPENAI")).toBe(false);
 			expect(isModelForProvider("unknown-model", "ANTHROPIC")).toBe(false);
+			expect(isModelForProvider("unknown-model", "GOOGLE")).toBe(false);
 		});
 	});
 
@@ -132,6 +168,9 @@ describe("Provider Functions", () => {
 			expect(getProviderForModel("claude-3-5-haiku-20241022")).toBe(
 				"ANTHROPIC",
 			);
+			expect(getProviderForModel("gemini-2.5-pro")).toBe("GOOGLE");
+			expect(getProviderForModel("gemini-1.5-flash")).toBe("GOOGLE");
+			expect(getProviderForModel("text-embedding-004")).toBe("GOOGLE");
 		});
 
 		test("should return null for unknown models", () => {
@@ -145,6 +184,9 @@ describe("Provider Functions", () => {
 			expect(isValidModel("gpt-4o-mini")).toBe(true);
 			expect(isValidModel("claude-3-opus-20240229")).toBe(true);
 			expect(isValidModel("claude-3-5-haiku-20241022")).toBe(true);
+			expect(isValidModel("gemini-2.5-pro")).toBe(true);
+			expect(isValidModel("gemini-1.5-flash")).toBe(true);
+			expect(isValidModel("text-embedding-004")).toBe(true);
 		});
 
 		test("should reject unknown models", () => {
@@ -171,15 +213,18 @@ describe("Provider Functions", () => {
 		test("should return filtered models for specific provider", () => {
 			const openaiOptions = getModelOptions("OPENAI");
 			const anthropicOptions = getModelOptions("ANTHROPIC");
+			const googleOptions = getModelOptions("GOOGLE");
 
 			expect(openaiOptions.every((opt) => !("provider" in opt))).toBe(true);
 			expect(anthropicOptions.every((opt) => !("provider" in opt))).toBe(true);
+			expect(googleOptions.every((opt) => !("provider" in opt))).toBe(true);
 
 			// Verify counts match
 			expect(openaiOptions.length).toBe(Object.keys(MODELS.OPENAI).length);
 			expect(anthropicOptions.length).toBe(
 				Object.keys(MODELS.ANTHROPIC).length,
 			);
+			expect(googleOptions.length).toBe(Object.keys(MODELS.GOOGLE).length);
 		});
 
 		test("should sort models correctly", () => {
@@ -204,10 +249,13 @@ describe("Provider Functions", () => {
 	});
 
 	describe("ALL_MODELS", () => {
-		test("should contain all models from both providers", () => {
+		test("should contain all models from all providers", () => {
 			const openaiCount = Object.keys(MODELS.OPENAI).length;
 			const anthropicCount = Object.keys(MODELS.ANTHROPIC).length;
-			expect(ALL_MODELS.length).toBe(openaiCount + anthropicCount);
+			const googleCount = Object.keys(MODELS.GOOGLE).length;
+			expect(ALL_MODELS.length).toBe(
+				openaiCount + anthropicCount + googleCount,
+			);
 		});
 
 		test("should have correct structure", () => {
@@ -226,6 +274,8 @@ describe("Provider Functions", () => {
 			expect(MODEL_VALUES.length).toBe(ALL_MODELS.length);
 			expect(MODEL_VALUES).toContain("gpt-4o");
 			expect(MODEL_VALUES).toContain("claude-3-opus-20240229");
+			expect(MODEL_VALUES).toContain("gemini-2.5-pro");
+			expect(MODEL_VALUES).toContain("gemini-1.5-flash");
 		});
 
 		test("should not contain duplicates", () => {
@@ -255,6 +305,23 @@ describe("Provider Functions", () => {
 				expect(pricing).toBeDefined();
 				expect(pricing.prompt).toBeGreaterThan(0);
 				expect(pricing.completion).toBeGreaterThan(0);
+			}
+		});
+
+		test("all Google models should have pricing", async () => {
+			const { getModelPricing } = await import("../pricing");
+
+			for (const model of Object.keys(MODELS.GOOGLE) as Model[]) {
+				const pricing = getModelPricing("GOOGLE", model);
+				expect(pricing).toBeDefined();
+				expect(pricing.prompt).toBeGreaterThan(0);
+
+				// Embedding models have 0 completion cost which is expected
+				if (model.includes("embedding")) {
+					expect(pricing.completion).toBe(0);
+				} else {
+					expect(pricing.completion).toBeGreaterThan(0);
+				}
 			}
 		});
 	});

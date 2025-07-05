@@ -48,8 +48,11 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 	const fullApiKey = await getFullApiKey(db, project.keyId, apiKey!);
 
 	// Determine the model to use
-	const modelToUse = getVisionModel(project.key.provider, project.model || undefined);
-	
+	const modelToUse = getVisionModel(
+		project.key.provider,
+		project.model || undefined,
+	);
+
 	// Validate that the model supports vision inputs
 	if (!supportsVision(project.key.provider, modelToUse)) {
 		throw createError(

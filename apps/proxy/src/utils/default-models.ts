@@ -33,7 +33,11 @@ export function supportsStructuredOutputs(
 			return model.includes("gpt-4o") || model.includes("gpt-4.1");
 		case "ANTHROPIC":
 			// Claude 3 models support structured outputs
-			return model.includes("claude-3") || model.includes("claude-opus-4") || model.includes("claude-sonnet-4");
+			return (
+				model.includes("claude-3") ||
+				model.includes("claude-opus-4") ||
+				model.includes("claude-sonnet-4")
+			);
 		case "GOOGLE":
 			// Gemini 1.5 and 2.x models support structured outputs
 			return (
@@ -49,7 +53,10 @@ export function supportsStructuredOutputs(
 /**
  * Get the appropriate model for vision tasks
  */
-export function getVisionModel(provider: ProviderType, preferredModel?: string): string {
+export function getVisionModel(
+	provider: ProviderType,
+	preferredModel?: string,
+): string {
 	// If a preferred model is specified and supports vision, use it
 	if (preferredModel && supportsVision(provider, preferredModel)) {
 		return preferredModel;
@@ -82,7 +89,11 @@ export function supportsVision(provider: ProviderType, model: string): boolean {
 			);
 		case "ANTHROPIC":
 			// All Claude 3 models support vision
-			return model.includes("claude-3") || model.includes("claude-opus-4") || model.includes("claude-sonnet-4");
+			return (
+				model.includes("claude-3") ||
+				model.includes("claude-opus-4") ||
+				model.includes("claude-sonnet-4")
+			);
 		case "GOOGLE":
 			// Most Gemini models support vision, except embedding models
 			return (
@@ -105,7 +116,11 @@ export function supportsPDF(provider: ProviderType, model: string): boolean {
 			return model.includes("gpt-4o") || model.includes("gpt-4.1");
 		case "ANTHROPIC":
 			// Claude 3 models support document inputs
-			return model.includes("claude-3") || model.includes("claude-opus-4") || model.includes("claude-sonnet-4");
+			return (
+				model.includes("claude-3") ||
+				model.includes("claude-opus-4") ||
+				model.includes("claude-sonnet-4")
+			);
 		case "GOOGLE":
 			// Gemini 1.5 and newer support document inputs
 			return (

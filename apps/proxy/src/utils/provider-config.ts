@@ -70,7 +70,9 @@ const ANTHROPIC_CONFIG: ProviderConfig = {
 };
 
 const GOOGLE_CONFIG: ProviderConfig = {
-	baseUrl: getEnv("GOOGLE_API_BASE") || "https://generativelanguage.googleapis.com/v1beta",
+	baseUrl:
+		getEnv("GOOGLE_API_BASE") ||
+		"https://generativelanguage.googleapis.com/v1beta",
 	maxRetries: getNumericEnv("GOOGLE_MAX_RETRIES", 2),
 	retryDelay: getNumericEnv("GOOGLE_RETRY_DELAY", 1000),
 	timeout: getNumericEnv("GOOGLE_TIMEOUT", 120000), // 2 minutes

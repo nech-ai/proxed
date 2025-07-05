@@ -3,9 +3,11 @@ insert into
 values
   ('avatars', 'avatars', false);
 
+-- Storage helper functions moved to public schema to comply with Supabase restrictions
+-- (functions cannot be created in storage schema after April 21, 2025)
 
 CREATE
-OR REPLACE FUNCTION storage.handle_empty_folder_placeholder () RETURNS trigger LANGUAGE plpgsql AS $function$
+OR REPLACE FUNCTION public.storage_handle_empty_folder_placeholder () RETURNS trigger LANGUAGE plpgsql AS $function$
 DECLARE
     name_tokens text[];
     modified_name text;
@@ -40,7 +42,7 @@ END;
 $function$;
 
 CREATE
-OR REPLACE FUNCTION storage.extension (name TEXT) RETURNS TEXT LANGUAGE plpgsql AS $function$
+OR REPLACE FUNCTION public.storage_extension (name TEXT) RETURNS TEXT LANGUAGE plpgsql AS $function$
 DECLARE
 _parts text[];
 _filename text;
@@ -53,7 +55,7 @@ END
 $function$;
 
 CREATE
-OR REPLACE FUNCTION storage.filename (name TEXT) RETURNS TEXT LANGUAGE plpgsql AS $function$
+OR REPLACE FUNCTION public.storage_filename (name TEXT) RETURNS TEXT LANGUAGE plpgsql AS $function$
 DECLARE
 _parts text[];
 BEGIN
@@ -63,7 +65,7 @@ END
 $function$;
 
 CREATE
-OR REPLACE FUNCTION storage.foldername (name TEXT) RETURNS text[] LANGUAGE plpgsql AS $function$
+OR REPLACE FUNCTION public.storage_foldername (name TEXT) RETURNS text[] LANGUAGE plpgsql AS $function$
 DECLARE
 _parts text[];
 BEGIN
@@ -72,6 +74,7 @@ BEGIN
 END
 $function$;
 
+-- Storage RLS Policies (These are still allowed on storage.objects)
 create policy "Give users select access to avatars folder" on "storage"."objects" as permissive for
 select
   to authenticated using (true);
@@ -91,7 +94,7 @@ with
             (
               (team_memberships.user_id = auth.uid ())
               AND (
-                (team_memberships.team_id)::TEXT = (storage.foldername (objects.name)) [1]
+                (team_memberships.team_id)::TEXT = (public.storage_foldername (objects.name)) [1]
               )
             )
         )
@@ -114,7 +117,7 @@ for update
             (
               (team_memberships.user_id = auth.uid ())
               AND (
-                (team_memberships.team_id)::TEXT = (storage.foldername (objects.name)) [1]
+                (team_memberships.team_id)::TEXT = (public.storage_foldername (objects.name)) [1]
               )
             )
         )
@@ -135,7 +138,7 @@ create policy "Give members delete access to avatars folder" on "storage"."objec
           (
             (team_memberships.user_id = auth.uid ())
             AND (
-              (team_memberships.team_id)::TEXT = (storage.foldername (objects.name)) [1]
+              (team_memberships.team_id)::TEXT = (public.storage_foldername (objects.name)) [1]
             )
           )
       )
@@ -149,7 +152,7 @@ with
     (
       (bucket_id = 'avatars'::TEXT)
       AND (
-        (auth.uid ())::TEXT = (storage.foldername (name)) [1]
+        (auth.uid ())::TEXT = (public.storage_foldername (name)) [1]
       )
     )
   );
@@ -160,7 +163,7 @@ for update
     (
       (bucket_id = 'avatars'::TEXT)
       AND (
-        (auth.uid ())::TEXT = (storage.foldername (name)) [1]
+        (auth.uid ())::TEXT = (public.storage_foldername (name)) [1]
       )
     )
   );
@@ -169,7 +172,7 @@ create policy "Give users delete access to avatars folder" on "storage"."objects
   (
     (bucket_id = 'avatars'::TEXT)
     AND (
-      (auth.uid ())::TEXT = (storage.foldername (name)) [1]
+      (auth.uid ())::TEXT = (public.storage_foldername (name)) [1]
     )
   )
 );

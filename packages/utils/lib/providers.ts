@@ -219,7 +219,7 @@ export const MODELS = {
 		"claude-3-haiku-20240307": { displayName: "Claude 3 Haiku", order: 13 },
 	},
 	GOOGLE: {
-		// Gemini 2.5 series
+		// Gemini 2.5 series (latest)
 		"gemini-2.5-pro": {
 			displayName: "Gemini 2.5 Pro",
 			order: 1,
@@ -230,33 +230,13 @@ export const MODELS = {
 			order: 2,
 			badge: "new" as ModelBadge,
 		},
-		"gemini-2.5-flash-lite-preview-06-17": {
-			displayName: "Gemini 2.5 Flash Lite Preview",
-			order: 3,
-			badge: "preview" as ModelBadge,
-		},
 
 		// Gemini 2.0 series
-		"gemini-2.0-flash": { displayName: "Gemini 2.0 Flash", order: 4 },
-		"gemini-2.0-flash-lite": { displayName: "Gemini 2.0 Flash Lite", order: 5 },
+		"gemini-2.0-flash": { displayName: "Gemini 2.0 Flash", order: 3 },
 
 		// Gemini 1.5 series
-		"gemini-1.5-flash": { displayName: "Gemini 1.5 Flash", order: 6 },
-		"gemini-1.5-flash-8b": { displayName: "Gemini 1.5 Flash 8B", order: 7 },
-		"gemini-1.5-pro": { displayName: "Gemini 1.5 Pro", order: 8 },
-
-		// Gemini Pro models
-		"gemini-pro": { displayName: "Gemini Pro", order: 9 },
-		"gemini-pro-vision": { displayName: "Gemini Pro Vision", order: 10 },
-
-		// Embedding models
-		"gemini-embedding-exp": {
-			displayName: "Gemini Embedding Experimental",
-			order: 11,
-			badge: "experimental" as ModelBadge,
-		},
-		"text-embedding-004": { displayName: "Text Embedding 004", order: 12 },
-		"embedding-001": { displayName: "Embedding 001", order: 13 },
+		"gemini-1.5-flash": { displayName: "Gemini 1.5 Flash", order: 4 },
+		"gemini-1.5-pro": { displayName: "Gemini 1.5 Pro", order: 5 },
 	},
 } as const;
 

@@ -52,18 +52,18 @@ describe("Pricing and Cost Calculation", () => {
 			expect(result.totalCost).toBeCloseTo(0.45, 10);
 		});
 
-		test("should handle Google embedding models with zero completion cost", () => {
+		test("should handle Google models", () => {
 			const result = calculateCosts({
 				provider: "GOOGLE",
-				model: "text-embedding-004",
+				model: "gemini-2.5-flash",
 				promptTokens: 1000000, // 1M tokens
-				completionTokens: 0, // Embedding models don't generate completions
+				completionTokens: 500000, // 500K tokens
 			});
 
-			// text-embedding-004: 0.0625 per 1M prompt, 0 per 1M completion
-			expect(result.promptCost).toBe(0.0625);
-			expect(result.completionCost).toBe(0);
-			expect(result.totalCost).toBe(0.0625);
+			// gemini-2.5-flash: 0.3 per 1M prompt, 2.5 per 1M completion
+			expect(result.promptCost).toBe(0.3);
+			expect(result.completionCost).toBe(1.25); // 0.5 * 2.5
+			expect(result.totalCost).toBe(1.55);
 		});
 
 		test("should handle very small token counts", () => {
@@ -243,12 +243,6 @@ describe("Pricing and Cost Calculation", () => {
 				prompt: 0.075,
 				completion: 0.3,
 			});
-
-			const embeddingPricing = getModelPricing("GOOGLE", "text-embedding-004");
-			expect(embeddingPricing).toEqual({
-				prompt: 0.0625,
-				completion: 0.0,
-			});
 		});
 
 		test("should return correct pricing for expensive models", () => {
@@ -284,8 +278,7 @@ describe("Pricing and Cost Calculation", () => {
 				["ANTHROPIC", "claude-opus-4-20250514", 0.015, 0.075],
 				["ANTHROPIC", "claude-3-7-sonnet-latest", 0.003, 0.015],
 				["GOOGLE", "gemini-2.5-flash", 0.3, 2.5],
-				["GOOGLE", "gemini-2.0-flash-lite", 0.075, 0.3],
-				["GOOGLE", "gemini-embedding-exp", 0.0625, 0.0],
+				["GOOGLE", "gemini-2.0-flash", 0.1, 0.4],
 			];
 
 			for (const [

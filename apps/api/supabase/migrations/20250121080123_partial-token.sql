@@ -1,5 +1,5 @@
 -- Provider type enum
-create type provider_type as enum ('OPENAI', 'ANTHROPIC');
+create type provider_type as enum ('OPENAI', 'ANTHROPIC', 'GOOGLE');
 
 -- Partial keys
 create table public.provider_keys (

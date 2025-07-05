@@ -2,7 +2,7 @@
 -- If you want to run this migration please uncomment this code before executing migrations
 /*
 CREATE TYPE "public"."finish_reason" AS ENUM('stop', 'length', 'content-filter', 'tool-calls', 'error', 'other', 'unknown');--> statement-breakpoint
-CREATE TYPE "public"."provider_type" AS ENUM('OPENAI', 'ANTHROPIC');--> statement-breakpoint
+CREATE TYPE "public"."provider_type" AS ENUM('OPENAI', 'ANTHROPIC', 'GOOGLE');--> statement-breakpoint
 CREATE TYPE "public"."team_role" AS ENUM('OWNER', 'MEMBER');--> statement-breakpoint
 CREATE TABLE "users" (
 	"id" uuid PRIMARY KEY NOT NULL,

@@ -527,7 +527,7 @@ export type Database = {
 				| "error"
 				| "other"
 				| "unknown";
-			provider_type: "OPENAI" | "ANTHROPIC";
+			provider_type: "OPENAI" | "ANTHROPIC" | "GOOGLE";
 			team_role: "OWNER" | "MEMBER";
 		};
 		CompositeTypes: {
@@ -653,7 +653,7 @@ export const Constants = {
 				"other",
 				"unknown",
 			],
-			provider_type: ["OPENAI", "ANTHROPIC"],
+			provider_type: ["OPENAI", "ANTHROPIC", "GOOGLE"],
 			team_role: ["OWNER", "MEMBER"],
 		},
 	},

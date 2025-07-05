@@ -58,7 +58,11 @@ export const finishReason = pgEnum("finish_reason", [
 	"other",
 	"unknown",
 ]);
-export const providerType = pgEnum("provider_type", ["OPENAI", "ANTHROPIC"]);
+export const providerType = pgEnum("provider_type", [
+	"OPENAI",
+	"ANTHROPIC",
+	"GOOGLE",
+]);
 export const teamRole = pgEnum("team_role", ["OWNER", "MEMBER"]);
 
 export const schemaMigrationsInAuth = auth.table("schema_migrations", {

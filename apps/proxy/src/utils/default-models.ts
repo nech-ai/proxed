@@ -11,7 +11,7 @@ export function getDefaultModel(provider: ProviderType): string {
 		case "ANTHROPIC":
 			return "claude-3-5-sonnet-latest";
 		case "GOOGLE":
-			return "gemini-1.5-pro";
+			return "gemini-2.5-pro";
 		default:
 			// Fallback to a commonly supported model
 			return "gpt-4o";
@@ -20,8 +20,7 @@ export function getDefaultModel(provider: ProviderType): string {
 
 /**
  * Check if a model supports structured outputs
- * Note: This is a simplified check. In practice, you might want to
- * maintain a more comprehensive list or check with the provider's API
+ * Based on AI SDK documentation for Object Generation capability
  */
 export function supportsStructuredOutputs(
 	provider: ProviderType,
@@ -29,21 +28,43 @@ export function supportsStructuredOutputs(
 ): boolean {
 	switch (provider) {
 		case "OPENAI":
-			// GPT-4o models support structured outputs
-			return model.includes("gpt-4o") || model.includes("gpt-4.1");
+			// Modern OpenAI models with structured output support
+			return (
+				// GPT-4.1 series
+				model.startsWith("gpt-4.1") ||
+				// GPT-4o series
+				model.startsWith("gpt-4o") ||
+				// GPT-4 Turbo
+				model === "gpt-4-turbo" ||
+				model === "gpt-4" ||
+				// o1 reasoning models
+				model === "o1" ||
+				model === "o1-mini" ||
+				model === "o1-preview" ||
+				// o3 series
+				model.startsWith("o3") ||
+				// o4 series
+				model.startsWith("o4")
+			);
 		case "ANTHROPIC":
-			// Claude 3 models support structured outputs
+			// All modern Claude models support structured outputs
 			return (
 				model.includes("claude-3") ||
 				model.includes("claude-opus-4") ||
-				model.includes("claude-sonnet-4")
+				model.includes("claude-sonnet-4") ||
+				model.includes("claude-4")
 			);
 		case "GOOGLE":
-			// Gemini 1.5 and 2.x models support structured outputs
+			// Modern Gemini models with structured outputs
+			// Exclude embedding models
+			if (model.includes("embedding") || model.includes("text-embedding")) {
+				return false;
+			}
 			return (
 				model.includes("gemini-1.5") ||
 				model.includes("gemini-2") ||
-				model === "gemini-pro"
+				model === "gemini-pro" ||
+				model === "gemini-pro-vision"
 			);
 		default:
 			return false;
@@ -69,7 +90,7 @@ export function getVisionModel(
 		case "ANTHROPIC":
 			return "claude-3-5-sonnet-latest";
 		case "GOOGLE":
-			return "gemini-1.5-pro";
+			return "gemini-2.5-pro";
 		default:
 			return "gpt-4o";
 	}
@@ -77,29 +98,41 @@ export function getVisionModel(
 
 /**
  * Check if a model supports vision/image inputs
+ * Based on AI SDK documentation for Image Input capability
  */
 export function supportsVision(provider: ProviderType, model: string): boolean {
 	switch (provider) {
 		case "OPENAI":
-			// GPT-4 vision models
+			// Modern OpenAI models with vision support
 			return (
-				model.includes("gpt-4o") ||
-				model.includes("gpt-4.1") ||
+				// GPT-4.1 series
+				model.startsWith("gpt-4.1") ||
+				// GPT-4o series (all variants)
+				model.startsWith("gpt-4o") ||
+				// GPT-4 Turbo and GPT-4
+				model === "gpt-4-turbo" ||
+				model === "gpt-4" ||
+				// Explicit vision models
 				model.includes("vision")
 			);
 		case "ANTHROPIC":
-			// All Claude 3 models support vision
+			// All modern Claude models support vision
 			return (
 				model.includes("claude-3") ||
 				model.includes("claude-opus-4") ||
-				model.includes("claude-sonnet-4")
+				model.includes("claude-sonnet-4") ||
+				model.includes("claude-4")
 			);
 		case "GOOGLE":
-			// Most Gemini models support vision, except embedding models
+			// Modern Gemini models support vision, except embedding models
+			if (model.includes("embedding") || model.includes("text-embedding")) {
+				return false;
+			}
 			return (
-				!model.includes("embedding") &&
-				!model.includes("text-embedding") &&
-				(model.includes("gemini") || model.includes("vision"))
+				model.includes("gemini-1.5") ||
+				model.includes("gemini-2") ||
+				model === "gemini-pro" ||
+				model === "gemini-pro-vision"
 			);
 		default:
 			return false;
@@ -108,25 +141,39 @@ export function supportsVision(provider: ProviderType, model: string): boolean {
 
 /**
  * Check if a model supports PDF/document inputs
+ * Based on AI SDK documentation and multimodal capabilities
  */
 export function supportsPDF(provider: ProviderType, model: string): boolean {
 	switch (provider) {
 		case "OPENAI":
-			// GPT-4o models support file inputs
-			return model.includes("gpt-4o") || model.includes("gpt-4.1");
+			// Modern OpenAI models with file/document support
+			return (
+				// GPT-4.1 series
+				model.startsWith("gpt-4.1") ||
+				// GPT-4o series
+				model.startsWith("gpt-4o") ||
+				// GPT-4 Turbo
+				model === "gpt-4-turbo"
+			);
 		case "ANTHROPIC":
-			// Claude 3 models support document inputs
+			// All modern Claude models support document inputs
 			return (
 				model.includes("claude-3") ||
 				model.includes("claude-opus-4") ||
-				model.includes("claude-sonnet-4")
+				model.includes("claude-sonnet-4") ||
+				model.includes("claude-4")
 			);
 		case "GOOGLE":
-			// Gemini 1.5 and newer support document inputs
+			// Modern Gemini models support document inputs
+			// Exclude embedding models
+			if (model.includes("embedding") || model.includes("text-embedding")) {
+				return false;
+			}
 			return (
 				model.includes("gemini-1.5") ||
 				model.includes("gemini-2") ||
-				model === "gemini-pro"
+				model === "gemini-pro" ||
+				model === "gemini-pro-vision"
 			);
 		default:
 			return false;

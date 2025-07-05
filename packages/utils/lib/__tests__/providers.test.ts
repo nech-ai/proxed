@@ -60,10 +60,11 @@ describe("Provider Functions", () => {
 		test("should return Google models", () => {
 			const models = getModelsForProvider("GOOGLE");
 			expect(models).toContain("gemini-2.5-pro");
+			expect(models).toContain("gemini-2.5-flash");
+			expect(models).toContain("gemini-2.0-flash");
 			expect(models).toContain("gemini-1.5-flash");
-			expect(models).toContain("gemini-pro");
-			expect(models).toContain("text-embedding-004");
-			expect(models.length).toBeGreaterThan(10);
+			expect(models).toContain("gemini-1.5-pro");
+			expect(models.length).toBe(5);
 		});
 	});
 
@@ -89,13 +90,10 @@ describe("Provider Functions", () => {
 
 		test("should return correct display names for Google models", () => {
 			expect(getModelDisplayName("gemini-2.5-pro")).toBe("Gemini 2.5 Pro");
+			expect(getModelDisplayName("gemini-2.5-flash")).toBe("Gemini 2.5 Flash");
+			expect(getModelDisplayName("gemini-2.0-flash")).toBe("Gemini 2.0 Flash");
 			expect(getModelDisplayName("gemini-1.5-flash")).toBe("Gemini 1.5 Flash");
-			expect(getModelDisplayName("gemini-pro-vision")).toBe(
-				"Gemini Pro Vision",
-			);
-			expect(getModelDisplayName("text-embedding-004")).toBe(
-				"Text Embedding 004",
-			);
+			expect(getModelDisplayName("gemini-1.5-pro")).toBe("Gemini 1.5 Pro");
 		});
 
 		test("should return model ID for unknown models", () => {
@@ -111,11 +109,9 @@ describe("Provider Functions", () => {
 			expect(getModelBadge("gpt-4.5-preview")).toBe("preview");
 			expect(getModelBadge("gpt-4o-2024-05-13")).toBe("deprecated");
 			expect(getModelBadge("gemini-2.5-pro")).toBe("new");
-			expect(getModelBadge("gemini-2.5-flash-lite-preview-06-17")).toBe(
-				"preview",
-			);
-			expect(getModelBadge("gemini-embedding-exp")).toBe("experimental");
+			expect(getModelBadge("gemini-2.5-flash")).toBe("new");
 			expect(getModelBadge("gpt-4o")).toBeUndefined();
+			expect(getModelBadge("gemini-1.5-flash")).toBeUndefined();
 		});
 
 		test("should return undefined for models without badges", () => {
@@ -169,8 +165,8 @@ describe("Provider Functions", () => {
 				"ANTHROPIC",
 			);
 			expect(getProviderForModel("gemini-2.5-pro")).toBe("GOOGLE");
+			expect(getProviderForModel("gemini-2.5-flash")).toBe("GOOGLE");
 			expect(getProviderForModel("gemini-1.5-flash")).toBe("GOOGLE");
-			expect(getProviderForModel("text-embedding-004")).toBe("GOOGLE");
 		});
 
 		test("should return null for unknown models", () => {
@@ -185,8 +181,8 @@ describe("Provider Functions", () => {
 			expect(isValidModel("claude-3-opus-20240229")).toBe(true);
 			expect(isValidModel("claude-3-5-haiku-20241022")).toBe(true);
 			expect(isValidModel("gemini-2.5-pro")).toBe(true);
+			expect(isValidModel("gemini-2.5-flash")).toBe(true);
 			expect(isValidModel("gemini-1.5-flash")).toBe(true);
-			expect(isValidModel("text-embedding-004")).toBe(true);
 		});
 
 		test("should reject unknown models", () => {

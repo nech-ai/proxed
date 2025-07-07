@@ -57,7 +57,7 @@
 		"react-cropper": "^2.3.3",
 		"react-dom": "19.1.0",
 		"react-dropzone": "^14.3.8",
-		"react-hook-form": "^7.59.0",
+		"react-hook-form": "^7.60.0",
 		"react-markdown": "^10.1.0",
 		"react-syntax-highlighter": "^15.6.1",
 		"remark-gfm": "^4.0.1",

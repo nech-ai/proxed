@@ -38,7 +38,7 @@
         "@hookform/resolvers": "^5.1.1",
         "@novu/headless": "^2.6.6",
         "@number-flow/react": "^0.5.10",
-        "@polar-sh/nextjs": "^0.4.1",
+        "@polar-sh/nextjs": "^0.4.2",
         "@polar-sh/sdk": "^0.33.2",
         "@proxed/analytics": "workspace:*",
         "@proxed/jobs": "workspace:*",
@@ -919,7 +919,7 @@
 
     "@polar-sh/adapter-utils": ["@polar-sh/adapter-utils@0.2.1", "", { "dependencies": { "@polar-sh/sdk": "^0.34.2" } }, "sha512-qcfTi6es9j4DRodYoPN1w5OHlVIjmPuTwV8CF1B09ghwI3gkI0s2wyCK0anTafcOSK5/astCTCbvUbgtRdw6yg=="],
 
-    "@polar-sh/nextjs": ["@polar-sh/nextjs@0.4.1", "", { "dependencies": { "@polar-sh/adapter-utils": "0.2.1", "@polar-sh/sdk": "^0.34.2" }, "peerDependencies": { "next": "^15.0.0 || ^15.2.0-canary.*" } }, "sha512-Hh0Tm/IkaCw+A6P/dZ7S23MgTloCI11kUTI2uc8+ImvFEozvrNhgky773wGXFwm+8wtnAir7pLZVPKqeP7dyqw=="],
+    "@polar-sh/nextjs": ["@polar-sh/nextjs@0.4.2", "", { "dependencies": { "@polar-sh/adapter-utils": "0.2.1", "@polar-sh/sdk": "^0.34.2" }, "peerDependencies": { "next": "^15.0.0 || ^15.2.0-canary.*" } }, "sha512-9xhOGr2pZ0Sbg8LPlXKn8qhSKiIC0VvYFgTnHQd7Fgogyu146KAGMTqQkSADuNmdoWctHoeNxHDLGvMDiKZYOg=="],
 
     "@polar-sh/sdk": ["@polar-sh/sdk@0.33.2", "", { "dependencies": { "standardwebhooks": "^1.0.0" }, "peerDependencies": { "@modelcontextprotocol/sdk": ">=1.5.0 <1.10.0", "zod": ">= 3" }, "optionalPeers": ["@modelcontextprotocol/sdk"], "bin": { "mcp": "bin/mcp-server.js" } }, "sha512-k/YDcwuPKlQdgJXEQkRBQY2ZFxzJHdSNE+Pqz3FMiWTC9hWk7eyfTI6fzJeYfMuhQnY801oujiOg3ZbYHxW8nw=="],
 

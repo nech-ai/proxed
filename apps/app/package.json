@@ -14,7 +14,7 @@
 		"@novu/headless": "^2.6.6",
 		"@number-flow/react": "^0.5.10",
 		"@polar-sh/nextjs": "^0.4.1",
-		"@polar-sh/sdk": "^0.33.2",
+		"@polar-sh/sdk": "^0.34.3",
 		"@proxed/analytics": "workspace:*",
 		"@proxed/jobs": "workspace:*",
 		"@proxed/location": "workspace:*",

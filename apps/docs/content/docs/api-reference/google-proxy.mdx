@@ -1,0 +1,151 @@
+---
+title: Google AI Proxy API
+description: |
+  API reference for proxying requests to the Google AI API via /v1/google/{projectId}/*. Securely use Google's Gemini models with Proxed.AI's features.
+---
+
+# Google AI Proxy (`/v1/google/{projectId}/*`)
+
+The Google AI Proxy endpoint allows you to securely route your requests to the official Google AI API through Proxed.AI. This enables you to leverage Proxed.AI's security features (DeviceCheck, Partial Keys) and observability (usage tracking, rate limiting) while interacting with Google's Gemini models.
+
+## Endpoint
+
+*   `POST /v1/google/{projectId}/{google-api-path}`
+
+*   `{projectId}` (string, required): Your Proxed.AI project identifier.
+*   `{google-api-path}` (string, required): The specific path for the Google AI API you wish to target (e.g., `models/gemini-pro:generateContent`).
+
+Currently, POST requests to paths like `models/{model}:generateContent` are the primary method for Google's Gemini API.
+
+## Authentication
+
+Requires authentication. See the [API Authentication guide](/docs/authentication).
+
+## Headers
+
+*   `Authorization: Bearer {your-partial-api-key}.{your-token}` (Recommended method)
+*   `Content-Type: application/json` (Required)
+*   Proxed.AI automatically injects the necessary Google-specific headers:
+    *   `x-goog-api-key: {GOOGLE_API_KEY}` (Full key reconstructed from your partial key)
+    *   `x-goog-api-client: proxed-api` (Client identifier)
+*   `x-project-id`: Not typically needed here as the project ID is in the URL path.
+*   `x-ai-key`, `x-device-token`: Only if using alternative authentication methods.
+
+## Request Body
+
+The request body should be **exactly** what the target Google AI API endpoint expects.
+
+**Example (for `/v1/google/{projectId}/models/gemini-pro:generateContent`):**
+
+```json
+{
+  "contents": [
+    {
+      "parts": [
+        {
+          "text": "Explain how quantum computing works in simple terms"
+        }
+      ]
+    }
+  ],
+  "generationConfig": {
+    "temperature": 0.7,
+    "maxOutputTokens": 1024
+  }
+}
+```
+
+Refer to the [official Google AI documentation](https://ai.google.dev/api/rest) for detailed request body structures.
+
+## Successful Response (Matches Google's Response)
+
+The response from this endpoint will be the **direct response from the Google AI API**.
+Proxed.AI does not modify the successful response body from Google.
+
+**Example (from `/v1/google/{projectId}/models/gemini-pro:generateContent`):**
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "Quantum computing uses quantum bits (qubits) that can exist in multiple states simultaneously..."
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0,
+      "safetyRatings": [
+        {
+          "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+          "probability": "NEGLIGIBLE"
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 10,
+    "candidatesTokenCount": 50,
+    "totalTokenCount": 60
+  }
+}
+```
+
+## Supported Models
+
+*   **Gemini 2.5 Series**: `gemini-2.5-pro`, `gemini-2.5-flash`
+*   **Gemini 2.0 Series**: `gemini-2.0-flash`, `gemini-2.0-flash-lite`
+*   **Gemini 1.5 Series**: `gemini-1.5-pro`, `gemini-1.5-flash`, `gemini-1.5-flash-8b`
+*   **Specialized Models**: Vision models, embedding models (`text-embedding-004`)
+
+## Error Responses
+
+*   **Proxed.AI Errors:** Refer to the [API Errors guide](/api-errors) (e.g., `UNAUTHORIZED`, `PROJECT_NOT_FOUND`, `TOO_MANY_REQUESTS`).
+*   **Google AI Errors:** If authentication with Proxed.AI is successful, but Google returns an error, the proxy will forward Google's error response.
+
+## Example Request (curl for Content Generation)
+
+```bash
+curl -X POST \
+  https://api.proxed.ai/v1/google/{your-project-id}/models/gemini-pro:generateContent \
+  -H "Authorization: Bearer {your-partial-api-key}.{your-device-token-or-test-key}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [{
+      "parts": [{
+        "text": "What are the main differences between machine learning and deep learning?"
+      }]
+    }],
+    "generationConfig": {
+      "temperature": 0.8,
+      "maxOutputTokens": 500
+    }
+  }'
+```
+
+## Vision Analysis Example
+
+Google's Gemini models support multimodal inputs. Here's an example with image analysis:
+
+```bash
+curl -X POST \
+  https://api.proxed.ai/v1/google/{your-project-id}/models/gemini-pro-vision:generateContent \
+  -H "Authorization: Bearer {your-partial-api-key}.{your-device-token-or-test-key}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [{
+      "parts": [
+        {"text": "What is in this image?"},
+        {
+          "inline_data": {
+            "mime_type": "image/jpeg",
+            "data": "base64_encoded_image_data_here"
+          }
+        }
+      ]
+    }]
+  }'
+```

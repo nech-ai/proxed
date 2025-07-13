@@ -55,6 +55,16 @@ The response will be a JSON object whose structure is determined by the **output
 }
 ```
 
+## Supported Providers and Models
+
+Proxed.AI supports PDF analysis with multimodal models from:
+
+*   **OpenAI**: `gpt-4.1`, `gpt-4o`, `gpt-4o-mini` (with vision capabilities for PDF rendering)
+*   **Anthropic**: `claude-4-opus`, `claude-4-sonnet`
+*   **Google AI**: `gemini-2.5-pro`, `gemini-2.5-flash`, `gemini-2.0-flash`, `gemini-1.5-pro`, `gemini-1.5-flash`
+
+Note: PDF support requires models with multimodal capabilities. The system automatically selects an appropriate model based on your project's provider.
+
 ## Error Responses
 
 Refer to the [API Errors guide](/api-errors) for details on error codes and messages.

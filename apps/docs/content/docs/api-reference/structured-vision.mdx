@@ -52,6 +52,16 @@ The response will be a JSON object whose structure is determined by the **output
 }
 ```
 
+## Supported Providers and Models
+
+Proxed.AI automatically uses vision-capable models based on your project's provider:
+
+*   **OpenAI**: `gpt-4.1`, `gpt-4o`, `gpt-4o-mini`
+*   **Anthropic**: `claude-4-opus`, `claude-4-sonnet`
+*   **Google AI**: `gemini-2.5-pro`, `gemini-2.5-flash`, `gemini-2.0-flash`, `gemini-1.5-pro`, `gemini-1.5-flash`
+
+You can specify a custom model in your project settings if needed.
+
 ## Error Responses
 
 Refer to the [API Errors guide](/api-errors) for details on error codes and messages.

@@ -1,6 +1,6 @@
 {
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4"
+		"@biomejs/biome": "2.1.1"
 	},
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules",

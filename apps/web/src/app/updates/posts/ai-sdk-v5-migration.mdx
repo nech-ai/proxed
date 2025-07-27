@@ -1,0 +1,58 @@
+---
+title: "Major Upgrade: Proxed.AI Now Powered by AI SDK v5"
+publishedAt: "2025-07-27"
+summary: "We've migrated Proxed.AI to the latest AI SDK v5, unlocking enhanced performance, better type safety, and a more robust developer experience for all your secure AI integrations."
+image: "/images/starting.png"
+tag: "Engineering"
+---
+
+We're excited to announce a significant upgrade to our core infrastructure: Proxed.AI has been fully migrated to the AI SDK v5. This move allows us to leverage the latest advancements in AI development tooling, bringing improved performance, stronger security, and a better developer experience to our platform.
+
+<br />
+### Why Upgrade to AI SDK v5?
+
+The AI SDK v5 is a major step forward, introducing significant improvements in type safety, consistency, and overall performance. By upgrading, we are able to:
+
+- **Enhance Type Safety**: The new version provides more robust type definitions, reducing the chance of runtime errors and making integrations more reliable.
+- **Improve Performance**: AI SDK v5 includes optimizations that lead to faster response times and more efficient processing of AI requests.
+- **Standardize the Developer Experience**: The updated SDK offers a more consistent and intuitive API, which simplifies our internal development and will make it easier to add new features in the future.
+
+This migration touches every part of our system, from how we handle [structured responses](/updates/structured-routes) for text, vision, and PDF analysis to the way we manage [API authentication](/updates/api-authentication-explained).
+
+<br />
+### What This Means for You
+
+While this is primarily an internal infrastructure upgrade, you'll experience the benefits through:
+
+1.  **Faster and More Reliable Responses**: The performance improvements in AI SDK v5 mean your requests will be processed more quickly and with greater stability.
+2.  **More Consistent API Behavior**: The updated, standardized APIs will lead to more predictable behavior across all supported providers, including [OpenAI](/updates/public-launch), [Anthropic](/updates/public-launch), and [Google AI](/updates/google-ai-integration).
+3.  **Future-Proofing**: By staying on the cutting edge of AI tooling, we ensure that Proxed.AI can quickly adopt new features and capabilities as they are released.
+
+The core principles of our platform remain the same. We are still committed to providing top-tier security through our [split-key architecture and DeviceCheck integration](/updates/token-generation), and our platform is still fully [open-source](https://github.com/nech-ai/proxed) for those who wish to [self-host](/updates/our-pricing-philosophy).
+
+<br />
+### Under the Hood: Key Migration Changes
+
+For those interested in the technical details, the migration involved several key changes:
+
+- **Package Updates**: We've moved from stable versions of the AI SDK to the latest `5.0.0-beta` releases across all our packages to ensure full compatibility.
+- **API Client Refactoring**: We've updated our internal AI client to use the new provider patterns introduced in v5.
+- **Modernized API Calls**: We refactored our `generateObject` calls for structured data extraction to align with the new, more streamlined v5 syntax. This affects our text, vision, and PDF analysis routes.
+- **Updated Token Usage Tracking**: The way token usage is reported by the SDK has changed. We've updated our metrics and cost-tracking systems to use the new `inputTokens` and `outputTokens` properties, ensuring our [consumption notifications](/updates/consumption-notifications) and analytics remain accurate.
+
+These changes are designed to be seamless. Your existing integrations will continue to work without any modifications on your end.
+
+<br />
+### The Road Ahead
+
+This migration to AI SDK v5 is a foundational step that prepares us for the exciting features on our [roadmap](/updates/proxed-ai-roadmap). With a more powerful and flexible core, we can accelerate the development of:
+
+-   Advanced rate limiting and cost controls.
+-   Deeper multi-provider support and smart routing.
+-   Enhanced monitoring and analytics.
+
+We're committed to providing the most secure and developer-friendly platform for integrating AI into your iOS apps. This upgrade is a testament to that commitment.
+
+As always, you can follow our progress on [GitHub](https://github.com/nech-ai/proxed) and check out our [documentation](https://docs.proxed.ai) for more details on our security and integration patterns.
+
+Stay tuned for more updates as we continue to build upon this new foundation!

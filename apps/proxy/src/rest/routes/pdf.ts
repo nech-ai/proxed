@@ -1,5 +1,5 @@
 import { ZodParser, type JsonSchema } from "@proxed/structure";
-import { generateObject } from "ai";
+import { generateObject, NoObjectGeneratedError } from "ai";
 import { type Context, Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 import { protectedMiddleware } from "../middleware";
@@ -105,6 +105,8 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 			generateObject({
 				model: aiClient(modelToUse),
 				schema,
+				schemaName: (project.schemaConfig as any)?.title,
+				schemaDescription: (project.schemaConfig as any)?.description,
 				messages: [
 					{
 						role: "system",
@@ -129,6 +131,13 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 						],
 					},
 				],
+				experimental_repairText: async ({ text, error }) => {
+					// example: add a closing brace to the text
+					if (error.message.includes("Unexpected end of JSON input")) {
+						return `${text}}`;
+					}
+					return text;
+				},
 			}),
 			60000, // 60 second timeout for PDF processing
 			"PDF AI generation timed out after 60 seconds",
@@ -155,6 +164,33 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 			projectId: project.id,
 			teamId,
 		});
+
+		if (NoObjectGeneratedError.isInstance(error)) {
+			await recordExecution(
+				c,
+				startTime,
+				{
+					promptTokens: error.usage?.inputTokens || 0,
+					completionTokens: error.usage?.outputTokens || 0,
+					totalTokens: error.usage?.totalTokens || 0,
+					finishReason: "error" as FinishReason,
+					error: {
+						message: error.message,
+						code: error.name,
+					},
+					response: {
+						text: error.text,
+						cause: error.cause,
+					},
+				},
+				{ project, teamId },
+			);
+
+			throw createError(ErrorCode.PROVIDER_ERROR, error.message, {
+				originalError: error.cause,
+				projectId: project.id,
+			});
+		}
 
 		// Record failed execution
 		await recordExecution(

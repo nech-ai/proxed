@@ -1,8 +1,9 @@
 {
 	"dependencies": {
-		"@ai-sdk/anthropic": "^1.2.12",
-		"@ai-sdk/google": "^1.2.19",
-		"@ai-sdk/openai": "^1.3.22",
+		"@ai-sdk/anthropic": "^2.0.0-beta.9",
+		"@ai-sdk/google": "^2.0.0-beta.15",
+		"@ai-sdk/openai": "^2.0.0-beta.12",
+		"@ai-sdk/react": "^2.0.0-beta.28",
 		"@date-fns/utc": "^2.1.0",
 		"@hono/zod-openapi": "^0.19.9",
 		"@hono/zod-validator": "^0.7.0",
@@ -16,7 +17,7 @@
 		"@supabase/supabase-js": "^2.50.2",
 		"@trigger.dev/sdk": "^3.3.17",
 		"@upstash/ratelimit": "^2.0.5",
-		"ai": "^4.3.16",
+		"ai": "^5.0.0-beta.28",
 		"camelcase-keys": "^9.1.3",
 		"date-fns": "^4.1.0",
 		"drizzle-orm": "^0.44.2",

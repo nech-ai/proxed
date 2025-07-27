@@ -3,7 +3,7 @@
 import { filterExecutionsSchema } from "@/actions/schema";
 import { openai } from "@ai-sdk/openai";
 import { streamObject } from "ai";
-import { createStreamableValue } from "ai/rsc";
+import { createStreamableValue } from "@ai-sdk/rsc";
 
 const VALID_FILTERS = [
 	"projectId",

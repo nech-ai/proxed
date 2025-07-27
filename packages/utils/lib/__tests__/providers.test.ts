@@ -46,25 +46,30 @@ describe("Provider Functions", () => {
 			expect(models).toContain("gpt-4o");
 			expect(models).toContain("gpt-4o-mini");
 			expect(models).toContain("o1");
-			expect(models.length).toBeGreaterThan(20);
+			expect(models).toContain("gpt-4.1");
+			expect(models).toContain("o3");
+			expect(models).toContain("o4-mini");
+			expect(models).toContain("gpt-3.5-turbo");
+			expect(models).toContain("chatgpt-4o-latest");
+			expect(models.length).toBe(16); // 16 AI SDK 5 supported models
 		});
 
 		test("should return Anthropic models", () => {
 			const models = getModelsForProvider("ANTHROPIC");
-			expect(models).toContain("claude-3-opus-20240229");
+			expect(models).toContain("claude-4-opus-20250514");
+			expect(models).toContain("claude-4-sonnet-20250514");
+			expect(models).toContain("claude-3-7-sonnet-20250219");
 			expect(models).toContain("claude-3-5-sonnet-20241022");
 			expect(models).toContain("claude-3-haiku-20240307");
-			expect(models.length).toBeGreaterThan(10);
+			expect(models.length).toBe(9); // 9 AI SDK 5 supported models
 		});
 
 		test("should return Google models", () => {
 			const models = getModelsForProvider("GOOGLE");
-			expect(models).toContain("gemini-2.5-pro");
 			expect(models).toContain("gemini-2.5-flash");
-			expect(models).toContain("gemini-2.0-flash");
-			expect(models).toContain("gemini-1.5-flash");
+			expect(models).toContain("gemini-2.0-flash-exp");
 			expect(models).toContain("gemini-1.5-pro");
-			expect(models.length).toBe(5);
+			expect(models.length).toBe(12); // 12 AI SDK 5 supported models
 		});
 	});
 
@@ -72,26 +77,26 @@ describe("Provider Functions", () => {
 		test("should return correct display names for OpenAI models", () => {
 			expect(getModelDisplayName("gpt-4o")).toBe("GPT-4o");
 			expect(getModelDisplayName("gpt-4o-mini")).toBe("GPT-4o Mini");
-			expect(getModelDisplayName("o1-pro")).toBe("o1 Pro");
+			expect(getModelDisplayName("o1")).toBe("o1");
 			expect(getModelDisplayName("gpt-4.1-nano")).toBe("GPT-4.1 Nano");
 		});
 
 		test("should return correct display names for Anthropic models", () => {
-			expect(getModelDisplayName("claude-3-opus-20240229")).toBe(
-				"Claude 3 Opus",
+			expect(getModelDisplayName("claude-4-opus-20250514")).toBe(
+				"Claude 4 Opus",
 			);
 			expect(getModelDisplayName("claude-3-5-haiku-20241022")).toBe(
 				"Claude 3.5 Haiku",
 			);
-			expect(getModelDisplayName("claude-3-7-sonnet-latest")).toBe(
-				"Claude 3.7 Sonnet (Latest)",
+			expect(getModelDisplayName("claude-3-7-sonnet-20250219")).toBe(
+				"Claude 3.7 Sonnet",
 			);
 		});
 
 		test("should return correct display names for Google models", () => {
-			expect(getModelDisplayName("gemini-2.5-pro")).toBe("Gemini 2.5 Pro");
-			expect(getModelDisplayName("gemini-2.5-flash")).toBe("Gemini 2.5 Flash");
-			expect(getModelDisplayName("gemini-2.0-flash")).toBe("Gemini 2.0 Flash");
+			expect(getModelDisplayName("gemini-2.0-flash-exp")).toBe(
+				"Gemini 2.0 Flash Exp",
+			);
 			expect(getModelDisplayName("gemini-1.5-flash")).toBe("Gemini 1.5 Flash");
 			expect(getModelDisplayName("gemini-1.5-pro")).toBe("Gemini 1.5 Pro");
 		});
@@ -106,17 +111,16 @@ describe("Provider Functions", () => {
 	describe("getModelBadge", () => {
 		test("should return correct badges", () => {
 			expect(getModelBadge("gpt-4.1")).toBe("new");
-			expect(getModelBadge("gpt-4.5-preview")).toBe("preview");
-			expect(getModelBadge("gpt-4o-2024-05-13")).toBe("deprecated");
-			expect(getModelBadge("gemini-2.5-pro")).toBe("new");
-			expect(getModelBadge("gemini-2.5-flash")).toBe("new");
+			expect(getModelBadge("o1-preview")).toBe("preview");
+			expect(getModelBadge("o3")).toBe("new");
+			expect(getModelBadge("gemini-2.0-flash-exp")).toBe("experimental");
 			expect(getModelBadge("gpt-4o")).toBeUndefined();
 			expect(getModelBadge("gemini-1.5-flash")).toBeUndefined();
 		});
 
 		test("should return undefined for models without badges", () => {
 			expect(getModelBadge("gpt-4o-mini")).toBeUndefined();
-			expect(getModelBadge("claude-3-haiku-20240307")).toBeUndefined();
+			expect(getModelBadge("claude-3-5-sonnet-20241022")).toBeUndefined();
 		});
 	});
 
@@ -124,13 +128,13 @@ describe("Provider Functions", () => {
 		test("should correctly identify OpenAI models", () => {
 			expect(isModelForProvider("gpt-4o", "OPENAI")).toBe(true);
 			expect(isModelForProvider("gpt-4o-mini", "OPENAI")).toBe(true);
-			expect(isModelForProvider("claude-3-opus-20240229", "OPENAI")).toBe(
+			expect(isModelForProvider("claude-4-opus-20250514", "OPENAI")).toBe(
 				false,
 			);
 		});
 
 		test("should correctly identify Anthropic models", () => {
-			expect(isModelForProvider("claude-3-opus-20240229", "ANTHROPIC")).toBe(
+			expect(isModelForProvider("claude-4-opus-20250514", "ANTHROPIC")).toBe(
 				true,
 			);
 			expect(isModelForProvider("claude-3-5-haiku-20241022", "ANTHROPIC")).toBe(
@@ -140,10 +144,10 @@ describe("Provider Functions", () => {
 		});
 
 		test("should correctly identify Google models", () => {
-			expect(isModelForProvider("gemini-2.5-pro", "GOOGLE")).toBe(true);
+			expect(isModelForProvider("gemini-2.0-flash-exp", "GOOGLE")).toBe(true);
 			expect(isModelForProvider("gemini-1.5-flash", "GOOGLE")).toBe(true);
 			expect(isModelForProvider("gpt-4o", "GOOGLE")).toBe(false);
-			expect(isModelForProvider("claude-3-opus-20240229", "GOOGLE")).toBe(
+			expect(isModelForProvider("claude-opus-4-20250514", "GOOGLE")).toBe(
 				false,
 			);
 		});
@@ -159,14 +163,13 @@ describe("Provider Functions", () => {
 		test("should return correct provider for models", () => {
 			expect(getProviderForModel("gpt-4o")).toBe("OPENAI");
 			expect(getProviderForModel("gpt-4o-mini")).toBe("OPENAI");
-			expect(getProviderForModel("o1-pro")).toBe("OPENAI");
-			expect(getProviderForModel("claude-3-opus-20240229")).toBe("ANTHROPIC");
+			expect(getProviderForModel("o1")).toBe("OPENAI");
+			expect(getProviderForModel("claude-4-opus-20250514")).toBe("ANTHROPIC");
 			expect(getProviderForModel("claude-3-5-haiku-20241022")).toBe(
 				"ANTHROPIC",
 			);
-			expect(getProviderForModel("gemini-2.5-pro")).toBe("GOOGLE");
-			expect(getProviderForModel("gemini-2.5-flash")).toBe("GOOGLE");
-			expect(getProviderForModel("gemini-1.5-flash")).toBe("GOOGLE");
+			expect(getProviderForModel("gemini-2.0-flash-exp")).toBe("GOOGLE");
+			expect(getProviderForModel("gemini-1.5-pro")).toBe("GOOGLE");
 		});
 
 		test("should return null for unknown models", () => {
@@ -178,10 +181,9 @@ describe("Provider Functions", () => {
 		test("should validate known models", () => {
 			expect(isValidModel("gpt-4o")).toBe(true);
 			expect(isValidModel("gpt-4o-mini")).toBe(true);
-			expect(isValidModel("claude-3-opus-20240229")).toBe(true);
+			expect(isValidModel("claude-4-opus-20250514")).toBe(true);
 			expect(isValidModel("claude-3-5-haiku-20241022")).toBe(true);
-			expect(isValidModel("gemini-2.5-pro")).toBe(true);
-			expect(isValidModel("gemini-2.5-flash")).toBe(true);
+			expect(isValidModel("gemini-2.0-flash-exp")).toBe(true);
 			expect(isValidModel("gemini-1.5-flash")).toBe(true);
 		});
 
@@ -190,6 +192,8 @@ describe("Provider Functions", () => {
 			expect(isValidModel("claude-4")).toBe(false);
 			expect(isValidModel("unknown-model")).toBe(false);
 			expect(isValidModel("")).toBe(false);
+			expect(isValidModel("text-davinci-003")).toBe(false); // Not in AI SDK 5
+			expect(isValidModel("claude-instant-1.2")).toBe(false); // Not in AI SDK 5
 		});
 	});
 
@@ -235,9 +239,7 @@ describe("Provider Functions", () => {
 		test("should include badges in options", () => {
 			const options = getModelOptions("OPENAI");
 			const newModel = options.find((opt) => opt.value === "gpt-4.1");
-			const previewModel = options.find(
-				(opt) => opt.value === "gpt-4.5-preview",
-			);
+			const previewModel = options.find((opt) => opt.value === "o1-preview");
 
 			expect(newModel?.badge).toBe("new");
 			expect(previewModel?.badge).toBe("preview");
@@ -269,8 +271,8 @@ describe("Provider Functions", () => {
 		test("should contain all model IDs", () => {
 			expect(MODEL_VALUES.length).toBe(ALL_MODELS.length);
 			expect(MODEL_VALUES).toContain("gpt-4o");
-			expect(MODEL_VALUES).toContain("claude-3-opus-20240229");
-			expect(MODEL_VALUES).toContain("gemini-2.5-pro");
+			expect(MODEL_VALUES).toContain("claude-4-opus-20250514");
+			expect(MODEL_VALUES).toContain("gemini-2.0-flash-exp");
 			expect(MODEL_VALUES).toContain("gemini-1.5-flash");
 		});
 

@@ -31,195 +31,102 @@ interface ModelDefinition {
 // Model definitions with display names
 export const MODELS = {
 	OPENAI: {
-		// GPT-4.1 series
+		// GPT-4.1 series - Supported in AI SDK 5
 		"gpt-4.1": { displayName: "GPT-4.1", order: 1, badge: "new" as ModelBadge },
-		"gpt-4.1-2025-04-14": {
-			displayName: "GPT-4.1 (2025-04-14)",
-			order: 2,
-			badge: "new" as ModelBadge,
-		},
 		"gpt-4.1-mini": {
 			displayName: "GPT-4.1 Mini",
-			order: 3,
-			badge: "new" as ModelBadge,
-		},
-		"gpt-4.1-mini-2025-04-14": {
-			displayName: "GPT-4.1 Mini (2025-04-14)",
-			order: 4,
+			order: 2,
 			badge: "new" as ModelBadge,
 		},
 		"gpt-4.1-nano": {
 			displayName: "GPT-4.1 Nano",
-			order: 5,
-			badge: "new" as ModelBadge,
-		},
-		"gpt-4.1-nano-2025-04-14": {
-			displayName: "GPT-4.1 Nano (2025-04-14)",
-			order: 6,
+			order: 3,
 			badge: "new" as ModelBadge,
 		},
 
-		// GPT-4.5 series
-		"gpt-4.5-preview": {
-			displayName: "GPT-4.5 Preview",
-			order: 7,
-			badge: "preview" as ModelBadge,
-		},
-		"gpt-4.5-preview-2025-02-27": {
-			displayName: "GPT-4.5 Preview (2025-02-27)",
-			order: 8,
-			badge: "preview" as ModelBadge,
-		},
-
-		// GPT-4o series
-		"gpt-4o": { displayName: "GPT-4o", order: 9 },
-		"gpt-4o-2024-11-20": { displayName: "GPT-4o (2024-11-20)", order: 10 },
-		"gpt-4o-2024-08-06": { displayName: "GPT-4o (2024-08-06)", order: 11 },
-		"gpt-4o-2024-05-13": {
-			displayName: "GPT-4o (2024-05-13)",
-			order: 12,
-			badge: "deprecated" as ModelBadge,
-		},
+		// GPT-4o series - Supported in AI SDK 5
+		"gpt-4o": { displayName: "GPT-4o", order: 4 },
+		"gpt-4o-mini": { displayName: "GPT-4o Mini", order: 5 },
 		"gpt-4o-audio-preview": {
-			displayName: "GPT-4o Audio Preview",
-			order: 13,
+			displayName: "GPT-4o Audio",
+			order: 6,
 			badge: "preview" as ModelBadge,
 		},
-		"gpt-4o-audio-preview-2024-12-17": {
-			displayName: "GPT-4o Audio Preview (2024-12-17)",
+
+		// GPT-4 series - Supported in AI SDK 5
+		"gpt-4-turbo": { displayName: "GPT-4 Turbo", order: 7 },
+		"gpt-4": { displayName: "GPT-4", order: 8 },
+		"gpt-3.5-turbo": { displayName: "GPT-3.5 Turbo", order: 9 },
+
+		// o1 series - Supported in AI SDK 5
+		o1: { displayName: "o1", order: 10 },
+		"o1-mini": { displayName: "o1 Mini", order: 11 },
+		"o1-preview": {
+			displayName: "o1 Preview",
+			order: 12,
+			badge: "preview" as ModelBadge,
+		},
+
+		// o3 series - Supported in AI SDK 5
+		o3: { displayName: "o3", order: 13, badge: "new" as ModelBadge },
+		"o3-mini": {
+			displayName: "o3 Mini",
 			order: 14,
-			badge: "preview" as ModelBadge,
+			badge: "new" as ModelBadge,
 		},
-		"gpt-4o-realtime-preview": {
-			displayName: "GPT-4o Realtime Preview",
+
+		// o4 series - Supported in AI SDK 5
+		"o4-mini": {
+			displayName: "o4 Mini",
 			order: 15,
-			badge: "preview" as ModelBadge,
+			badge: "new" as ModelBadge,
 		},
-		"gpt-4o-realtime-preview-2024-12-17": {
-			displayName: "GPT-4o Realtime Preview (2024-12-17)",
+
+		// ChatGPT models - Supported in AI SDK 5
+		"chatgpt-4o-latest": {
+			displayName: "ChatGPT 4o Latest",
 			order: 16,
 			badge: "preview" as ModelBadge,
 		},
-
-		// GPT-4o mini series
-		"gpt-4o-mini": { displayName: "GPT-4o Mini", order: 17 },
-		"gpt-4o-mini-2024-07-18": {
-			displayName: "GPT-4o Mini (2024-07-18)",
-			order: 18,
-		},
-		"gpt-4o-mini-audio-preview": {
-			displayName: "GPT-4o Mini Audio Preview",
-			order: 19,
-			badge: "preview" as ModelBadge,
-		},
-		"gpt-4o-mini-audio-preview-2024-12-17": {
-			displayName: "GPT-4o Mini Audio Preview (2024-12-17)",
-			order: 20,
-			badge: "preview" as ModelBadge,
-		},
-		"gpt-4o-mini-realtime-preview": {
-			displayName: "GPT-4o Mini Realtime Preview",
-			order: 21,
-			badge: "preview" as ModelBadge,
-		},
-		"gpt-4o-mini-realtime-preview-2024-12-17": {
-			displayName: "GPT-4o Mini Realtime Preview (2024-12-17)",
-			order: 22,
-			badge: "preview" as ModelBadge,
-		},
-
-		// o1 series
-		o1: { displayName: "o1", order: 23 },
-		"o1-2024-12-17": { displayName: "o1 (2024-12-17)", order: 24 },
-		"o1-pro": { displayName: "o1 Pro", order: 25, badge: "new" as ModelBadge },
-		"o1-pro-2025-03-19": {
-			displayName: "o1 Pro (2025-03-19)",
-			order: 26,
-			badge: "new" as ModelBadge,
-		},
-		"o1-mini": { displayName: "o1 Mini", order: 27 },
-		"o1-mini-2024-09-12": { displayName: "o1 Mini (2024-09-12)", order: 28 },
-
-		// o3 series
-		o3: { displayName: "o3", order: 29, badge: "new" as ModelBadge },
-		"o3-2025-04-16": {
-			displayName: "o3 (2025-04-16)",
-			order: 30,
-			badge: "new" as ModelBadge,
-		},
-		"o3-mini": {
-			displayName: "o3 Mini",
-			order: 31,
-			badge: "new" as ModelBadge,
-		},
-		"o3-mini-2025-01-31": {
-			displayName: "o3 Mini (2025-01-31)",
-			order: 32,
-			badge: "new" as ModelBadge,
-		},
-
-		// o4 series
-		"o4-mini": {
-			displayName: "o4 Mini",
-			order: 33,
-			badge: "new" as ModelBadge,
-		},
-		"o4-mini-2025-04-16": {
-			displayName: "o4 Mini (2025-04-16)",
-			order: 34,
-			badge: "new" as ModelBadge,
-		},
 	},
 	ANTHROPIC: {
-		// Claude Opus models
-		"claude-opus-4-20250514": {
-			displayName: "Claude Opus 4",
+		// Claude 4 models - Supported in AI SDK 5
+		"claude-4-opus-20250514": {
+			displayName: "Claude 4 Opus",
 			order: 1,
 			badge: "new" as ModelBadge,
 		},
-		"claude-3-opus-20240229": { displayName: "Claude 3 Opus", order: 2 },
-		"claude-3-opus-latest": { displayName: "Claude 3 Opus (Latest)", order: 3 },
-
-		// Claude Sonnet models
-		"claude-sonnet-4-20250514": {
-			displayName: "Claude Sonnet 4",
-			order: 4,
+		"claude-4-sonnet-20250514": {
+			displayName: "Claude 4 Sonnet",
+			order: 2,
 			badge: "new" as ModelBadge,
 		},
+
+		// Claude 3.7 Sonnet - Supported in AI SDK 5
 		"claude-3-7-sonnet-20250219": {
 			displayName: "Claude 3.7 Sonnet",
-			order: 5,
+			order: 3,
 			badge: "new" as ModelBadge,
 		},
-		"claude-3-7-sonnet-latest": {
-			displayName: "Claude 3.7 Sonnet (Latest)",
-			order: 6,
-			badge: "new" as ModelBadge,
-		},
+
+		// Claude 3.5 models - Supported in AI SDK 5
 		"claude-3-5-sonnet-20241022": {
 			displayName: "Claude 3.5 Sonnet v2",
-			order: 7,
-		},
-		"claude-3-5-sonnet-latest": {
-			displayName: "Claude 3.5 Sonnet (Latest)",
-			order: 8,
+			order: 4,
 		},
 		"claude-3-5-sonnet-20240620": {
 			displayName: "Claude 3.5 Sonnet",
-			order: 9,
+			order: 5,
 		},
-		"claude-3-sonnet-20240229": { displayName: "Claude 3 Sonnet", order: 10 },
+		"claude-3-5-haiku-20241022": { displayName: "Claude 3.5 Haiku", order: 6 },
 
-		// Claude Haiku models
-		"claude-3-5-haiku-20241022": { displayName: "Claude 3.5 Haiku", order: 11 },
-		"claude-3-5-haiku-latest": {
-			displayName: "Claude 3.5 Haiku (Latest)",
-			order: 12,
-		},
-		"claude-3-haiku-20240307": { displayName: "Claude 3 Haiku", order: 13 },
+		// Claude 3 models - Supported in AI SDK 5
+		"claude-3-opus-20240229": { displayName: "Claude 3 Opus", order: 7 },
+		"claude-3-sonnet-20240229": { displayName: "Claude 3 Sonnet", order: 8 },
+		"claude-3-haiku-20240307": { displayName: "Claude 3 Haiku", order: 9 },
 	},
 	GOOGLE: {
-		// Gemini 2.5 series (latest)
+		// Gemini 2.5 series - Supported in AI SDK 5
 		"gemini-2.5-pro": {
 			displayName: "Gemini 2.5 Pro",
 			order: 1,
@@ -230,13 +137,41 @@ export const MODELS = {
 			order: 2,
 			badge: "new" as ModelBadge,
 		},
+		"gemini-2.5-flash-lite": {
+			displayName: "Gemini 2.5 Flash Lite",
+			order: 3,
+			badge: "new" as ModelBadge,
+		},
+		"gemini-2.5-flash-lite-preview-06-17": {
+			displayName: "Gemini 2.5 Flash Lite Preview",
+			order: 4,
+			badge: "preview" as ModelBadge,
+		},
 
-		// Gemini 2.0 series
-		"gemini-2.0-flash": { displayName: "Gemini 2.0 Flash", order: 3 },
+		// Gemini 2.0 series - Supported in AI SDK 5
+		"gemini-2.0-flash": {
+			displayName: "Gemini 2.0 Flash",
+			order: 5,
+		},
+		"gemini-2.0-flash-exp": {
+			displayName: "Gemini 2.0 Flash Exp",
+			order: 6,
+			badge: "experimental" as ModelBadge,
+		},
 
-		// Gemini 1.5 series
-		"gemini-1.5-flash": { displayName: "Gemini 1.5 Flash", order: 4 },
-		"gemini-1.5-pro": { displayName: "Gemini 1.5 Pro", order: 5 },
+		// Gemini 1.5 series - Supported in AI SDK 5
+		"gemini-1.5-pro": { displayName: "Gemini 1.5 Pro", order: 7 },
+		"gemini-1.5-pro-latest": { displayName: "Gemini 1.5 Pro Latest", order: 8 },
+		"gemini-1.5-flash": { displayName: "Gemini 1.5 Flash", order: 9 },
+		"gemini-1.5-flash-latest": {
+			displayName: "Gemini 1.5 Flash Latest",
+			order: 10,
+		},
+		"gemini-1.5-flash-8b": { displayName: "Gemini 1.5 Flash 8B", order: 11 },
+		"gemini-1.5-flash-8b-latest": {
+			displayName: "Gemini 1.5 Flash 8B Latest",
+			order: 12,
+		},
 	},
 } as const;
 

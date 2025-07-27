@@ -11,238 +11,151 @@ import type { ProviderType } from "../../rest/types";
 describe("default-models", () => {
 	describe("getDefaultModel", () => {
 		test("should return correct default models for each provider", () => {
-			expect(getDefaultModel("OPENAI")).toBe("gpt-4o");
-			expect(getDefaultModel("ANTHROPIC")).toBe("claude-3-5-sonnet-latest");
-			expect(getDefaultModel("GOOGLE")).toBe("gemini-2.5-pro");
+			expect(getDefaultModel("OPENAI")).toBe("gpt-4.1-mini");
+			expect(getDefaultModel("ANTHROPIC")).toBe("claude-4-sonnet-20250514");
+			expect(getDefaultModel("GOOGLE")).toBe("gemini-2.5-flash");
 		});
 
 		test("should return fallback for unknown provider", () => {
-			expect(getDefaultModel("UNKNOWN" as ProviderType)).toBe("gpt-4o");
+			expect(getDefaultModel("UNKNOWN" as ProviderType)).toBe("gpt-4.1-mini");
 		});
 	});
 
 	describe("supportsStructuredOutputs", () => {
-		describe("OpenAI", () => {
-			test("should support modern OpenAI models", () => {
-				// GPT-4.1 series
-				expect(supportsStructuredOutputs("OPENAI", "gpt-4.1")).toBe(true);
-				expect(supportsStructuredOutputs("OPENAI", "gpt-4.1-mini")).toBe(true);
-				expect(supportsStructuredOutputs("OPENAI", "gpt-4.1-nano")).toBe(true);
+		test("should return true for all AI SDK 5 OpenAI models", () => {
+			const openAIModels = [
+				"gpt-4.1",
+				"gpt-4.1-mini",
+				"gpt-4.1-nano",
+				"gpt-4o",
+				"gpt-4o-mini",
+				"gpt-4o-audio-preview",
+				"gpt-4-turbo",
+				"gpt-4",
+				"gpt-3.5-turbo",
+				"o1",
+				"o1-mini",
+				"o1-preview",
+				"o3",
+				"o3-mini",
+				"o4-mini",
+				"chatgpt-4o-latest",
+			];
 
-				// GPT-4o series
-				expect(supportsStructuredOutputs("OPENAI", "gpt-4o")).toBe(true);
-				expect(supportsStructuredOutputs("OPENAI", "gpt-4o-mini")).toBe(true);
-				expect(supportsStructuredOutputs("OPENAI", "gpt-4o-2024-11-20")).toBe(
-					true,
-				);
-
-				// GPT-4 Turbo
-				expect(supportsStructuredOutputs("OPENAI", "gpt-4-turbo")).toBe(true);
-				expect(supportsStructuredOutputs("OPENAI", "gpt-4")).toBe(true);
-
-				// o1 series
-				expect(supportsStructuredOutputs("OPENAI", "o1")).toBe(true);
-				expect(supportsStructuredOutputs("OPENAI", "o1-mini")).toBe(true);
-				expect(supportsStructuredOutputs("OPENAI", "o1-preview")).toBe(true);
-
-				// o3 series
-				expect(supportsStructuredOutputs("OPENAI", "o3")).toBe(true);
-				expect(supportsStructuredOutputs("OPENAI", "o3-mini")).toBe(true);
-
-				// o4 series
-				expect(supportsStructuredOutputs("OPENAI", "o4-mini")).toBe(true);
-			});
-
-			test("should not support old/unknown OpenAI models", () => {
-				expect(supportsStructuredOutputs("OPENAI", "gpt-3.5-turbo")).toBe(
-					false,
-				);
-				expect(supportsStructuredOutputs("OPENAI", "text-davinci-003")).toBe(
-					false,
-				);
-			});
+			for (const model of openAIModels) {
+				expect(supportsStructuredOutputs("OPENAI", model)).toBe(true);
+			}
 		});
 
-		describe("Anthropic", () => {
-			test("should support all Claude models", () => {
-				expect(
-					supportsStructuredOutputs("ANTHROPIC", "claude-3-opus-20240229"),
-				).toBe(true);
-				expect(
-					supportsStructuredOutputs("ANTHROPIC", "claude-3-5-sonnet-latest"),
-				).toBe(true);
-				expect(
-					supportsStructuredOutputs("ANTHROPIC", "claude-3-haiku-20240307"),
-				).toBe(true);
-				expect(
-					supportsStructuredOutputs("ANTHROPIC", "claude-opus-4-20250514"),
-				).toBe(true);
-				expect(
-					supportsStructuredOutputs("ANTHROPIC", "claude-sonnet-4-20250514"),
-				).toBe(true);
-			});
+		test("should return true for all AI SDK 5 Anthropic models", () => {
+			const anthropicModels = [
+				"claude-4-opus-20250514",
+				"claude-4-sonnet-20250514",
+				"claude-3-7-sonnet-20250219",
+				"claude-3-5-sonnet-20241022",
+				"claude-3-5-sonnet-20240620",
+				"claude-3-5-haiku-20241022",
+				"claude-3-opus-20240229",
+				"claude-3-sonnet-20240229",
+				"claude-3-haiku-20240307",
+			];
+
+			for (const model of anthropicModels) {
+				expect(supportsStructuredOutputs("ANTHROPIC", model)).toBe(true);
+			}
 		});
 
-		describe("Google", () => {
-			test("should support modern Gemini models", () => {
-				expect(supportsStructuredOutputs("GOOGLE", "gemini-1.5-pro")).toBe(
-					true,
-				);
-				expect(supportsStructuredOutputs("GOOGLE", "gemini-1.5-flash")).toBe(
-					true,
-				);
-				expect(supportsStructuredOutputs("GOOGLE", "gemini-2.0-flash")).toBe(
-					true,
-				);
-				expect(supportsStructuredOutputs("GOOGLE", "gemini-2.5-pro")).toBe(
-					true,
-				);
-				expect(supportsStructuredOutputs("GOOGLE", "gemini-2.5-flash")).toBe(
-					true,
-				);
-				expect(supportsStructuredOutputs("GOOGLE", "gemini-pro")).toBe(true);
-				expect(supportsStructuredOutputs("GOOGLE", "gemini-pro-vision")).toBe(
-					true,
-				);
-			});
+		test("should return true for all AI SDK 5 Google models", () => {
+			const googleModels = [
+				"gemini-2.5-pro",
+				"gemini-2.5-flash",
+				"gemini-2.5-flash-lite",
+				"gemini-2.5-flash-lite-preview-06-17",
+				"gemini-2.0-flash",
+				"gemini-2.0-flash-exp",
+				"gemini-1.5-pro",
+				"gemini-1.5-pro-latest",
+				"gemini-1.5-flash",
+				"gemini-1.5-flash-latest",
+				"gemini-1.5-flash-8b",
+				"gemini-1.5-flash-8b-latest",
+			];
 
-			test("should not support embedding models", () => {
-				expect(supportsStructuredOutputs("GOOGLE", "text-embedding-004")).toBe(
-					false,
-				);
-				expect(supportsStructuredOutputs("GOOGLE", "embedding-001")).toBe(
-					false,
-				);
-				expect(
-					supportsStructuredOutputs("GOOGLE", "gemini-embedding-exp"),
-				).toBe(false);
-			});
-		});
-	});
-
-	describe("supportsVision", () => {
-		describe("OpenAI", () => {
-			test("should support vision-capable OpenAI models", () => {
-				expect(supportsVision("OPENAI", "gpt-4.1")).toBe(true);
-				expect(supportsVision("OPENAI", "gpt-4.1-mini")).toBe(true);
-				expect(supportsVision("OPENAI", "gpt-4o")).toBe(true);
-				expect(supportsVision("OPENAI", "gpt-4o-mini")).toBe(true);
-				expect(supportsVision("OPENAI", "gpt-4-turbo")).toBe(true);
-				expect(supportsVision("OPENAI", "gpt-4")).toBe(true);
-				expect(supportsVision("OPENAI", "gpt-4-vision-preview")).toBe(true);
-			});
-
-			test("should not support non-vision OpenAI models", () => {
-				expect(supportsVision("OPENAI", "o1")).toBe(false);
-				expect(supportsVision("OPENAI", "o1-mini")).toBe(false);
-				expect(supportsVision("OPENAI", "gpt-3.5-turbo")).toBe(false);
-			});
+			for (const model of googleModels) {
+				expect(supportsStructuredOutputs("GOOGLE", model)).toBe(true);
+			}
 		});
 
-		describe("Anthropic", () => {
-			test("should support all Claude models for vision", () => {
-				expect(supportsVision("ANTHROPIC", "claude-3-opus-20240229")).toBe(
-					true,
-				);
-				expect(supportsVision("ANTHROPIC", "claude-3-5-sonnet-latest")).toBe(
-					true,
-				);
-				expect(supportsVision("ANTHROPIC", "claude-3-haiku-20240307")).toBe(
-					true,
-				);
-				expect(supportsVision("ANTHROPIC", "claude-opus-4-20250514")).toBe(
-					true,
-				);
-			});
-		});
-
-		describe("Google", () => {
-			test("should support vision-capable Gemini models", () => {
-				expect(supportsVision("GOOGLE", "gemini-1.5-pro")).toBe(true);
-				expect(supportsVision("GOOGLE", "gemini-1.5-flash")).toBe(true);
-				expect(supportsVision("GOOGLE", "gemini-2.0-flash")).toBe(true);
-				expect(supportsVision("GOOGLE", "gemini-2.5-pro")).toBe(true);
-				expect(supportsVision("GOOGLE", "gemini-2.5-flash")).toBe(true);
-				expect(supportsVision("GOOGLE", "gemini-pro")).toBe(true);
-				expect(supportsVision("GOOGLE", "gemini-pro-vision")).toBe(true);
-			});
-
-			test("should not support embedding models for vision", () => {
-				expect(supportsVision("GOOGLE", "text-embedding-004")).toBe(false);
-				expect(supportsVision("GOOGLE", "embedding-001")).toBe(false);
-				expect(supportsVision("GOOGLE", "gemini-embedding-exp")).toBe(false);
-			});
-		});
-	});
-
-	describe("supportsPDF", () => {
-		describe("OpenAI", () => {
-			test("should support PDF for modern OpenAI models", () => {
-				expect(supportsPDF("OPENAI", "gpt-4.1")).toBe(true);
-				expect(supportsPDF("OPENAI", "gpt-4.1-mini")).toBe(true);
-				expect(supportsPDF("OPENAI", "gpt-4o")).toBe(true);
-				expect(supportsPDF("OPENAI", "gpt-4o-mini")).toBe(true);
-				expect(supportsPDF("OPENAI", "gpt-4-turbo")).toBe(true);
-			});
-
-			test("should not support PDF for older OpenAI models", () => {
-				expect(supportsPDF("OPENAI", "gpt-4")).toBe(false);
-				expect(supportsPDF("OPENAI", "gpt-3.5-turbo")).toBe(false);
-				expect(supportsPDF("OPENAI", "o1")).toBe(false);
-			});
-		});
-
-		describe("Anthropic", () => {
-			test("should support PDF for all Claude models", () => {
-				expect(supportsPDF("ANTHROPIC", "claude-3-opus-20240229")).toBe(true);
-				expect(supportsPDF("ANTHROPIC", "claude-3-5-sonnet-latest")).toBe(true);
-				expect(supportsPDF("ANTHROPIC", "claude-3-haiku-20240307")).toBe(true);
-				expect(supportsPDF("ANTHROPIC", "claude-opus-4-20250514")).toBe(true);
-			});
-		});
-
-		describe("Google", () => {
-			test("should support PDF for modern Gemini models", () => {
-				expect(supportsPDF("GOOGLE", "gemini-1.5-pro")).toBe(true);
-				expect(supportsPDF("GOOGLE", "gemini-1.5-flash")).toBe(true);
-				expect(supportsPDF("GOOGLE", "gemini-2.0-flash")).toBe(true);
-				expect(supportsPDF("GOOGLE", "gemini-2.5-pro")).toBe(true);
-				expect(supportsPDF("GOOGLE", "gemini-2.5-flash")).toBe(true);
-				expect(supportsPDF("GOOGLE", "gemini-pro")).toBe(true);
-				expect(supportsPDF("GOOGLE", "gemini-pro-vision")).toBe(true);
-			});
-
-			test("should not support PDF for embedding models", () => {
-				expect(supportsPDF("GOOGLE", "text-embedding-004")).toBe(false);
-				expect(supportsPDF("GOOGLE", "embedding-001")).toBe(false);
-				expect(supportsPDF("GOOGLE", "gemini-embedding-exp")).toBe(false);
-			});
+		test("should return false for unsupported models", () => {
+			expect(supportsStructuredOutputs("OPENAI", "unsupported-model")).toBe(
+				false,
+			);
+			expect(supportsStructuredOutputs("ANTHROPIC", "claude-2")).toBe(false);
+			expect(supportsStructuredOutputs("GOOGLE", "palm-2")).toBe(false);
 		});
 	});
 
 	describe("getVisionModel", () => {
+		test("should return default vision models", () => {
+			expect(getVisionModel("OPENAI")).toBe("gpt-4o");
+			expect(getVisionModel("ANTHROPIC")).toBe("claude-4-sonnet-20250514");
+			expect(getVisionModel("GOOGLE")).toBe("gemini-2.5-flash");
+		});
+
 		test("should return preferred model if it supports vision", () => {
 			expect(getVisionModel("OPENAI", "gpt-4o-mini")).toBe("gpt-4o-mini");
-			expect(getVisionModel("ANTHROPIC", "claude-3-haiku-20240307")).toBe(
-				"claude-3-haiku-20240307",
+			expect(getVisionModel("ANTHROPIC", "claude-3-5-haiku-20241022")).toBe(
+				"claude-3-5-haiku-20241022",
 			);
-			expect(getVisionModel("GOOGLE", "gemini-1.5-flash")).toBe(
-				"gemini-1.5-flash",
-			);
+			expect(getVisionModel("GOOGLE", "gemini-1.5-pro")).toBe("gemini-1.5-pro");
 		});
 
-		test("should return default model if preferred doesn't support vision", () => {
-			expect(getVisionModel("OPENAI", "o1")).toBe("gpt-4o");
-			expect(getVisionModel("OPENAI", "gpt-3.5-turbo")).toBe("gpt-4o");
-			expect(getVisionModel("GOOGLE", "text-embedding-004")).toBe(
-				"gemini-2.5-pro",
+		test("should return default if preferred model doesn't support vision", () => {
+			expect(getVisionModel("OPENAI", "unsupported-model")).toBe("gpt-4o");
+			expect(getVisionModel("ANTHROPIC", "claude-instant")).toBe(
+				"claude-4-sonnet-20250514",
 			);
+			expect(getVisionModel("GOOGLE", "bard")).toBe("gemini-2.5-flash");
+		});
+	});
+
+	describe("supportsVision", () => {
+		test("should return true for all AI SDK 5 models", () => {
+			// Test a few models from each provider
+			expect(supportsVision("OPENAI", "gpt-4o")).toBe(true);
+			expect(supportsVision("OPENAI", "gpt-4.1-mini")).toBe(true);
+			expect(supportsVision("ANTHROPIC", "claude-4-sonnet-20250514")).toBe(
+				true,
+			);
+			expect(supportsVision("ANTHROPIC", "claude-3-5-haiku-20241022")).toBe(
+				true,
+			);
+			expect(supportsVision("GOOGLE", "gemini-2.5-flash")).toBe(true);
+			expect(supportsVision("GOOGLE", "gemini-1.5-pro")).toBe(true);
 		});
 
-		test("should return default model when no preferred model specified", () => {
-			expect(getVisionModel("OPENAI")).toBe("gpt-4o");
-			expect(getVisionModel("ANTHROPIC")).toBe("claude-3-5-sonnet-latest");
-			expect(getVisionModel("GOOGLE")).toBe("gemini-2.5-pro");
+		test("should return false for unsupported models", () => {
+			expect(supportsVision("OPENAI", "text-davinci-003")).toBe(false);
+			expect(supportsVision("ANTHROPIC", "claude-1")).toBe(false);
+			expect(supportsVision("GOOGLE", "text-bison")).toBe(false);
+		});
+	});
+
+	describe("supportsPDF", () => {
+		test("should return true for all AI SDK 5 models", () => {
+			// Test a few models from each provider
+			expect(supportsPDF("OPENAI", "gpt-4o")).toBe(true);
+			expect(supportsPDF("OPENAI", "gpt-4.1-mini")).toBe(true);
+			expect(supportsPDF("ANTHROPIC", "claude-4-sonnet-20250514")).toBe(true);
+			expect(supportsPDF("ANTHROPIC", "claude-3-5-haiku-20241022")).toBe(true);
+			expect(supportsPDF("GOOGLE", "gemini-2.5-flash")).toBe(true);
+			expect(supportsPDF("GOOGLE", "gemini-1.5-pro")).toBe(true);
+		});
+
+		test("should return false for unsupported models", () => {
+			expect(supportsPDF("OPENAI", "text-embedding-ada-002")).toBe(false);
+			expect(supportsPDF("ANTHROPIC", "claude-instant-1")).toBe(false);
+			expect(supportsPDF("GOOGLE", "code-gecko")).toBe(false);
 		});
 	});
 });

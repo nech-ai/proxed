@@ -6,9 +6,10 @@ import { createError, ErrorCode } from "./errors";
 
 /**
  * Creates an AI SDK client instance based on the specified provider.
+ * Compatible with AI SDK v5.
  * @param provider - The AI provider ('OPENAI', 'ANTHROPIC', or 'GOOGLE').
  * @param apiKey - The full API key for the provider.
- * @returns An instance of the AI SDK client for the specified provider.
+ * @returns An instance of the AI SDK provider for the specified provider.
  * @throws {AppError} If the provider is unsupported.
  */
 export function createAIClient(provider: ProviderType, apiKey: string) {

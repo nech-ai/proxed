@@ -67,7 +67,7 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 		// Generate object with timeout
 		const { object, usage, finishReason } = await withTimeout(
 			generateObject({
-				model: aiClient(modelToUse, { structuredOutputs: true }),
+				model: aiClient(modelToUse),
 				schema,
 				messages: [
 					{
@@ -92,7 +92,6 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 						],
 					},
 				],
-				maxTokens: 1000,
 			}),
 			30000, // 30 second timeout
 			"Vision AI generation timed out after 30 seconds",
@@ -103,9 +102,9 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 			c,
 			startTime,
 			{
-				promptTokens: usage.promptTokens,
-				completionTokens: usage.completionTokens,
-				totalTokens: usage.promptTokens + usage.completionTokens,
+				promptTokens: usage.inputTokens || 0,
+				completionTokens: usage.outputTokens || 0,
+				totalTokens: usage.totalTokens || 0,
 				finishReason: finishReason as FinishReason,
 				response: object,
 			},

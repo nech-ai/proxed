@@ -1,0 +1,18 @@
+# Analytics Package
+
+## Overview
+
+The `analytics` package provides a wrapper around OpenPanel for logging events on both the client and server sides.
+
+## File Structure
+
+```
+packages/analytics/
+├── src/
+│   ├── client.tsx     # Client-side analytics provider and track function
+│   ├── events.ts      # Definitions for all trackable log events
+│   ├── index.ts       # Main package exports
+│   └── server.ts      # Server-side analytics setup and track function
+├── package.json
+└── tsconfig.json
+```

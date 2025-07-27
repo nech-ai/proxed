@@ -1,6 +1,5 @@
 ---
 description: UI package - Shadcn UI components, hooks, icons, and design system
-globs: ["packages/ui/**/*", "apps/app/**/*"]
 alwaysApply: false
 ---
 # UI Package Implementation Rules

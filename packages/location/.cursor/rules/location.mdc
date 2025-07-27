@@ -1,0 +1,19 @@
+# Location Package
+
+## Overview
+
+The `location` package provides utilities for IP-based geolocation, including country and region information.
+
+## File Structure
+
+```
+packages/location/
+├── src/
+│   ├── client.ts
+│   ├── constants.ts
+│   ├── country-info.ts
+│   ├── index.ts
+│   └── regions.json
+├── package.json
+└── tsconfig.json
+```

@@ -1,0 +1,30 @@
+# Utils Package
+
+## Overview
+
+The `utils` package provides common utility functions, constants, and types that are shared across the monorepo.
+
+## File Structure
+
+```
+packages/utils/
+├── lib/
+│   ├── __tests__/
+│   │   ├── partial-keys.test.ts
+│   │   ├── pricing.test.ts
+│   │   └── providers.test.ts
+│   ├── base-url.ts
+│   ├── index.ts
+│   ├── partial-keys.ts
+│   ├── pricing.ts
+│   ├── providers.ts
+│   ├── resend.ts
+│   └── strip-special-characters.ts
+├── index.ts
+├── package.json
+└── tsconfig.json
+```
+
+❌ Don't forget to handle edge cases
+❌ Don't hardcode environment-specific values
+❌ Don't create circular dependencies between utils

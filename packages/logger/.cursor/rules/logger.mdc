@@ -1,0 +1,15 @@
+# Logger Package
+
+## Overview
+
+The `logger` package provides a simple logging utility using Pino.
+
+## File Structure
+
+```
+packages/logger/
+├── src/
+│   └── index.ts
+├── package.json
+└── tsconfig.json
+```

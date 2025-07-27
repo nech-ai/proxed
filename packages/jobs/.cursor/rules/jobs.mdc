@@ -1,0 +1,18 @@
+# Jobs Package
+
+## Overview
+
+The `jobs` package contains background job definitions using Trigger.dev. These jobs handle tasks such as sending notifications for execution errors and high consumption alerts.
+
+## File Structure
+
+```
+packages/jobs/
+├── src/
+│   ├── index.ts
+│   └── notifications/
+│       ├── execution-error.ts
+│       └── high-consumption-notifier.ts
+├── package.json
+└── tsconfig.json
+```

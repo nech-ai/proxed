@@ -1,0 +1,19 @@
+# KV Package
+
+## Overview
+
+The `kv` package provides a simple key-value storage utility using Upstash Redis.
+
+## File Structure
+
+```
+packages/kv/
+├── src/
+│   └── index.ts
+├── package.json
+└── tsconfig.json
+```
+description:
+globs:
+alwaysApply: false
+---

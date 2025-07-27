@@ -1,0 +1,677 @@
+---
+description: Supabase development guide covering database management, schema design, authentication, and RLS policies
+alwaysApply: false
+---
+# Complete Supabase Development Guide
+
+## Table of Contents
+1. [Database Setup & SQL Style](#database-setup--sql-style)
+2. [Schema Management](#schema-management)
+3. [Authentication Implementation](#authentication-implementation)
+4. [Row Level Security (RLS)](#row-level-security-rls)
+5. [Migrations](#migrations)
+
+---
+
+## Database Setup & SQL Style
+
+### Naming Conventions
+
+- Use snake_case for tables, columns, and database objects
+- Avoid SQL reserved words and stay under 63 characters
+- Prefer plurals for table names (e.g., `users`)
+- Prefer singular names for columns (e.g., `user_id`)
+- For foreign keys, use singular table name with `_id` suffix (e.g., `user_id` to reference `users` table)
+
+### Table Structure
+
+- Always add an `id` column of type `identity generated always` unless otherwise specified
+- Create tables in the `public` schema by default
+- Always add comments to describe table purpose (up to 1024 characters)
+- Always qualify schema names in SQL queries for clarity
+
+```sql
+create table public.books (
+  id bigint generated always as identity primary key,
+  title text not null,
+  author_id bigint references public.authors (id)
+);
+comment on table public.books is 'A list of all the books in the library.';
+```
+
+### SQL Query Style
+
+- Add spaces and newlines for readability
+- Use lowercase for SQL reserved words
+- Format smaller queries concisely, larger queries with more structure
+
+#### Small Query Example
+```sql
+select *
+from public.employees
+where end_date is null;
+
+update public.employees
+set end_date = '2023-12-31'
+where employee_id = 1001;
+```
+
+#### Larger Query Example
+```sql
+select
+  first_name,
+  last_name
+from
+  public.employees
+where
+  start_date between '2021-01-01' and '2021-12-31'
+and
+  status = 'employed';
+```
+
+### Joins and Complex Queries
+
+- Align joins and subqueries with related SQL clauses
+- Use full table names for clarity
+- Use meaningful aliases with the 'as' keyword
+- For complex queries, use CTEs (Common Table Expressions) with comments
+
+```sql
+with department_employees as (
+  -- Get all employees and their departments
+  select
+    e.department_id,
+    e.first_name,
+    e.last_name,
+    d.department_name
+  from
+    public.employees e
+  join
+    public.departments d on e.department_id = d.department_id
+),
+employee_counts as (
+  -- Count employees per department
+  select
+    department_name,
+    count(*) as num_employees
+  from
+    department_employees
+  group by
+    department_name
+)
+select
+  department_name,
+  num_employees
+from
+  employee_counts
+order by
+  department_name;
+```
+
+### Database Functions
+
+#### Security Best Practices
+
+- Default to `SECURITY INVOKER` (use `SECURITY DEFINER` only when explicitly required)
+- Always set `search_path` to empty string (`set search_path = '';`)
+- Use fully qualified names for all database objects
+
+#### Function Templates
+
+##### Basic Function
+```sql
+create or replace function public.hello_world()
+returns text
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  return 'hello world';
+end;
+$$;
+```
+
+##### Function with Parameters
+```sql
+create or replace function public.calculate_total_price(order_id bigint)
+returns numeric
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  total numeric;
+begin
+  select sum(price * quantity)
+  into total
+  from public.order_items
+  where order_id = calculate_total_price.order_id;
+
+  return total;
+end;
+$$;
+```
+
+##### Trigger Function
+```sql
+create or replace function public.update_updated_at()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  new.updated_at := now();
+  return new;
+end;
+$$;
+
+create trigger update_updated_at_trigger
+before update on public.my_table
+for each row
+execute function public.update_updated_at();
+```
+
+### Function Types
+
+- Prefer `IMMUTABLE` or `STABLE` functions where possible
+- Use `VOLATILE` only when function modifies data or has side effects
+- Minimize side effects in functions
+- Use explicit typing for inputs and outputs
+
+---
+
+## Schema Management
+
+### Declarative Schema Overview
+
+All database schema modifications must be defined within `.sql` files located in the `supabase/schemas/` directory. Do not create or modify files directly in the `supabase/migrations/` directory unless addressing known caveats.
+
+### Schema Declaration Process
+
+1. **Create Schema Files**: For each database entity (tables, views, functions), create or update a corresponding `.sql` file in the `supabase/schemas/` directory
+2. **Stop Supabase**: Before generating migrations, stop the local Supabase development environment
+   ```bash
+   supabase stop
+   ```
+3. **Generate Migrations**: Generate migration files by diffing the declared schema against the current database state
+   ```bash
+   supabase db diff -f <migration_name>
+   ```
+
+### Schema File Organization
+
+- Schema files are executed in lexicographic order
+- To manage dependencies (e.g., foreign keys), name files to ensure correct execution order
+- When adding new columns, append them to the end of the table definition to prevent unnecessary diffs
+
+### Rollback Procedures
+
+To revert changes:
+1. Manually update the relevant `.sql` files in `supabase/schemas/` to reflect the desired state
+2. Generate a new migration file capturing the rollback
+   ```bash
+   supabase db diff -f <rollback_migration_name>
+   ```
+3. Review the generated migration file carefully to avoid unintentional data loss
+
+### Known Caveats
+
+The following entities must be added through versioned migrations instead of schema files:
+
+#### Data Manipulation Language
+- DML statements such as insert, update, delete, etc., are not captured by schema diff
+
+#### View Ownership
+- View owner and grants
+- Security invoker on views
+- Materialized views
+- Doesn't recreate views when altering column type
+
+#### RLS Policies
+- Alter policy statements
+- Column privileges
+
+#### Other Entities
+- Schema privileges are not tracked because each schema is diffed separately
+- Comments are not tracked
+- Partitions are not tracked
+- Alter publication ... add table ...
+- Create domain statements are ignored
+- Grant statements are duplicated from default privileges
+
+---
+
+## Authentication Implementation
+
+### Overview
+
+Supabase Auth SSR implementation requires:
+1. Installing `@supabase/supabase-js` and `@supabase/ssr` packages
+2. Setting up environment variables
+3. Writing utility functions with `createClient` functions for browser and server clients
+4. Hooking up middleware to refresh auth tokens
+
+### CRITICAL REQUIREMENTS
+
+**You MUST NOT generate any of the following DEPRECATED patterns:**
+
+```typescript
+// ❌ NEVER GENERATE THIS CODE - IT WILL BREAK THE APPLICATION
+{
+  cookies: {
+    get(name: string) {                 // ❌ BREAKS APPLICATION
+      return cookieStore.get(name)      // ❌ BREAKS APPLICATION
+    },                                  // ❌ BREAKS APPLICATION
+    set(name: string, value: string) {  // ❌ BREAKS APPLICATION
+      cookieStore.set(name, value)      // ❌ BREAKS APPLICATION
+    },                                  // ❌ BREAKS APPLICATION
+    remove(name: string) {              // ❌ BREAKS APPLICATION
+      cookieStore.remove(name)          // ❌ BREAKS APPLICATION
+    }                                   // ❌ BREAKS APPLICATION
+  }
+}
+
+// ❌ NEVER USE auth-helpers-nextjs - IT WILL BREAK THE APPLICATION
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'  // ❌ BREAKS APPLICATION
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'  // ❌ BREAKS APPLICATION
+```
+
+### ABSOLUTE REQUIREMENTS
+
+1. You MUST use `@supabase/ssr`
+2. You MUST use ONLY `getAll` and `setAll`
+3. You MUST NEVER use `get`, `set`, or `remove`
+4. You MUST NEVER import from `@supabase/auth-helpers-nextjs`
+
+### Browser Client Implementation
+
+```typescript
+import { createBrowserClient } from '@supabase/ssr'
+
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
+```
+
+### Server Client Implementation
+
+```typescript
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+export async function createClient() {
+  const cookieStore = await cookies()
+
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+      },
+    }
+  )
+}
+```
+
+### Middleware Implementation
+
+```typescript
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
+
+export async function middleware(request: NextRequest) {
+    let supabaseResponse = NextResponse.next({
+    request,
+  })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({
+            request,
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  // Do not run code between createServerClient and
+  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
+  // issues with users being randomly logged out.
+
+  // IMPORTANT: DO NOT REMOVE auth.getUser()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (
+    !user &&
+    !request.nextUrl.pathname.startsWith('/login') &&
+    !request.nextUrl.pathname.startsWith('/auth')
+  ) {
+    // no user, potentially respond by redirecting the user to the login page
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
+  }
+
+  // IMPORTANT: You *must* return the supabaseResponse object as it is.
+  // If you're creating a new response object with NextResponse.next() make sure to:
+  // 1. Pass the request in it, like so:
+  //    const myNewResponse = NextResponse.next({ request })
+  // 2. Copy over the cookies, like so:
+  //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
+  // 3. Change the myNewResponse object to fit your needs, but avoid changing
+  //    the cookies!
+  // 4. Finally:
+  //    return myNewResponse
+  // If this is not done, you may be causing the browser and server to go out
+  // of sync and terminate the user's session prematurely!
+
+  return supabaseResponse
+}
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * Feel free to modify this pattern to include more paths.
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+}
+```
+
+---
+
+## Row Level Security (RLS)
+
+### RLS Policy Guidelines
+
+- You can use only CREATE POLICY or ALTER POLICY queries
+- Always use double apostrophe in SQL strings (e.g., 'Night''s watch')
+- Always use "auth.uid()" instead of "current_user"
+- SELECT policies should always have USING but not WITH CHECK
+- INSERT policies should always have WITH CHECK but not USING
+- UPDATE policies should always have WITH CHECK and most often have USING
+- DELETE policies should always have USING but not WITH CHECK
+- Don't use `FOR ALL`. Instead separate into 4 separate policies for select, insert, update, and delete
+- The policy name should be short but detailed text explaining the policy, enclosed in double quotes
+- Discourage `RESTRICTIVE` policies and encourage `PERMISSIVE` policies
+
+### Authenticated and Unauthenticated Roles
+
+Supabase maps every request to one of the roles:
+- `anon`: an unauthenticated request (the user is not logged in)
+- `authenticated`: an authenticated request (the user is logged in)
+
+```sql
+create policy "Profiles are viewable by everyone"
+on profiles
+for select
+to authenticated, anon
+using ( true );
+
+-- OR
+
+create policy "Public profiles are viewable only by authenticated users"
+on profiles
+for select
+to authenticated
+using ( true );
+```
+
+### Multiple Operations
+
+PostgreSQL policies do not support specifying multiple operations in a single FOR clause. Create separate policies for each operation.
+
+#### Incorrect
+```sql
+create policy "Profiles can be created and deleted by any user"
+on profiles
+for insert, delete -- cannot create a policy on multiple operators
+to authenticated
+with check ( true )
+using ( true );
+```
+
+#### Correct
+```sql
+create policy "Profiles can be created by any user"
+on profiles
+for insert
+to authenticated
+with check ( true );
+
+create policy "Profiles can be deleted by any user"
+on profiles
+for delete
+to authenticated
+using ( true );
+```
+
+### Helper Functions
+
+#### `auth.uid()`
+Returns the ID of the user making the request.
+
+#### `auth.jwt()`
+Returns the JWT of the user making the request. Anything stored in the user's `raw_app_meta_data` or `raw_user_meta_data` column will be accessible.
+
+- `raw_user_meta_data` - can be updated by the authenticated user using `supabase.auth.update()`
+- `raw_app_meta_data` - cannot be updated by the user, good for storing authorization data
+
+```sql
+create policy "User is in team"
+on my_table
+to authenticated
+using ( team_id in (select auth.jwt() -> 'app_metadata' -> 'teams'));
+```
+
+#### MFA Support
+```sql
+create policy "Restrict updates."
+on profiles
+as restrictive
+for update
+to authenticated using (
+  (select auth.jwt()->>'aal') = 'aal2'
+);
+```
+
+### RLS Performance Recommendations
+
+#### Add Indexes
+Make sure you've added indexes on any columns used within the Policies:
+
+```sql
+create policy "Users can access their own records" on test_table
+to authenticated
+using ( (select auth.uid()) = user_id );
+```
+
+Add an index:
+```sql
+create index userid
+on test_table
+using btree (user_id);
+```
+
+#### Call Functions with `select`
+Use `select` statement to improve policies that use functions:
+
+```sql
+-- Instead of this:
+create policy "Users can access their own records" on test_table
+to authenticated
+using ( auth.uid() = user_id );
+
+-- Use this:
+create policy "Users can access their own records" on test_table
+to authenticated
+using ( (select auth.uid()) = user_id );
+```
+
+This causes an `initPlan` to be run by the Postgres optimizer, allowing it to "cache" the results per-statement.
+
+#### Minimize Joins
+Rewrite policies to avoid joins between source and target tables:
+
+```sql
+-- Slow policy with joins:
+create policy "Users can access records belonging to their teams" on test_table
+to authenticated
+using (
+  (select auth.uid()) in (
+    select user_id
+    from team_user
+    where team_user.team_id = team_id -- joins to the source "test_table.team_id"
+  )
+);
+
+-- Better policy without joins:
+create policy "Users can access records belonging to their teams" on test_table
+to authenticated
+using (
+  team_id in (
+    select team_id
+    from team_user
+    where user_id = (select auth.uid()) -- no join
+  )
+);
+```
+
+#### Specify Roles in Policies
+Always use the Role inside your policies with the `TO` operator:
+
+```sql
+-- Instead of this:
+create policy "Users can access their own records" on rls_test
+using ( auth.uid() = user_id );
+
+-- Use this:
+create policy "Users can access their own records" on rls_test
+to authenticated
+using ( (select auth.uid()) = user_id );
+```
+
+---
+
+## Migrations
+
+### Creating Migration Files
+
+Migration files MUST follow this naming convention:
+`YYYYMMDDHHmmss_short_description.sql`
+
+Example: `20240906123045_create_profiles.sql`
+
+### Migration Guidelines
+
+Write Postgres-compatible SQL code that:
+
+- Includes a header comment with metadata about the migration
+- Includes thorough comments explaining the purpose of each migration step
+- Writes all SQL in lowercase
+- Adds copious comments for any destructive SQL commands
+- When creating a new table, MUST enable Row Level Security (RLS)
+- When creating RLS Policies:
+  - Ensure policies cover all relevant access scenarios (select, insert, update, delete)
+  - If the table is intended for public access, the policy can simply return `true`
+  - RLS Policies should be granular: one policy for each operation and each Supabase role
+  - Include comments explaining the rationale and intended behavior of each security policy
+
+### Migration Template
+
+```sql
+-- Migration: Create user profiles table
+-- Purpose: Store user profile information with RLS enabled
+-- Affected tables: profiles
+-- Dependencies: auth.users table
+
+-- Create the profiles table
+create table public.profiles (
+  id bigint generated always as identity primary key,
+  user_id uuid references auth.users(id) on delete cascade,
+  full_name text,
+  avatar_url text,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
+-- Add table comment
+comment on table public.profiles is 'User profile information linked to auth.users';
+
+-- Enable Row Level Security
+alter table public.profiles enable row level security;
+
+-- Create RLS policies
+create policy "Users can view their own profile"
+on public.profiles
+for select
+to authenticated
+using ( (select auth.uid()) = user_id );
+
+create policy "Users can create their own profile"
+on public.profiles
+for insert
+to authenticated
+with check ( (select auth.uid()) = user_id );
+
+create policy "Users can update their own profile"
+on public.profiles
+for update
+to authenticated
+using ( (select auth.uid()) = user_id )
+with check ( (select auth.uid()) = user_id );
+
+create policy "Users can delete their own profile"
+on public.profiles
+for delete
+to authenticated
+using ( (select auth.uid()) = user_id );
+
+-- Create indexes for performance
+create index profiles_user_id_idx on public.profiles using btree (user_id);
+
+-- Create trigger for updated_at
+create trigger update_profiles_updated_at
+before update on public.profiles
+for each row
+execute function public.update_updated_at();
+```
+
+This comprehensive guide covers all aspects of Supabase development from database design to authentication and security policies. Follow these patterns and guidelines to ensure consistent, secure, and performant database operations.

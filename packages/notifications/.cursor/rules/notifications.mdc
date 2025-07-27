@@ -1,0 +1,26 @@
+# Notifications Package
+
+## Overview
+
+The `notifications` package manages notification workflows and utilities using Novu. It defines workflows for events like execution errors and high consumption alerts.
+
+## File Structure
+
+```
+packages/notifications/
+├── src/
+│   ├── index.ts
+│   └── workflows/
+│       ├── execution-error/
+│       │   ├── index.ts
+│       │   ├── schemas.ts
+│       │   ├── types.ts
+│       │   └── workflow.ts
+│       └── high-consumption/
+│           ├── index.ts
+│           ├── schemas.ts
+│           ├── types.ts
+│           └── workflow.ts
+├── package.json
+└── tsconfig.json
+```

@@ -1,0 +1,32 @@
+# Supabase Package
+
+## Overview
+
+The `supabase` package provides Supabase clients and utilities for database interactions, including server-side, client-side, and middleware clients.
+
+## File Structure
+
+```
+packages/supabase/
+├── src/
+│   ├── clients/
+│   │   ├── api.ts
+│   │   ├── client.ts
+│   │   ├── job.ts
+│   │   ├── middleware.ts
+│   │   └── server.ts
+│   ├── mutations/
+│   │   └── index.ts
+│   ├── queries/
+│   │   ├── cached-queries.ts
+│   │   └── index.ts
+│   ├── types/
+│   │   ├── billing.ts
+│   │   ├── db.generated.ts
+│   │   ├── db.ts
+│   │   └── index.ts
+│   └── utils/
+│       └── storage.ts
+├── package.json
+└── tsconfig.json
+```

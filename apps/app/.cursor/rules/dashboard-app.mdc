@@ -1,13 +1,12 @@
 ---
 description: Dashboard app - Next.js 15 with React 19, Supabase auth, and modern patterns
-globs: ["apps/app/**/*"]
 alwaysApply: false
 ---
 # Dashboard App Implementation Rules
 
 ## Core Technologies
 
-- **Framework**: Next.js 15 App Router  
+- **Framework**: Next.js 15 App Router
 - **UI**: React 19, Tailwind CSS, Shadcn UI
 - **Database**: Supabase (Auth, Database, Storage)
 - **State Management**: nuqs (URL state), Zustand (client state), Jotai (atoms)
@@ -394,8 +393,8 @@ export const projectFiltersAtom = atomWithStorage("project-filters", {
 export const filteredProjectsAtom = atom((get) => {
   const projects = get(projectsAtom);
   const filters = get(projectFiltersAtom);
-  
-  return projects.filter(project => 
+
+  return projects.filter(project =>
     filters.status === "all" || project.status === filters.status
   );
 });
@@ -404,7 +403,7 @@ export const filteredProjectsAtom = atom((get) => {
 function ProjectsList() {
   const [projects] = useAtom(filteredProjectsAtom);
   const [, setFilters] = useAtom(projectFiltersAtom);
-  
+
   return (
     <div>
       <ProjectFilters onFiltersChange={setFilters} />
@@ -475,15 +474,15 @@ export function CreateProjectForm({ teamId }: { teamId: string }) {
   const [state, formAction, isPending] = useActionState<FormState, FormData>(
     async (prevState, formData) => {
       const result = await createProject(formData);
-      
+
       if (result?.serverError) {
         return { message: result.serverError };
       }
-      
+
       if (result?.validationErrors) {
         return { errors: result.validationErrors };
       }
-      
+
       return { message: "Project created successfully!" };
     },
     {}
@@ -501,14 +500,14 @@ export function CreateProjectForm({ teamId }: { teamId: string }) {
       name: formData.get("name") as string,
       status: "active",
     });
-    
+
     formAction(formData);
   };
 
   return (
     <form action={handleSubmit} className="space-y-4">
       <input type="hidden" name="teamId" value={teamId} />
-      
+
       <div>
         <label htmlFor="name" className="block text-sm font-medium">
           Project Name
@@ -840,7 +839,7 @@ export const useAppStore = create(
 function ProjectManager() {
   const projects = useAppStore(state => state.projects);
   const [optimisticProjects, addOptimistic] = useOptimistic(projects);
-  
+
   // Sync Zustand with React 19 optimistic updates
   useEffect(() => {
     return useAppStore.subscribe(
@@ -877,29 +876,29 @@ const createProjectSchema = z.object({
 export async function createProjectAction(formData: FormData) {
   // 1. Authenticate user
   const user = await requireUser();
-  
+
   // 2. Validate input
   const result = createProjectSchema.safeParse({
     name: formData.get("name"),
     teamId: formData.get("teamId"),
   });
-  
+
   if (!result.success) {
     return { errors: result.error.flatten().fieldErrors };
   }
-  
+
   // 3. Authorize user for team
   const hasAccess = await verifyTeamAccess(user.id, result.data.teamId);
   if (!hasAccess) {
     throw new Error("Unauthorized");
   }
-  
+
   // 4. Perform operation with RLS
   const project = await createProject(result.data);
-  
+
   // 5. Revalidate cache
   revalidatePath(`/teams/${result.data.teamId}`);
-  
+
   return { data: project };
 }
 ```
@@ -944,7 +943,7 @@ describe("createProjectAction", () => {
     formData.set("teamId", "valid-team-id");
 
     const result = await createProjectAction(formData);
-    
+
     expect(result.data).toBeDefined();
     expect(result.data.name).toBe("Test Project");
   });
@@ -954,7 +953,7 @@ describe("createProjectAction", () => {
     formData.set("name", ""); // Invalid empty name
 
     const result = await createProjectAction(formData);
-    
+
     expect(result.errors).toBeDefined();
     expect(result.errors.name).toContain("Required");
   });

@@ -1,6 +1,5 @@
 ---
 description: Hono API proxy with Bun runtime - Core service for AI provider proxying
-globs: ["apps/proxy/**/*"]
 alwaysApply: false
 ---
 # Hono Proxy API Implementation Rules
@@ -89,11 +88,11 @@ app.route("/v1", v1Router);
 // Global error handler
 app.onError((error, c) => {
   console.error(`Request ${c.get("requestId")} failed:`, error);
-  
+
   if (error instanceof AppError) {
     return c.json(error.toResponse(), error.status);
   }
-  
+
   return c.json({ error: "Internal server error" }, 500);
 });
 
@@ -532,7 +531,7 @@ describe("API", () => {
 
 ### ❌ Never Do
 - Use `compress()` middleware (Bun incompatible)
-- Create new DB connections per request  
+- Create new DB connections per request
 - Use Next.js patterns or imports
 - Skip request/response validation
 - Ignore circuit breaker states

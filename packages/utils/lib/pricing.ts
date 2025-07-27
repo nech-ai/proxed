@@ -17,15 +17,7 @@ const OPENAI_MODELS: Record<OpenAIModel, ModelPricing> = {
 		prompt: 0.002, // $2.00 per 1M tokens
 		completion: 0.008, // $8.00 per 1M tokens
 	},
-	"gpt-4.1-2025-04-14": {
-		prompt: 0.002, // $2.00 per 1M tokens
-		completion: 0.008, // $8.00 per 1M tokens
-	},
 	"gpt-4.1-mini": {
-		prompt: 0.0004, // $0.40 per 1M tokens
-		completion: 0.0016, // $1.60 per 1M tokens
-	},
-	"gpt-4.1-mini-2025-04-14": {
 		prompt: 0.0004, // $0.40 per 1M tokens
 		completion: 0.0016, // $1.60 per 1M tokens
 	},
@@ -33,79 +25,33 @@ const OPENAI_MODELS: Record<OpenAIModel, ModelPricing> = {
 		prompt: 0.0001, // $0.10 per 1M tokens
 		completion: 0.0004, // $0.40 per 1M tokens
 	},
-	"gpt-4.1-nano-2025-04-14": {
-		prompt: 0.0001, // $0.10 per 1M tokens
-		completion: 0.0004, // $0.40 per 1M tokens
-	},
-
-	// GPT-4.5 series
-	"gpt-4.5-preview": {
-		prompt: 0.075, // $75.00 per 1M tokens
-		completion: 0.15, // $150.00 per 1M tokens
-	},
-	"gpt-4.5-preview-2025-02-27": {
-		prompt: 0.075, // $75.00 per 1M tokens
-		completion: 0.15, // $150.00 per 1M tokens
-	},
 
 	// GPT-4o series
 	"gpt-4o": {
 		prompt: 0.0025, // $2.50 per 1M tokens
 		completion: 0.01, // $10.00 per 1M tokens
 	},
-	"gpt-4o-2024-11-20": {
-		prompt: 0.0025, // $2.50 per 1M tokens
-		completion: 0.01, // $10.00 per 1M tokens
-	},
-	"gpt-4o-2024-08-06": {
-		prompt: 0.0025, // $2.50 per 1M tokens
-		completion: 0.01, // $10.00 per 1M tokens
-	},
-	"gpt-4o-2024-05-13": {
-		prompt: 0.005, // $5.00 per 1M tokens (legacy pricing)
-		completion: 0.015, // $15.00 per 1M tokens (legacy pricing)
-	},
-	"gpt-4o-audio-preview": {
-		prompt: 0.0025, // $2.50 per 1M tokens
-		completion: 0.01, // $10.00 per 1M tokens
-	},
-	"gpt-4o-audio-preview-2024-12-17": {
-		prompt: 0.0025, // $2.50 per 1M tokens
-		completion: 0.01, // $10.00 per 1M tokens
-	},
-	"gpt-4o-realtime-preview": {
-		prompt: 0.005, // $5.00 per 1M tokens
-		completion: 0.02, // $20.00 per 1M tokens
-	},
-	"gpt-4o-realtime-preview-2024-12-17": {
-		prompt: 0.005, // $5.00 per 1M tokens
-		completion: 0.02, // $20.00 per 1M tokens
-	},
-
-	// GPT-4o mini series
 	"gpt-4o-mini": {
 		prompt: 0.00015, // $0.15 per 1M tokens
 		completion: 0.0006, // $0.60 per 1M tokens
 	},
-	"gpt-4o-mini-2024-07-18": {
-		prompt: 0.00015, // $0.15 per 1M tokens
-		completion: 0.0006, // $0.60 per 1M tokens
+	"gpt-4o-audio-preview": {
+		prompt: 0.0025, // $2.50 per 1M tokens (same as 4o)
+		completion: 0.01, // $10.00 per 1M tokens (same as 4o)
 	},
-	"gpt-4o-mini-audio-preview": {
-		prompt: 0.00015, // $0.15 per 1M tokens
-		completion: 0.0006, // $0.60 per 1M tokens
+
+	// GPT-4 series
+	"gpt-4-turbo": {
+		prompt: 0.01, // $10.00 per 1M tokens
+		completion: 0.03, // $30.00 per 1M tokens
 	},
-	"gpt-4o-mini-audio-preview-2024-12-17": {
-		prompt: 0.00015, // $0.15 per 1M tokens
-		completion: 0.0006, // $0.60 per 1M tokens
+	"gpt-4": {
+		prompt: 0.03, // $30.00 per 1M tokens
+		completion: 0.06, // $60.00 per 1M tokens
 	},
-	"gpt-4o-mini-realtime-preview": {
-		prompt: 0.0006, // $0.60 per 1M tokens
-		completion: 0.0024, // $2.40 per 1M tokens
-	},
-	"gpt-4o-mini-realtime-preview-2024-12-17": {
-		prompt: 0.0006, // $0.60 per 1M tokens
-		completion: 0.0024, // $2.40 per 1M tokens
+	"gpt-3.5-turbo": {
+		prompt: 0.0005, // $0.50 per 1M tokens
+		completion: 0.0015, // $1.50 per 1M tokens
 	},
 
 	// o1 series
@@ -113,25 +59,13 @@ const OPENAI_MODELS: Record<OpenAIModel, ModelPricing> = {
 		prompt: 0.015, // $15.00 per 1M tokens
 		completion: 0.06, // $60.00 per 1M tokens
 	},
-	"o1-2024-12-17": {
-		prompt: 0.015, // $15.00 per 1M tokens
-		completion: 0.06, // $60.00 per 1M tokens
-	},
-	"o1-pro": {
-		prompt: 0.15, // $150.00 per 1M tokens
-		completion: 0.6, // $600.00 per 1M tokens
-	},
-	"o1-pro-2025-03-19": {
-		prompt: 0.15, // $150.00 per 1M tokens
-		completion: 0.6, // $600.00 per 1M tokens
-	},
 	"o1-mini": {
 		prompt: 0.0011, // $1.10 per 1M tokens
 		completion: 0.0044, // $4.40 per 1M tokens
 	},
-	"o1-mini-2024-09-12": {
-		prompt: 0.0011, // $1.10 per 1M tokens
-		completion: 0.0044, // $4.40 per 1M tokens
+	"o1-preview": {
+		prompt: 0.015, // $15.00 per 1M tokens
+		completion: 0.06, // $60.00 per 1M tokens
 	},
 
 	// o3 series
@@ -139,15 +73,7 @@ const OPENAI_MODELS: Record<OpenAIModel, ModelPricing> = {
 		prompt: 0.01, // $10.00 per 1M tokens
 		completion: 0.04, // $40.00 per 1M tokens
 	},
-	"o3-2025-04-16": {
-		prompt: 0.01, // $10.00 per 1M tokens
-		completion: 0.04, // $40.00 per 1M tokens
-	},
 	"o3-mini": {
-		prompt: 0.0011, // $1.10 per 1M tokens
-		completion: 0.0044, // $4.40 per 1M tokens
-	},
-	"o3-mini-2025-01-31": {
 		prompt: 0.0011, // $1.10 per 1M tokens
 		completion: 0.0044, // $4.40 per 1M tokens
 	},
@@ -157,45 +83,33 @@ const OPENAI_MODELS: Record<OpenAIModel, ModelPricing> = {
 		prompt: 0.0011, // $1.10 per 1M tokens
 		completion: 0.0044, // $4.40 per 1M tokens
 	},
-	"o4-mini-2025-04-16": {
-		prompt: 0.0011, // $1.10 per 1M tokens
-		completion: 0.0044, // $4.40 per 1M tokens
+
+	// ChatGPT models
+	"chatgpt-4o-latest": {
+		prompt: 0.0025, // $2.50 per 1M tokens (same as 4o)
+		completion: 0.01, // $10.00 per 1M tokens (same as 4o)
 	},
 };
 
 const ANTHROPIC_MODELS: Record<AnthropicModel, ModelPricing> = {
-	// Claude Opus models
-	"claude-opus-4-20250514": {
+	// Claude 4 models
+	"claude-4-opus-20250514": {
 		prompt: 0.015, // $15.00 per 1M tokens
 		completion: 0.075, // $75.00 per 1M tokens
 	},
-	"claude-3-opus-20240229": {
-		prompt: 0.015, // $15.00 per 1M tokens
-		completion: 0.075, // $75.00 per 1M tokens
-	},
-	"claude-3-opus-latest": {
-		prompt: 0.015, // $15.00 per 1M tokens
-		completion: 0.075, // $75.00 per 1M tokens
-	},
-
-	// Claude Sonnet models
-	"claude-sonnet-4-20250514": {
+	"claude-4-sonnet-20250514": {
 		prompt: 0.003, // $3.00 per 1M tokens
 		completion: 0.015, // $15.00 per 1M tokens
 	},
+
+	// Claude 3.7 Sonnet models
 	"claude-3-7-sonnet-20250219": {
 		prompt: 0.003, // $3.00 per 1M tokens
 		completion: 0.015, // $15.00 per 1M tokens
 	},
-	"claude-3-7-sonnet-latest": {
-		prompt: 0.003, // $3.00 per 1M tokens
-		completion: 0.015, // $15.00 per 1M tokens
-	},
+
+	// Claude 3.5 models
 	"claude-3-5-sonnet-20241022": {
-		prompt: 0.003, // $3.00 per 1M tokens
-		completion: 0.015, // $15.00 per 1M tokens
-	},
-	"claude-3-5-sonnet-latest": {
 		prompt: 0.003, // $3.00 per 1M tokens
 		completion: 0.015, // $15.00 per 1M tokens
 	},
@@ -203,19 +117,19 @@ const ANTHROPIC_MODELS: Record<AnthropicModel, ModelPricing> = {
 		prompt: 0.003, // $3.00 per 1M tokens
 		completion: 0.015, // $15.00 per 1M tokens
 	},
-	"claude-3-sonnet-20240229": {
-		prompt: 0.003, // $3.00 per 1M tokens (assuming same as other Sonnet 3.x)
-		completion: 0.015, // $15.00 per 1M tokens
-	},
-
-	// Claude Haiku models
 	"claude-3-5-haiku-20241022": {
 		prompt: 0.0008, // $0.80 per 1M tokens
 		completion: 0.004, // $4.00 per 1M tokens
 	},
-	"claude-3-5-haiku-latest": {
-		prompt: 0.0008, // $0.80 per 1M tokens
-		completion: 0.004, // $4.00 per 1M tokens
+
+	// Claude 3 models
+	"claude-3-opus-20240229": {
+		prompt: 0.015, // $15.00 per 1M tokens
+		completion: 0.075, // $75.00 per 1M tokens
+	},
+	"claude-3-sonnet-20240229": {
+		prompt: 0.003, // $3.00 per 1M tokens
+		completion: 0.015, // $15.00 per 1M tokens
 	},
 	"claude-3-haiku-20240307": {
 		prompt: 0.00025, // $0.25 per 1M tokens
@@ -224,30 +138,58 @@ const ANTHROPIC_MODELS: Record<AnthropicModel, ModelPricing> = {
 };
 
 const GOOGLE_MODELS: Record<GoogleModel, ModelPricing> = {
-	// Gemini 2.5 series (latest)
+	// Gemini 2.5 series
 	"gemini-2.5-pro": {
-		prompt: 1.25, // $1.25 per 1M tokens (≤200k), $2.50 (>200k)
-		completion: 10.0, // $10.00 per 1M tokens (≤200k), $15.00 (>200k)
+		prompt: 1.25, // $1.25 per 1M tokens (≤128k), $2.50 (>128k)
+		completion: 5.0, // $5.00 per 1M tokens (≤128k), $10.00 (>128k)
 	},
 	"gemini-2.5-flash": {
-		prompt: 0.3, // $0.30 per 1M tokens (text/image/video), $1.00 (audio)
-		completion: 2.5, // $2.50 per 1M tokens
+		prompt: 0.075, // $0.075 per 1M tokens (≤128k), $0.15 (>128k)
+		completion: 0.3, // $0.30 per 1M tokens (≤128k), $0.60 (>128k)
+	},
+	"gemini-2.5-flash-lite": {
+		prompt: 0.05, // $0.05 per 1M tokens (estimated)
+		completion: 0.2, // $0.20 per 1M tokens (estimated)
+	},
+	"gemini-2.5-flash-lite-preview-06-17": {
+		prompt: 0.05, // $0.05 per 1M tokens (estimated)
+		completion: 0.2, // $0.20 per 1M tokens (estimated)
 	},
 
 	// Gemini 2.0 series
 	"gemini-2.0-flash": {
+		prompt: 0.075, // $0.075 per 1M tokens
+		completion: 0.3, // $0.30 per 1M tokens
+	},
+	"gemini-2.0-flash-exp": {
 		prompt: 0.1, // $0.10 per 1M tokens (text/image/video), $0.70 (audio)
 		completion: 0.4, // $0.40 per 1M tokens
 	},
 
 	// Gemini 1.5 series
+	"gemini-1.5-pro": {
+		prompt: 1.25, // $1.25 per 1M tokens (≤128k), $2.50 (>128k)
+		completion: 5.0, // $5.00 per 1M tokens (≤128k), $10.00 (>128k)
+	},
+	"gemini-1.5-pro-latest": {
+		prompt: 1.25, // $1.25 per 1M tokens (≤128k), $2.50 (>128k)
+		completion: 5.0, // $5.00 per 1M tokens (≤128k), $10.00 (>128k)
+	},
 	"gemini-1.5-flash": {
 		prompt: 0.075, // $0.075 per 1M tokens (≤128k), $0.15 (>128k)
 		completion: 0.3, // $0.30 per 1M tokens (≤128k), $0.60 (>128k)
 	},
-	"gemini-1.5-pro": {
-		prompt: 1.25, // $1.25 per 1M tokens (≤128k), $2.50 (>128k)
-		completion: 5.0, // $5.00 per 1M tokens (≤128k), $10.00 (>128k)
+	"gemini-1.5-flash-latest": {
+		prompt: 0.075, // $0.075 per 1M tokens (≤128k), $0.15 (>128k)
+		completion: 0.3, // $0.30 per 1M tokens (≤128k), $0.60 (>128k)
+	},
+	"gemini-1.5-flash-8b": {
+		prompt: 0.0375, // $0.0375 per 1M tokens (≤128k), $0.075 (>128k)
+		completion: 0.15, // $0.15 per 1M tokens (≤128k), $0.30 (>128k)
+	},
+	"gemini-1.5-flash-8b-latest": {
+		prompt: 0.0375, // $0.0375 per 1M tokens (≤128k), $0.075 (>128k)
+		completion: 0.15, // $0.15 per 1M tokens (≤128k), $0.30 (>128k)
 	},
 };
 

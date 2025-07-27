@@ -14,7 +14,7 @@
 		"@openpanel/nextjs": "^1.0.8",
 		"@proxed/logger": "workspace:*",
 		"@vercel/functions": "^2.2.2",
-		"next": "^15.3.4"
+		"next": "^15.4.4"
 	},
 	"devDependencies": {
 		"@types/node": "^22.16.5",

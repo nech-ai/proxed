@@ -34,7 +34,6 @@
 		"format": "biome format --write .",
 		"typecheck": "tsc --noEmit",
 		"dev": "email dev -p 3003 --dir ./src/emails",
-		"build": "email build --dir ./src/emails",
 		"start": "email start --dir ./src/emails"
 	},
 	"types": "./src/index.ts",

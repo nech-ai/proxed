@@ -34,7 +34,6 @@ function ChangelogEntryHeader({
 				className="group/title block flex-grow"
 				href={`/changelog/${slug}`}
 				prefetch={firstEntry}
-				legacyBehavior
 			>
 				<GradientText
 					as="h2"

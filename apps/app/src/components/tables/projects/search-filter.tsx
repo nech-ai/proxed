@@ -14,7 +14,7 @@ import {
 } from "@proxed/ui/components/dropdown-menu";
 import { Input } from "@proxed/ui/components/input";
 import { cn } from "@proxed/ui/utils";
-import { readStreamableValue } from "ai/rsc";
+import { readStreamableValue } from "@ai-sdk/rsc";
 import { formatISO } from "date-fns";
 import { CalendarIcon, Filter, Search } from "lucide-react";
 import { parseAsString, useQueryStates } from "nuqs";

@@ -29,7 +29,7 @@
 		"@biomejs/biome": "1.9.4",
 		"@manypkg/cli": "^0.24.0",
 		"@types/bun": "^1.2.19",
-		"@types/node": "^22.16.5",
+		"@types/node": "^24.1.0",
 		"dotenv-cli": "^8.0.0",
 		"tsconfig": "workspace:*",
 		"turbo": "^2.5.5",

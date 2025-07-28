@@ -36,7 +36,7 @@
         "@hookform/resolvers": "^5.1.1",
         "@novu/headless": "^2.6.6",
         "@number-flow/react": "^0.5.10",
-        "@polar-sh/nextjs": "^0.4.1",
+        "@polar-sh/nextjs": "^0.4.4",
         "@polar-sh/sdk": "^0.33.2",
         "@proxed/analytics": "workspace:*",
         "@proxed/jobs": "workspace:*",
@@ -921,9 +921,9 @@
 
     "@pnpm/npm-conf": ["@pnpm/npm-conf@2.3.1", "", { "dependencies": { "@pnpm/config.env-replace": "^1.1.0", "@pnpm/network.ca-file": "^1.0.1", "config-chain": "^1.1.11" } }, "sha512-c83qWb22rNRuB0UaVCI0uRPNRr8Z0FWnEIvT47jiHAmOIUHbBOg5XvV7pM5x+rKn9HRpjxquDbXYSXr3fAKFcw=="],
 
-    "@polar-sh/adapter-utils": ["@polar-sh/adapter-utils@0.2.2", "", { "dependencies": { "@polar-sh/sdk": "^0.34.5" } }, "sha512-BlQHNvykZF7d+v9IFdKv52FcZt7ijSvu/8SCjCKM+kM+L7VIvrkC4qGHplMLLUHn7HYrZ+te0k77Q7SugBF0/Q=="],
+    "@polar-sh/adapter-utils": ["@polar-sh/adapter-utils@0.2.3", "", { "dependencies": { "@polar-sh/sdk": "^0.34.8" } }, "sha512-ULIV5UEP/DSkaRoeY7QNjTDWM5Th9spiN5ZeOrLJ0G66my0lyT1o2+uK1XOKd7Kwqp56xucgcpu/M2lOCttvvw=="],
 
-    "@polar-sh/nextjs": ["@polar-sh/nextjs@0.4.3", "", { "dependencies": { "@polar-sh/adapter-utils": "0.2.2", "@polar-sh/sdk": "^0.34.5" }, "peerDependencies": { "next": "^15.0.0 || ^15.2.0-canary.*" } }, "sha512-3b/5lag6D1M0jCXZllEzCpnE4R1LW8vev0DNrmG/I6suAnLxnnYI4vHJGlZRuufFxuVpqCZdYe1LkGPV31hD+A=="],
+    "@polar-sh/nextjs": ["@polar-sh/nextjs@0.4.4", "", { "dependencies": { "@polar-sh/adapter-utils": "0.2.3", "@polar-sh/sdk": "^0.34.8" }, "peerDependencies": { "next": "^15.0.0 || ^15.2.0-canary.*" } }, "sha512-rjpGmR1/z7vGzLRzDNhjRP50dfh9xXW/zedRDL93tmFRl2QJSaZig0TPePe3wTTK0iOX0euLHPAF6AhyjfMcaw=="],
 
     "@polar-sh/sdk": ["@polar-sh/sdk@0.33.2", "", { "dependencies": { "standardwebhooks": "^1.0.0" }, "peerDependencies": { "@modelcontextprotocol/sdk": ">=1.5.0 <1.10.0", "zod": ">= 3" }, "optionalPeers": ["@modelcontextprotocol/sdk"], "bin": { "mcp": "bin/mcp-server.js" } }, "sha512-k/YDcwuPKlQdgJXEQkRBQY2ZFxzJHdSNE+Pqz3FMiWTC9hWk7eyfTI6fzJeYfMuhQnY801oujiOg3ZbYHxW8nw=="],
 
@@ -3279,9 +3279,9 @@
 
     "@pnpm/network.ca-file/graceful-fs": ["graceful-fs@4.2.10", "", {}, "sha512-9ByhssR2fPVsNZj478qUUbKfmL0+t5BDVyjShtyZZLiK7ZDAArFFfopyOTj0M05wE2tJPisA4iTnnXl2YoPvOA=="],
 
-    "@polar-sh/adapter-utils/@polar-sh/sdk": ["@polar-sh/sdk@0.34.6", "", { "dependencies": { "standardwebhooks": "^1.0.0" }, "peerDependencies": { "@modelcontextprotocol/sdk": ">=1.5.0 <1.10.0", "zod": "^3" }, "optionalPeers": ["@modelcontextprotocol/sdk"], "bin": { "mcp": "bin/mcp-server.js" } }, "sha512-L9skM7yJNHWOxoypYnFmaM4E7iGDew4sow7yk70E7M3zvt6HXYzdOA658s9qHN/44TligzNxJJDVLM9kzyeqZg=="],
+    "@polar-sh/adapter-utils/@polar-sh/sdk": ["@polar-sh/sdk@0.34.8", "", { "dependencies": { "standardwebhooks": "^1.0.0", "zod": "^3.25.76" }, "peerDependencies": { "@modelcontextprotocol/sdk": ">=1.5.0 <1.10.0" }, "optionalPeers": ["@modelcontextprotocol/sdk"], "bin": { "mcp": "bin/mcp-server.js" } }, "sha512-9GVBaB0XlSxS/0GTPThPkWWb31vPOZr67onMC772dKjzRd7o9WJ9WTXY1d2btmFFoxqdxJutGxXptI3mmFl0aw=="],
 
-    "@polar-sh/nextjs/@polar-sh/sdk": ["@polar-sh/sdk@0.34.6", "", { "dependencies": { "standardwebhooks": "^1.0.0" }, "peerDependencies": { "@modelcontextprotocol/sdk": ">=1.5.0 <1.10.0", "zod": "^3" }, "optionalPeers": ["@modelcontextprotocol/sdk"], "bin": { "mcp": "bin/mcp-server.js" } }, "sha512-L9skM7yJNHWOxoypYnFmaM4E7iGDew4sow7yk70E7M3zvt6HXYzdOA658s9qHN/44TligzNxJJDVLM9kzyeqZg=="],
+    "@polar-sh/nextjs/@polar-sh/sdk": ["@polar-sh/sdk@0.34.8", "", { "dependencies": { "standardwebhooks": "^1.0.0", "zod": "^3.25.76" }, "peerDependencies": { "@modelcontextprotocol/sdk": ">=1.5.0 <1.10.0" }, "optionalPeers": ["@modelcontextprotocol/sdk"], "bin": { "mcp": "bin/mcp-server.js" } }, "sha512-9GVBaB0XlSxS/0GTPThPkWWb31vPOZr67onMC772dKjzRd7o9WJ9WTXY1d2btmFFoxqdxJutGxXptI3mmFl0aw=="],
 
     "@react-email/components/@react-email/render": ["@react-email/render@1.1.2", "", { "dependencies": { "html-to-text": "^9.0.5", "prettier": "^3.5.3", "react-promise-suspense": "^0.3.4" }, "peerDependencies": { "react": "^18.0 || ^19.0 || ^19.0.0-rc", "react-dom": "^18.0 || ^19.0 || ^19.0.0-rc" } }, "sha512-RnRehYN3v9gVlNMehHPHhyp2RQo7+pSkHDtXPvg3s0GbzM9SQMW4Qrf8GRNvtpLC4gsI+Wt0VatNRUFqjvevbw=="],
 

@@ -21,7 +21,7 @@
 		"@proxed/supabase": "workspace:*",
 		"@proxed/ui": "workspace:*",
 		"@proxed/utils": "workspace:*",
-		"@sentry/esbuild-plugin": "^3.5.0",
+		"@sentry/esbuild-plugin": "^4.0.1",
 		"@sentry/nextjs": "^9.33.0",
 		"@sentry/node": "^9.33.0",
 		"@supabase/sentry-js-integration": "^0.3.0",

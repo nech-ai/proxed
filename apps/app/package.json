@@ -78,8 +78,8 @@
 	"name": "@proxed/app",
 	"private": true,
 	"scripts": {
-		"build": "next build",
-		"dev": "next dev -p 3000",
+		"build": "next build --turbopack",
+		"dev": "next dev -p 3000 --turbopack",
 		"dev:trigger": "bunx trigger.dev@latest dev --skip-update-check",
 		"clean": "rm -rf .turbo node_modules",
 		"lint": "biome check .",

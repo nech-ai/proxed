@@ -6,7 +6,7 @@
 		"@ai-sdk/openai": "^2.0.0-beta.12",
 		"@ai-sdk/react": "^2.0.0-beta.28",
 		"@date-fns/utc": "^2.1.0",
-		"@hono/zod-openapi": "^0.19.9",
+		"@hono/zod-openapi": "^1.0.2",
 		"@hono/zod-validator": "^0.7.0",
 		"@proxed/jobs": "workspace:*",
 		"@proxed/kv": "workspace:*",

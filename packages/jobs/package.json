@@ -23,7 +23,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"@trigger.dev/build": "^3.3.17",
-		"@types/node": "^22.16.5",
+		"@types/node": "^24.1.0",
 		"tsconfig": "workspace:*"
 	}
 }

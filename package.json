@@ -26,7 +26,7 @@
 		"update:all": "manypkg exec bun update"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
+		"@biomejs/biome": "2.1.3",
 		"@manypkg/cli": "^0.24.0",
 		"@types/bun": "^1.2.19",
 		"@types/node": "^22.16.5",

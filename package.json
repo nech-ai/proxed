@@ -30,7 +30,7 @@
 		"@manypkg/cli": "^0.24.0",
 		"@types/bun": "^1.2.19",
 		"@types/node": "^22.16.5",
-		"dotenv-cli": "^8.0.0",
+		"dotenv-cli": "^10.0.0",
 		"tsconfig": "workspace:*",
 		"turbo": "^2.5.5",
 		"type-fest": "^4.41.0",

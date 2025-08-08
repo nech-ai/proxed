@@ -51,7 +51,7 @@ describe("Provider Functions", () => {
 			expect(models).toContain("o4-mini");
 			expect(models).toContain("gpt-3.5-turbo");
 			expect(models).toContain("chatgpt-4o-latest");
-			expect(models.length).toBe(16); // 16 AI SDK 5 supported models
+			expect(models.length).toBe(20); // 20 AI SDK 5 supported models (added GPT-5 series)
 		});
 
 		test("should return Anthropic models", () => {
@@ -188,7 +188,8 @@ describe("Provider Functions", () => {
 		});
 
 		test("should reject unknown models", () => {
-			expect(isValidModel("gpt-5")).toBe(false);
+			// Use a non-existent future model as the unknown placeholder
+			expect(isValidModel("gpt-6")).toBe(false);
 			expect(isValidModel("claude-4")).toBe(false);
 			expect(isValidModel("unknown-model")).toBe(false);
 			expect(isValidModel("")).toBe(false);

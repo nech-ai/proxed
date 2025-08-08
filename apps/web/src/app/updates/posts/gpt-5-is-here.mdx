@@ -1,0 +1,61 @@
+---
+title: "GPT‑5 is here: Proxed.AI now supports the GPT‑5 family"
+publishedAt: "2025-08-08"
+summary: "We’ve added OpenAI’s GPT‑5 models to Proxed.AI with full pricing, validation, and model selection support."
+image: "/images/starting.png"
+tag: "Feature"
+---
+
+We just shipped support for the GPT‑5 family across Proxed.AI. That means you can route requests to OpenAI’s newest models with the same secure proxy, partial keys, and DeviceCheck protections you already use.
+
+<br />
+### What’s included
+
+- **New models**: `gpt-5`, `gpt-5-mini`, `gpt-5-nano`, `gpt-5-chat-latest`
+- **Pricing + cost tracking**: Included in our pricing engine and dashboard estimates
+- **Validation**: Integrated into model lists, badges, and capability checks
+
+<br />
+### Pricing (per 1M tokens)
+
+| Model | Input | Output |
+|---|---:|---:|
+| `gpt-5` | $1.25 | $10.00 |
+| `gpt-5-mini` | $0.25 | $2.00 |
+| `gpt-5-nano` | $0.05 | $0.40 |
+| `gpt-5-chat-latest` | $1.25 | $10.00 |
+
+Note: Cached input and alternative tiers (Flex, Batch, Priority) are coming later to the dashboard. Standard tier rates are live now in our calculators.
+
+<br />
+### How to use
+
+Switch your OpenAI model to any GPT‑5 variant. Everything else stays the same.
+
+```ts
+// Example: switch model id
+const request = await fetch(`https://api.proxed.ai/v1/openai/${PROJECT_ID}/chat/completions`, {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${PARTIAL_KEY}.${DEVICE_TOKEN}`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "gpt-5",
+    messages: [{ role: "user", content: "Give me a concise plan." }],
+  }),
+});
+```
+
+If you prefer lower latency or cost, try `gpt-5-mini` or `gpt-5-nano`.
+
+<br />
+### Notes
+
+- All changes are backward-compatible. No SDK changes required.
+- Cost estimates reflect the new GPT‑5 rates immediately.
+- You can combine GPT‑5 with our structured routes (Text/Vision/PDF) as usual.
+
+Have feedback or issues? Open a ticket on our GitHub or ping us on X.
+
+

@@ -88,6 +88,24 @@ export const MODELS = {
 			order: 16,
 			badge: "preview" as ModelBadge,
 		},
+
+		// GPT-5 series - Supported in AI SDK 5
+		"gpt-5": { displayName: "GPT-5", order: 17, badge: "new" as ModelBadge },
+		"gpt-5-mini": {
+			displayName: "GPT-5 Mini",
+			order: 18,
+			badge: "new" as ModelBadge,
+		},
+		"gpt-5-nano": {
+			displayName: "GPT-5 Nano",
+			order: 19,
+			badge: "new" as ModelBadge,
+		},
+		"gpt-5-chat-latest": {
+			displayName: "GPT-5 Chat Latest",
+			order: 20,
+			badge: "new" as ModelBadge,
+		},
 	},
 	ANTHROPIC: {
 		// Claude 4 models - Supported in AI SDK 5

@@ -12,6 +12,24 @@ type ModelPricing = {
 };
 
 const OPENAI_MODELS: Record<OpenAIModel, ModelPricing> = {
+	// GPT-5 series (Standard tier pricing)
+	"gpt-5": {
+		prompt: 0.00125, // $1.25 per 1M tokens
+		completion: 0.01, // $10.00 per 1M tokens
+	},
+	"gpt-5-mini": {
+		prompt: 0.00025, // $0.25 per 1M tokens
+		completion: 0.002, // $2.00 per 1M tokens
+	},
+	"gpt-5-nano": {
+		prompt: 0.00005, // $0.05 per 1M tokens
+		completion: 0.0004, // $0.40 per 1M tokens
+	},
+	"gpt-5-chat-latest": {
+		prompt: 0.00125, // $1.25 per 1M tokens
+		completion: 0.01, // $10.00 per 1M tokens
+	},
+
 	// GPT-4.1 series
 	"gpt-4.1": {
 		prompt: 0.002, // $2.00 per 1M tokens

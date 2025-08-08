@@ -8,6 +8,8 @@ import {
 import { notFound } from "next/navigation";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import { metadataImage } from "@/lib/metadata";
+import { cn } from "@proxed/ui/lib/utils";
+import type { ReactNode } from "react";
 
 export default async function Page(props: {
 	params: Promise<{ slug?: string[] }>;
@@ -18,12 +20,37 @@ export default async function Page(props: {
 
 	const MDX = page.data.body;
 
+	function Note({
+		type = "info",
+		className,
+		children,
+	}: {
+		type?: "info" | "warning" | "success" | "error";
+		className?: string;
+		children: ReactNode;
+	}) {
+		const variant =
+			type === "warning"
+				? "border-amber-500/30 bg-amber-500/10 text-amber-200"
+				: type === "success"
+					? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
+					: type === "error"
+						? "border-red-500/30 bg-red-500/10 text-red-200"
+						: "border-blue-500/30 bg-blue-500/10 text-blue-200";
+
+		return (
+			<div className={cn("rounded-md border p-3 text-sm", variant, className)}>
+				{children}
+			</div>
+		);
+	}
+
 	return (
 		<DocsPage toc={page.data.toc} full={page.data.full}>
 			<DocsTitle>{page.data.title}</DocsTitle>
 			<DocsDescription>{page.data.description}</DocsDescription>
 			<DocsBody>
-				<MDX components={{ ...defaultMdxComponents }} />
+				<MDX components={{ ...defaultMdxComponents, Note }} />
 			</DocsBody>
 		</DocsPage>
 	);

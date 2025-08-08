@@ -4,6 +4,7 @@ import Link from "next/link";
 import React from "react";
 import { highlight } from "sugar-high";
 import { cn } from "@proxed/ui/lib/utils";
+import type { ReactNode } from "react";
 
 interface TableData {
 	headers: string[];
@@ -167,6 +168,31 @@ function Iframe({ src, className, ...props }: IframeProps) {
 	);
 }
 
+function Note({
+	type = "info",
+	className,
+	children,
+}: {
+	type?: "info" | "warning" | "success" | "error";
+	className?: string;
+	children: ReactNode;
+}) {
+	const variant =
+		type === "warning"
+			? "border-amber-500/30 bg-amber-500/10 text-amber-200"
+			: type === "success"
+				? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
+				: type === "error"
+					? "border-red-500/30 bg-red-500/10 text-red-200"
+					: "border-blue-500/30 bg-blue-500/10 text-blue-200";
+
+	return (
+		<div className={cn("rounded-md border p-3 text-sm", variant, className)}>
+			{children}
+		</div>
+	);
+}
+
 const components = {
 	h1: createHeading(1),
 	h2: createHeading(2),
@@ -179,6 +205,7 @@ const components = {
 	code: Code,
 	Table,
 	iframe: Iframe,
+	Note,
 } as const;
 
 interface CustomMDXProps {

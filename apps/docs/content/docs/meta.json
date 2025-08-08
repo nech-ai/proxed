@@ -12,6 +12,7 @@
 		"api-reference/structured-vision",
 		"api-reference/structured-text",
 		"api-reference/structured-pdf",
+		"api-reference/structured-image",
 		"api-reference/openai-proxy",
 		"api-reference/anthropic-proxy",
 		"api-reference/google-proxy",

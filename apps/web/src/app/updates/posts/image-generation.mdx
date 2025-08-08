@@ -1,0 +1,34 @@
+---
+title: Image Generation API (Experimental)
+date: 2025-08-08
+author: Proxed Team
+summary: Generate images from prompts via our unified proxy with OpenAI and Google support.
+---
+
+We're introducing a new experimental Image Generation API that lets you create images from text prompts through the same secure, metered proxy you use for text, vision, and PDF.
+
+### What you get
+- Works with **OpenAI** (`gpt-image-1`, `dall-e-3`, `dall-e-2`) and **Google AI** (`imagen-3.0-generate-002`).
+- Simple endpoint: `POST /v1/image` (or `/v1/image/{projectId}`).
+- Supports `size` (e.g., `1024x1024`) or `aspectRatio` (e.g., `16:9`), `n` images, `seed`, and provider-specific options.
+- Responses include base64-encoded images plus provider metadata and warnings when available.
+
+### Quick start
+Send a request with your project auth headers:
+
+```bash
+curl -X POST \
+  https://api.proxed.ai/v1/image/{your-project-id} \
+  -H "Authorization: Bearer {your-partial-api-key}.{your-device-token-or-test-key}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "A retro-futuristic city skyline at dusk",
+    "model": "gpt-image-1",
+    "size": "1024x1024"
+  }'
+```
+
+### Docs
+See the full API reference: [/docs/api-reference/structured-image](/docs/api-reference/structured-image)
+
+<Note type="warning">Image generation is experimental. Parameters and behaviors may change.</Note>

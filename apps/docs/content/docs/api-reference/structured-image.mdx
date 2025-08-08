@@ -98,3 +98,17 @@ curl -X POST \
     "n": 1
   }'
 ```
+
+## Pricing
+
+- OpenAI GPT Image 1 (per image):
+  - Quality low: 1024x1024 $0.011, 1024x1536 $0.016, 1536x1024 $0.016
+  - Quality medium: 1024x1024 $0.042, 1024x1536 $0.063, 1536x1024 $0.063
+  - Quality high: 1024x1024 $0.167, 1024x1536 $0.25, 1536x1024 $0.25
+- OpenAI DALL·E 3 (per image):
+  - Standard: 1024x1024 $0.04, 1024x1536 $0.08, 1536x1024 $0.08
+  - HD: 1024x1024 $0.08, 1024x1536 $0.12, 1536x1024 $0.12
+- OpenAI DALL·E 2 (per image): 1024x1024 $0.016, 1024x1536 $0.018, 1536x1024 $0.02
+
+Notes:
+- Costs are recorded per execution when sufficient parameters are provided.

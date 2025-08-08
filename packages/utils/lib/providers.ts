@@ -106,6 +106,15 @@ export const MODELS = {
 			order: 20,
 			badge: "new" as ModelBadge,
 		},
+
+		// Image generation models
+		"gpt-image-1": {
+			displayName: "GPT Image 1",
+			order: 21,
+			badge: "experimental" as ModelBadge,
+		},
+		"dall-e-3": { displayName: "DALL·E 3", order: 22 },
+		"dall-e-2": { displayName: "DALL·E 2", order: 23 },
 	},
 	ANTHROPIC: {
 		// Claude 4 models - Supported in AI SDK 5
@@ -189,6 +198,13 @@ export const MODELS = {
 		"gemini-1.5-flash-8b-latest": {
 			displayName: "Gemini 1.5 Flash 8B Latest",
 			order: 12,
+		},
+
+		// Image generation model(s)
+		"imagen-3.0-generate-002": {
+			displayName: "Imagen 3.0 Generate 002",
+			order: 13,
+			badge: "experimental" as ModelBadge,
 		},
 	},
 } as const;

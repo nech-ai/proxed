@@ -147,12 +147,15 @@ export async function recordExecution(
 			completionCost: string;
 			totalCost: string;
 		};
+		overrideModel?: string;
 	},
 ) {
 	const db = c.get("db");
 	const geo = c.get("geo");
 	const userAgent = c.req.header("user-agent");
 	const latency = Date.now() - startTime;
+
+	const modelForExecution = options?.overrideModel ?? projectData.project.model;
 
 	const commonParams = getCommonExecutionParams({
 		teamId: projectData.teamId,
@@ -161,7 +164,7 @@ export async function recordExecution(
 		keyId: projectData.project.keyId,
 		ip: geo.ip ?? undefined,
 		userAgent,
-		model: projectData.project.model,
+		model: modelForExecution,
 		provider: projectData.project.key.provider,
 		geo,
 	});
@@ -175,20 +178,20 @@ export async function recordExecution(
 
 	if (
 		!options?.overrideCosts &&
-		projectData.project.model &&
+		modelForExecution &&
 		projectData.project.key?.provider
 	) {
 		try {
 			costs = formatCostsForDB({
 				provider: projectData.project.key.provider,
-				model: projectData.project.model,
+				model: modelForExecution,
 				promptTokens: metrics.promptTokens,
 				completionTokens: metrics.completionTokens,
 			});
 		} catch (error) {
 			logger.error("Failed to calculate costs:", {
 				error: error instanceof Error ? error.message : error,
-				model: projectData.project.model,
+				model: modelForExecution,
 				provider: projectData.project.key.provider,
 				tokens: {
 					prompt: metrics.promptTokens,

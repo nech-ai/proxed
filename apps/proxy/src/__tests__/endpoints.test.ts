@@ -344,6 +344,19 @@ test("POST /v1/pdf returns 401 without auth", async () => {
 	expect(json.error).toBeDefined();
 });
 
+// Image Generation
+
+test("POST /v1/image returns 401 without auth", async () => {
+	const res = await post(
+		"/v1/image",
+		{ prompt: "A sunset over mountains in watercolor" },
+		headerProject,
+	);
+	expect(res.status).toBe(401);
+	const json: any = await res.json();
+	expect(json.error).toBeDefined();
+});
+
 // -----------------------------
 // Test with authentication
 // -----------------------------

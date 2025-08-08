@@ -7,6 +7,7 @@ import { textResponseRouter } from "./routes/text";
 import { pdfResponseRouter } from "./routes/pdf";
 import { healthRouter } from "./routes/health";
 import type { Context } from "./types";
+import { imageGenerationRouter } from "./routes/image";
 
 const routers = new OpenAPIHono<Context>();
 
@@ -20,6 +21,7 @@ routers.route("/v1/google", googleRouter);
 routers.route("/v1/vision", visionResponseRouter);
 routers.route("/v1/text", textResponseRouter);
 routers.route("/v1/pdf", pdfResponseRouter);
+routers.route("/v1/image", imageGenerationRouter);
 
 // Health check doesn't need authentication
 const publicRouters = new OpenAPIHono<Context>();

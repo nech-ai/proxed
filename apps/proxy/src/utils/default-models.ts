@@ -142,3 +142,37 @@ export function supportsPDF(provider: ProviderType, model: string): boolean {
 	// This is the same as structured outputs support
 	return supportsStructuredOutputs(provider, model);
 }
+
+/**
+ * Get the default image generation model for a given provider
+ */
+export function getDefaultImageModel(provider: ProviderType): string {
+	switch (provider) {
+		case "OPENAI":
+			return "gpt-image-1"; // or "dall-e-3"
+		case "GOOGLE":
+			return "imagen-3.0-generate-002";
+		default:
+			// If provider doesn't support image generation natively, fallback to OpenAI default
+			return "gpt-image-1";
+	}
+}
+
+/**
+ * Check if the provider/model supports image generation
+ */
+export function supportsImageGeneration(
+	provider: ProviderType,
+	model: string,
+): boolean {
+	switch (provider) {
+		case "OPENAI":
+			return (
+				model === "gpt-image-1" || model === "dall-e-3" || model === "dall-e-2"
+			);
+		case "GOOGLE":
+			return model === "imagen-3.0-generate-002";
+		default:
+			return false;
+	}
+}

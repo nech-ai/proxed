@@ -1,4 +1,7 @@
-import { experimental_generateImage as generateImage, NoImageGeneratedError } from "ai";
+import {
+	experimental_generateImage as generateImage,
+	NoImageGeneratedError,
+} from "ai";
 import { type Context, Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 import { protectedMiddleware } from "../middleware";
@@ -7,6 +10,10 @@ import { z } from "zod";
 import { logger } from "../../utils/logger";
 import { createError, ErrorCode } from "../../utils/errors";
 import { createAIClient } from "../../utils/ai-client";
+import {
+	calculateImageGenerationCost,
+	formatImageCostForDB,
+} from "@proxed/utils/lib/pricing";
 import {
 	getDefaultImageModel,
 	supportsImageGeneration,
@@ -77,7 +84,10 @@ async function handleImageGeneration(c: Context<AppContext>) {
 	const fullApiKey = await getFullApiKey(db, project.keyId, apiKey!);
 
 	// Determine the model to use
-	const modelToUse = requestedModel || project.model || getDefaultImageModel(project.key.provider);
+	const modelToUse =
+		requestedModel ||
+		project.model ||
+		getDefaultImageModel(project.key.provider);
 
 	// Validate that the model supports image generation
 	if (!supportsImageGeneration(project.key.provider, modelToUse)) {
@@ -98,13 +108,13 @@ async function handleImageGeneration(c: Context<AppContext>) {
 						: (aiClient as any).image(modelToUse),
 				prompt,
 				// size or aspectRatio
-				...(size ? { size } : {}),
-				...(aspectRatio ? { aspectRatio } : {}),
+				...(size ? { size: size as `${number}x${number}` } : {}),
+				...(aspectRatio
+					? { aspectRatio: aspectRatio as `${number}:${number}` }
+					: {}),
 				n,
 				...(seed !== undefined ? { seed } : {}),
-				...(maxImagesPerCall !== undefined
-					? { maxImagesPerCall }
-					: {}),
+				...(maxImagesPerCall !== undefined ? { maxImagesPerCall } : {}),
 				...(providerOptions ? { providerOptions } : {}),
 				...(headers ? { headers } : {}),
 			}),
@@ -113,12 +123,29 @@ async function handleImageGeneration(c: Context<AppContext>) {
 		);
 
 		// Collect response
-		const images = (gen.images ?? (gen.image ? [gen.image] : [])).map((img) => ({
-			base64: img.base64,
-			mediaType: (img as any).mediaType ?? "image/png",
-		}));
+		const images = (gen.images ?? (gen.image ? [gen.image] : [])).map(
+			(img) => ({
+				base64: img.base64,
+				mediaType: (img as any).mediaType ?? "image/png",
+			}),
+		);
 
-		// Record successful execution (image generation does not provide token usage)
+		// Compute per-image cost if we can
+		const quality =
+			(providerOptions as any)?.openai?.quality ||
+			(providerOptions as any)?.openai?.style ||
+			(providerOptions as any)?.quality;
+		const totalCostNumber = calculateImageGenerationCost({
+			provider: project.key.provider,
+			model: modelToUse,
+			size,
+			aspectRatio,
+			quality,
+			n,
+		});
+		const overrideCosts = formatImageCostForDB(totalCostNumber);
+
+		// Record successful execution (image generation typically has no token usage)
 		await recordExecution(
 			c,
 			startTime,
@@ -130,6 +157,7 @@ async function handleImageGeneration(c: Context<AppContext>) {
 				response: { imagesCount: images.length },
 			},
 			{ project, teamId },
+			{ overrideCosts },
 		);
 
 		return c.json({
@@ -207,7 +235,8 @@ export const imageGenerationRouter = new Hono<AppContext>()
 		describeRoute({
 			tags: ["Image Generation"],
 			summary: "Image Generation",
-			description: "Generates images from a text prompt using the projectId from header",
+			description:
+				"Generates images from a text prompt using the projectId from header",
 			responses: {
 				200: { description: "Image generation response" },
 				400: { description: "Bad request" },
@@ -224,7 +253,8 @@ export const imageGenerationRouter = new Hono<AppContext>()
 		describeRoute({
 			tags: ["Image Generation"],
 			summary: "Image Generation with URL projectId",
-			description: "Generates images from a text prompt using projectId from the URL",
+			description:
+				"Generates images from a text prompt using projectId from the URL",
 			parameters: [
 				{
 					in: "path",

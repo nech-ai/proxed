@@ -1,5 +1,11 @@
 import { describe, test, expect } from "bun:test";
-import { calculateCosts, formatCostsForDB, getModelPricing } from "../pricing";
+import {
+	calculateCosts,
+	formatCostsForDB,
+	getModelPricing,
+	calculateImageGenerationCost,
+	formatImageCostForDB,
+} from "../pricing";
 import type { Provider, Model } from "../providers";
 
 describe("Pricing and Cost Calculation", () => {
@@ -133,6 +139,96 @@ describe("Pricing and Cost Calculation", () => {
 				model: "gpt-4o",
 				promptTokens: 100000,
 				completionTokens: 50000,
+			});
+
+			describe("image generation pricing", () => {
+				test("GPT Image 1 low/medium/high by size and count", () => {
+					// low, 1024x1024, n=1
+					expect(
+						calculateImageGenerationCost({
+							provider: "OPENAI",
+							model: "gpt-image-1",
+							size: "1024x1024",
+							quality: "low",
+							n: 1,
+						}),
+					).toBeCloseTo(0.011, 6);
+
+					// high (aka hd), 1024x1536, n=2
+					expect(
+						calculateImageGenerationCost({
+							provider: "OPENAI",
+							model: "gpt-image-1",
+							size: "1024x1536",
+							quality: "hd",
+							n: 2,
+						}),
+					).toBeCloseTo(0.5, 6); // 0.25 * 2
+
+					// aspect ratio with default medium quality
+					expect(
+						calculateImageGenerationCost({
+							provider: "OPENAI",
+							model: "gpt-image-1",
+							aspectRatio: "1:1",
+						}),
+					).toBeCloseTo(0.042, 6);
+				});
+
+				test("DALL·E 3 standard and HD", () => {
+					expect(
+						calculateImageGenerationCost({
+							provider: "OPENAI",
+							model: "dall-e-3",
+							size: "1024x1024",
+							quality: "standard",
+						}),
+					).toBeCloseTo(0.04, 6);
+
+					expect(
+						calculateImageGenerationCost({
+							provider: "OPENAI",
+							model: "dall-e-3",
+							size: "1536x1024",
+							quality: "hd",
+						}),
+					).toBeCloseTo(0.12, 6);
+				});
+
+				test("DALL·E 2 pricing by size", () => {
+					expect(
+						calculateImageGenerationCost({
+							provider: "OPENAI",
+							model: "dall-e-2",
+							size: "1024x1536",
+						}),
+					).toBeCloseTo(0.018, 6);
+				});
+
+				test("Google Imagen returns 0 (not priced here)", () => {
+					expect(
+						calculateImageGenerationCost({
+							provider: "GOOGLE",
+							model: "imagen-3.0-generate-002",
+							size: "1024x1024",
+						}),
+					).toBe(0);
+				});
+
+				test("formatImageCostForDB formatting", () => {
+					expect(formatImageCostForDB(0.5)).toEqual({
+						promptCost: "0.500000",
+						completionCost: "0.000000",
+						totalCost: "0.500000",
+					});
+
+					// Very small → minimum representable
+					expect(formatImageCostForDB(0.0000004)).toEqual({
+						promptCost: "0.000001",
+						completionCost: "0.000000",
+						totalCost: "0.000001",
+					});
+				});
 			});
 
 			// gpt-4o: 0.0025 per 1M prompt, 0.01 per 1M completion

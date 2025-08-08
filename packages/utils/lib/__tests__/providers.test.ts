@@ -51,7 +51,7 @@ describe("Provider Functions", () => {
 			expect(models).toContain("o4-mini");
 			expect(models).toContain("gpt-3.5-turbo");
 			expect(models).toContain("chatgpt-4o-latest");
-			expect(models.length).toBe(20); // 20 AI SDK 5 supported models (added GPT-5 series)
+			expect(models.length).toBe(23); // +3 image models added
 		});
 
 		test("should return Anthropic models", () => {
@@ -69,7 +69,7 @@ describe("Provider Functions", () => {
 			expect(models).toContain("gemini-2.5-flash");
 			expect(models).toContain("gemini-2.0-flash-exp");
 			expect(models).toContain("gemini-1.5-pro");
-			expect(models.length).toBe(12); // 12 AI SDK 5 supported models
+			expect(models.length).toBe(13); // +1 image model added
 		});
 	});
 
@@ -291,8 +291,17 @@ describe("Provider Functions", () => {
 			for (const model of Object.keys(MODELS.OPENAI) as Model[]) {
 				const pricing = getModelPricing("OPENAI", model);
 				expect(pricing).toBeDefined();
-				expect(pricing.prompt).toBeGreaterThan(0);
-				expect(pricing.completion).toBeGreaterThan(0);
+				if (
+					model === "gpt-image-1" ||
+					model === "dall-e-3" ||
+					model === "dall-e-2"
+				) {
+					expect(pricing.prompt).toBe(0);
+					expect(pricing.completion).toBe(0);
+				} else {
+					expect(pricing.prompt).toBeGreaterThan(0);
+					expect(pricing.completion).toBeGreaterThan(0);
+				}
 			}
 		});
 
@@ -313,13 +322,17 @@ describe("Provider Functions", () => {
 			for (const model of Object.keys(MODELS.GOOGLE) as Model[]) {
 				const pricing = getModelPricing("GOOGLE", model);
 				expect(pricing).toBeDefined();
-				expect(pricing.prompt).toBeGreaterThan(0);
-
-				// Embedding models have 0 completion cost which is expected
-				if (model.includes("embedding")) {
+				if (model === "imagen-3.0-generate-002") {
+					expect(pricing.prompt).toBe(0);
 					expect(pricing.completion).toBe(0);
 				} else {
-					expect(pricing.completion).toBeGreaterThan(0);
+					expect(pricing.prompt).toBeGreaterThan(0);
+					// Embedding models have 0 completion cost which is expected
+					if (model.includes("embedding")) {
+						expect(pricing.completion).toBe(0);
+					} else {
+						expect(pricing.completion).toBeGreaterThan(0);
+					}
 				}
 			}
 		});

@@ -141,6 +141,13 @@ export async function recordExecution(
 		project: any;
 		teamId: string;
 	},
+	options?: {
+		overrideCosts?: {
+			promptCost: string;
+			completionCost: string;
+			totalCost: string;
+		};
+	},
 ) {
 	const db = c.get("db");
 	const geo = c.get("geo");
@@ -160,13 +167,17 @@ export async function recordExecution(
 	});
 
 	// Calculate costs if we have a model
-	let costs = {
+	let costs = options?.overrideCosts ?? {
 		promptCost: "0",
 		completionCost: "0",
 		totalCost: "0",
 	};
 
-	if (projectData.project.model && projectData.project.key?.provider) {
+	if (
+		!options?.overrideCosts &&
+		projectData.project.model &&
+		projectData.project.key?.provider
+	) {
 		try {
 			costs = formatCostsForDB({
 				provider: projectData.project.key.provider,

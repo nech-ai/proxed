@@ -107,6 +107,20 @@ const OPENAI_MODELS: Record<OpenAIModel, ModelPricing> = {
 		prompt: 0.0025, // $2.50 per 1M tokens (same as 4o)
 		completion: 0.01, // $10.00 per 1M tokens (same as 4o)
 	},
+
+	// Image generation models (token pricing not applicable)
+	"gpt-image-1": {
+		prompt: 0,
+		completion: 0,
+	},
+	"dall-e-3": {
+		prompt: 0,
+		completion: 0,
+	},
+	"dall-e-2": {
+		prompt: 0,
+		completion: 0,
+	},
 };
 
 const ANTHROPIC_MODELS: Record<AnthropicModel, ModelPricing> = {
@@ -208,6 +222,12 @@ const GOOGLE_MODELS: Record<GoogleModel, ModelPricing> = {
 	"gemini-1.5-flash-8b-latest": {
 		prompt: 0.0375, // $0.0375 per 1M tokens (≤128k), $0.075 (>128k)
 		completion: 0.15, // $0.15 per 1M tokens (≤128k), $0.30 (>128k)
+	},
+
+	// Image generation model (token pricing not applicable)
+	"imagen-3.0-generate-002": {
+		prompt: 0,
+		completion: 0,
 	},
 };
 
@@ -338,5 +358,142 @@ export function formatCostsForDB(params: {
 		promptCost: formatCost(costs.promptCost),
 		completionCost: formatCost(costs.completionCost),
 		totalCost: formatCost(costs.totalCost),
+	};
+}
+
+// MARK: Image generation pricing (per image)
+
+type ImageSizeKey = "1024x1024" | "1024x1536" | "1536x1024";
+
+// Normalize size/aspectRatio to one of the known pricing buckets
+function normalizeImageSize(
+	size?: string,
+	aspectRatio?: string,
+): ImageSizeKey | null {
+	if (size) {
+		const normalized = size.trim();
+		if (
+			normalized === "1024x1024" ||
+			normalized === "1024x1536" ||
+			normalized === "1536x1024"
+		) {
+			return normalized as ImageSizeKey;
+		}
+	}
+
+	if (aspectRatio) {
+		const ar = aspectRatio.trim();
+		if (ar === "1:1") return "1024x1024";
+		if (ar === "2:3") return "1024x1536";
+		if (ar === "3:2") return "1536x1024";
+	}
+
+	return null;
+}
+
+function toFixed6(n: number): string {
+	if (!Number.isFinite(n) || n <= 0) return "0.000000";
+	const formatted = n.toFixed(6);
+	return formatted === "0.000000" ? "0.000001" : formatted;
+}
+
+/**
+ * Calculate total cost for image generation requests.
+ * Returns the total dollar amount for n images based on model, size, and quality.
+ * Currently supports OpenAI image models. Google Imagen pricing is not defined here and returns 0.
+ */
+export function calculateImageGenerationCost(params: {
+	provider: Provider;
+	model: string;
+	size?: string;
+	aspectRatio?: string;
+	quality?: string; // e.g., "low" | "medium" | "high" | "standard" | "hd"
+	n?: number;
+}): number {
+	const { provider, model, size, aspectRatio, quality, n = 1 } = params;
+	const count = Math.max(1, n | 0);
+	const sizeKey = normalizeImageSize(size, aspectRatio);
+
+	// Only defined for OpenAI image models for now
+	if (provider !== "OPENAI") {
+		return 0;
+	}
+
+	// Normalize quality labels across models
+	const q = (quality || "").toLowerCase();
+	// For GPT Image 1, use low/medium/high. Map common synonyms.
+	const normalizedQualityForGptImage1: "low" | "medium" | "high" =
+		q === "low" ? "low" : q === "high" || q === "hd" ? "high" : "medium"; // default
+
+	// For DALL·E 3 use standard or hd; map medium->standard, high->hd
+	const normalizedQualityForDalle3: "standard" | "hd" =
+		q === "hd" || q === "high" ? "hd" : "standard";
+
+	if (model === "gpt-image-1") {
+		if (!sizeKey) return 0;
+		const table: Record<
+			"low" | "medium" | "high",
+			Record<ImageSizeKey, number>
+		> = {
+			low: {
+				"1024x1024": 0.011,
+				"1024x1536": 0.016,
+				"1536x1024": 0.016,
+			},
+			medium: {
+				"1024x1024": 0.042,
+				"1024x1536": 0.063,
+				"1536x1024": 0.063,
+			},
+			high: {
+				"1024x1024": 0.167,
+				"1024x1536": 0.25,
+				"1536x1024": 0.25,
+			},
+		};
+		return table[normalizedQualityForGptImage1][sizeKey] * count;
+	}
+
+	if (model === "dall-e-3") {
+		if (!sizeKey) return 0;
+		const table: Record<"standard" | "hd", Record<ImageSizeKey, number>> = {
+			standard: {
+				"1024x1024": 0.04,
+				"1024x1536": 0.08,
+				"1536x1024": 0.08,
+			},
+			hd: {
+				"1024x1024": 0.08,
+				"1024x1536": 0.12,
+				"1536x1024": 0.12,
+			},
+		};
+		return table[normalizedQualityForDalle3][sizeKey] * count;
+	}
+
+	if (model === "dall-e-2") {
+		if (!sizeKey) return 0;
+		const table: Record<ImageSizeKey, number> = {
+			"1024x1024": 0.016,
+			"1024x1536": 0.018,
+			"1536x1024": 0.02,
+		};
+		return table[sizeKey] * count;
+	}
+
+	// Unknown image model or provider
+	return 0;
+}
+
+export function formatImageCostForDB(totalCost: number): {
+	promptCost: string;
+	completionCost: string;
+	totalCost: string;
+} {
+	const formatted = toFixed6(totalCost);
+	return {
+		promptCost: formatted,
+		completionCost: "0.000000",
+		totalCost: formatted,
 	};
 }

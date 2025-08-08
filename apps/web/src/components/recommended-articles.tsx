@@ -40,7 +40,6 @@ export function RecommendedArticles({
 						href={`/updates/${post.slug}`}
 						key={post.slug}
 						className="block group"
-						legacyBehavior
 					>
 						<div className="border border-gray-800 bg-black/30 p-6 rounded-lg hover:bg-black/50 transition-colors duration-300 space-y-4 h-full flex flex-col justify-between">
 							<div>

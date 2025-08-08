@@ -60,8 +60,8 @@ function CustomLink({ href, className, ...props }: CustomLinkProps) {
 
 	if (href.startsWith("/")) {
 		return (
-			<Link href={href} className={linkClass} {...props} legacyBehavior>
-				{props.children}
+			<Link href={href} className={linkClass} {...props}>
+				<span>{props.children}</span>
 			</Link>
 		);
 	}

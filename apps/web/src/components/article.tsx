@@ -39,7 +39,6 @@ function ArticleHeader({
 				className="group/title"
 				href={`/updates/${slug}`}
 				prefetch={firstPost}
-				legacyBehavior
 			>
 				<GradientText as="h2" className="font-medium text-4xl">
 					{metadata.title}

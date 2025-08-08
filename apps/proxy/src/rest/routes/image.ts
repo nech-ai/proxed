@@ -157,7 +157,7 @@ async function handleImageGeneration(c: Context<AppContext>) {
 				response: { imagesCount: images.length },
 			},
 			{ project, teamId },
-			{ overrideCosts },
+			{ overrideCosts, overrideModel: modelToUse },
 		);
 
 		return c.json({
@@ -191,6 +191,7 @@ async function handleImageGeneration(c: Context<AppContext>) {
 					},
 				},
 				{ project, teamId },
+				{ overrideModel: modelToUse },
 			);
 
 			throw createError(ErrorCode.PROVIDER_ERROR, (error as any).message, {
@@ -214,6 +215,7 @@ async function handleImageGeneration(c: Context<AppContext>) {
 				},
 			},
 			{ project, teamId },
+			{ overrideModel: modelToUse },
 		);
 
 		throw createError(

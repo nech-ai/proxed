@@ -21,7 +21,7 @@
 		"zod": "^3.25.67"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
+		"@biomejs/biome": "2.1.4",
 		"@trigger.dev/build": "^3.3.17",
 		"@types/node": "^22.16.5",
 		"tsconfig": "workspace:*"

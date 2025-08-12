@@ -20,6 +20,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { FaXTwitter } from "react-icons/fa6";
 import { CopyInput } from "./copy-input";
 import { ChevronDownIcon, ChevronUpIcon, ShareIcon } from "lucide-react";
+import { useCallback } from "react";
 
 interface Post {
 	slug: string;
@@ -120,7 +121,7 @@ export function UpdatesToolbar({ posts }: { posts: Post[] }) {
 	const isDetailView = pathname.split("/").length > 3;
 	const currentPost = posts[currentIndex];
 
-	const scrollToPost = (postSlug: string) => {
+	const scrollToPost = useCallback((postSlug: string) => {
 		const element = document.getElementById(postSlug);
 		if (!element) return;
 
@@ -133,26 +134,35 @@ export function UpdatesToolbar({ posts }: { posts: Post[] }) {
 			top: elementPosition - headerHeight - HEADER_SCROLL_OFFSET,
 			behavior: "smooth",
 		});
-	};
+	}, []);
 
-	const handleNavigation = (direction: "prev" | "next") => {
-		const targetIndex =
-			direction === "prev" ? currentIndex - 1 : currentIndex + 1;
-		const targetPost = posts[targetIndex];
-		if (!targetPost) return;
+	const handleNavigation = useCallback(
+		(direction: "prev" | "next") => {
+			const targetIndex =
+				direction === "prev" ? currentIndex - 1 : currentIndex + 1;
+			const targetPost = posts[targetIndex];
+			if (!targetPost) return;
 
-		if (isDetailView) {
-			router.push(`/updates/${targetPost.slug}`);
-		} else {
-			scrollToPost(targetPost.slug);
-		}
-	};
+			if (isDetailView) {
+				router.push(`/updates/${targetPost.slug}`);
+			} else {
+				scrollToPost(targetPost.slug);
+			}
+		},
+		[currentIndex, isDetailView, posts, router, scrollToPost],
+	);
 
-	const handlePrev = () => handleNavigation("prev");
-	const handleNext = () => handleNavigation("next");
+	const handlePrev = useCallback(
+		() => handleNavigation("prev"),
+		[handleNavigation],
+	);
+	const handleNext = useCallback(
+		() => handleNavigation("next"),
+		[handleNavigation],
+	);
 
-	useHotkeys("arrowRight", handleNext, [handleNext]);
-	useHotkeys("arrowLeft", handlePrev, [handlePrev]);
+	useHotkeys("arrowRight", handleNext, {}, [handleNext]);
+	useHotkeys("arrowLeft", handlePrev, {}, [handlePrev]);
 
 	const handleShare = () => {
 		if (!currentPost) return;

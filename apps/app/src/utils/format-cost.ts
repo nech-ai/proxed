@@ -10,17 +10,10 @@ export function formatCost(cost: number | null | undefined): string {
 		return "$0.00";
 	}
 
-	// For very small amounts (less than $0.01), show in different format
+	// For very small amounts (< $0.01), show in cents with higher precision
 	if (cost < 0.01) {
-		// Show in millicents (1/10 of a cent)
-		if (cost < 0.001) {
-			// Show in microdollars
-			const microDollars = cost * 1_000_000;
-			return `${microDollars.toFixed(2)}µ$`;
-		}
-		// Show in millicents
-		const milliCents = cost * 1000;
-		return `${milliCents.toFixed(2)}m¢`;
+		const cents = cost * 100;
+		return `${cents.toFixed(3)}¢`;
 	}
 
 	// For amounts less than $1, show cents

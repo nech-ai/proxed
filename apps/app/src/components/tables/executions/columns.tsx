@@ -5,6 +5,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ActionsCell } from "./actions-cell";
 import { formatCost } from "@/utils/format-cost";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@proxed/ui/components/tooltip";
 
 export type ExecutionOutput =
 	Database["public"]["Tables"]["executions"]["Row"] & {
@@ -72,15 +73,34 @@ export const columns: ColumnDef<ExecutionOutput>[] = [
 			const promptCost = row.original.prompt_cost;
 			const completionCost = row.original.completion_cost;
 
+			const rawDollar = (n?: number | null) =>
+				n === null || n === undefined ? "$0.000000" : `$${n.toFixed(6)}`;
+
 			return (
-				<div className="flex flex-col">
-					<span className="font-medium">{formatCost(totalCost)}</span>
-					{(promptCost || completionCost) && (
-						<span className="text-muted-foreground text-xs">
-							{formatCost(promptCost)} / {formatCost(completionCost)}
-						</span>
-					)}
-				</div>
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<div className="flex flex-col cursor-default">
+								<span className="font-medium">{formatCost(totalCost)}</span>
+								{(promptCost || completionCost) && (
+									<span className="text-muted-foreground text-xs">
+										{formatCost(promptCost)} / {formatCost(completionCost)}
+									</span>
+								)}
+							</div>
+						</TooltipTrigger>
+						<TooltipContent>
+							<div className="flex flex-col">
+								<span>Total: {rawDollar(totalCost)}</span>
+								{(promptCost || completionCost) && (
+									<span>
+										Prompt / Completion: {rawDollar(promptCost)} / {rawDollar(completionCost)}
+									</span>
+								)}
+							</div>
+						</TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
 			);
 		},
 	},

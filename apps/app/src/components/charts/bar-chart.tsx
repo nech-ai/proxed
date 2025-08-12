@@ -33,9 +33,9 @@ interface ChartData {
 		currentTotal: number;
 		prevTotal: number;
 	};
-	meta: {
-		type: "all" | "completed" | "failed";
-	};
+		meta: {
+			type: "all" | "completed" | "failed" | "tokens";
+		};
 }
 
 interface BarChartProps {

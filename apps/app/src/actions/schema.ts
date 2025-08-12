@@ -233,7 +233,7 @@ export const changeChartPeriodSchema = z.object({
 	to: z.string().optional(),
 });
 
-export const changeChartTypeSchema = z.enum(["all"]);
+export const changeChartTypeSchema = z.enum(["all", "tokens"]);
 
 export const trackingConsentSchema = z.boolean();
 

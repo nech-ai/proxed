@@ -493,6 +493,80 @@ export async function getExecutionMetricsQuery(
 	};
 }
 
+export type getTokenMetricsParams = {
+	teamId: string;
+	from: string;
+	to: string;
+	type?: "tokens";
+};
+
+export async function getTokenMetricsQuery(
+	supabase: Client,
+	params: getTokenMetricsParams,
+) {
+	const { teamId, from, to, type = "tokens" } = params;
+
+	const fromDate = new UTCDate(from);
+	const toDate = new UTCDate(to);
+
+	const [{ data: prevData }, { data: currentData }] = await Promise.all([
+		supabase.rpc("get_tokens_all", {
+			p_team_id: teamId,
+			date_from: subYears(fromDate, 1).toDateString(),
+			date_to: subYears(toDate, 1).toDateString(),
+		}),
+		supabase.rpc("get_tokens_all", {
+			p_team_id: teamId,
+			date_from: fromDate.toDateString(),
+			date_to: toDate.toDateString(),
+		}),
+	]);
+
+	const prevTotal = prevData?.reduce(
+		(acc, item) => acc + (item.total_tokens || 0),
+		0,
+	);
+	const currentTotal = currentData?.reduce(
+		(acc, item) => acc + (item.total_tokens || 0),
+		0,
+	);
+
+	return {
+		summary: {
+			currentTotal: currentTotal || 0,
+			prevTotal: prevTotal || 0,
+		},
+		meta: {
+			type,
+		},
+		result: currentData?.map((record, index) => {
+			const prev = prevData?.at(index);
+
+			return {
+				date: record.date,
+				precentage: {
+					value: getPercentageIncrease(
+						Math.abs(prev?.total_tokens || 0),
+						Math.abs(record.total_tokens || 0),
+					),
+					status:
+						(record.total_tokens || 0) > (prev?.total_tokens || 0)
+							? "positive"
+							: "negative",
+				},
+				current: {
+					date: record.date,
+					value: record.total_tokens || 0,
+				},
+				previous: {
+					date: prev?.date,
+					value: prev?.total_tokens || 0,
+				},
+			};
+		}),
+	};
+}
+
 export const getTeamLimitsMetricsQuery = async (
 	client: Client,
 	teamId: string,

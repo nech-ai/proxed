@@ -13,11 +13,11 @@ interface ExecutionMetricsProps {
 }
 
 // Helper component to render a single metric value.
-const MetricItem: React.FC<{ label: string; value: React.ReactNode; hint?: string }>= ({
-	label,
-	value,
-	hint,
-}) => (
+const MetricItem: React.FC<{
+	label: string;
+	value: React.ReactNode;
+	hint?: string;
+}> = ({ label, value, hint }) => (
 	<div className="flex flex-col items-center">
 		<span className="text-xs text-muted-foreground">{label}</span>
 		<span className="font-medium">{value}</span>
@@ -54,9 +54,21 @@ export function ExecutionMetrics({
 			<div className="p-4 border rounded-lg bg-background">
 				<p className="mb-1 text-sm text-muted-foreground">Costs</p>
 				<div className="grid grid-cols-3 gap-2">
-					<MetricItem label="Prompt" value={formatCost(promptCost)} hint={rawDollar(promptCost)} />
-					<MetricItem label="Completion" value={formatCost(completionCost)} hint={rawDollar(completionCost)} />
-					<MetricItem label="Total" value={formatCost(totalCost)} hint={rawDollar(totalCost)} />
+					<MetricItem
+						label="Prompt"
+						value={formatCost(promptCost)}
+						hint={rawDollar(promptCost)}
+					/>
+					<MetricItem
+						label="Completion"
+						value={formatCost(completionCost)}
+						hint={rawDollar(completionCost)}
+					/>
+					<MetricItem
+						label="Total"
+						value={formatCost(totalCost)}
+						hint={rawDollar(totalCost)}
+					/>
 				</div>
 			</div>
 		</div>

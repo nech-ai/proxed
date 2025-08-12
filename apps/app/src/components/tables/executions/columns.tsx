@@ -5,7 +5,12 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ActionsCell } from "./actions-cell";
 import { formatCost } from "@/utils/format-cost";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@proxed/ui/components/tooltip";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@proxed/ui/components/tooltip";
 
 export type ExecutionOutput =
 	Database["public"]["Tables"]["executions"]["Row"] & {
@@ -94,7 +99,8 @@ export const columns: ColumnDef<ExecutionOutput>[] = [
 								<span>Total: {rawDollar(totalCost)}</span>
 								{(promptCost || completionCost) && (
 									<span>
-										Prompt / Completion: {rawDollar(promptCost)} / {rawDollar(completionCost)}
+										Prompt / Completion: {rawDollar(promptCost)} /{" "}
+										{rawDollar(completionCost)}
 									</span>
 								)}
 							</div>

@@ -1,0 +1,70 @@
+---
+title: "GPT‑5 Support + New Image Generation API"
+publishedAt: "2025-08-12"
+summary: "Added OpenAI GPT‑5 family support and launched a unified Image Generation API. Also hardened dashboard headers per OWASP guidance."
+---
+
+We shipped two big updates:
+
+### GPT‑5 support
+
+- New models: `gpt-5`, `gpt-5-mini`, `gpt-5-nano`, `gpt-5-chat-latest`
+- Pricing integrated in calculators and estimates
+- Backwards compatible; no SDK changes required
+
+Usage:
+
+```ts
+await fetch(`https://api.proxed.ai/v1/openai/${PROJECT_ID}/chat/completions`, {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${PARTIAL_KEY}.${DEVICE_TOKEN}`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "gpt-5",
+    messages: [{ role: "user", content: "Give me a concise plan." }],
+  }),
+});
+```
+
+See the full post: [/updates/gpt-5-is-here](/updates/gpt-5-is-here)
+
+### Image Generation API (Experimental)
+
+- Endpoint: `POST /v1/image` (or `/v1/image/{projectId}`)
+- Providers: OpenAI (`gpt-image-1`, `dall-e-3`, `dall-e-2`), Google (`imagen-3.0-generate-002`)
+- Supports `size`/`aspectRatio`, `n`, `seed`, and provider-specific options
+
+Quick start:
+
+```bash
+curl -X POST \
+  https://api.proxed.ai/v1/image/{your-project-id} \
+  -H "Authorization: Bearer {your-partial-api-key}.{your-device-token-or-test-key}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "A retro-futuristic city skyline at dusk",
+    "model": "gpt-image-1",
+    "size": "1024x1024"
+  }'
+```
+
+See the full post: [/updates/image-generation](/updates/image-generation)
+
+### Security hardening (dashboard)
+
+We tightened response headers in the dashboard app to align with OWASP Secure Headers:
+
+- `Cross-Origin-Opener-Policy: same-origin`
+- `Cross-Origin-Resource-Policy: same-origin`
+- `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `X-Frame-Options: DENY`
+- `Permissions-Policy: restricted sensitive features`
+- `CSP` refined with stricter sources and `upgrade-insecure-requests`
+
+These changes improve isolation, reduce data leakage, and prevent common classes of attacks without impacting normal functionality.
+
+

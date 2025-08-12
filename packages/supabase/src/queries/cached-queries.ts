@@ -23,6 +23,8 @@ import {
 	type getExecutionMetricsParams,
 	getExecutionMetricsQuery,
 	getTeamBillingQuery,
+	getTokenMetricsQuery,
+	type getTokenMetricsParams,
 } from "../queries";
 
 import type { TeamBilling } from "../types";
@@ -300,6 +302,28 @@ export const getExecutionMetrics = async (
 		["execution_metrics", teamId, params.type ?? "all"],
 		{
 			tags: [`job_metrics_${teamId}_${params.type ?? "all"}`],
+			revalidate: 30,
+		},
+		// @ts-expect-error
+	)(params);
+};
+
+export const getTokenMetrics = async (
+	params: Omit<getTokenMetricsParams, "teamId">,
+) => {
+	const supabase = await createClient();
+
+	const user = await getUser();
+	const teamId = user?.data?.team_id;
+	if (!teamId) return null;
+
+	return unstable_cache(
+		async () => {
+			return getTokenMetricsQuery(supabase, { ...params, teamId });
+		},
+		["token_metrics", teamId, params.type ?? "tokens"],
+		{
+			tags: [`job_metrics_${teamId}_${params.type ?? "tokens"}`],
 			revalidate: 30,
 		},
 		// @ts-expect-error

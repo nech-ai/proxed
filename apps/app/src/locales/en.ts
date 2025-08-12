@@ -1,6 +1,7 @@
 export default {
 	chart_type: {
 		all: "All",
+		tokens: "Tokens",
 	},
 	notifications: {
 		"execution-error": {

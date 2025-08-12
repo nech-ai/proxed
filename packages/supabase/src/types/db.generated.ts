@@ -491,6 +491,13 @@ export type Database = {
 					execution_count: number;
 				}[];
 			};
+			get_tokens_all: {
+				Args: { p_team_id: string; date_from: string; date_to: string };
+				Returns: {
+					date: string;
+					total_tokens: number;
+				}[];
+			};
 			get_server_key: {
 				Args: { p_provider_key_id: string };
 				Returns: string;

@@ -4,6 +4,8 @@ import { ActionBlock } from "@/components/shared/action-block";
 import { subWeeks } from "date-fns";
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/page-header";
+import { cookies } from "next/headers";
+import { Cookies as CookieKeys } from "@/utils/constants";
 
 export const maxDuration = 30;
 
@@ -23,7 +25,10 @@ export default async function Metrics({
 	searchParams: any;
 }) {
 	const { from, to } = await searchParams;
-	const chartType = "all";
+	const cookieStore = await cookies();
+	const chartType = (cookieStore.get(CookieKeys.ChartType)?.value ?? "all") as
+		| "all"
+		| "tokens";
 	const value = {
 		...(from && { from }),
 		...(to && { to }),

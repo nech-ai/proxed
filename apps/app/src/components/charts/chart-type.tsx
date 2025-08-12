@@ -11,7 +11,7 @@ import {
 } from "@proxed/ui/components/select";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
-const options = ["all"];
+const options = ["all", "tokens"];
 
 type Props = {
 	initialValue: string;

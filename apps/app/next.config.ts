@@ -14,7 +14,7 @@ const cspDirectives = () => {
 	}
 
 	// Public API base used in UI (with fallback used in code)
-	const proxyApiUrl = process.env.NEXT_PUBLIC_PROXY_API_URL || "https://api.proxed.dev";
+	const proxyApiUrl = process.env.NEXT_PUBLIC_PROXY_API_URL || "https://api.proxed.ai";
 	try {
 		const origin = new URL(proxyApiUrl).origin;
 		connectSrc.push(origin);

@@ -38,7 +38,7 @@ export function ProjectConnectionDetails({
 	);
 
 	const proxyApiBaseUrl =
-		process.env.NEXT_PUBLIC_PROXY_API_URL || "https://api.proxed.dev";
+		process.env.NEXT_PUBLIC_PROXY_API_URL || "https://api.proxed.ai";
 
 	const copyToClipboard = (text: string, label: string) => {
 		navigator.clipboard.writeText(text);

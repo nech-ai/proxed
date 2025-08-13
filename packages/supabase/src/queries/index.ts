@@ -438,13 +438,13 @@ export async function getExecutionMetricsQuery(
 	const [{ data: prevData }, { data: currentData }] = await Promise.all([
 		supabase.rpc(rpc, {
 			p_team_id: teamId,
-			date_from: subYears(fromDate, 1).toDateString(),
-			date_to: subYears(toDate, 1).toDateString(),
+			date_from: subYears(fromDate, 1).toISOString().slice(0, 10),
+			date_to: subYears(toDate, 1).toISOString().slice(0, 10),
 		}),
 		supabase.rpc(rpc, {
 			p_team_id: teamId,
-			date_from: fromDate.toDateString(),
-			date_to: toDate.toDateString(),
+			date_from: fromDate.toISOString().slice(0, 10),
+			date_to: toDate.toISOString().slice(0, 10),
 		}),
 	]);
 
@@ -512,13 +512,13 @@ export async function getTokenMetricsQuery(
 	const [{ data: prevData }, { data: currentData }] = await Promise.all([
 		supabase.rpc("get_tokens_all", {
 			p_team_id: teamId,
-			date_from: subYears(fromDate, 1).toDateString(),
-			date_to: subYears(toDate, 1).toDateString(),
+			date_from: subYears(fromDate, 1).toISOString().slice(0, 10),
+			date_to: subYears(toDate, 1).toISOString().slice(0, 10),
 		}),
 		supabase.rpc("get_tokens_all", {
 			p_team_id: teamId,
-			date_from: fromDate.toDateString(),
-			date_to: toDate.toDateString(),
+			date_from: fromDate.toISOString().slice(0, 10),
+			date_to: toDate.toISOString().slice(0, 10),
 		}),
 	]);
 

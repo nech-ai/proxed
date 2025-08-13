@@ -321,7 +321,7 @@ export const getTokenMetrics = async (
 		async () => {
 			return getTokenMetricsQuery(supabase, { ...params, teamId });
 		},
-		["token_metrics", teamId, params.type ?? "tokens"],
+		["token_metrics", teamId, JSON.stringify(params)],
 		{
 			tags: [`job_metrics_${teamId}_${params.type ?? "tokens"}`],
 			revalidate: 30,

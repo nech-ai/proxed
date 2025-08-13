@@ -1,8 +1,10 @@
 import type { NextConfig } from "next";
 
 const cspDirectives = () => {
+	const isDev = process.env.NODE_ENV !== "production";
 	const connectSrc: string[] = ["'self'"];
 	const imgSrc: string[] = ["'self'", "data:", "blob:"];
+	const scriptSrc: string[] = ["'self'", "'unsafe-inline'"];
 
 	const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 	if (supabaseUrl) {
@@ -25,6 +27,13 @@ const cspDirectives = () => {
 	// Optional Sentry ingestion endpoints if enabled
 	connectSrc.push("https://*.sentry.io");
 
+	// Dev: allow websocket connections for HMR/dev overlay
+	if (isDev) {
+		connectSrc.push("ws:", "wss:");
+		// Dev: allow eval only in development to support tooling/source maps
+		scriptSrc.push("'unsafe-eval'");
+	}
+
 	return [
 		"default-src 'self'",
 		"base-uri 'self'",
@@ -32,7 +41,7 @@ const cspDirectives = () => {
 		"form-action 'self'",
 		"object-src 'none'",
 		// Allow minimal inline scripts for Next hydration
-		"script-src 'self' 'unsafe-inline'",
+		`script-src ${scriptSrc.join(" ")}`,
 		"script-src-attr 'none'",
 		"style-src 'self' 'unsafe-inline'",
 		"frame-src 'none'",

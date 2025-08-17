@@ -13,13 +13,13 @@
 	"dependencies": {
 		"@openpanel/nextjs": "^1.0.8",
 		"@proxed/logger": "workspace:*",
-		"@vercel/functions": "^2.2.2",
-		"next": "^15.3.4"
+		"@vercel/functions": "^2.2.12",
+		"next": "^15.4.6"
 	},
 	"devDependencies": {
 		"@types/node": "^22.16.5",
-		"@types/react": "^19.1.8",
-		"@types/react-dom": "19.1.6",
+		"@types/react": "^19.1.10",
+		"@types/react-dom": "19.1.7",
 		"tsconfig": "workspace:*",
 		"typescript": "5.8.3"
 	},

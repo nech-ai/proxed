@@ -9,16 +9,16 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@date-fns/utc": "^2.1.0",
+		"@date-fns/utc": "^2.1.1",
 		"@proxed/logger": "workspace:*",
 		"@supabase/ssr": "^0.6.1",
 		"date-fns": "^4.1.0",
-		"react": "19.1.0",
+		"react": "19.1.1",
 		"server-only": "^0.0.1",
-		"supabase": "^2.26.9"
+		"supabase": "^2.34.3"
 	},
 	"devDependencies": {
-		"@supabase/supabase-js": "^2.50.2"
+		"@supabase/supabase-js": "^2.55.0"
 	},
 	"exports": {
 		"./server": "./src/clients/server.ts",

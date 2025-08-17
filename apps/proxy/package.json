@@ -6,7 +6,7 @@
 		"@ai-sdk/openai": "^2.0.15",
 		"@ai-sdk/react": "^2.0.15",
 		"@date-fns/utc": "^2.1.1",
-		"@hono/zod-openapi": "^0.19.10",
+		"@hono/zod-openapi": "^1.1.0",
 		"@hono/zod-validator": "^0.7.2",
 		"@proxed/jobs": "workspace:*",
 		"@proxed/kv": "workspace:*",
@@ -32,12 +32,12 @@
 		"openai": "^5.12.2",
 		"pino": "^9.9.0",
 		"postgres": "^3.4.7",
-		"resend": "^4.8.0",
-		"snakecase-keys": "^8.1.0",
+		"resend": "^6.0.1",
+		"snakecase-keys": "^9.0.2",
 		"superjson": "2.2.2",
 		"uuid": "^11.1.0",
-		"zod": "^3.25.76",
-		"zod-openapi": "^4.2.4"
+		"zod": "^4.0.17",
+		"zod-openapi": "^5.3.1"
 	},
 	"devDependencies": {
 		"@types/bun": "^1.2.20",

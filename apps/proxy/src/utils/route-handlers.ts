@@ -189,15 +189,7 @@ export async function recordExecution(
 				completionTokens: metrics.completionTokens,
 			});
 		} catch (error) {
-			logger.error("Failed to calculate costs:", {
-				error: error instanceof Error ? error.message : error,
-				model: modelForExecution,
-				provider: projectData.project.key.provider,
-				tokens: {
-					prompt: metrics.promptTokens,
-					completion: metrics.completionTokens,
-				},
-			});
+			logger.error(`Failed to calculate costs: ${error}`);
 		}
 	}
 
@@ -229,7 +221,7 @@ export async function recordExecution(
 			});
 		}
 	} catch (error) {
-		logger.error("Failed to record execution:", error);
+		logger.error(`Failed to record execution: ${error}`);
 		// Don't throw - this is a non-critical operation
 	}
 }

@@ -119,13 +119,6 @@ export class CircuitBreaker<T> {
 		this.failureCount++;
 		this.lastFailureTime = Date.now();
 
-		logger.warn(`Circuit breaker ${this.name} failure`, {
-			failureCount: this.failureCount,
-			threshold: this.options.failureThreshold,
-			error: error.message,
-			state: this.state,
-		});
-
 		if (this.state === CircuitState.HALF_OPEN) {
 			// Failed in HALF_OPEN state, open the circuit again
 			this.openCircuit();
@@ -144,10 +137,6 @@ export class CircuitBreaker<T> {
 	private openCircuit(): void {
 		this.state = CircuitState.OPEN;
 		this.nextRetryTime = Date.now() + this.options.resetTimeout;
-		logger.error(`Circuit breaker ${this.name} opened`, {
-			nextRetryTime: new Date(this.nextRetryTime).toISOString(),
-			failureCount: this.failureCount,
-		});
 	}
 
 	/**

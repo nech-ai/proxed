@@ -94,19 +94,19 @@ export async function baseProxy(
 	const sanitizedHeaders = sanitizeRequestHeaders(c.req.header(), headers);
 
 	if (debug) {
-		logger.debug("Proxy request", {
-			targetUrl,
-			method: c.req.method,
-			headers: Object.fromEntries(
-				Object.entries(sanitizedHeaders).map(([k, v]) => [
-					k,
-					k.toLowerCase().includes("key") ||
-					k.toLowerCase().includes("authorization")
-						? `${v?.substring(0, 10)}...`
-						: v,
-				]),
-			),
-		});
+		logger.debug(
+			`Proxy request: targetUrl=${targetUrl}, method=${c.req.method}, headers=${JSON.stringify(
+				Object.fromEntries(
+					Object.entries(sanitizedHeaders).map(([k, v]) => [
+						k,
+						k.toLowerCase().includes("key") ||
+						k.toLowerCase().includes("authorization")
+							? `${v?.substring(0, 10)}...`
+							: v,
+					]),
+				),
+			)}`,
+		);
 	}
 
 	let lastError: Error | null = null;
@@ -141,13 +141,9 @@ export async function baseProxy(
 				// Log non-2xx responses
 				if (!response.ok && debug) {
 					const errorBody = await response.clone().text();
-					logger.warn("Upstream API error response", {
-						status: response.status,
-						statusText: response.statusText,
-						body: errorBody.substring(0, 500), // Limit log size
-						targetUrl,
-						attempt,
-					});
+					logger.warn(
+						`Upstream API error response: status=${response.status}, statusText=${response.statusText}, body=${errorBody.substring(0, 500)}, targetUrl=${targetUrl}, attempt=${attempt}`,
+					);
 				}
 
 				// Check if we should retry
@@ -159,13 +155,9 @@ export async function baseProxy(
 					retries++;
 					const delay = calculateRetryDelay(attempt, retryDelay);
 
-					logger.info("Retrying proxy request", {
-						status: response.status,
-						attempt: attempt + 1,
-						maxRetries,
-						delayMs: delay,
-						targetUrl,
-					});
+					logger.info(
+						`Retrying proxy request: status=${response.status}, attempt=${attempt + 1}, maxRetries=${maxRetries}, delayMs=${delay}, targetUrl=${targetUrl}`,
+					);
 
 					await sleep(delay);
 					continue;
@@ -183,10 +175,9 @@ export async function baseProxy(
 
 				// Check if we need to handle streaming
 				if (shouldStream(response)) {
-					logger.debug("Detected streaming response", {
-						contentType: response.headers.get("content-type"),
-						transferEncoding: response.headers.get("transfer-encoding"),
-					});
+					logger.debug(
+						`Detected streaming response: contentType=${response.headers.get("content-type")}, transferEncoding=${response.headers.get("transfer-encoding")}`,
+					);
 
 					// For SSE streams, use SSE handler
 					if (
@@ -196,7 +187,7 @@ export async function baseProxy(
 							response: await handleSSEStream(c, filteredResponse, {
 								onStart: () => logger.debug("SSE stream started"),
 								onEnd: () => logger.debug("SSE stream ended"),
-								onError: (error) => logger.error("SSE stream error", { error }),
+								onError: (error) => logger.error(`SSE stream error: ${error}`),
 							}),
 							latency,
 							retries,
@@ -208,7 +199,7 @@ export async function baseProxy(
 						response: await handleRawStream(c, filteredResponse, {
 							onStart: () => logger.debug("Raw stream started"),
 							onEnd: () => logger.debug("Raw stream ended"),
-							onError: (error) => logger.error("Raw stream error", { error }),
+							onError: (error) => logger.error(`Raw stream error: ${error}`),
 						}),
 						latency,
 						retries,
@@ -228,11 +219,7 @@ export async function baseProxy(
 
 			// Check if it's a timeout
 			if (error instanceof Error && error.name === "AbortError") {
-				logger.error("Proxy request timeout", {
-					targetUrl,
-					timeout,
-					attempt,
-				});
+				logger.error(`Proxy request timeout: ${error.message}`);
 
 				if (attempt < maxRetries) {
 					retries++;
@@ -248,11 +235,9 @@ export async function baseProxy(
 			}
 
 			// Log other errors
-			logger.error("Proxy request failed", {
-				error: error instanceof Error ? error.message : "Unknown error",
-				targetUrl,
-				attempt,
-			});
+			logger.error(
+				`Proxy request failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+			);
 
 			// Retry on network errors
 			if (attempt < maxRetries) {

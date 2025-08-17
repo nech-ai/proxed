@@ -25,7 +25,7 @@ export const withDatabase: MiddlewareHandler = async (c, next) => {
 	} catch (error) {
 		// Reset connection promise on error
 		dbConnectionPromise = null;
-		logger.error("Database connection error", { error });
+		logger.error(error, "Database connection error");
 		throw error;
 	}
 };

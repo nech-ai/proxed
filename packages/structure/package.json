@@ -11,10 +11,10 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"zod": "^3.25.67"
+		"zod": "^3.25.76"
 	},
 	"devDependencies": {
-		"@types/react": "^19.1.8",
+		"@types/react": "^19.1.10",
 		"@types/react-dom": "19.1.6",
 		"tsconfig": "workspace:*",
 		"typescript": "5.8.3"

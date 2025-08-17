@@ -56,7 +56,7 @@ export async function checkDatabaseHealth(
 			responseTime: Date.now() - start,
 		};
 	} catch (error) {
-		logger.error("Database health check failed", { error });
+		logger.error(`Database health check failed: ${error}`);
 		return {
 			service: "database",
 			status: "unhealthy",
@@ -92,7 +92,7 @@ export async function checkRedisHealth(
 		};
 	} catch (error) {
 		// If Redis is down, the service can still function (rate limiting degrades gracefully)
-		logger.warn("Redis health check failed", { error });
+		logger.warn(`Redis health check failed: ${error}`);
 		return {
 			service: "redis",
 			status: "degraded",

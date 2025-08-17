@@ -68,11 +68,11 @@ app.onError((err, c) => {
 
 	// Use appropriate log level based on status code
 	if (apiError.status >= 500) {
-		logger.error("Server error", logData);
+		logger.error(logData, "Server error");
 	} else if (apiError.status >= 400) {
-		logger.warn("Client error", logData);
+		logger.warn(logData, "Client error");
 	} else {
-		logger.info("Request error", logData);
+		logger.info(logData, "Request error");
 	}
 
 	// Add security headers

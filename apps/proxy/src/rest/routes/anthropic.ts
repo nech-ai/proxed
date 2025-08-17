@@ -72,10 +72,9 @@ async function handleAnthropicProxy(c: Context<AppContext>, targetUrl: string) {
 		try {
 			responseData = (await response.clone().json()) as AnthropicResponse;
 		} catch (err) {
-			logger.warn("Failed to parse Anthropic response as JSON", {
-				error: err,
-				projectId: project.id,
-			});
+			logger.warn(
+				`Failed to parse Anthropic response as JSON: ${err}, projectId=${project.id}`,
+			);
 		}
 
 		const usage = responseData.usage ?? {
@@ -107,12 +106,9 @@ async function handleAnthropicProxy(c: Context<AppContext>, targetUrl: string) {
 		return response;
 	} catch (error) {
 		const latency = Date.now() - startTime;
-		logger.error("Anthropic proxy error:", {
-			error: error instanceof Error ? error.message : error,
-			projectId: project.id,
-			teamId,
-			provider: "ANTHROPIC",
-		});
+		logger.error(
+			`Anthropic proxy error: ${error instanceof Error ? error.message : error}`,
+		);
 
 		// Collect error metrics
 		collectMetrics(

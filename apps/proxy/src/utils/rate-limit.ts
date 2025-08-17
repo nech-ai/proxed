@@ -40,9 +40,9 @@ export function checkAndNotifyRateLimit({
 				.limit(1);
 
 			if (!projectSettings) {
-				logger.error("Failed to fetch project notification settings", {
-					projectId,
-				});
+				logger.error(
+					`Failed to fetch project notification settings for project ${projectId}`,
+				);
 				return;
 			}
 

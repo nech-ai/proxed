@@ -45,7 +45,9 @@ export async function verifyDeviceCheckToken(
 		// If Apple responds with success status 200, token is valid
 		return response.status === 200;
 	} catch (error: any) {
-		logger.error("verifyDeviceCheckToken error", error.response?.data || error);
+		logger.error(
+			`verifyDeviceCheckToken error: ${error.response?.data || error}`,
+		);
 		return false;
 	}
 }

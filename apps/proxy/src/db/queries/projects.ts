@@ -34,9 +34,9 @@ export async function getProjectQuery(
 	try {
 		// Validate projectId format
 		if (!projectId || typeof projectId !== "string") {
-			logger.warn("Invalid project ID provided to getProjectQuery", {
-				projectId,
-			});
+			logger.warn(
+				`Invalid project ID provided to getProjectQuery: projectId=${projectId}`,
+			);
 			return null;
 		}
 
@@ -72,10 +72,9 @@ export async function getProjectQuery(
 
 		return result || null;
 	} catch (error) {
-		logger.error("Failed to fetch project", {
-			error: error instanceof Error ? error.message : error,
-			projectId,
-		});
+		logger.error(
+			`Failed to fetch project: ${error instanceof Error ? error.message : error}, projectId=${projectId}`,
+		);
 		throw new Error("Failed to fetch project configuration");
 	}
 }
@@ -93,21 +92,24 @@ export async function getActiveProjectWithProvider(
 
 		// Validate project is active and has required configuration
 		if (!project.isActive) {
-			logger.warn("Attempted to access inactive project", { projectId });
+			logger.warn(
+				`Attempted to access inactive project: projectId=${projectId}`,
+			);
 			return null;
 		}
 
 		if (!project.key || !project.keyId) {
-			logger.error("Project missing provider key configuration", { projectId });
+			logger.error(
+				`Project missing provider key configuration: projectId=${projectId}`,
+			);
 			return null;
 		}
 
 		return project;
 	} catch (error) {
-		logger.error("Failed to fetch active project with provider", {
-			error: error instanceof Error ? error.message : error,
-			projectId,
-		});
+		logger.error(
+			`Failed to fetch active project with provider: ${error instanceof Error ? error.message : error}, projectId=${projectId}`,
+		);
 		throw error;
 	}
 }

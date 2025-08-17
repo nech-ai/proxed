@@ -6,7 +6,7 @@
 		"@proxed/mail": "workspace:*",
 		"@proxed/supabase": "workspace:*",
 		"uuid": "^11.1.0",
-		"zod": "^3.25.67"
+		"zod": "^3.25.76"
 	},
 	"main": "./src/index.ts",
 	"name": "@proxed/notifications",

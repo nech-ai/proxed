@@ -50,7 +50,7 @@ export async function handleSSEStream(
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error("Stream error");
 			config?.onError?.(err);
-			logger.error("SSE stream error", { error: err.message });
+			logger.error(`SSE stream error: ${err.message}`);
 			await stream.writeSSE({ data: JSON.stringify({ error: err.message }) });
 		} finally {
 			await stream.close();
@@ -95,7 +95,7 @@ export async function handleRawStream(
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error("Stream error");
 			config?.onError?.(err);
-			logger.error("Raw stream error", { error: err.message });
+			logger.error(`Raw stream error: ${err.message}`);
 			throw err; // Re-throw for proper error handling
 		} finally {
 			await stream.close();

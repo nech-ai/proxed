@@ -55,11 +55,9 @@ export const requestValidation: MiddlewareHandler = async (c, next) => {
 	}
 
 	if (suspiciousHeaders.length > 0) {
-		logger.warn("Suspicious headers detected", {
-			headers: suspiciousHeaders,
-			ip: c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for"),
-			userAgent: c.req.header("user-agent"),
-		});
+		logger.warn(
+			`Suspicious headers detected: headers=${JSON.stringify(suspiciousHeaders)}, ip=${c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for")}, userAgent=${c.req.header("user-agent")}`,
+		);
 	}
 
 	// Validate content-type for methods that require body
@@ -98,11 +96,9 @@ export const requestValidation: MiddlewareHandler = async (c, next) => {
 
 	if (transferEncoding && contentLengthHeader) {
 		// Having both Transfer-Encoding and Content-Length is suspicious
-		logger.warn("Potential request smuggling attempt", {
-			transferEncoding,
-			contentLength: contentLengthHeader,
-			ip: c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for"),
-		});
+		logger.warn(
+			`Potential request smuggling attempt: transferEncoding=${transferEncoding}, contentLength=${contentLengthHeader}, ip=${c.req.header("cf-connecting-ip") || c.req.header("x-forwarded-for")}`,
+		);
 
 		throw createError(ErrorCode.BAD_REQUEST, "Invalid request headers");
 	}

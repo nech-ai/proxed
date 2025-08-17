@@ -70,10 +70,9 @@ async function handleGoogleProxy(c: Context<AppContext>, targetUrl: string) {
 		try {
 			responseData = (await response.clone().json()) as GoogleResponse;
 		} catch (err) {
-			logger.warn("Failed to parse Google response as JSON", {
-				error: err,
-				projectId: project.id,
-			});
+			logger.warn(
+				`Failed to parse Google response as JSON: ${err}, projectId=${project.id}`,
+			);
 		}
 
 		const usage = responseData.usageMetadata ?? {
@@ -106,12 +105,9 @@ async function handleGoogleProxy(c: Context<AppContext>, targetUrl: string) {
 		return response;
 	} catch (error) {
 		const latency = Date.now() - startTime;
-		logger.error("Google AI proxy error:", {
-			error: error instanceof Error ? error.message : error,
-			projectId: project.id,
-			teamId,
-			provider: "GOOGLE",
-		});
+		logger.error(
+			`Google AI proxy error: ${error instanceof Error ? error.message : error}`,
+		);
 
 		// Collect error metrics
 		collectMetrics(

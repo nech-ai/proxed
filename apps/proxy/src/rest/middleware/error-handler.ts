@@ -33,12 +33,9 @@ export const errorHandlerMiddleware: MiddlewareHandler<AppContext> = async (
 		// Log slow requests
 		const duration = Date.now() - startTime;
 		if (duration > 5000) {
-			logger.warn("Slow request detected", {
-				requestId,
-				path: c.req.path,
-				method: c.req.method,
-				durationMs: duration,
-			});
+			logger.warn(
+				`Slow request detected: requestId=${requestId}, path=${c.req.path}, method=${c.req.method}, durationMs=${duration}`,
+			);
 		}
 	} catch (error) {
 		const apiError = handleApiError(error);
@@ -76,11 +73,11 @@ export const errorHandlerMiddleware: MiddlewareHandler<AppContext> = async (
 
 		// Use appropriate log level based on status code
 		if (apiError.status >= 500) {
-			logger.error("Server error", logData);
+			logger.error(logData, "Server error");
 		} else if (apiError.status >= 400) {
-			logger.warn("Client error", logData);
+			logger.warn(logData, "Client error");
 		} else {
-			logger.info("Request error", logData);
+			logger.info(logData, "Request error");
 		}
 
 		// Add security headers

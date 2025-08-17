@@ -83,10 +83,9 @@ export function bunCompress(options?: CompressionOptions): MiddlewareHandler {
 		// 2. Use Bun's built-in compression when it becomes available
 		// 3. Implement streaming compression using Bun's APIs
 
-		logger.debug("Compression requested but using Bun runtime", {
-			contentType,
-			acceptEncoding,
-		});
+		logger.debug(
+			`Compression requested but using Bun runtime: contentType=${contentType}, acceptEncoding=${acceptEncoding}`,
+		);
 
 		// For now, we'll just add the appropriate headers
 		// Actual compression would be handled by a reverse proxy
@@ -118,10 +117,9 @@ export async function compressResponse(
 
 	// In a real implementation, you would compress here
 	// For now, return uncompressed with a note
-	logger.debug("Manual compression requested", {
-		originalSize: bytes.length,
-		threshold: opts.threshold,
-	});
+	logger.debug(
+		`Manual compression requested: originalSize=${bytes.length}, threshold=${opts.threshold}`,
+	);
 
 	return new Response(bytes, {
 		headers: {

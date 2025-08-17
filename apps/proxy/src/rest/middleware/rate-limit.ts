@@ -77,13 +77,9 @@ export const withRateLimit: MiddlewareHandler<Context> = async (c, next) => {
 		c.res.headers.set("X-RateLimit-Reset", new Date(reset).toISOString());
 
 		if (!success) {
-			logger.warn("Rate limit exceeded", {
-				identifier,
-				path,
-				limitType,
-				teamId: session?.teamId,
-				ip: geo?.ip,
-			});
+			logger.warn(
+				`Rate limit exceeded: identifier=${identifier}, path=${path}, limitType=${limitType}, teamId=${session?.teamId}, ip=${geo?.ip}`,
+			);
 
 			throw createError(
 				ErrorCode.TOO_MANY_REQUESTS,
@@ -103,11 +99,9 @@ export const withRateLimit: MiddlewareHandler<Context> = async (c, next) => {
 	} catch (error) {
 		// If Redis is down, log but don't block the request
 		if (error instanceof Error && !error.message.includes("Rate limit")) {
-			logger.error("Rate limiting error", {
-				error: error.message,
-				identifier,
-				path,
-			});
+			logger.error(
+				`Rate limiting error: ${error.message}, identifier=${identifier}, path=${path}`,
+			);
 			// Continue without rate limiting
 			await next();
 		} else {

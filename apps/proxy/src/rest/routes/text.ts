@@ -118,11 +118,9 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 
 		return c.json(object);
 	} catch (error) {
-		logger.error("Text structured response error:", {
-			error: error instanceof Error ? error.message : error,
-			projectId: project.id,
-			teamId,
-		});
+		logger.error(
+			`Text structured response error: ${error instanceof Error ? error.message : error}`,
+		);
 
 		if (NoObjectGeneratedError.isInstance(error)) {
 			await recordExecution(

@@ -35,7 +35,7 @@ export async function safeWaitUntil(
 
 		// 2. Fire and forget (faster but no guarantees)
 		promise.catch((error) => {
-			logger.error("Background task failed:", error);
+			logger.error(`Background task failed: ${error}`);
 		});
 	}
 }

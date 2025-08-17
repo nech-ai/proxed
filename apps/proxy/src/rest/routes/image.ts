@@ -166,11 +166,9 @@ async function handleImageGeneration(c: Context<AppContext>) {
 			providerMetadata: gen.providerMetadata,
 		});
 	} catch (error) {
-		logger.error("Image generation error:", {
-			error: error instanceof Error ? error.message : error,
-			projectId: project.id,
-			teamId,
-		});
+		logger.error(
+			`Image generation error: ${error instanceof Error ? error.message : error}`,
+		);
 
 		if ((NoImageGeneratedError as any)?.isInstance?.(error)) {
 			await recordExecution(

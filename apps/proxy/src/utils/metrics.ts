@@ -120,7 +120,7 @@ class MetricsCollector {
 		}
 
 		// Log metrics (in production, send to metrics service)
-		logger.info("Metrics flush", metrics);
+		logger.info(`Metrics flush: ${JSON.stringify(metrics)}`);
 
 		// Reset counters
 		this.requestCounts.clear();

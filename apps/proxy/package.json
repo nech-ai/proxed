@@ -40,9 +40,9 @@
 		"zod-openapi": "^4.2.4"
 	},
 	"devDependencies": {
-		"@types/bun": "^1.2.19",
+		"@types/bun": "^1.2.20",
 		"@types/jsonwebtoken": "^9.0.10",
-		"@types/pg": "^8.15.4",
+		"@types/pg": "^8.15.5",
 		"drizzle-kit": "^0.31.4"
 	},
 	"name": "@proxed/proxy",

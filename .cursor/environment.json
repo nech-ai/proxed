@@ -1,0 +1,36 @@
+{
+	"name": "Proxed Dev Environment",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": "."
+	},
+	"install": "bun install ",
+	"start": "bun dev",
+	"terminals": [
+		{
+			"name": "Supabase Start",
+			"command": "bun supabase:start",
+			"description": "Starts the Supabase server"
+		},
+		{
+			"name": "Format Code",
+			"command": "bun format",
+			"description": "Formats the code"
+		},
+		{
+			"name": "Lint Code",
+			"command": "bun lint",
+			"description": "Lints the code"
+		},
+		{
+			"name": "Type Check",
+			"command": "bun typecheck",
+			"description": "Types the code"
+		},
+		{
+			"name": "Run Tests",
+			"command": "bun test",
+			"description": "Runs the tests"
+		}
+	]
+}

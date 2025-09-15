@@ -26,15 +26,15 @@
 		"update:all": "manypkg exec bun update"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
-		"@manypkg/cli": "^0.24.0",
-		"@types/bun": "^1.2.20",
-		"@types/node": "^22.17.2",
-		"dotenv-cli": "^8.0.0",
+		"@biomejs/biome": "2.2.4",
+		"@manypkg/cli": "^0.25.1",
+		"@types/bun": "^1.2.22",
+		"@types/node": "^24.4.0",
+		"dotenv-cli": "^10.0.0",
 		"tsconfig": "workspace:*",
 		"turbo": "^2.5.6",
-		"type-fest": "^4.41.0",
-		"typescript": "5.8.3"
+		"type-fest": "^5.0.0",
+		"typescript": "5.9.2"
 	},
 	"packageManager": "bun@1.2.11",
 	"trustedDependencies": [

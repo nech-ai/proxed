@@ -23,7 +23,7 @@
 		"@types/mdx": "^2.0.13",
 		"@types/react": "^19.1.10",
 		"@types/react-dom": "19.1.6",
-		"algoliasearch": "^5.35.0",
-		"typescript": "5.8.3"
+		"algoliasearch": "^5.37.0",
+		"typescript": "5.9.2"
 	}
 }

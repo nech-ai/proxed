@@ -53,8 +53,8 @@
 		"vaul": "^1.1.2"
 	},
 	"devDependencies": {
-		"@mdx-js/mdx": "^3.1.0",
-		"@shikijs/rehype": "^3.9.2",
+		"@mdx-js/mdx": "^3.1.1",
+		"@shikijs/rehype": "^3.12.2",
 		"@tailwindcss/typography": "^0.5.16",
 		"@types/mdx": "^2.0.13",
 		"@types/react": "^19.1.10",

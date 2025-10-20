@@ -1,13 +1,13 @@
 {
 	"dependencies": {
-		"@react-email/components": "^0.0.41",
+		"@react-email/components": "^0.5.7",
 		"@react-email/render": "^1.2.0",
 		"lodash-es": "^4.17.21",
-		"next-intl": "^4.3.4",
-		"nodemailer": "^7.0.5",
-		"react": "19.1.0",
-		"react-dom": "19.1.0",
-		"react-email": "^4.2.8",
+		"next-intl": "^4.3.12",
+		"nodemailer": "^7.0.9",
+		"react": "19.2.0",
+		"react-dom": "19.2.0",
+		"react-email": "^4.3.1",
 		"use-intl": "^4.3.4"
 	},
 	"devDependencies": {
@@ -15,8 +15,8 @@
 		"@tailwindcss/line-clamp": "^0.4.4",
 		"@types/lodash-es": "^4.17.12",
 		"@types/nodemailer": "latest",
-		"@types/react": "^19.1.10",
-		"@types/react-dom": "19.1.6",
+		"@types/react": "^19.2.2",
+		"@types/react-dom": "19.2.2",
 		"tsconfig": "workspace:*"
 	},
 	"main": "./src/index.ts",

@@ -11,14 +11,14 @@
 	"dependencies": {
 		"@date-fns/utc": "^2.1.1",
 		"@proxed/logger": "workspace:*",
-		"@supabase/ssr": "^0.6.1",
+		"@supabase/ssr": "^0.8.0",
 		"date-fns": "^4.1.0",
-		"react": "19.1.0",
+		"react": "19.2.0",
 		"server-only": "^0.0.1",
-		"supabase": "^2.34.3"
+		"supabase": "^2.63.1"
 	},
 	"devDependencies": {
-		"@supabase/supabase-js": "^2.55.0"
+		"@supabase/supabase-js": "^2.86.0"
 	},
 	"exports": {
 		"./server": "./src/clients/server.ts",

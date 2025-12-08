@@ -5,8 +5,8 @@
 		"lodash-es": "^4.17.21",
 		"next-intl": "^4.3.4",
 		"nodemailer": "^7.0.5",
-		"react": "19.1.0",
-		"react-dom": "19.1.0",
+		"react": "19.2.1",
+		"react-dom": "19.2.1",
 		"react-email": "^4.2.8",
 		"use-intl": "^4.3.4"
 	},

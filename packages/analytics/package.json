@@ -17,11 +17,11 @@
 		"next": "^15.5.7"
 	},
 	"devDependencies": {
-		"@types/node": "^22.17.2",
+		"@types/node": "^24.10.1",
 		"@types/react": "^19.1.10",
-		"@types/react-dom": "19.1.6",
+		"@types/react-dom": "19.2.3",
 		"tsconfig": "workspace:*",
-		"typescript": "5.8.3"
+		"typescript": "5.9.3"
 	},
 	"exports": {
 		".": "./src/index.ts",

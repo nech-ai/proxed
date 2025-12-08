@@ -66,11 +66,11 @@
 	},
 	"devDependencies": {
 		"@proxed/logger": "workspace:*",
-		"@trigger.dev/build": "^3.3.17",
+		"@trigger.dev/build": "^4.2.0",
 		"@types/js-cookie": "^3.0.6",
 		"@types/prismjs": "^1.26.5",
 		"@types/react": "^19.1.10",
-		"@types/react-dom": "19.1.6",
+		"@types/react-dom": "19.2.3",
 		"@types/react-syntax-highlighter": "^15.5.13",
 		"tailwindcss": "^4.1.12",
 		"tsconfig": "workspace:*"

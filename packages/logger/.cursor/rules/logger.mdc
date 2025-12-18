@@ -1,15 +1,19 @@
-# Logger Package
+---
+description: Conventions for @proxed/logger (Pino logger)
+globs:
+  - "packages/logger/**/*.ts"
+alwaysApply: false
+---
+# `@proxed/logger`
 
-## Overview
+Shared `pino` logger instance.
 
-The `logger` package provides a simple logging utility using Pino.
+## Entry points
 
-## File Structure
+- `packages/logger/src/index.ts` exports `logger`
 
-```
-packages/logger/
-├── src/
-│   └── index.ts
-├── package.json
-└── tsconfig.json
-```
+## Conventions
+
+- Prefer `logger` over `console.*` in server code and background jobs.
+- Log structured objects (context fields) rather than string interpolation.
+

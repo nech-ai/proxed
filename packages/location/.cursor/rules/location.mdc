@@ -1,19 +1,23 @@
-# Location Package
+---
+description: Conventions for @proxed/location (geo + country/region utilities)
+globs:
+  - "packages/location/**/*.ts"
+  - "packages/location/**/*.json"
+alwaysApply: false
+---
+# `@proxed/location`
 
-## Overview
+IP geolocation helpers and country/region metadata.
 
-The `location` package provides utilities for IP-based geolocation, including country and region information.
+## Entry points
 
-## File Structure
+- `packages/location/src/client.ts`
+- `packages/location/src/country-info.ts`
+- `packages/location/src/regions.json`
 
-```
-packages/location/
-├── src/
-│   ├── client.ts
-│   ├── constants.ts
-│   ├── country-info.ts
-│   ├── index.ts
-│   └── regions.json
-├── package.json
-└── tsconfig.json
-```
+## Conventions
+
+- Treat `regions.json` as source data; keep changes additive and avoid breaking key formats.
+- Keep APIs pure and deterministic (no network calls from this package).
+- Prefer returning safe fallbacks (e.g., `"Unknown"`) rather than throwing for unmapped regions.
+

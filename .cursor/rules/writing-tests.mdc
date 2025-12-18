@@ -1,0 +1,16 @@
+---
+description: Writing tests with Bun
+globs:
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.ts"
+  - "**/*.spec.tsx"
+alwaysApply: false
+---
+# Writing tests (Bun)
+
+- Prefer adding tests near the code you changed (co-located) before creating new suites.
+- For bug fixes: add a failing test first, then implement the fix.
+- Keep tests deterministic: avoid real network calls; prefer fixtures/mocks.
+- Run tests in the relevant workspace (or repo root) with `bun test` / `bun run test` where available.
+

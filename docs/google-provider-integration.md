@@ -24,26 +24,30 @@ export const PROVIDERS = {
 
 The following Google AI models are supported:
 
+#### Gemini 3 (preview)
+- `gemini-3-pro-preview` - Frontier multimodal model (preview)
+- `gemini-3-flash-preview` - Low-latency, cost-efficient model (preview)
+- `gemini-3-pro-image-preview` - Native image generation model (preview)
+
 #### Gemini 2.5 Series
 - `gemini-2.5-pro` - State-of-the-art thinking model
 - `gemini-2.5-flash` - Best price-performance model
-- `gemini-2.5-flash-lite-preview-06-17` - Cost-efficient model (preview)
+- `gemini-2.5-flash-lite` - Cost-efficient model
 
 #### Gemini 2.0 Series
 - `gemini-2.0-flash` - Next-gen features and improved capabilities
 - `gemini-2.0-flash-lite` - Optimized for cost efficiency and low latency
+- `gemini-2.0-flash-exp` - Experimental
 
 #### Gemini 1.5 Series
 - `gemini-1.5-flash` - Fast and versatile multimodal model
 - `gemini-1.5-flash-8b` - Small model for lower intelligence tasks
 - `gemini-1.5-pro` - Mid-size model for complex reasoning tasks
 
-#### Other Models
-- `gemini-pro` - General purpose model
-- `gemini-pro-vision` - Vision-enabled model
-- `gemini-embedding-exp` - Experimental embedding model
-- `text-embedding-004` - Text embedding model
-- `embedding-001` - Basic embedding model
+#### Imagen 4 (image generation)
+- `imagen-4.0-generate-001` - Imagen 4 (default)
+- `imagen-4.0-fast-generate-001` - Imagen 4 Fast
+- `imagen-4.0-ultra-generate-001` - Imagen 4 Ultra
 
 ### 3. API Configuration
 
@@ -136,7 +140,7 @@ https://api.proxed.ai/v1/google/{projectId}/{googleApiPath}
 
 For example:
 ```
-https://api.proxed.ai/v1/google/your-project-id/models/gemini-pro:generateContent
+https://api.proxed.ai/v1/google/your-project-id/models/gemini-2.5-flash:generateContent
 ```
 
 ## Database Schema
@@ -157,7 +161,7 @@ To test the Google AI integration:
 4. Test with a simple request:
 
 ```bash
-curl -X POST https://api.proxed.ai/v1/google/YOUR_PROJECT_ID/models/gemini-pro:generateContent \
+curl -X POST https://api.proxed.ai/v1/google/YOUR_PROJECT_ID/models/gemini-2.5-flash:generateContent \
   -H "Authorization: Bearer YOUR_CLIENT_KEY_PART" \
   -H "Content-Type: application/json" \
   -d '{

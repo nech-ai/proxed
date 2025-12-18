@@ -1,4 +1,5 @@
 import type { ProviderType } from "../rest/types";
+import { isModelForProvider } from "@proxed/utils/lib/providers";
 
 /**
  * Get the default model for a given provider
@@ -9,7 +10,7 @@ export function getDefaultModel(provider: ProviderType): string {
 		case "OPENAI":
 			return "gpt-4.1-mini";
 		case "ANTHROPIC":
-			return "claude-4-sonnet-20250514";
+			return "claude-sonnet-4-0";
 		case "GOOGLE":
 			return "gemini-2.5-flash";
 		default:
@@ -27,73 +28,9 @@ export function supportsStructuredOutputs(
 	provider: ProviderType,
 	model: string,
 ): boolean {
-	switch (provider) {
-		case "OPENAI":
-			// All AI SDK 5 OpenAI models support structured outputs
-			return (
-				// GPT-4.1 series
-				model === "gpt-4.1" ||
-				model === "gpt-4.1-mini" ||
-				model === "gpt-4.1-nano" ||
-				// GPT-4o series
-				model === "gpt-4o" ||
-				model === "gpt-4o-mini" ||
-				model === "gpt-4o-audio-preview" ||
-				// GPT-4 series
-				model === "gpt-4-turbo" ||
-				model === "gpt-4" ||
-				model === "gpt-3.5-turbo" ||
-				// o1 reasoning models
-				model === "o1" ||
-				model === "o1-mini" ||
-				model === "o1-preview" ||
-				// o3 series
-				model === "o3" ||
-				model === "o3-mini" ||
-				// o4 series
-				model === "o4-mini" ||
-				// ChatGPT models
-				model === "chatgpt-4o-latest"
-			);
-		case "ANTHROPIC":
-			// All AI SDK 5 Anthropic models support structured outputs
-			return (
-				// Claude 4 models
-				model === "claude-4-opus-20250514" ||
-				model === "claude-4-sonnet-20250514" ||
-				// Claude 3.7
-				model === "claude-3-7-sonnet-20250219" ||
-				// Claude 3.5 models
-				model === "claude-3-5-sonnet-20241022" ||
-				model === "claude-3-5-sonnet-20240620" ||
-				model === "claude-3-5-haiku-20241022" ||
-				// Claude 3 models
-				model === "claude-3-opus-20240229" ||
-				model === "claude-3-sonnet-20240229" ||
-				model === "claude-3-haiku-20240307"
-			);
-		case "GOOGLE":
-			// All AI SDK 5 Google models support structured outputs
-			return (
-				// Gemini 2.5 series
-				model === "gemini-2.5-pro" ||
-				model === "gemini-2.5-flash" ||
-				model === "gemini-2.5-flash-lite" ||
-				model === "gemini-2.5-flash-lite-preview-06-17" ||
-				// Gemini 2.0 series
-				model === "gemini-2.0-flash" ||
-				model === "gemini-2.0-flash-exp" ||
-				// Gemini 1.5 series
-				model === "gemini-1.5-pro" ||
-				model === "gemini-1.5-pro-latest" ||
-				model === "gemini-1.5-flash" ||
-				model === "gemini-1.5-flash-latest" ||
-				model === "gemini-1.5-flash-8b" ||
-				model === "gemini-1.5-flash-8b-latest"
-			);
-		default:
-			return false;
-	}
+	// Structured outputs are supported for the provider's known text models.
+	// Explicitly exclude image-generation models.
+	return isModelForProvider(model, provider) && !supportsImageGeneration(provider, model);
 }
 
 /**
@@ -113,7 +50,7 @@ export function getVisionModel(
 		case "OPENAI":
 			return "gpt-4o";
 		case "ANTHROPIC":
-			return "claude-4-sonnet-20250514";
+			return "claude-sonnet-4-0";
 		case "GOOGLE":
 			return "gemini-2.5-flash";
 		default:
@@ -151,7 +88,7 @@ export function getDefaultImageModel(provider: ProviderType): string {
 		case "OPENAI":
 			return "gpt-image-1"; // or "dall-e-3"
 		case "GOOGLE":
-			return "imagen-3.0-generate-002";
+			return "imagen-4.0-generate-001";
 		default:
 			// If provider doesn't support image generation natively, fallback to OpenAI default
 			return "gpt-image-1";
@@ -168,10 +105,19 @@ export function supportsImageGeneration(
 	switch (provider) {
 		case "OPENAI":
 			return (
-				model === "gpt-image-1" || model === "dall-e-3" || model === "dall-e-2"
+				model === "gpt-image-1" ||
+				model === "gpt-image-1.5" ||
+				model === "gpt-image-1-mini" ||
+				model === "chatgpt-image-latest" ||
+				model === "dall-e-3" ||
+				model === "dall-e-2"
 			);
 		case "GOOGLE":
-			return model === "imagen-3.0-generate-002";
+			return (
+				model === "imagen-4.0-generate-001" ||
+				model === "imagen-4.0-fast-generate-001" ||
+				model === "imagen-4.0-ultra-generate-001"
+			);
 		default:
 			return false;
 	}

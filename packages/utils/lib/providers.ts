@@ -57,7 +57,11 @@ export const MODELS = {
 			order: 7,
 		},
 		"gpt-5": { displayName: "GPT-5", order: 8 },
-		"gpt-5-pro": { displayName: "GPT-5 Pro", order: 9, badge: "new" as ModelBadge },
+		"gpt-5-pro": {
+			displayName: "GPT-5 Pro",
+			order: 9,
+			badge: "new" as ModelBadge,
+		},
 		"gpt-5-mini": { displayName: "GPT-5 Mini", order: 10 },
 		"gpt-5-nano": { displayName: "GPT-5 Nano", order: 11 },
 
@@ -77,7 +81,11 @@ export const MODELS = {
 			order: 22,
 			badge: "new" as ModelBadge,
 		},
-		"gpt-5-codex": { displayName: "GPT-5 Codex", order: 23, badge: "new" as ModelBadge },
+		"gpt-5-codex": {
+			displayName: "GPT-5 Codex",
+			order: 23,
+			badge: "new" as ModelBadge,
+		},
 		"codex-mini-latest": {
 			displayName: "Codex Mini (latest)",
 			order: 24,
@@ -100,9 +108,21 @@ export const MODELS = {
 		"gpt-4o-mini": { displayName: "GPT-4o Mini", order: 31 },
 
 		// GPT-4 series - Supported in AI SDK 5
-		"gpt-4-turbo": { displayName: "GPT-4 Turbo", order: 40, badge: "deprecated" as ModelBadge },
-		"gpt-4": { displayName: "GPT-4", order: 41, badge: "deprecated" as ModelBadge },
-		"gpt-3.5-turbo": { displayName: "GPT-3.5 Turbo", order: 42, badge: "deprecated" as ModelBadge },
+		"gpt-4-turbo": {
+			displayName: "GPT-4 Turbo",
+			order: 40,
+			badge: "deprecated" as ModelBadge,
+		},
+		"gpt-4": {
+			displayName: "GPT-4",
+			order: 41,
+			badge: "deprecated" as ModelBadge,
+		},
+		"gpt-3.5-turbo": {
+			displayName: "GPT-3.5 Turbo",
+			order: 42,
+			badge: "deprecated" as ModelBadge,
+		},
 
 		// o1 series - Supported in AI SDK 5
 		"o1-pro": { displayName: "o1 Pro", order: 50, badge: "new" as ModelBadge },
@@ -166,8 +186,16 @@ export const MODELS = {
 			order: 93,
 			badge: "preview" as ModelBadge,
 		},
-		"dall-e-3": { displayName: "DALL·E 3", order: 94, badge: "deprecated" as ModelBadge },
-		"dall-e-2": { displayName: "DALL·E 2", order: 95, badge: "deprecated" as ModelBadge },
+		"dall-e-3": {
+			displayName: "DALL·E 3",
+			order: 94,
+			badge: "deprecated" as ModelBadge,
+		},
+		"dall-e-2": {
+			displayName: "DALL·E 2",
+			order: 95,
+			badge: "deprecated" as ModelBadge,
+		},
 	},
 	ANTHROPIC: {
 		// Claude 4.5 (newest)

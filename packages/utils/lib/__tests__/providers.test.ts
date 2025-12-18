@@ -307,10 +307,7 @@ describe("Provider Functions", () => {
 			for (const model of Object.keys(MODELS.OPENAI) as Model[]) {
 				const pricing = getModelPricing("OPENAI", model);
 				expect(pricing).toBeDefined();
-				if (
-					model === "dall-e-3" ||
-					model === "dall-e-2"
-				) {
+				if (model === "dall-e-3" || model === "dall-e-2") {
 					expect(pricing.prompt).toBe(0);
 					expect(pricing.completion).toBe(0);
 				} else {

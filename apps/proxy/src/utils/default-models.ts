@@ -30,7 +30,10 @@ export function supportsStructuredOutputs(
 ): boolean {
 	// Structured outputs are supported for the provider's known text models.
 	// Explicitly exclude image-generation models.
-	return isModelForProvider(model, provider) && !supportsImageGeneration(provider, model);
+	return (
+		isModelForProvider(model, provider) &&
+		!supportsImageGeneration(provider, model)
+	);
 }
 
 /**

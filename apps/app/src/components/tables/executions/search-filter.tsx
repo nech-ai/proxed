@@ -33,9 +33,9 @@ import { Button } from "@proxed/ui/components/button";
 import {
 	PROVIDERS,
 	FINISH_REASONS,
-	getModelOptions,
 	type Provider,
 } from "@proxed/utils/lib/providers";
+import { getModelOptionsWithPricing } from "@proxed/utils/lib/pricing";
 
 type Props = {
 	placeholder: string;
@@ -248,14 +248,21 @@ export function SearchFilter({ placeholder, className }: Props) {
 							<span>Model</span>
 						</DropdownMenuSubTrigger>
 						<DropdownMenuSubContent>
-							{getModelOptions().map((model) => (
+							{getModelOptionsWithPricing().map((model) => (
 								<DropdownMenuItem
 									key={model.value}
 									onClick={() => setFilters({ model: model.value })}
 									className="flex items-center justify-between"
 								>
-									<span>{model.label}</span>
-									{model.badge && <ModelBadge badge={model.badge} />}
+									<span className="truncate">{model.label}</span>
+									<div className="flex items-center gap-2">
+										{model.pricingLabel && (
+											<span className="text-xs text-muted-foreground whitespace-nowrap">
+												{model.pricingLabel}
+											</span>
+										)}
+										{model.badge && <ModelBadge badge={model.badge} />}
+									</div>
 								</DropdownMenuItem>
 							))}
 						</DropdownMenuSubContent>

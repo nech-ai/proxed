@@ -1,0 +1,40 @@
+---
+alwaysApply: true
+---
+# Project Structure
+
+This is the Proxed.AI monorepo (Turborepo + Bun workspaces).
+
+## Top-level
+
+- `apps/` deployable apps/services
+- `packages/` shared libraries (import via `@proxed/*`)
+- `tooling/` shared configs (TypeScript, etc.)
+- `biome.json` formatting/linting, `turbo.json` task graph, `tsconfig.json` base TS config
+
+## Apps (high level)
+
+- `apps/proxy` (`@proxed/proxy`): Bun + Hono API proxy (core service; DeviceCheck, rate limits, provider proxying)
+- `apps/app` (`@proxed/app`): Next.js dashboard (Supabase auth; schema builder; admin UI)
+- `apps/web` (`@proxed/web`): marketing site (Next.js)
+- `apps/docs` (`@proxed/docs`): docs site (Fumadocs)
+- `apps/api` (`@proxed/api`): local Supabase project (schemas/migrations/functions + typegen)
+
+## Root commands (common)
+
+```bash
+bun install
+bun run dev
+bun run dev:web
+bun run dev:app
+bun run dev:api
+bun run lint
+bun run format
+bun run typecheck
+```
+
+## Data + background work
+
+- Supabase project lives in `apps/api/supabase/` (schemas/migrations/functions).
+- Trigger.dev config lives in `apps/app/trigger.config.ts`; tasks are re-exported from `apps/app/jobs/*` and implemented in `packages/jobs`.
+

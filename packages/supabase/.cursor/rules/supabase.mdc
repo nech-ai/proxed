@@ -1,32 +1,26 @@
-# Supabase Package
+---
+description: Conventions for @proxed/supabase (SSR clients, queries, mutations, generated types)
+globs:
+  - "packages/supabase/**/*.ts"
+alwaysApply: false
+---
+# `@proxed/supabase`
 
-## Overview
+Shared Supabase clients + query helpers used by apps and jobs.
 
-The `supabase` package provides Supabase clients and utilities for database interactions, including server-side, client-side, and middleware clients.
+## Public entrypoints (package exports)
 
-## File Structure
+- `@proxed/supabase/server` (RSC/server-side client)
+- `@proxed/supabase/client` (browser client)
+- `@proxed/supabase/middleware` (session refresh for Next middleware)
+- `@proxed/supabase/api` (service-role / server API client)
+- `@proxed/supabase/job` (service-role client for Trigger tasks)
+- `@proxed/supabase/queries`, `@proxed/supabase/mutations`
+- `@proxed/supabase/types` (generated DB types)
 
-```
-packages/supabase/
-├── src/
-│   ├── clients/
-│   │   ├── api.ts
-│   │   ├── client.ts
-│   │   ├── job.ts
-│   │   ├── middleware.ts
-│   │   └── server.ts
-│   ├── mutations/
-│   │   └── index.ts
-│   ├── queries/
-│   │   ├── cached-queries.ts
-│   │   └── index.ts
-│   ├── types/
-│   │   ├── billing.ts
-│   │   ├── db.generated.ts
-│   │   ├── db.ts
-│   │   └── index.ts
-│   └── utils/
-│       └── storage.ts
-├── package.json
-└── tsconfig.json
-```
+## Conventions
+
+- Prefer using the exported clients; don’t re-create Supabase clients in apps.
+- Keep cookie handling limited to `getAll`/`setAll` in SSR/middleware clients.
+- Keep DB access helpers in `queries/` and `mutations/` rather than scattering `.from(...)` calls across apps.
+

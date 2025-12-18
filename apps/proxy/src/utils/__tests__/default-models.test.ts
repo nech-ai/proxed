@@ -12,7 +12,7 @@ describe("default-models", () => {
 	describe("getDefaultModel", () => {
 		test("should return correct default models for each provider", () => {
 			expect(getDefaultModel("OPENAI")).toBe("gpt-4.1-mini");
-			expect(getDefaultModel("ANTHROPIC")).toBe("claude-4-sonnet-20250514");
+			expect(getDefaultModel("ANTHROPIC")).toBe("claude-sonnet-4-0");
 			expect(getDefaultModel("GOOGLE")).toBe("gemini-2.5-flash");
 		});
 
@@ -22,20 +22,23 @@ describe("default-models", () => {
 	});
 
 	describe("supportsStructuredOutputs", () => {
-		test("should return true for all AI SDK 5 OpenAI models", () => {
+		test("should return true for known OpenAI text models", () => {
 			const openAIModels = [
+				"gpt-5.2",
+				"gpt-5",
+				"gpt-5-mini",
 				"gpt-4.1",
 				"gpt-4.1-mini",
 				"gpt-4.1-nano",
 				"gpt-4o",
 				"gpt-4o-mini",
-				"gpt-4o-audio-preview",
 				"gpt-4-turbo",
 				"gpt-4",
 				"gpt-3.5-turbo",
 				"o1",
 				"o1-mini",
 				"o1-preview",
+				"o3-pro",
 				"o3",
 				"o3-mini",
 				"o4-mini",
@@ -47,10 +50,16 @@ describe("default-models", () => {
 			}
 		});
 
-		test("should return true for all AI SDK 5 Anthropic models", () => {
+		test("should return true for known Anthropic text models", () => {
 			const anthropicModels = [
-				"claude-4-opus-20250514",
-				"claude-4-sonnet-20250514",
+				"claude-opus-4-5",
+				"claude-sonnet-4-5",
+				"claude-haiku-4-5",
+				"claude-opus-4-1",
+				"claude-opus-4-0",
+				"claude-sonnet-4-0",
+				"claude-opus-4-20250514",
+				"claude-sonnet-4-20250514",
 				"claude-3-7-sonnet-20250219",
 				"claude-3-5-sonnet-20241022",
 				"claude-3-5-sonnet-20240620",
@@ -65,20 +74,20 @@ describe("default-models", () => {
 			}
 		});
 
-		test("should return true for all AI SDK 5 Google models", () => {
+		test("should return true for known Google text models", () => {
 			const googleModels = [
+				"gemini-3-pro-preview",
+				"gemini-3-flash-preview",
+				"gemini-3-pro-image-preview",
 				"gemini-2.5-pro",
 				"gemini-2.5-flash",
 				"gemini-2.5-flash-lite",
-				"gemini-2.5-flash-lite-preview-06-17",
 				"gemini-2.0-flash",
+				"gemini-2.0-flash-lite",
 				"gemini-2.0-flash-exp",
 				"gemini-1.5-pro",
-				"gemini-1.5-pro-latest",
 				"gemini-1.5-flash",
-				"gemini-1.5-flash-latest",
 				"gemini-1.5-flash-8b",
-				"gemini-1.5-flash-8b-latest",
 			];
 
 			for (const model of googleModels) {
@@ -98,7 +107,7 @@ describe("default-models", () => {
 	describe("getVisionModel", () => {
 		test("should return default vision models", () => {
 			expect(getVisionModel("OPENAI")).toBe("gpt-4o");
-			expect(getVisionModel("ANTHROPIC")).toBe("claude-4-sonnet-20250514");
+			expect(getVisionModel("ANTHROPIC")).toBe("claude-sonnet-4-0");
 			expect(getVisionModel("GOOGLE")).toBe("gemini-2.5-flash");
 		});
 
@@ -113,7 +122,7 @@ describe("default-models", () => {
 		test("should return default if preferred model doesn't support vision", () => {
 			expect(getVisionModel("OPENAI", "unsupported-model")).toBe("gpt-4o");
 			expect(getVisionModel("ANTHROPIC", "claude-instant")).toBe(
-				"claude-4-sonnet-20250514",
+				"claude-sonnet-4-0",
 			);
 			expect(getVisionModel("GOOGLE", "bard")).toBe("gemini-2.5-flash");
 		});
@@ -124,9 +133,7 @@ describe("default-models", () => {
 			// Test a few models from each provider
 			expect(supportsVision("OPENAI", "gpt-4o")).toBe(true);
 			expect(supportsVision("OPENAI", "gpt-4.1-mini")).toBe(true);
-			expect(supportsVision("ANTHROPIC", "claude-4-sonnet-20250514")).toBe(
-				true,
-			);
+			expect(supportsVision("ANTHROPIC", "claude-sonnet-4-0")).toBe(true);
 			expect(supportsVision("ANTHROPIC", "claude-3-5-haiku-20241022")).toBe(
 				true,
 			);
@@ -146,7 +153,7 @@ describe("default-models", () => {
 			// Test a few models from each provider
 			expect(supportsPDF("OPENAI", "gpt-4o")).toBe(true);
 			expect(supportsPDF("OPENAI", "gpt-4.1-mini")).toBe(true);
-			expect(supportsPDF("ANTHROPIC", "claude-4-sonnet-20250514")).toBe(true);
+			expect(supportsPDF("ANTHROPIC", "claude-sonnet-4-0")).toBe(true);
 			expect(supportsPDF("ANTHROPIC", "claude-3-5-haiku-20241022")).toBe(true);
 			expect(supportsPDF("GOOGLE", "gemini-2.5-flash")).toBe(true);
 			expect(supportsPDF("GOOGLE", "gemini-1.5-pro")).toBe(true);

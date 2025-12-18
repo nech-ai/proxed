@@ -1,67 +1,28 @@
-
+---
+description: Shared patterns for packages/*
+alwaysApply: true
+---
 # Shared Package Patterns
 
-## Package Structure
+`packages/` contains shared libraries used by the apps. Import via `@proxed/*` and prefer each package's public `exports` entrypoints.
 
-The packages directory contains reusable modules shared across the monorepo:
+## Packages (current)
 
-- **Analytics**: `@proxed/analytics` - Analytics package for logging events with OpenPanel.
-- **Jobs**: `@proxed/jobs` - Background jobs package using Trigger.dev for tasks like notifications.
-- **KV**: `@proxed/kv` - Key-value storage utilities using Upstash Redis.
-- **Location**: `@proxed/location` - Location and country utilities for IP-based geolocation.
-- **Logger**: `@proxed/logger` - Logging utilities using Pino.
-- **Mail**: `@proxed/mail` - Email sending functionality with React Email templates and providers.
-- **Notifications**: `@proxed/notifications` - Notification workflows and utilities using Novu.
-- **Structure**: `@proxed/structure` - Code structure parser and generator.
-- **Supabase**: `@proxed/supabase` - Supabase client and utilities for database interactions.
-- **UI**: `@proxed/ui` - Shared UI components based on Shadcn UI.
-- **Utils**: `@proxed/utils` - Common utility functions, constants, and types.
+- `@proxed/ui`: shared UI primitives (shadcn/radix + Tailwind)
+- `@proxed/supabase`: Supabase clients, queries, and generated types
+- `@proxed/jobs`: Trigger.dev tasks
+- `@proxed/notifications`: Novu workflows + trigger helpers
+- `@proxed/mail`: React Email templates + send helpers (Resend, console)
+- `@proxed/utils`: shared utilities
+- `@proxed/logger`: Pino logger instance
+- `@proxed/kv`: Upstash Redis helpers
+- `@proxed/location`: geo/country helpers
+- `@proxed/structure`: schema/structure parsing + generation
+- `@proxed/analytics`: OpenPanel wrapper
 
-## Package Conventions
-Each package follows a consistent structure:
+## Conventions
 
-```
-package-name/
-├── src/
-│   ├── index.ts          # Main export file
-│   ├── components/       # Components (if applicable)
-│   └── utils/           # Utility functions
-├── package.json         # Package configuration
-├── tsconfig.json        # TypeScript configuration
-└── README.md           # Documentation
-```
+- Apps may depend on packages; avoid app-to-app imports.
+- Prefer stable public APIs: export from package `exports` and import by package name (avoid deep imports).
+- Keep packages focused and dependency-light; move domain logic out of apps when it becomes shared.
 
-## Development Guidelines
-- **Export Everything**: Use `src/index.ts` as the main export file
-- **TypeScript First**: All packages use TypeScript
-- **Minimal Dependencies**: Keep dependencies to a minimum
-- **Tree Shaking**: Structure exports for optimal tree shaking
-- **Documentation**: Include README.md with usage examples
-
-## Import/Export Patterns
-```typescript
-// Main export file (src/index.ts)
-export * from './components';
-export * from './utils';
-export { default as SomeComponent } from './components/SomeComponent';
-
-// Package imports in applications
-import { SomeComponent, someUtility } from '@se/package-name';
-```
-
-## TypeScript Configuration
-- Extend base TypeScript config from `@midday/tsconfig`
-- Use consistent compiler options across packages
-- Include proper type exports for consumers
-
-## Testing
-- Co-locate tests with source files
-- Use consistent testing framework across packages
-- Include unit tests for utility functions
-- Test components in isolation
-
-## Package.json Best Practices
-- Use workspace protocol for internal dependencies
-- Include proper exports field for Node.js compatibility
-- Set appropriate peer dependencies
-- Include build scripts for compiled packages

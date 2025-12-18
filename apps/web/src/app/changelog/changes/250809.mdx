@@ -33,7 +33,7 @@ See the full post: [/updates/gpt-5-is-here](/updates/gpt-5-is-here)
 ### Image Generation API (Experimental)
 
 - Endpoint: `POST /v1/image` (or `/v1/image/{projectId}`)
-- Providers: OpenAI (`gpt-image-1`, `dall-e-3`, `dall-e-2`), Google (`imagen-3.0-generate-002`)
+- Providers: OpenAI (`gpt-image-1`, `dall-e-3`, `dall-e-2`), Google (`imagen-4.0-generate-001`)
 - Supports `size`/`aspectRatio`, `n`, `seed`, and provider-specific options
 
 Quick start:
@@ -66,5 +66,4 @@ We tightened response headers in the dashboard app to align with OWASP Secure He
 - `CSP` refined with stricter sources and `upgrade-insecure-requests`
 
 These changes improve isolation, reduce data leakage, and prevent common classes of attacks without impacting normal functionality.
-
 

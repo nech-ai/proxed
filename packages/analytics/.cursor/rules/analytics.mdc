@@ -1,18 +1,24 @@
-# Analytics Package
+---
+description: Conventions for @proxed/analytics (OpenPanel wrapper)
+globs:
+  - "packages/analytics/**/*.ts"
+  - "packages/analytics/**/*.tsx"
+alwaysApply: false
+---
+# `@proxed/analytics`
 
-## Overview
+Wrapper around OpenPanel for tracking events in browser and server.
 
-The `analytics` package provides a wrapper around OpenPanel for logging events on both the client and server sides.
+## Entry points
 
-## File Structure
+- `@proxed/analytics/client` → `AnalyticsProvider` + `track`
+- `@proxed/analytics/server` → `setupAnalytics(...)`
+- `@proxed/analytics/events` → event names/types/constants
 
-```
-packages/analytics/
-├── src/
-│   ├── client.tsx     # Client-side analytics provider and track function
-│   ├── events.ts      # Definitions for all trackable log events
-│   ├── index.ts       # Main package exports
-│   └── server.ts      # Server-side analytics setup and track function
-├── package.json
-└── tsconfig.json
-```
+## Conventions
+
+- Centralize event names and properties in `packages/analytics/src/events.ts`.
+- Avoid sending PII; keep payloads minimal and intentional.
+- Respect tracking consent (see `tracking-consent` cookie logic in server setup).
+- In non-production, logging to console for debugging is OK; in production, rely on OpenPanel.
+

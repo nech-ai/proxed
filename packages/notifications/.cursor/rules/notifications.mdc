@@ -1,26 +1,21 @@
-# Notifications Package
+---
+description: Conventions for @proxed/notifications (Novu workflows + triggers)
+globs:
+  - "packages/notifications/**/*.ts"
+alwaysApply: false
+---
+# `@proxed/notifications`
 
-## Overview
+Novu workflow definitions and trigger helpers.
 
-The `notifications` package manages notification workflows and utilities using Novu. It defines workflows for events like execution errors and high consumption alerts.
+## Entry points
 
-## File Structure
+- Workflow implementations: `packages/notifications/src/workflows/*/*`
+- Trigger helpers: `packages/notifications/src/index.ts`
 
-```
-packages/notifications/
-├── src/
-│   ├── index.ts
-│   └── workflows/
-│       ├── execution-error/
-│       │   ├── index.ts
-│       │   ├── schemas.ts
-│       │   ├── types.ts
-│       │   └── workflow.ts
-│       └── high-consumption/
-│           ├── index.ts
-│           ├── schemas.ts
-│           ├── types.ts
-│           └── workflow.ts
-├── package.json
-└── tsconfig.json
-```
+## Conventions
+
+- Keep workflow payload schemas/types close to the workflow (`schemas.ts`, `types.ts`).
+- Add new workflow events to the `TriggerEvents` enum and keep names stable.
+- Avoid `any` for payloads when possible; prefer exported types for task callers.
+

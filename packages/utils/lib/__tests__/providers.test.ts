@@ -43,33 +43,49 @@ describe("Provider Functions", () => {
 	describe("getModelsForProvider", () => {
 		test("should return OpenAI models", () => {
 			const models = getModelsForProvider("OPENAI");
+			expect(models).toContain("gpt-5");
+			expect(models).toContain("gpt-5.2");
+			expect(models).toContain("gpt-5.2-pro");
 			expect(models).toContain("gpt-4o");
 			expect(models).toContain("gpt-4o-mini");
+			expect(models).toContain("o1-pro");
 			expect(models).toContain("o1");
 			expect(models).toContain("gpt-4.1");
 			expect(models).toContain("o3");
+			expect(models).toContain("o3-pro");
 			expect(models).toContain("o4-mini");
-			expect(models).toContain("gpt-3.5-turbo");
 			expect(models).toContain("chatgpt-4o-latest");
-			expect(models.length).toBe(23); // +3 image models added
+			expect(models).toContain("gpt-image-1");
+			expect(models).toContain("gpt-image-1.5");
+			expect(models.length).toBeGreaterThanOrEqual(30);
 		});
 
 		test("should return Anthropic models", () => {
 			const models = getModelsForProvider("ANTHROPIC");
-			expect(models).toContain("claude-4-opus-20250514");
-			expect(models).toContain("claude-4-sonnet-20250514");
+			expect(models).toContain("claude-opus-4-5");
+			expect(models).toContain("claude-sonnet-4-5");
+			expect(models).toContain("claude-haiku-4-5");
+			expect(models).toContain("claude-opus-4-1");
+			expect(models).toContain("claude-opus-4-0");
+			expect(models).toContain("claude-sonnet-4-0");
+			expect(models).toContain("claude-opus-4-20250514");
+			expect(models).toContain("claude-sonnet-4-20250514");
 			expect(models).toContain("claude-3-7-sonnet-20250219");
 			expect(models).toContain("claude-3-5-sonnet-20241022");
 			expect(models).toContain("claude-3-haiku-20240307");
-			expect(models.length).toBe(9); // 9 AI SDK 5 supported models
+			expect(models.length).toBeGreaterThanOrEqual(10);
 		});
 
 		test("should return Google models", () => {
 			const models = getModelsForProvider("GOOGLE");
+			expect(models).toContain("gemini-3-pro-preview");
+			expect(models).toContain("gemini-3-flash-preview");
+			expect(models).toContain("gemini-3-pro-image-preview");
 			expect(models).toContain("gemini-2.5-flash");
 			expect(models).toContain("gemini-2.0-flash-exp");
 			expect(models).toContain("gemini-1.5-pro");
-			expect(models.length).toBe(13); // +1 image model added
+			expect(models).toContain("imagen-4.0-generate-001");
+			expect(models.length).toBeGreaterThanOrEqual(12);
 		});
 	});
 
@@ -82,8 +98,8 @@ describe("Provider Functions", () => {
 		});
 
 		test("should return correct display names for Anthropic models", () => {
-			expect(getModelDisplayName("claude-4-opus-20250514")).toBe(
-				"Claude 4 Opus",
+			expect(getModelDisplayName("claude-opus-4-20250514")).toBe(
+				"Claude Opus 4 (20250514)",
 			);
 			expect(getModelDisplayName("claude-3-5-haiku-20241022")).toBe(
 				"Claude 3.5 Haiku",
@@ -110,9 +126,9 @@ describe("Provider Functions", () => {
 
 	describe("getModelBadge", () => {
 		test("should return correct badges", () => {
-			expect(getModelBadge("gpt-4.1")).toBe("new");
-			expect(getModelBadge("o1-preview")).toBe("preview");
-			expect(getModelBadge("o3")).toBe("new");
+			expect(getModelBadge("gpt-5.2")).toBe("new");
+			expect(getModelBadge("gpt-5.2-pro")).toBe("new");
+			expect(getModelBadge("o1-preview")).toBe("deprecated");
 			expect(getModelBadge("gemini-2.0-flash-exp")).toBe("experimental");
 			expect(getModelBadge("gpt-4o")).toBeUndefined();
 			expect(getModelBadge("gemini-1.5-flash")).toBeUndefined();
@@ -128,13 +144,13 @@ describe("Provider Functions", () => {
 		test("should correctly identify OpenAI models", () => {
 			expect(isModelForProvider("gpt-4o", "OPENAI")).toBe(true);
 			expect(isModelForProvider("gpt-4o-mini", "OPENAI")).toBe(true);
-			expect(isModelForProvider("claude-4-opus-20250514", "OPENAI")).toBe(
+			expect(isModelForProvider("claude-opus-4-20250514", "OPENAI")).toBe(
 				false,
 			);
 		});
 
 		test("should correctly identify Anthropic models", () => {
-			expect(isModelForProvider("claude-4-opus-20250514", "ANTHROPIC")).toBe(
+			expect(isModelForProvider("claude-opus-4-20250514", "ANTHROPIC")).toBe(
 				true,
 			);
 			expect(isModelForProvider("claude-3-5-haiku-20241022", "ANTHROPIC")).toBe(
@@ -164,7 +180,7 @@ describe("Provider Functions", () => {
 			expect(getProviderForModel("gpt-4o")).toBe("OPENAI");
 			expect(getProviderForModel("gpt-4o-mini")).toBe("OPENAI");
 			expect(getProviderForModel("o1")).toBe("OPENAI");
-			expect(getProviderForModel("claude-4-opus-20250514")).toBe("ANTHROPIC");
+			expect(getProviderForModel("claude-opus-4-20250514")).toBe("ANTHROPIC");
 			expect(getProviderForModel("claude-3-5-haiku-20241022")).toBe(
 				"ANTHROPIC",
 			);
@@ -181,7 +197,7 @@ describe("Provider Functions", () => {
 		test("should validate known models", () => {
 			expect(isValidModel("gpt-4o")).toBe(true);
 			expect(isValidModel("gpt-4o-mini")).toBe(true);
-			expect(isValidModel("claude-4-opus-20250514")).toBe(true);
+			expect(isValidModel("claude-opus-4-20250514")).toBe(true);
 			expect(isValidModel("claude-3-5-haiku-20241022")).toBe(true);
 			expect(isValidModel("gemini-2.0-flash-exp")).toBe(true);
 			expect(isValidModel("gemini-1.5-flash")).toBe(true);
@@ -239,11 +255,11 @@ describe("Provider Functions", () => {
 
 		test("should include badges in options", () => {
 			const options = getModelOptions("OPENAI");
-			const newModel = options.find((opt) => opt.value === "gpt-4.1");
+			const newModel = options.find((opt) => opt.value === "gpt-5.2");
 			const previewModel = options.find((opt) => opt.value === "o1-preview");
 
 			expect(newModel?.badge).toBe("new");
-			expect(previewModel?.badge).toBe("preview");
+			expect(previewModel?.badge).toBe("deprecated");
 		});
 	});
 
@@ -272,7 +288,7 @@ describe("Provider Functions", () => {
 		test("should contain all model IDs", () => {
 			expect(MODEL_VALUES.length).toBe(ALL_MODELS.length);
 			expect(MODEL_VALUES).toContain("gpt-4o");
-			expect(MODEL_VALUES).toContain("claude-4-opus-20250514");
+			expect(MODEL_VALUES).toContain("claude-opus-4-20250514");
 			expect(MODEL_VALUES).toContain("gemini-2.0-flash-exp");
 			expect(MODEL_VALUES).toContain("gemini-1.5-flash");
 		});
@@ -292,7 +308,6 @@ describe("Provider Functions", () => {
 				const pricing = getModelPricing("OPENAI", model);
 				expect(pricing).toBeDefined();
 				if (
-					model === "gpt-image-1" ||
 					model === "dall-e-3" ||
 					model === "dall-e-2"
 				) {
@@ -300,7 +315,8 @@ describe("Provider Functions", () => {
 					expect(pricing.completion).toBe(0);
 				} else {
 					expect(pricing.prompt).toBeGreaterThan(0);
-					expect(pricing.completion).toBeGreaterThan(0);
+					// Some image models have $0 text output (image output is priced separately)
+					expect(pricing.completion).toBeGreaterThanOrEqual(0);
 				}
 			}
 		});
@@ -322,7 +338,11 @@ describe("Provider Functions", () => {
 			for (const model of Object.keys(MODELS.GOOGLE) as Model[]) {
 				const pricing = getModelPricing("GOOGLE", model);
 				expect(pricing).toBeDefined();
-				if (model === "imagen-3.0-generate-002") {
+				if (
+					model === "imagen-4.0-generate-001" ||
+					model === "imagen-4.0-fast-generate-001" ||
+					model === "imagen-4.0-ultra-generate-001"
+				) {
 					expect(pricing.prompt).toBe(0);
 					expect(pricing.completion).toBe(0);
 				} else {

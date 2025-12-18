@@ -6,7 +6,7 @@ description: |
 
 # Image Generation (`/v1/image`)
 
-The Image Generation endpoint allows you to generate images from a text prompt. It works with OpenAI (`gpt-image-1`, `dall-e-3`, `dall-e-2`) and Google (`imagen-3.0-generate-002`).
+The Image Generation endpoint allows you to generate images from a text prompt. It works with OpenAI (`gpt-image-1`, `dall-e-3`, `dall-e-2`) and Google (`imagen-4.0-generate-001`).
 
 <Note type="warning">Image generation is an experimental feature.</Note>
 
@@ -71,7 +71,7 @@ The response includes generated images as base64 strings and optional metadata.
 ## Supported Providers and Default Models
 
 - **OpenAI**: `gpt-image-1` (default), `dall-e-3`, `dall-e-2`
-- **Google AI**: `imagen-3.0-generate-002` (default)
+- **Google AI**: `imagen-4.0-generate-001` (default), `imagen-4.0-fast-generate-001`, `imagen-4.0-ultra-generate-001`
 
 You can specify a custom model in the request body or via project settings.
 
@@ -105,6 +105,8 @@ curl -X POST \
   - Quality low: 1024x1024 $0.011, 1024x1536 $0.016, 1536x1024 $0.016
   - Quality medium: 1024x1024 $0.042, 1024x1536 $0.063, 1536x1024 $0.063
   - Quality high: 1024x1024 $0.167, 1024x1536 $0.25, 1536x1024 $0.25
+- Google Imagen 4 (per image): $0.04
+- Google Imagen 4 Fast (per image): $0.02
 - OpenAI DALL·E 3 (per image):
   - Standard: 1024x1024 $0.04, 1024x1536 $0.08, 1536x1024 $0.08
   - HD: 1024x1024 $0.08, 1024x1536 $0.12, 1536x1024 $0.12

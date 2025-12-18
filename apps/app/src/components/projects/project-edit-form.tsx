@@ -53,7 +53,8 @@ import {
 } from "@proxed/ui/components/alert-dialog";
 import Link from "next/link";
 import { useState } from "react";
-import { getModelOptions, type Provider } from "@proxed/utils/lib/providers";
+import type { Provider } from "@proxed/utils/lib/providers";
+import { getModelOptionsWithPricing } from "@proxed/utils/lib/pricing";
 
 interface SectionProps {
 	title: string;
@@ -218,7 +219,7 @@ export function ProjectEditForm({
 	const selectedKey = keys.find((k) => k.id === form.watch("keyId"));
 	const selectedProvider = selectedKey?.provider as Provider | undefined;
 	const modelOptions = selectedProvider
-		? getModelOptions(selectedProvider)
+		? getModelOptionsWithPricing(selectedProvider)
 		: [];
 
 	return (
@@ -459,11 +460,20 @@ export function ProjectEditForm({
 																		key={option.value}
 																		value={option.value}
 																	>
-																		<div className="flex items-center justify-between w-full">
-																			<span>{option.label}</span>
-																			{option.badge && (
-																				<ModelBadge badge={option.badge} />
-																			)}
+																		<div className="flex items-center justify-between w-full gap-3">
+																			<span className="truncate">
+																				{option.label}
+																			</span>
+																			<div className="flex items-center gap-2">
+																				{option.pricingLabel && (
+																					<span className="text-xs text-muted-foreground whitespace-nowrap">
+																						{option.pricingLabel}
+																					</span>
+																				)}
+																				{option.badge && (
+																					<ModelBadge badge={option.badge} />
+																				)}
+																			</div>
 																		</div>
 																	</SelectItem>
 																))}

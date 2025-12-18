@@ -9,7 +9,7 @@ tag: "Feature"
 We're introducing a new experimental Image Generation API that lets you create images from text prompts through the same secure, metered proxy you use for text, vision, and PDF.
 
 ### What you get
-- Works with **OpenAI** (`gpt-image-1`, `dall-e-3`, `dall-e-2`) and **Google AI** (`imagen-3.0-generate-002`).
+- Works with **OpenAI** (`gpt-image-1`, `dall-e-3`, `dall-e-2`) and **Google AI** (`imagen-4.0-generate-001`).
 - Simple endpoint: `POST /v1/image` (or `/v1/image/{projectId}`).
 - Supports `size` (e.g., `1024x1024`) or `aspectRatio` (e.g., `16:9`), `n` images, `seed`, and provider-specific options.
 - Responses include base64-encoded images plus provider metadata and warnings when available.
@@ -37,5 +37,6 @@ See the full API reference: [/docs/api-reference/structured-image](/docs/api-ref
 ### Pricing
 
 - GPT Image 1 (per image): low $0.011–$0.016, medium $0.042–$0.063, high $0.167–$0.25 depending on size.
+- Google Imagen 4 (per image): $0.04 (Fast: $0.02).
 - DALL·E 3 (per image): standard $0.04–$0.08, HD $0.08–$0.12 depending on size.
 - DALL·E 2 (per image): $0.016–$0.02 depending on size.

@@ -1,19 +1,18 @@
-# KV Package
-
-## Overview
-
-The `kv` package provides a simple key-value storage utility using Upstash Redis.
-
-## File Structure
-
-```
-packages/kv/
-├── src/
-│   └── index.ts
-├── package.json
-└── tsconfig.json
-```
-description:
+---
+description: Conventions for @proxed/kv (Upstash Redis helpers)
 globs:
+  - "packages/kv/**/*.ts"
 alwaysApply: false
 ---
+# `@proxed/kv`
+
+Thin wrapper around Upstash Redis used across the monorepo.
+
+## Entry points
+
+- `packages/kv/src/index.ts`
+
+## Conventions
+
+- Keep the API minimal and explicit; avoid leaking provider details into apps.
+- Prefer typed helpers for commonly used keys/prefixes instead of ad-hoc strings.

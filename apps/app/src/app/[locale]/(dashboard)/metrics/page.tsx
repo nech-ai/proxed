@@ -1,11 +1,10 @@
 import { ChartSelectors } from "@/components/charts/chart-selectors";
 import { Charts } from "@/components/charts/charts";
 import { ActionBlock } from "@/components/shared/action-block";
-import { subWeeks } from "date-fns";
 import type { Metadata } from "next";
+import type { SearchParams } from "nuqs/server";
 import { PageHeader } from "@/components/layout/page-header";
-import { cookies } from "next/headers";
-import { Cookies as CookieKeys } from "@/utils/constants";
+import { HydrateClient } from "@/trpc/server";
 
 export const maxDuration = 30;
 
@@ -13,29 +12,13 @@ export const metadata: Metadata = {
 	title: "Metrics | Proxed",
 };
 
-const defaultValue = {
-	from: subWeeks(new Date(), 1).toISOString(),
-	to: new Date().toISOString(),
-	period: "daily",
-};
-
 export default async function Metrics({
-	searchParams,
+	searchParams: _searchParams,
 }: {
-	searchParams: any;
+	searchParams: Promise<SearchParams>;
 }) {
-	const { from, to } = await searchParams;
-	const cookieStore = await cookies();
-	const chartType = (cookieStore.get(CookieKeys.ChartType)?.value ?? "all") as
-		| "all"
-		| "tokens";
-	const value = {
-		...(from && { from }),
-		...(to && { to }),
-	};
-
 	return (
-		<>
+		<HydrateClient>
 			<PageHeader
 				title="Metrics"
 				description="Analytics and performance insights"
@@ -43,18 +26,13 @@ export default async function Metrics({
 			<div className="container mx-auto px-4 py-8">
 				<ActionBlock title="Executions">
 					<div className="mb-6">
-						<ChartSelectors defaultValue={defaultValue} />
+						<ChartSelectors />
 					</div>
 					<div className="mb-12">
-						<Charts
-							value={value}
-							defaultValue={defaultValue}
-							disabled={false}
-							type={chartType}
-						/>
+						<Charts disabled={false} />
 					</div>
 				</ActionBlock>
 			</div>
-		</>
+		</HydrateClient>
 	);
 }

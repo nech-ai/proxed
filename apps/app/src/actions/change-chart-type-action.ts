@@ -22,7 +22,7 @@ export const changeChartTypeAction = authActionClient
 			expires: addYears(new Date(), 1),
 		});
 
-		revalidateTag(`chart_${user.team_id}`);
+		revalidateTag(`chart_${user.team_id}`, "default");
 
 		return value;
 	});

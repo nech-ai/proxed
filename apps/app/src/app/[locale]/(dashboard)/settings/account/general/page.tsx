@@ -2,8 +2,7 @@ import { ChangeAvatar } from "@/components/settings/account/general/change-avata
 import { ChangeEmail } from "@/components/settings/account/general/change-email";
 import { DeleteAccount } from "@/components/settings/account/general/delete-account";
 import { DisplayName } from "@/components/settings/account/general/display-name";
-import { getUser } from "@proxed/supabase/cached-queries";
-import { redirect } from "next/navigation";
+import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
 
 export async function generateMetadata() {
 	return {
@@ -12,18 +11,16 @@ export async function generateMetadata() {
 }
 
 export default async function AccountSettingsPage() {
-	const userData = await getUser();
-
-	if (!userData?.data) {
-		redirect("/login");
-	}
+	batchPrefetch([trpc.user.me.queryOptions()]);
 
 	return (
-		<div className="grid grid-cols-1 gap-6">
-			<ChangeAvatar user={userData.data} />
-			<DisplayName fullName={userData.data.full_name ?? ""} />
-			<ChangeEmail email={userData.data.email ?? ""} />
-			<DeleteAccount />
-		</div>
+		<HydrateClient>
+			<div className="grid grid-cols-1 gap-6">
+				<ChangeAvatar />
+				<DisplayName />
+				<ChangeEmail />
+				<DeleteAccount />
+			</div>
+		</HydrateClient>
 	);
 }

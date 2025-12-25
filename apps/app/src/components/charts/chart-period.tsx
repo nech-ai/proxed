@@ -19,15 +19,9 @@ import { formatISO } from "date-fns";
 import { subMonths, subWeeks } from "date-fns";
 import { formatDateRange } from "little-date";
 import { ChevronDownIcon } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { parseAsString, useQueryStates } from "nuqs";
-import { changeChartPeriodAction } from "@/actions/change-chart-period-action";
+import { useMetricsParams } from "@/hooks/use-metrics-params";
 
 type Props = {
-	defaultValue: {
-		to: string;
-		from: string;
-	};
 	disabled?: string;
 };
 
@@ -56,39 +50,34 @@ const periods = [
 			to: new Date(),
 		},
 	},
-];
-export function ChartPeriod({ defaultValue, disabled }: Props) {
-	const { execute } = useAction(changeChartPeriodAction);
-
-	const [params, setParams] = useQueryStates(
-		{
-			from: parseAsString.withDefault(defaultValue.from),
-			to: parseAsString.withDefault(defaultValue.to),
-			period: parseAsString,
-		},
-		{
-			shallow: false,
-		},
-	);
+] as const;
+export function ChartPeriod({ disabled }: Props) {
+	const { params, setParams } = useMetricsParams();
 
 	const handleChangePeriod = (
 		range: { from: Date | null; to: Date | null } | undefined,
-		period?: string,
+		period?: (typeof periods)[number]["value"],
 	) => {
 		if (!range) return;
 
-		const newRange = {
+		const newRange: {
+			from: string;
+			to: string;
+			period?: (typeof periods)[number]["value"];
+		} = {
 			from: range.from
 				? formatISO(range.from, { representation: "date" })
 				: params.from,
 			to: range.to
 				? formatISO(range.to, { representation: "date" })
 				: params.to,
-			period,
 		};
 
+		if (period) {
+			newRange.period = period;
+		}
+
 		setParams(newRange);
-		execute(newRange);
 	};
 
 	return (
@@ -118,7 +107,7 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
 							onValueChange={(value) =>
 								handleChangePeriod(
 									periods.find((p) => p.value === value)?.range,
-									value,
+									value as (typeof periods)[number]["value"],
 								)
 							}
 						>

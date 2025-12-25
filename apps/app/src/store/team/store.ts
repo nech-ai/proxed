@@ -1,7 +1,11 @@
 import { createContext } from "react";
 import { createStore } from "zustand";
-import type { TeamBilling, TeamMembership, User } from "@proxed/supabase/types";
+import type { RouterOutputs } from "@/trpc/types";
 import { config } from "@config";
+
+type TeamMembership = RouterOutputs["team"]["memberships"][number];
+type TeamBilling = RouterOutputs["team"]["billing"];
+type User = NonNullable<RouterOutputs["user"]["me"]>;
 
 export type TeamFeature =
 	| "create_project"
@@ -45,13 +49,12 @@ export const createTeamStore = (initProps: TeamProps) => {
 					if (!limits) return false;
 					return !(
 						plan === "starter" &&
-						limits.projects_count >= (limits.projects_limit || 1)
+						limits.projectsCount >= (limits.projectsLimit || 1)
 					);
 				case "api_calls":
 					if (!limits) return false;
 					return !(
-						limits.api_calls_limit &&
-						limits.api_calls_used >= limits.api_calls_limit
+						limits.apiCallsLimit && limits.apiCallsUsed >= limits.apiCallsLimit
 					);
 				case "advanced_analytics":
 					return plan === "ultimate";

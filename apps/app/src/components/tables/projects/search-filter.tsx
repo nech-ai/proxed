@@ -17,22 +17,26 @@ import { cn } from "@proxed/ui/utils";
 import { readStreamableValue } from "@ai-sdk/rsc";
 import { formatISO } from "date-fns";
 import { CalendarIcon, Filter, Search } from "lucide-react";
-import { parseAsString, useQueryStates } from "nuqs";
 import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FilterList } from "./filter-list";
+import { useProjectsFilterParams } from "@/hooks/use-projects-filter-params";
 
 type Props = {
 	placeholder: string;
 	className?: string;
 };
 
-const defaultSearch = {
-	q: "",
-	name: "",
-	deviceCheck: "",
-	start: "",
-	end: "",
+type ProjectFilters = ReturnType<typeof useProjectsFilterParams>["filter"];
+
+const defaultSearch: ProjectFilters = {
+	q: null,
+	name: null,
+	deviceCheck: null,
+	start: null,
+	end: null,
+	bundleId: null,
+	keyId: null,
 };
 
 export function SearchFilter({ placeholder, className }: Props) {
@@ -43,19 +47,7 @@ export function SearchFilter({ placeholder, className }: Props) {
 
 	const deviceChecks: { id: string; name: string }[] = [];
 
-	const [filters, setFilters] = useQueryStates(
-		{
-			name: parseAsString,
-			q: parseAsString,
-			start: parseAsString,
-			end: parseAsString,
-			deviceCheck: parseAsString,
-		},
-		{
-			shallow: false,
-			history: "push",
-		},
-	);
+	const { filter: filters, setFilter: setFilters } = useProjectsFilterParams();
 
 	useHotkeys(
 		"esc",

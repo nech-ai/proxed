@@ -1,6 +1,6 @@
 import { DeviceCheckCreateForm } from "@/components/settings/team/device-checks/device-check-create";
 import { DeviceChecksBlock } from "@/components/settings/team/device-checks/device-checks";
-import { getDeviceChecks } from "@proxed/supabase/cached-queries";
+import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
 
 export async function generateMetadata() {
 	return {
@@ -9,16 +9,14 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-	const deviceChecks = await getDeviceChecks();
-
-	if (!deviceChecks || !deviceChecks.data) {
-		return <div>No device checks found</div>;
-	}
+	batchPrefetch([trpc.deviceChecks.list.queryOptions()]);
 
 	return (
-		<div className="grid grid-cols-1 gap-6">
-			<DeviceCheckCreateForm revalidatePath="/settings/team/device-check" />
-			<DeviceChecksBlock deviceChecks={deviceChecks.data} />
-		</div>
+		<HydrateClient>
+			<div className="grid grid-cols-1 gap-6">
+				<DeviceCheckCreateForm />
+				<DeviceChecksBlock />
+			</div>
+		</HydrateClient>
 	);
 }

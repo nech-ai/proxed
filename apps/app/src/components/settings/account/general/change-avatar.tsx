@@ -1,9 +1,7 @@
 "use client";
 
 import { type UpdateUserFormValues, updateUserSchema } from "@/actions/schema";
-import { updateUserAction } from "@/actions/update-user-action";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { User } from "@proxed/supabase/types";
 import { Button } from "@proxed/ui/components/button";
 import {
 	Card,
@@ -16,29 +14,44 @@ import {
 import { Form, FormMessage } from "@proxed/ui/components/form";
 import { toast } from "@proxed/ui/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { UserAvatarUpload } from "./user-avatar-upload";
+import { useRouter } from "next/navigation";
+import { useUserMutation, useUserQuery } from "@/hooks/use-user";
 
-type Props = {
-	user: User;
-};
-
-export function ChangeAvatar({ user }: Props) {
-	const action = useAction(updateUserAction);
+export function ChangeAvatar() {
+	const router = useRouter();
+	const { data: user } = useUserQuery();
+	const updateUser = useUserMutation();
 
 	const form = useForm<UpdateUserFormValues>({
 		resolver: zodResolver(updateUserSchema),
 		defaultValues: {
-			avatar_url: user.avatar_url ?? "",
+			avatarUrl: "",
 		},
 	});
 
+	useEffect(() => {
+		if (!user) return;
+		form.reset({ avatarUrl: user.avatarUrl ?? "" });
+	}, [user, form]);
+
+	if (!user) {
+		return null;
+	}
+
 	const onSubmit = form.handleSubmit((data) => {
-		action.execute({
-			avatar_url: data?.avatar_url,
-			revalidatePath: "/account",
-		});
+		updateUser.mutate(
+			{
+				avatarUrl: data?.avatarUrl,
+			},
+			{
+				onSuccess: () => {
+					router.refresh();
+				},
+			},
+		);
 		form.reset();
 	});
 
@@ -54,12 +67,12 @@ export function ChangeAvatar({ user }: Props) {
 					<CardContent>
 						<UserAvatarUpload
 							user={user}
-							onSuccess={(avatar_url) => {
+							onSuccess={(avatarUrl) => {
 								toast({
 									variant: "default",
 									description: "Your avatar has been updated.",
 								});
-								form.setValue("avatar_url", avatar_url, {
+								form.setValue("avatarUrl", avatarUrl, {
 									shouldDirty: true,
 								});
 							}}
@@ -78,11 +91,9 @@ export function ChangeAvatar({ user }: Props) {
 						<div>This is your avatar.</div>
 						<Button
 							type="submit"
-							disabled={
-								action.status === "executing" || !form.formState.isDirty
-							}
+							disabled={updateUser.isPending || !form.formState.isDirty}
 						>
-							{action.status === "executing" ? (
+							{updateUser.isPending ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
 							) : (
 								"Save"

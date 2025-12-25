@@ -1,14 +1,15 @@
 "use client";
 
 import { ActionBlock } from "@/components/shared/action-block";
-import type { Tables } from "@proxed/supabase/types";
 import { DeviceChecksList } from "./device-checks-list";
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
 
-export function DeviceChecksBlock({
-	deviceChecks,
-}: {
-	deviceChecks: Partial<Tables<"device_checks">>[];
-}) {
+export function DeviceChecksBlock() {
+	const trpc = useTRPC();
+	const { data } = useQuery(trpc.deviceChecks.list.queryOptions());
+	const deviceChecks = data?.data ?? [];
+
 	return (
 		<div className="space-y-6">
 			<ActionBlock title="Device Check Configurations">

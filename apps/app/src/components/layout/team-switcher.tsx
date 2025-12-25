@@ -1,6 +1,5 @@
 "use client";
-import { changeTeamAction } from "@/actions/change-team-action";
-import type { TeamMembership } from "@proxed/supabase/types";
+
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -15,24 +14,33 @@ import {
 	useSidebar,
 } from "@proxed/ui/components/sidebar";
 import { ChevronsUpDown } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { TeamAvatar } from "../teams/team-avatar";
 import { cn } from "@proxed/ui/utils";
-import { useTeamContext } from "@/store/team/hook";
+import { useTRPC } from "@/trpc/client";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useUserQuery } from "@/hooks/use-user";
 
-export function TeamSwitcher({
-	activeTeamId,
-	teamMemberships,
-	className,
-}: {
-	activeTeamId: string | null;
-	teamMemberships: TeamMembership[];
-	className?: string;
-}) {
-	const changeTeam = useAction(changeTeamAction);
+export function TeamSwitcher({ className }: { className?: string }) {
 	const { isMobile, open } = useSidebar();
+	const trpc = useTRPC();
+	const router = useRouter();
+	const { data: teamMemberships = [] } = useQuery(
+		trpc.team.memberships.queryOptions(),
+	);
+	const { data: user } = useUserQuery();
+	const activeTeamId = user?.teamId ?? null;
 	const activeTeam = teamMemberships.find(
-		(teamMembership) => activeTeamId === teamMembership.team_id,
+		(teamMembership) => activeTeamId === teamMembership.teamId,
+	);
+
+	const changeTeam = useMutation(
+		trpc.team.switch.mutationOptions({
+			onSuccess: () => {
+				router.push("/");
+				router.refresh();
+			},
+		}),
 	);
 
 	const switchTeam = (teamId: string) => {
@@ -40,10 +48,7 @@ export function TeamSwitcher({
 			return;
 		}
 
-		changeTeam.execute({
-			teamId,
-			redirectTo: "/",
-		});
+		changeTeam.mutate({ teamId });
 	};
 
 	if (!activeTeam) {
@@ -51,7 +56,7 @@ export function TeamSwitcher({
 	}
 
 	return (
-		<SidebarMenu>
+		<SidebarMenu className={className}>
 			<SidebarMenuItem>
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
@@ -68,7 +73,7 @@ export function TeamSwitcher({
 										<TeamAvatar
 											className="size-8"
 											name={activeTeam.team?.name ?? ""}
-											avatarUrl={activeTeam.team?.avatar_url ?? ""}
+											avatarUrl={activeTeam.team?.avatarUrl ?? ""}
 										/>
 									</div>
 									<div className="grid flex-1 text-left text-sm leading-tight">
@@ -82,7 +87,7 @@ export function TeamSwitcher({
 								<TeamAvatar
 									className="size-7"
 									name={activeTeam.team?.name ?? ""}
-									avatarUrl={activeTeam.team?.avatar_url ?? ""}
+									avatarUrl={activeTeam.team?.avatarUrl ?? ""}
 								/>
 							)}
 						</SidebarMenuButton>
@@ -98,15 +103,16 @@ export function TeamSwitcher({
 						</DropdownMenuLabel>
 						{teamMemberships.map((teamMembership) => (
 							<DropdownMenuItem
-								key={teamMembership.team_id}
-								onClick={() => switchTeam(teamMembership.team_id)}
+								key={teamMembership.teamId}
+								onClick={() => switchTeam(teamMembership.teamId)}
 								className="gap-2 p-2"
+								disabled={changeTeam.isPending}
 							>
 								<div className="flex items-center justify-center">
 									<TeamAvatar
 										className="size-6"
 										name={teamMembership.team?.name ?? ""}
-										avatarUrl={teamMembership.team?.avatar_url ?? ""}
+										avatarUrl={teamMembership.team?.avatarUrl ?? ""}
 									/>
 								</div>
 								{teamMembership.team?.name ?? ""}

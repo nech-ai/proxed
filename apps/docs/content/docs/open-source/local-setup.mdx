@@ -15,14 +15,15 @@ apps
 ├── api
 ├── app
 ├── docs
-├── proxy
 ├── web
 packages
 ├── analytics
-├── api
+├── jobs
+├── kv
 ├── location
 ├── logger
 ├── mail
+├── notifications
 ├── structure
 ├── supabase
 ├── ui
@@ -33,21 +34,22 @@ tooling
 
 The `apps` directory contains the core applications and services that need to be run.
 
-* `api`: The API service that is built with Supabase.
+* `api`: The core API proxy service built with Hono on Bun.
 * `app`: The Next.js portal that is used to manage the Proxed.AI platform.
 * `docs`: The documentation site that is built with Fumadocs.
-* `proxy`: The proxy service that is built with Next.js and Hono.
 * `web`: The Next.js marketing site.
 
 The `packages` directory contains the shared code that is used across the project.
 
 * `analytics`: The analytics service that is built with Openpanel.
-* `api`: The API service that is built with Hono.
+* `jobs`: Background jobs powered by Trigger.dev.
+* `kv`: Key-value storage utilities.
 * `location`: The location specific utilities.
 * `logger`: The logger service that is built with Pino.
 * `mail`: The mail service that is built with Resend.
+* `notifications`: Notification helpers and integrations.
 * `structure`: The visual schema builder.
-* `supabase`: The Supabase service that is built with Supabase.
+* `supabase`: Supabase client, queries, and database config.
 * `ui`: The UI components that are built with Shadcn/UI.
 * `utils`: The utility functions that are used across the project.
 
@@ -89,7 +91,6 @@ cp .env.example .env
 ```bash
 bun dev
 ```
-
 
 
 

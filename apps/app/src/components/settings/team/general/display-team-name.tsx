@@ -1,8 +1,6 @@
 "use client";
 
 import { type UpdateTeamFormValues, updateTeamSchema } from "@/actions/schema";
-import { updateTeamAction } from "@/actions/update-team-action";
-import { useTeamContext } from "@/store/team/hook";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@proxed/ui/components/button";
 import {
@@ -23,42 +21,54 @@ import {
 import { Input } from "@proxed/ui/components/input";
 import { useToast } from "@proxed/ui/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { useMembershipQuery } from "@/hooks/use-membership";
+import { useTeamMutation, useTeamQuery } from "@/hooks/use-team";
 
-type Props = {
-	teamName: string;
-};
-
-export function DisplayTeamName({ teamName }: Props) {
+export function DisplayTeamName() {
 	const { toast } = useToast();
-	const { teamMembership } = useTeamContext((state) => state.data);
-	const action = useAction(updateTeamAction, {
-		onSuccess: () => {
-			toast({
-				title: "Team name updated",
-				description: "Your team name has been updated successfully.",
-			});
-		},
-		onError: (error) => {
-			toast({
-				variant: "destructive",
-				title: "Error",
-				description: error?.error?.serverError || "Failed to update team name",
-			});
-		},
-	});
+	const router = useRouter();
+	const { data: team } = useTeamQuery();
+	const { role } = useMembershipQuery();
+	const teamName = team?.name ?? "";
+
+	const updateTeam = useTeamMutation();
+
 	const form = useForm<UpdateTeamFormValues>({
 		resolver: zodResolver(updateTeamSchema),
 		defaultValues: {
-			name: teamName,
+			name: "",
 		},
 	});
 
+	useEffect(() => {
+		form.reset({ name: teamName });
+	}, [teamName, form]);
+
 	const onSubmit = form.handleSubmit((data) => {
-		action.execute({
-			name: data?.name,
-		});
+		updateTeam.mutate(
+			{
+				name: data?.name,
+			},
+			{
+				onSuccess: () => {
+					toast({
+						title: "Team name updated",
+						description: "Your team name has been updated successfully.",
+					});
+					router.refresh();
+				},
+				onError: (error) => {
+					toast({
+						variant: "destructive",
+						title: "Error",
+						description: error?.message || "Failed to update team name",
+					});
+				},
+			},
+		);
 	});
 
 	return (
@@ -86,9 +96,9 @@ export function DisplayTeamName({ teamName }: Props) {
 											autoComplete="off"
 											autoCapitalize="none"
 											autoCorrect="off"
-											spellCheck="false"
+											spellCheck={false}
 											maxLength={32}
-											disabled={teamMembership?.role !== "OWNER"}
+											disabled={role !== "OWNER"}
 										/>
 									</FormControl>
 									<FormMessage />
@@ -102,12 +112,12 @@ export function DisplayTeamName({ teamName }: Props) {
 						<Button
 							type="submit"
 							disabled={
-								action.status === "executing" ||
+								updateTeam.isPending ||
 								!form.formState.isDirty ||
-								teamMembership?.role !== "OWNER"
+								role !== "OWNER"
 							}
 						>
-							{action.status === "executing" ? (
+							{updateTeam.isPending ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
 							) : (
 								"Save"

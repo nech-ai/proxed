@@ -2,19 +2,19 @@ import { Loading } from "@/components/tables/projects/loading";
 import { ErrorFallback } from "@/components/error-fallback";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
-import { searchParamsCache } from "./search-params";
 import { SearchFilter } from "@/components/tables/projects/search-filter";
 import { Table } from "@/components/tables/projects";
 import { ColumnVisibility } from "@/components/tables/projects/column-visibility";
 import { CreateProjectDialog } from "@/components/create-project-dialog";
-import {
-	getDeviceChecks,
-	getProviderKeys,
-} from "@proxed/supabase/cached-queries";
-import type { Tables } from "@proxed/supabase/types";
 import { PageHeader } from "@/components/layout/page-header";
 import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
+import { cookies } from "next/headers";
+import { Cookies as CookieKeys } from "@/utils/constants";
+import { HydrateClient, prefetch, trpc } from "@/trpc/server";
+import type { RouterInputs } from "@/trpc/types";
+import { loadProjectsFilterParams } from "@/hooks/use-projects-filter-params";
+import { loadSortParams } from "@/hooks/use-sort-params";
 
 export const metadata: Metadata = {
 	title: "Projects | Proxed",
@@ -25,45 +25,54 @@ type PageProps = {
 };
 
 export default async function Page({ searchParams }: PageProps) {
-	const {
-		q: query,
-		page,
-		sort: sortArray,
-		start,
-		end,
-		bundleId,
-		deviceCheck,
-		keyId,
-	} = await searchParamsCache.parse(searchParams);
+	const parsedSearchParams = await searchParams;
+	const filter = loadProjectsFilterParams(parsedSearchParams);
+	const { sort: sortValue } = loadSortParams(parsedSearchParams);
 
-	const filter = {
-		start,
-		end,
-		bundleId,
-		deviceCheck,
-		keyId,
-	};
+	type ProjectsListInput = Exclude<RouterInputs["projects"]["list"], void>;
+	const sort = sortValue
+		? (sortValue.split(":") as ProjectsListInput["sort"])
+		: undefined;
+	const hasFilters = Object.values({
+		start: filter.start,
+		end: filter.end,
+		bundleId: filter.bundleId,
+		deviceCheck: filter.deviceCheck,
+		keyId: filter.keyId,
+	}).some((value) => value !== null);
 
-	const sort = sortArray?.split(":");
+	const cookieStore = await cookies();
+	const initialColumnVisibility = JSON.parse(
+		cookieStore.get(CookieKeys.ProjectsColumns)?.value || "[]",
+	);
+
+	prefetch(
+		trpc.projects.list.infiniteQueryOptions(
+			{
+				filter: {
+					start: filter.start ?? undefined,
+					end: filter.end ?? undefined,
+					bundleId: filter.bundleId ?? undefined,
+					deviceCheckId: filter.deviceCheck ?? undefined,
+					keyId: filter.keyId ?? undefined,
+				},
+				sort,
+				searchQuery: filter.q ?? undefined,
+				pageSize: hasFilters ? 100000 : 50,
+			},
+			{
+				getNextPageParam: ({ meta }) => meta?.cursor,
+			},
+		),
+	);
 
 	const loadingKey = JSON.stringify({
-		page,
 		filter,
 		sort,
-		query,
 	});
 
-	const [deviceChecksData, keysData] = await Promise.all([
-		getDeviceChecks(),
-		getProviderKeys(),
-	]);
-
-	const deviceChecks =
-		deviceChecksData?.data ?? ([] as Tables<"device_checks">[]);
-	const keys = keysData?.data ?? ([] as Tables<"provider_keys">[]);
-
 	return (
-		<>
+		<HydrateClient>
 			<PageHeader
 				title="Projects"
 				description="Manage your AI projects and configurations"
@@ -84,11 +93,11 @@ export default async function Page({ searchParams }: PageProps) {
 				<div className="container mx-auto px-4 py-8">
 					<ErrorBoundary errorComponent={ErrorFallback}>
 						<Suspense fallback={<Loading />} key={loadingKey}>
-							<Table filter={filter} page={page} sort={sort} query={query} />
+							<Table initialColumnVisibility={initialColumnVisibility} />
 						</Suspense>
 					</ErrorBoundary>
 				</div>
 			</main>
-		</>
+		</HydrateClient>
 	);
 }

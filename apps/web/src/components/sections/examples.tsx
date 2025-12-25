@@ -135,7 +135,7 @@ actor OpenAIAnalyzer {
 
     init() async {
         let token = await DeviceCheck.retrieveToken()
-        let combinedToken = "\(apiKey).\(token ?? "")"
+        let combinedToken = "\\(apiKey).\\(token ?? "")"
 
         let configuration = OpenAI.Configuration(
             baseURL: URL(string: endpoint)!,
@@ -198,7 +198,7 @@ actor AnthropicAnalyzer {
               (200...299).contains(httpResponse.statusCode) else {
             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
             let responseBodyString = String(data: data, encoding: .utf8) ?? "No response body"
-            print("Error: Request to Anthropic proxy failed with status code \(statusCode). Response: \(responseBodyString)")
+            print("Error: Request to Anthropic proxy failed with status code \\(statusCode). Response: \\(responseBodyString)")
             return
         }
 

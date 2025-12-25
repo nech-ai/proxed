@@ -1,6 +1,5 @@
 "use client";
 
-import { toggleProjectTestAction } from "@/actions/toggle-project-test-action";
 import { Button } from "@proxed/ui/components/button";
 import {
 	Card,
@@ -11,7 +10,6 @@ import {
 } from "@proxed/ui/components/card";
 import { Switch } from "@proxed/ui/components/switch";
 import { useToast } from "@proxed/ui/hooks/use-toast";
-import { useAction } from "next-safe-action/hooks";
 import {
 	CopyIcon,
 	BookOpen,
@@ -21,7 +19,6 @@ import {
 	HelpCircle,
 	TestTube2,
 } from "lucide-react";
-import type { Tables } from "@proxed/supabase/types";
 import {
 	Tooltip,
 	TooltipContent,
@@ -37,31 +34,75 @@ import {
 import { Alert } from "@proxed/ui/components/alert";
 import { Sheet, SheetTrigger } from "@proxed/ui/components/sheet";
 import { ProjectTestSheet } from "./project-test-sheet";
+import { useTRPC } from "@/trpc/client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import type { RouterInputs, RouterOutputs } from "@/trpc/types";
 
 interface ProjectTestModeProps {
-	project: Tables<"projects">;
+	projectId: string;
 }
 
-export function ProjectTestMode({ project }: ProjectTestModeProps) {
+export function ProjectTestMode({ projectId }: ProjectTestModeProps) {
 	const { toast } = useToast();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { data: project } = useQuery(
+		trpc.projects.byId.queryOptions({ id: projectId }),
+	);
+	const [testMode, setTestMode] = useState(false);
+	const [testKey, setTestKey] = useState<string | null>(null);
 
-	const toggleTestMode = useAction(toggleProjectTestAction, {
-		onSuccess: () => {
-			toast({
-				title: "Test mode updated",
-				description: "The project test mode has been updated successfully.",
-			});
-		},
-		onError: (error) => {
-			toast({
-				variant: "destructive",
-				title: "Error",
-				description: error?.error?.serverError || "Failed to update test mode",
-			});
-		},
-	});
+	useEffect(() => {
+		if (project) {
+			setTestMode(project.testMode ?? false);
+			setTestKey(project.testKey ?? null);
+		}
+	}, [project]);
 
-	const canOpenTestSheet = project.test_mode && project.test_key;
+	const toggleTestMode = useMutation(
+		trpc.projects.toggleTestMode.mutationOptions({
+			onMutate: (variables) => {
+				const next = variables as Exclude<
+					RouterInputs["projects"]["toggleTestMode"],
+					void
+				>;
+				const previous = { testMode, testKey };
+				setTestMode(next.testMode);
+				if (!next.testMode) {
+					setTestKey(null);
+				}
+				return previous;
+			},
+			onSuccess: (updated) => {
+				const updatedProject = updated as
+					| RouterOutputs["projects"]["toggleTestMode"]
+					| null;
+				setTestMode(updatedProject?.testMode ?? false);
+				setTestKey(updatedProject?.testKey ?? null);
+				queryClient.invalidateQueries({
+					queryKey: trpc.projects.byId.queryKey({ id: projectId }),
+				});
+				toast({
+					title: "Test mode updated",
+					description: "The project test mode has been updated successfully.",
+				});
+			},
+			onError: (error, _variables, context) => {
+				if (context) {
+					setTestMode(context.testMode);
+					setTestKey(context.testKey);
+				}
+				toast({
+					variant: "destructive",
+					title: "Error",
+					description: error?.message || "Failed to update test mode",
+				});
+			},
+		}),
+	);
+
+	const canOpenTestSheet = testMode && testKey;
 
 	return (
 		<Sheet>
@@ -148,18 +189,18 @@ export function ProjectTestMode({ project }: ProjectTestModeProps) {
 							</p>
 						</div>
 						<Switch
-							checked={project.test_mode || false}
+							checked={testMode}
 							onCheckedChange={(checked) =>
-								toggleTestMode.execute({
-									projectId: project.id,
+								toggleTestMode.mutate({
+									projectId,
 									testMode: checked,
 								})
 							}
-							disabled={toggleTestMode.isExecuting}
+							disabled={toggleTestMode.isPending}
 						/>
 					</div>
 
-					{project.test_mode && project.test_key && (
+					{testMode && testKey && (
 						<>
 							<Alert className="border-yellow-500/20 bg-yellow-500/10 dark:border-yellow-500/30 dark:bg-yellow-500/20">
 								<AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
@@ -198,13 +239,13 @@ export function ProjectTestMode({ project }: ProjectTestModeProps) {
 								</p>
 								<div className="flex items-center gap-2">
 									<code className="relative rounded bg-muted px-[0.5rem] py-[0.4rem] font-mono text-sm flex-1 overflow-x-auto">
-										{project.test_key}
+										{testKey}
 									</code>
 									<Button
 										variant="outline"
 										size="icon"
 										onClick={() => {
-											navigator.clipboard.writeText(project.test_key || "");
+											navigator.clipboard.writeText(testKey || "");
 											toast({
 												title: "Copied!",
 												description: "Test key has been copied to clipboard.",
@@ -264,7 +305,7 @@ export function ProjectTestMode({ project }: ProjectTestModeProps) {
 										<div className="bg-muted p-2 rounded-md font-mono text-xs mb-2 overflow-x-auto">
 											var request = URLRequest(url: URL(string: endpoint)!)
 											<br />
-											request.setValue("{project.test_key}", forHTTPHeaderField:
+											request.setValue("{testKey}", forHTTPHeaderField:
 											"x-proxed-test-key")
 										</div>
 										<p className="text-muted-foreground mb-1 font-medium">
@@ -290,9 +331,7 @@ export function ProjectTestMode({ project }: ProjectTestModeProps) {
 				</CardContent>
 			</Card>
 
-			{project.test_key && (
-				<ProjectTestSheet projectId={project.id} testKey={project.test_key} />
-			)}
+			{testKey && <ProjectTestSheet projectId={projectId} testKey={testKey} />}
 		</Sheet>
 	);
 }

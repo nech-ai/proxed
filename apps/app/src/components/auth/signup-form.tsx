@@ -28,7 +28,7 @@ import { AuthErrorAlert } from "./auth-error-alert";
 
 const formSchema = z.object({
 	name: z.string().min(1),
-	email: z.string().email(),
+	email: z.email(),
 	password: z.string().min(8).max(255),
 });
 
@@ -36,7 +36,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function SignupForm() {
 	const supabase = createClient();
-	const { zodErrorMap, setApiErrorsToForm } = useFormErrors();
+	const { setApiErrorsToForm } = useFormErrors();
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const email = searchParams.get("email");

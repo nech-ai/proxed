@@ -108,7 +108,7 @@ export type userSchemaType = z.infer<typeof userSchema>;
 
 export const contactSchema = z.object({
   tags: z.array(z.string()),
-  email: z.string().email().nullable(),
+  email: z.email().nullable(),
   scores: z.array(z.number().int()).nullable()
 });
 

@@ -5,7 +5,7 @@
 	},
 	"linter": {
 		"enabled": true,
-		"ignore": [".wrangler", "node_modules"],
+		"includes": ["**", "!**/.wrangler", "!**/node_modules"],
 		"rules": {
 			"recommended": true,
 			"a11y": {
@@ -35,21 +35,25 @@
 			}
 		}
 	},
-	"organizeImports": {
-		"enabled": false
-	},
+	"assist": { "actions": { "source": { "organizeImports": "off" } } },
 	"files": {
-		"ignore": [
-			".react-email",
-			".next",
-			".turbo",
-			"node_modules/*",
-			".content-collections",
-			"dist",
-			".source"
+		"includes": [
+			"**",
+			"!**/.react-email",
+			"!**/.next",
+			"!**/.turbo",
+			"!**/node_modules/**/*",
+			"!**/.content-collections",
+			"!**/dist",
+			"!**/.source"
 		]
 	},
 	"javascript": {
 		"jsxRuntime": "reactClassic"
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
+		}
 	}
 }

@@ -258,6 +258,7 @@ export function ProjectTestSheet({
 							onChange={handleFileChange}
 						/>
 						{filePreview && (
+							// biome-ignore lint/performance/noImgElement: local file preview via object URL
 							<img
 								src={filePreview}
 								alt="Preview"

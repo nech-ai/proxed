@@ -344,12 +344,6 @@ const GOOGLE_MODELS: Record<GoogleModel, ModelPricing> = {
 	},
 };
 
-const PROVIDER_MODELS = {
-	OPENAI: OPENAI_MODELS,
-	ANTHROPIC: ANTHROPIC_MODELS,
-	GOOGLE: GOOGLE_MODELS,
-} as const;
-
 // Default pricing fallbacks for unknown models
 const DEFAULT_OPENAI_PRICING: ModelPricing = {
 	prompt: 2.5, // Default to GPT-4o input pricing

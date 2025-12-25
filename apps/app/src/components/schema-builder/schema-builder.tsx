@@ -69,7 +69,7 @@ export function SchemaBuilder({ initialSchema, onChange }: SchemaBuilderProps) {
 			onChange?.(schema);
 			setHasChanges(false);
 			toast.success("Schema saved successfully");
-		} catch (err) {
+		} catch (_err) {
 			toast.error("Failed to save schema");
 		}
 	}

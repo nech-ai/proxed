@@ -1,14 +1,16 @@
 import { HeadlessService } from "@novu/headless";
-import { createClient } from "@proxed/supabase/client";
-import { getUserQuery } from "@proxed/supabase/queries";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useUserQuery } from "@/hooks/use-user";
 
 export function useNotifications() {
-	const supabase = createClient();
+	const { data: userData } = useUserQuery();
 	const [isLoading, setLoading] = useState(true);
 	const [notifications, setNotifications] = useState([]);
-	const [subscriberId, setSubscriberId] = useState();
 	const headlessServiceRef = useRef<HeadlessService>(undefined);
+	const subscriberId = useMemo(() => {
+		if (!userData?.teamId) return undefined;
+		return `${userData.teamId}_${userData.id}`;
+	}, [userData]);
 
 	const markAllMessagesAsRead = () => {
 		const headlessService = headlessServiceRef.current;
@@ -49,8 +51,8 @@ export function useNotifications() {
 
 			headlessService.markNotificationsAsRead({
 				messageId: [messageId],
-				listener: (result) => {},
-				onError: (error) => {},
+				listener: (_result) => {},
+				onError: (_error) => {},
 			});
 		}
 	};
@@ -60,8 +62,7 @@ export function useNotifications() {
 
 		if (headlessService) {
 			headlessService.fetchNotifications({
-				// biome-ignore lint/correctness/noEmptyPattern:
-				listener: ({}) => {},
+				listener: () => {},
 				onSuccess: (response) => {
 					setLoading(false);
 					setNotifications(response.data);
@@ -88,36 +89,16 @@ export function useNotifications() {
 	};
 
 	useEffect(() => {
-		async function fetchUser() {
-			const {
-				data: { session },
-			} = await supabase.auth.getSession();
-
-			const { data: userData } = await getUserQuery(
-				supabase,
-				session?.user?.id as string,
-			);
-
-			if (userData) {
-				// @ts-expect-error
-				setSubscriberId(`${userData.team_id}_${userData.id}`);
-			}
-		}
-
-		fetchUser();
-	}, [supabase]);
-
-	useEffect(() => {
 		const headlessService = headlessServiceRef.current;
 
-		if (headlessService) {
-			headlessService.listenNotificationReceive({
-				listener: () => {
-					fetchNotifications();
-				},
-			});
-		}
-	}, [headlessServiceRef.current]);
+		if (!headlessService) return;
+
+		headlessService.listenNotificationReceive({
+			listener: () => {
+				fetchNotifications();
+			},
+		});
+	}, [fetchNotifications]);
 
 	useEffect(() => {
 		if (subscriberId && !headlessServiceRef.current) {

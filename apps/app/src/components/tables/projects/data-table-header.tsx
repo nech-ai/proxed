@@ -63,12 +63,12 @@ export function DataTableHeader({ table, loading }: Props) {
 			<TableRow className="h-[45px] hover:bg-transparent">
 				{renderSortHeader("name", "Name", "200px")}
 				{renderSortHeader("description", "Description", "250px")}
-				{renderSortHeader("bundle_id", "Bundle ID", "150px")}
-				{renderSortHeader("device_check", "Device Check", "150px")}
+				{renderSortHeader("bundleId", "Bundle ID", "150px")}
+				{renderSortHeader("deviceCheck", "Device Check", "150px")}
 				{renderSortHeader("key", "Key", "100px")}
-				{renderSortHeader("test_mode", "Test Mode", "80px")}
-				{renderSortHeader("is_active", "Status", "100px")}
-				{renderSortHeader("created_at", "Created At", "150px")}
+				{renderSortHeader("testMode", "Test Mode", "80px")}
+				{renderSortHeader("isActive", "Status", "100px")}
+				{renderSortHeader("createdAt", "Created At", "150px")}
 				{isVisible("actions") && (
 					<TableHead className="w-[50px] px-3 py-2 md:px-4" />
 				)}

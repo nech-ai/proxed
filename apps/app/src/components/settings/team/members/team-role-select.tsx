@@ -1,4 +1,4 @@
-import type { TeamMemberRoleType } from "@proxed/supabase/types";
+import type { RouterOutputs } from "@/trpc/types";
 import {
 	Select,
 	SelectContent,
@@ -12,8 +12,8 @@ export function TeamRoleSelect({
 	onSelect,
 	disabled,
 }: {
-	value: TeamMemberRoleType;
-	onSelect: (value: TeamMemberRoleType) => void;
+	value: RouterOutputs["team"]["members"][number]["role"];
+	onSelect: (value: RouterOutputs["team"]["members"][number]["role"]) => void;
 	disabled?: boolean;
 }) {
 	const roleOptions = [

@@ -1,9 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
+import type { SetAllCookies } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import type { Database } from "../types";
+import type { Client, Database } from "../types";
 
 const conWarn = console.warn;
 const conLog = console.log;
+
+type CookiesToSet = Parameters<SetAllCookies>[0];
 
 const IGNORE_WARNINGS = [
 	"Using the user object as returned from supabase.auth.getSession()",
@@ -31,7 +34,7 @@ console.log = (...args) => {
 	}
 };
 
-export const createClient = async () => {
+export const createClient = async (): Promise<Client> => {
 	const cookieStore = await cookies();
 
 	return createServerClient<Database>(
@@ -42,14 +45,14 @@ export const createClient = async () => {
 				getAll() {
 					return cookieStore.getAll();
 				},
-				setAll(cookiesToSet) {
+				setAll(cookiesToSet: CookiesToSet) {
 					try {
 						for (const { name, value, options } of cookiesToSet) {
 							cookieStore.set(name, value, options);
 						}
-					} catch (error) {}
+					} catch (_error) {}
 				},
 			},
 		},
-	);
+	) as unknown as Client;
 };

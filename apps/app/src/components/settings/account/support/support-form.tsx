@@ -1,7 +1,6 @@
 "use client";
 
 import { type SupportFormValues, supportSchema } from "@/actions/schema";
-import { supportAction } from "@/actions/support-action";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@proxed/ui/components/button";
 import {
@@ -31,34 +30,14 @@ import {
 import { Textarea } from "@proxed/ui/components/textarea";
 import { useToast } from "@proxed/ui/hooks/use-toast";
 import { CheckCircle2, Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
 
 export function SupportForm() {
-	const pathname = usePathname();
 	const { toast } = useToast();
 	const [isSubmitted, setIsSubmitted] = useState(false);
-
-	const action = useAction(supportAction, {
-		onSuccess: () => {
-			toast({
-				title: "Support request sent",
-				description: "We'll get back to you as soon as possible.",
-			});
-			form.reset();
-			setIsSubmitted(true);
-		},
-		onError: (error) => {
-			toast({
-				variant: "destructive",
-				title: "Error",
-				description:
-					error?.error?.serverError || "Failed to send support request",
-			});
-		},
-	});
 
 	const form = useForm<SupportFormValues>({
 		resolver: zodResolver(supportSchema),
@@ -70,11 +49,29 @@ export function SupportForm() {
 		},
 	});
 
+	const trpc = useTRPC();
+	const supportRequest = useMutation(
+		trpc.support.support.mutationOptions({
+			onSuccess: () => {
+				toast({
+					title: "Support request sent",
+					description: "We'll get back to you as soon as possible.",
+				});
+				form.reset();
+				setIsSubmitted(true);
+			},
+			onError: (error) => {
+				toast({
+					variant: "destructive",
+					title: "Error",
+					description: error?.message || "Failed to send support request",
+				});
+			},
+		}),
+	);
+
 	const onSubmit = form.handleSubmit((data) => {
-		action.execute({
-			...data,
-			revalidatePath: pathname,
-		});
+		supportRequest.mutate(data);
 	});
 
 	if (isSubmitted) {
@@ -206,8 +203,8 @@ export function SupportForm() {
 					</CardContent>
 
 					<CardFooter className="flex justify-end">
-						<Button type="submit" disabled={action.status === "executing"}>
-							{action.status === "executing" ? (
+						<Button type="submit" disabled={supportRequest.isPending}>
+							{supportRequest.isPending ? (
 								<>
 									<Loader2 className="h-4 w-4 animate-spin mr-2" />
 									Sending...

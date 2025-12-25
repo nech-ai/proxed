@@ -1,6 +1,5 @@
 "use client";
 
-import { createProviderKeyAction } from "@/actions/create-provider-key-action";
 import {
 	type CreateProviderKeyFormValues,
 	createProviderKeySchema,
@@ -43,7 +42,6 @@ import {
 	HelpCircle,
 	ChevronRight,
 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import {
 	splitKeyWithPrefix,
@@ -67,6 +65,8 @@ import {
 	AccordionTrigger,
 } from "@proxed/ui/components/accordion";
 import { PROVIDERS, type ProviderValue } from "@proxed/utils/lib/providers";
+import { useTRPC } from "@/trpc/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const cryptoProvider =
 	typeof window !== "undefined"
@@ -89,7 +89,7 @@ export function ProviderKeyCreateForm({
 	revalidatePath,
 }: ProviderKeyCreateFormProps) {
 	const { toast } = useToast();
-	const [clientPart, setClientPart] = useState<string>("");
+	const [_clientPart, setClientPart] = useState<string>("");
 	const [savedClientPart, setSavedClientPart] = useState<string>("");
 	const clientPartRef = useRef<string>("");
 	const [keyValidation, setKeyValidation] = useState<KeyValidationResult>({
@@ -105,8 +105,8 @@ export function ProviderKeyCreateForm({
 	const form = useForm<CreateProviderKeyFormValues>({
 		resolver: zodResolver(createProviderKeySchema),
 		defaultValues: {
-			display_name: "",
-			partial_key_server: "",
+			displayName: "",
+			partialKeyServer: "",
 			provider: "OPENAI" as ProviderValue,
 			revalidatePath,
 		},
@@ -121,48 +121,55 @@ export function ProviderKeyCreateForm({
 		};
 	}, []);
 
-	const createProviderKey = useAction(createProviderKeyAction, {
-		onExecute: () => setFormState((prev) => ({ ...prev, isSubmitting: true })),
-		onSuccess: () => {
-			setSavedClientPart(clientPartRef.current);
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const createProviderKey = useMutation(
+		trpc.providerKeys.create.mutationOptions({
+			onMutate: () => setFormState((prev) => ({ ...prev, isSubmitting: true })),
+			onSuccess: () => {
+				setSavedClientPart(clientPartRef.current);
 
-			setFormState({
-				isCreating: false,
-				isSuccess: true,
-				isSubmitting: false,
-			});
+				setFormState({
+					isCreating: false,
+					isSuccess: true,
+					isSubmitting: false,
+				});
 
-			form.reset({
-				display_name: "",
-				partial_key_server: "",
-				provider: "OPENAI" as ProviderValue,
-				revalidatePath,
-			});
+				form.reset({
+					displayName: "",
+					partialKeyServer: "",
+					provider: "OPENAI" as ProviderValue,
+					revalidatePath,
+				});
 
-			setKeyValidation({ isValid: false });
-			clientPartRef.current = "";
-			setClientPart("");
+				setKeyValidation({ isValid: false });
+				clientPartRef.current = "";
+				setClientPart("");
 
-			toast({
-				title: "✅ Partial Key created",
-				description:
-					"Please copy your client key part below. You won't see it again!",
-				variant: "default",
-				duration: 10000,
-			});
+				queryClient.invalidateQueries({
+					queryKey: trpc.providerKeys.list.queryKey(),
+				});
 
-			onSuccessAction?.();
-		},
-		onError: (error) => {
-			setFormState((prev) => ({ ...prev, isSubmitting: false }));
-			toast({
-				variant: "destructive",
-				title: "Error",
-				description:
-					error?.error?.serverError || "Failed to create Partial Key",
-			});
-		},
-	});
+				toast({
+					title: "✅ Partial Key created",
+					description:
+						"Please copy your client key part below. You won't see it again!",
+					variant: "default",
+					duration: 10000,
+				});
+
+				onSuccessAction?.();
+			},
+			onError: (error) => {
+				setFormState((prev) => ({ ...prev, isSubmitting: false }));
+				toast({
+					variant: "destructive",
+					title: "Error",
+					description: error?.message || "Failed to create Partial Key",
+				});
+			},
+		}),
+	);
 
 	const handleKeyInput = (value: string) => {
 		const validation = validateApiKey(value);
@@ -171,7 +178,7 @@ export function ProviderKeyCreateForm({
 		if (!validation.isValid) {
 			clientPartRef.current = "";
 			setClientPart("");
-			form.setValue("partial_key_server", "", { shouldDirty: false });
+			form.setValue("partialKeyServer", "", { shouldDirty: false });
 			return;
 		}
 
@@ -182,12 +189,12 @@ export function ProviderKeyCreateForm({
 			setClientPart(generatedClientPart);
 
 			form.clearErrors();
-			form.setValue("partial_key_server", serverPart, { shouldDirty: true });
+			form.setValue("partialKeyServer", serverPart, { shouldDirty: true });
 
 			if (validation.provider) {
 				form.setValue("provider", validation.provider, { shouldDirty: true });
-				if (!form.getValues("display_name")) {
-					form.setValue("display_name", `${validation.provider} Key`, {
+				if (!form.getValues("displayName")) {
+					form.setValue("displayName", `${validation.provider} Key`, {
 						shouldDirty: true,
 					});
 				}
@@ -202,7 +209,7 @@ export function ProviderKeyCreateForm({
 			}
 			clientPartRef.current = "";
 			setClientPart("");
-			form.setValue("partial_key_server", "", { shouldDirty: false });
+			form.setValue("partialKeyServer", "", { shouldDirty: false });
 		}
 	};
 
@@ -217,8 +224,8 @@ export function ProviderKeyCreateForm({
 		clientPartRef.current = "";
 		setKeyValidation({ isValid: false });
 		form.reset({
-			display_name: "",
-			partial_key_server: "",
+			displayName: "",
+			partialKeyServer: "",
 			provider: "OPENAI" as ProviderValue,
 			revalidatePath,
 		});
@@ -227,7 +234,13 @@ export function ProviderKeyCreateForm({
 	return (
 		<Form {...form}>
 			<form
-				onSubmit={form.handleSubmit((data) => createProviderKey.execute(data))}
+				onSubmit={form.handleSubmit((data) =>
+					createProviderKey.mutate({
+						displayName: data.displayName,
+						partialKeyServer: data.partialKeyServer,
+						provider: data.provider,
+					}),
+				)}
 			>
 				<Card>
 					<CardHeader>
@@ -375,7 +388,7 @@ export function ProviderKeyCreateForm({
 
 								<FormField
 									control={form.control}
-									name="display_name"
+									name="displayName"
 									render={({ field }) => (
 										<FormItem>
 											<div className="flex items-center gap-2">
@@ -590,7 +603,7 @@ function CopyToClipboard({ value }: { value: string }) {
 				duration: 3000,
 			});
 			setTimeout(() => setCopied(false), 2000);
-		} catch (error) {
+		} catch (_error) {
 			toast({
 				variant: "destructive",
 				title: "Failed to copy",

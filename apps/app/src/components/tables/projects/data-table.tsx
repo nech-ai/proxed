@@ -29,35 +29,23 @@ interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
 	data: TData[];
 	hasNextPage?: boolean;
-	hasFilters?: boolean;
-	loadMore: (params: { from: number; to: number }) => Promise<{
-		data: TData[];
-		meta: Record<string, string>;
-	}>;
-	query?: string;
-	pageSize: number;
-	meta: Record<string, string>;
+	isFetchingNextPage?: boolean;
+	fetchNextPage: () => void;
 	initialColumnVisibility: VisibilityState;
 }
 
 export function DataTable<TData, TValue>({
 	columns,
-	query,
-
 	data: initialData,
-	pageSize,
-	loadMore,
-	meta: pageMeta,
-	hasFilters,
-	hasNextPage: initialHasNextPage,
+	fetchNextPage,
+	hasNextPage,
+	isFetchingNextPage,
 	initialColumnVisibility,
 }: DataTableProps<TData, TValue>) {
 	const [data, setData] = useState(initialData);
-	const [from, setFrom] = useState(pageSize);
 	const { ref, inView } = useInView();
-	const { date_format: dateFormat } = useUserContext((state) => state.data);
+	const { dateFormat } = useUserContext((state) => state.data);
 
-	const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
 	const { setColumns } = useProjectsStore();
 
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
@@ -79,25 +67,6 @@ export function DataTable<TData, TValue>({
 		},
 	});
 
-	const loadMoreData = async () => {
-		const formatedFrom = from;
-		const to = formatedFrom + pageSize * 2;
-
-		try {
-			const { data, meta } = await loadMore({
-				from: formatedFrom,
-				to,
-			});
-
-			setData((prev) => [...prev, ...data]);
-			setFrom(to);
-			// @ts-expect-error
-			setHasNextPage(meta.count > to);
-		} catch {
-			setHasNextPage(false);
-		}
-	};
-
 	useEffect(() => {
 		// @ts-expect-error
 		setColumns(table.getAllLeafColumns());
@@ -111,10 +80,10 @@ export function DataTable<TData, TValue>({
 	}, [columnVisibility]);
 
 	useEffect(() => {
-		if (inView) {
-			loadMoreData();
+		if (inView && hasNextPage && !isFetchingNextPage) {
+			fetchNextPage();
 		}
-	}, [inView]);
+	}, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
 	useEffect(() => {
 		setData(initialData);

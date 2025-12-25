@@ -1,5 +1,5 @@
 "use client";
-import type { Database } from "@proxed/supabase/types";
+import type { RouterOutputs } from "@/trpc/types";
 import { Badge } from "@proxed/ui/components/badge";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
@@ -7,16 +7,7 @@ import { ActionsCell } from "./actions-cell";
 import { AlertTriangleIcon } from "lucide-react";
 import { cn } from "@proxed/ui/lib/utils";
 
-export type ProjectOutput = Database["public"]["Tables"]["projects"]["Row"] & {
-	device_check: {
-		id: string;
-		name: string;
-	} | null;
-	key: {
-		id: string;
-		display_name: string;
-	} | null;
-};
+export type ProjectOutput = RouterOutputs["projects"]["list"]["data"][number];
 
 export const columns: ColumnDef<ProjectOutput>[] = [
 	{
@@ -27,13 +18,13 @@ export const columns: ColumnDef<ProjectOutput>[] = [
 			<div className="flex items-center gap-2">
 				<span
 					className={cn(
-						row.original.test_mode &&
+						row.original.testMode &&
 							"text-yellow-600 dark:text-yellow-400 font-medium",
 					)}
 				>
 					{row.getValue("name")}
 				</span>
-				{row.original.test_mode && (
+				{row.original.testMode && (
 					<AlertTriangleIcon className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
 				)}
 			</div>
@@ -46,29 +37,29 @@ export const columns: ColumnDef<ProjectOutput>[] = [
 	},
 	{
 		header: "Bundle ID",
-		accessorKey: "bundle_id",
+		accessorKey: "bundleId",
 		enableSorting: true,
 	},
 	{
 		header: "Device Check",
-		accessorKey: "device_check",
+		accessorKey: "deviceCheck",
 		enableSorting: true,
-		accessorFn: (row) => row.device_check?.name || "N/A",
+		accessorFn: (row) => row.deviceCheck?.name || "N/A",
 	},
 	{
 		header: "Key",
 		accessorKey: "key",
 		enableSorting: true,
 		cell: ({ row }) => (
-			<Badge variant="outline">{row.original.key?.display_name}</Badge>
+			<Badge variant="outline">{row.original.key?.displayName}</Badge>
 		),
 	},
 	{
 		header: "Test Mode",
-		accessorKey: "test_mode",
+		accessorKey: "testMode",
 		enableSorting: true,
 		cell: ({ row }) =>
-			row.original.test_mode ? (
+			row.original.testMode ? (
 				<Badge
 					variant="outline"
 					className="border-yellow-500 text-yellow-600 dark:text-yellow-400"
@@ -79,20 +70,20 @@ export const columns: ColumnDef<ProjectOutput>[] = [
 	},
 	{
 		header: "Status",
-		accessorKey: "is_active",
+		accessorKey: "isActive",
 		enableSorting: true,
 		cell: ({ row }) => (
-			<Badge variant={row.original.is_active ? "default" : "destructive"}>
-				{row.original.is_active ? "Active" : "Inactive"}
+			<Badge variant={row.original.isActive ? "default" : "destructive"}>
+				{row.original.isActive ? "Active" : "Inactive"}
 			</Badge>
 		),
 	},
 	{
 		header: "Created At",
-		accessorKey: "created_at",
+		accessorKey: "createdAt",
 		enableSorting: true,
 		cell: ({ row }) =>
-			format(new Date(row.original.created_at), "yyyy-MM-dd HH:mm:ss"),
+			format(new Date(row.original.createdAt), "yyyy-MM-dd HH:mm:ss"),
 	},
 	{
 		header: "",

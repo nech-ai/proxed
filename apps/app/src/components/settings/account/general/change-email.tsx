@@ -1,7 +1,6 @@
 "use client";
 
 import { type UpdateUserFormValues, updateUserSchema } from "@/actions/schema";
-import { updateUserAction } from "@/actions/update-user-action";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@proxed/ui/components/button";
 import {
@@ -21,28 +20,43 @@ import {
 } from "@proxed/ui/components/form";
 import { Input } from "@proxed/ui/components/input";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { useUserMutation, useUserQuery } from "@/hooks/use-user";
 
-type Props = {
-	email: string;
-};
-
-export function ChangeEmail({ email }: Props) {
-	const action = useAction(updateUserAction);
+export function ChangeEmail() {
+	const router = useRouter();
+	const { data: user } = useUserQuery();
+	const updateUser = useUserMutation();
 
 	const form = useForm<UpdateUserFormValues>({
 		resolver: zodResolver(updateUserSchema),
 		defaultValues: {
-			email,
+			email: "",
 		},
 	});
 
+	useEffect(() => {
+		if (!user) return;
+		form.reset({ email: user.email ?? "" });
+	}, [user, form]);
+
+	if (!user) {
+		return null;
+	}
+
 	const onSubmit = form.handleSubmit((data) => {
-		action.execute({
-			email: data?.email,
-			revalidatePath: "/account",
-		});
+		updateUser.mutate(
+			{
+				email: data?.email,
+			},
+			{
+				onSuccess: () => {
+					router.refresh();
+				},
+			},
+		);
 	});
 
 	return (
@@ -67,7 +81,7 @@ export function ChangeEmail({ email }: Props) {
 											autoComplete="off"
 											autoCapitalize="none"
 											autoCorrect="off"
-											spellCheck="false"
+											spellCheck={false}
 											type="email"
 										/>
 									</FormControl>
@@ -83,11 +97,9 @@ export function ChangeEmail({ email }: Props) {
 						</div>
 						<Button
 							type="submit"
-							disabled={
-								action.status === "executing" || !form.formState.isDirty
-							}
+							disabled={updateUser.isPending || !form.formState.isDirty}
 						>
-							{action.status === "executing" ? (
+							{updateUser.isPending ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
 							) : (
 								"Save"

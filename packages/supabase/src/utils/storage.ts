@@ -1,4 +1,4 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Client } from "../types";
 
 export const EMPTY_FOLDER_PLACEHOLDER_FILE_NAME = ".emptyFolderPlaceholder";
 
@@ -9,7 +9,7 @@ type UploadParams = {
 };
 
 export async function upload(
-	client: SupabaseClient,
+	client: Client,
 	{ file, path, bucket }: UploadParams,
 ) {
 	const storage = client.storage.from(bucket);
@@ -31,10 +31,7 @@ type RemoveParams = {
 	bucket: string;
 };
 
-export async function remove(
-	client: SupabaseClient,
-	{ bucket, path }: RemoveParams,
-) {
+export async function remove(client: Client, { bucket, path }: RemoveParams) {
 	return client.storage
 		.from(bucket)
 		.remove([decodeURIComponent(path.join("/"))]);
@@ -46,7 +43,7 @@ type DeleteFolderParams = {
 };
 
 export async function deleteFolder(
-	client: SupabaseClient,
+	client: Client,
 	{ bucket, path }: DeleteFolderParams,
 ) {
 	const { data: list } = await client.storage
@@ -77,7 +74,7 @@ type CreateFolderParams = {
 };
 
 export async function createFolder(
-	client: SupabaseClient,
+	client: Client,
 	{ bucket, path, name }: CreateFolderParams,
 ) {
 	const fullPath = decodeURIComponent(
@@ -101,7 +98,7 @@ type DownloadParams = {
 };
 
 export async function download(
-	client: SupabaseClient,
+	client: Client,
 	{ bucket, path }: DownloadParams,
 ) {
 	return client.storage.from(bucket).download(path);
@@ -117,17 +114,17 @@ type ShareParams = {
 };
 
 export async function share(
-	client: SupabaseClient,
+	client: Client,
 	{ bucket, path, expireIn, options }: ShareParams,
 ) {
 	return client.storage.from(bucket).createSignedUrl(path, expireIn, options);
 }
 
 export async function getPublicUrl(
-	supabase: SupabaseClient,
+	client: Client,
 	bucket: string,
 	path: string[],
 ): Promise<string> {
-	return (await supabase.storage.from(bucket).getPublicUrl(path.join("/"))).data
+	return (await client.storage.from(bucket).getPublicUrl(path.join("/"))).data
 		.publicUrl;
 }

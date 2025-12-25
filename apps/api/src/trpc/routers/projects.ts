@@ -236,7 +236,9 @@ export const projectsRouter = createTRPCRouter({
 			const [updated] = await ctx.db
 				.update(projects)
 				.set(payload)
-				.where(eq(projects.id, input.id))
+				.where(
+					and(eq(projects.id, input.id), eq(projects.teamId, ctx.teamId)),
+				)
 				.returning();
 
 			if (!updated) {
@@ -257,7 +259,12 @@ export const projectsRouter = createTRPCRouter({
 			const [updated] = await ctx.db
 				.update(projects)
 				.set({ schemaConfig: input.schemaConfig })
-				.where(eq(projects.id, input.projectId))
+				.where(
+					and(
+						eq(projects.id, input.projectId),
+						eq(projects.teamId, ctx.teamId),
+					),
+				)
 				.returning();
 
 			if (!updated) {
@@ -283,7 +290,12 @@ export const projectsRouter = createTRPCRouter({
 					testMode: input.testMode,
 					testKey,
 				})
-				.where(eq(projects.id, input.projectId))
+				.where(
+					and(
+						eq(projects.id, input.projectId),
+						eq(projects.teamId, ctx.teamId),
+					),
+				)
 				.returning();
 
 			if (!updated) {

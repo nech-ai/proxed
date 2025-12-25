@@ -1,5 +1,5 @@
 import { deviceChecks } from "@proxed/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, ownerProcedure, teamProcedure } from "../init";
 import { mapDeviceCheck } from "../mappers";
@@ -50,7 +50,14 @@ export const deviceChecksRouter = createTRPCRouter({
 	delete: ownerProcedure
 		.input(z.object({ id: z.string().uuid() }))
 		.mutation(async ({ ctx, input }) => {
-			await ctx.db.delete(deviceChecks).where(eq(deviceChecks.id, input.id));
+			await ctx.db
+				.delete(deviceChecks)
+				.where(
+					and(
+						eq(deviceChecks.id, input.id),
+						eq(deviceChecks.teamId, ctx.teamId),
+					),
+				);
 
 			return { ok: true };
 		}),

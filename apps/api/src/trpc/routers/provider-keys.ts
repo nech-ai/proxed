@@ -1,5 +1,5 @@
 import { providerKeys, serverKeysInPrivate } from "@proxed/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, ownerProcedure, teamProcedure } from "../init";
 import { mapProviderKey } from "../mappers";
@@ -66,7 +66,14 @@ export const providerKeysRouter = createTRPCRouter({
 	delete: ownerProcedure
 		.input(z.object({ id: z.string().uuid() }))
 		.mutation(async ({ ctx, input }) => {
-			await ctx.db.delete(providerKeys).where(eq(providerKeys.id, input.id));
+			await ctx.db
+				.delete(providerKeys)
+				.where(
+					and(
+						eq(providerKeys.id, input.id),
+						eq(providerKeys.teamId, ctx.teamId),
+					),
+				);
 
 			return { ok: true };
 		}),

@@ -236,9 +236,7 @@ export const projectsRouter = createTRPCRouter({
 			const [updated] = await ctx.db
 				.update(projects)
 				.set(payload)
-				.where(
-					and(eq(projects.id, input.id), eq(projects.teamId, ctx.teamId)),
-				)
+				.where(and(eq(projects.id, input.id), eq(projects.teamId, ctx.teamId)))
 				.returning();
 
 			if (!updated) {

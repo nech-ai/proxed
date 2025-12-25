@@ -108,5 +108,3 @@ BEGIN
     $fn$;
   END IF;
 END $$;
-
-drop function if exists "public"."get_tokens_all"(p_team_id uuid, date_from date, date_to date);

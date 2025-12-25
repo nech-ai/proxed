@@ -18,7 +18,7 @@ export async function updateTeamPlan(teamId: string, data: UpdateTeamPlanData) {
 		.select("team_memberships(user_id)")
 		.single();
 
-revalidateTag(`teams_${teamId}`);
+	revalidateTag(`teams_${teamId}`);
 
 	// Revalidate the user cache for each user on the team
 	for (const user of teamData?.team_memberships ?? []) {

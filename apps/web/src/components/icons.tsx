@@ -1,12 +1,15 @@
+import { cn } from "@proxed/ui/utils";
+
 type IconProps = React.HTMLAttributes<SVGElement>;
 
 export const Icons = {
-	logo: (props: IconProps) => (
+	logo: ({ className, ...props }: IconProps) => (
 		<svg
 			id="Layer_1"
 			xmlns="http://www.w3.org/2000/svg"
-			className="group size-8 text-primary"
+			className={cn("group size-8 text-primary", className)}
 			viewBox="0 0 400 400"
+			{...props}
 		>
 			<rect x="-17.13" y="-14.87" width="435.4" height="426.9" />
 			<g>

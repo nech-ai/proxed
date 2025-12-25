@@ -12,6 +12,7 @@ import {
 	Cell,
 	ResponsiveContainer,
 	Tooltip,
+	type TooltipContentProps,
 	XAxis,
 	YAxis,
 } from "recharts";
@@ -44,11 +45,11 @@ interface BarChartProps {
 	disabled?: boolean;
 }
 
-const ToolTipContent = ({ payload = [] }: { payload?: any[] }) => {
+const ToolTipContent = ({ payload }: TooltipContentProps<number, string>) => {
 	const t = useI18n();
 	const { locale } = useUserContext((state) => state.data);
 
-	const [current, previous] = payload;
+	const [current, previous] = payload ?? [];
 
 	return (
 		<div className="w-[240px] rounded-md border bg-background shadow-sm">
@@ -123,9 +124,9 @@ const ToolTipContent = ({ payload = [] }: { payload?: any[] }) => {
 };
 
 export function BarChart({ data, height = 290 }: BarChartProps) {
-	const formattedData = data?.result?.map((item) => ({
+	const formattedData = (data?.result ?? []).map((item) => ({
 		...item,
-		meta: data.meta,
+		meta: data?.meta,
 		date: format(new Date(item.date), "dd MMM"),
 	}));
 
@@ -182,7 +183,7 @@ export function BarChart({ data, height = 290 }: BarChartProps) {
 					<Tooltip content={ToolTipContent} cursor={false} />
 
 					<Bar dataKey="previous.value" barSize={16}>
-						{data?.result?.map((entry, index) => (
+						{formattedData.map((_entry, index) => (
 							<Cell
 								key={`cell-${index.toString()}`}
 								className={cn("fill-[#606060] dark:fill-[#A0A0A0]")}
@@ -191,7 +192,7 @@ export function BarChart({ data, height = 290 }: BarChartProps) {
 					</Bar>
 
 					<Bar dataKey="current.value" barSize={16}>
-						{data?.result?.map((entry, index) => (
+						{formattedData.map((_entry, index) => (
 							<Cell
 								key={`cell-${index.toString()}`}
 								className={cn("fill-primary")}

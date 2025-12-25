@@ -1,7 +1,5 @@
 "use client";
 
-import { deleteTeamAction } from "@/actions/delete-team-action";
-import { useTeamContext } from "@/store/team/hook";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -22,19 +20,24 @@ import {
 	CardTitle,
 } from "@proxed/ui/components/card";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
+import { useMembershipQuery } from "@/hooks/use-membership";
+import { useUserQuery } from "@/hooks/use-user";
 
-interface DeleteTeamProps {
-	teamId: string;
-}
-
-export function DeleteTeam({ teamId }: DeleteTeamProps) {
+export function DeleteTeam() {
 	const router = useRouter();
-	const { teamMembership } = useTeamContext((state) => state.data);
-	const deleteTeam = useAction(deleteTeamAction, {
-		onSuccess: () => router.push("/teams"),
-	});
+	const trpc = useTRPC();
+	const { data: user } = useUserQuery();
+	const { role } = useMembershipQuery();
+	const teamId = user?.teamId ?? user?.team?.id ?? null;
+
+	const deleteTeam = useMutation(
+		trpc.team.delete.mutationOptions({
+			onSuccess: () => router.push("/teams"),
+		}),
+	);
 
 	return (
 		<Card className="border-destructive">
@@ -54,7 +57,7 @@ export function DeleteTeam({ teamId }: DeleteTeamProps) {
 						<Button
 							variant="destructive"
 							className="text-muted hover:bg-destructive"
-							disabled={teamMembership?.role !== "OWNER"}
+							disabled={role !== "OWNER" || !teamId}
 						>
 							Delete
 						</Button>
@@ -69,8 +72,14 @@ export function DeleteTeam({ teamId }: DeleteTeamProps) {
 						</AlertDialogHeader>
 						<AlertDialogFooter>
 							<AlertDialogCancel>Cancel</AlertDialogCancel>
-							<AlertDialogAction onClick={() => deleteTeam.execute({ teamId })}>
-								{deleteTeam.status === "executing" ? (
+							<AlertDialogAction
+								onClick={() => {
+									if (teamId) {
+										deleteTeam.mutate({ teamId });
+									}
+								}}
+							>
+								{deleteTeam.isPending ? (
 									<Loader2 className="h-4 w-4 animate-spin" />
 								) : (
 									"Confirm"

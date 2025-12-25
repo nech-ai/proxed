@@ -8,12 +8,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { TeamCard } from "./team-card";
 import { Alert, AlertDescription } from "@proxed/ui/components/alert";
-import { useToast } from "@proxed/ui/hooks/use-toast";
 import { Slider } from "@proxed/ui/components/slider";
+import { useUserQuery } from "@/hooks/use-user";
 
-export function TeamBillingForm({ teamId }: { teamId: string }) {
+export function TeamBillingForm() {
 	const router = useRouter();
-	const { toast } = useToast();
+	const { data: user } = useUserQuery();
+	const teamId = user?.teamId ?? user?.team?.id ?? null;
 
 	const [isLoading, setIsLoading] = useState(false);
 	const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(
@@ -25,6 +26,7 @@ export function TeamBillingForm({ teamId }: { teamId: string }) {
 	const selectedPlan = `${plans[sliderValue]}-${billingCycle}`;
 
 	const handleContinue = () => {
+		if (!teamId) return;
 		setIsLoading(true);
 
 		// Redirect to checkout with the selected plan
@@ -223,7 +225,7 @@ export function TeamBillingForm({ teamId }: { teamId: string }) {
 						<Button
 							type="button"
 							onClick={handleContinue}
-							disabled={isLoading}
+							disabled={isLoading || !teamId}
 							className="w-full"
 						>
 							{isLoading ? (

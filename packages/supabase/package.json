@@ -4,6 +4,15 @@
 	"private": true,
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules",
+		"dev": "supabase start",
+		"login": "supabase login",
+		"migrate": "supabase migration up",
+		"migration:create": "supabase migration new",
+		"seed": "supabase db seed generate && supabase db seed run",
+		"reset": "supabase db reset",
+		"generate": "supabase gen types --lang=typescript --local --schema public > src/types/db.generated.ts",
+		"generate-functions": "supabase gen types --lang=typescript --local --schema functions > src/types/functions.generated.ts",
+		"functions": "supabase functions serve",
 		"lint": "biome check .",
 		"format": "biome format --write .",
 		"typecheck": "tsc --noEmit"
@@ -11,14 +20,14 @@
 	"dependencies": {
 		"@date-fns/utc": "^2.1.1",
 		"@proxed/logger": "workspace:*",
-		"@supabase/ssr": "^0.6.1",
+		"@supabase/ssr": "^0.8.0",
 		"date-fns": "^4.1.0",
-		"react": "19.2.1",
+		"react": "19.2.3",
 		"server-only": "^0.0.1",
-		"supabase": "^2.34.3"
+		"supabase": "^2.70.5"
 	},
 	"devDependencies": {
-		"@supabase/supabase-js": "^2.55.0"
+		"@supabase/supabase-js": "^2.89.0"
 	},
 	"exports": {
 		"./server": "./src/clients/server.ts",

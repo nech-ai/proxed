@@ -16,9 +16,9 @@ export function UserProvider({ children, data }: UserProviderProps) {
 				data: {
 					locale: window.navigator.language || "en-GB",
 					id: "",
-					team_id: "",
-					full_name: "",
-					date_format: "",
+					teamId: "",
+					fullName: "",
+					dateFormat: "",
 					timezone: "",
 				},
 			});

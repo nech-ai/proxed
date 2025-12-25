@@ -5,19 +5,17 @@ import { SidebarTrigger, useSidebar } from "@proxed/ui/components/sidebar";
 import { cn } from "@proxed/ui/utils";
 import type { PropsWithChildren } from "react";
 import { UserMenu } from "./user-menu";
-import { useTeamContext } from "@/store/team/hook";
 import { FeedbackDialog } from "./feedback-dialog";
 import { Trial } from "../trial";
 import { NotificationCenter } from "../notification-center";
+import { useUserQuery } from "@/hooks/use-user";
 interface ContentHeaderProps extends PropsWithChildren {
 	className?: string;
 }
 
 export function ContentHeader({ children, className }: ContentHeaderProps) {
 	const { isMobile } = useSidebar();
-	const { user, teamMembership, billing } = useTeamContext(
-		(state) => state.data,
-	);
+	const { data: user } = useUserQuery();
 
 	return (
 		<div className={cn("border-b bg-background sticky top-0 z-10", className)}>
@@ -34,17 +32,12 @@ export function ContentHeader({ children, className }: ContentHeaderProps) {
 				<div className="flex-shrink-0 ml-2 flex items-center gap-2">
 					{!isMobile && (
 						<>
-							<Trial
-								createdAt={teamMembership.team?.created_at}
-								canceledAt={billing?.canceled_at}
-								teamId={teamMembership.team?.id}
-								plan={billing?.plan}
-							/>
+							<Trial />
 							<FeedbackDialog />
 						</>
 					)}
 					<NotificationCenter />
-					<UserMenu user={user} />
+					{user && <UserMenu user={user} />}
 				</div>
 			</header>
 		</div>

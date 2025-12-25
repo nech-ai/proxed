@@ -2,9 +2,9 @@
 
 import { UserAvatar } from "@/components/layout/user-avatar";
 import { CropImageDialog } from "@/components/shared/settings/crop-image-dialog";
-import { useTeamContext } from "@/store/team/hook";
 import { useUpload } from "@/hooks/use-upload";
-import type { Team } from "@proxed/supabase/types";
+import { useMembershipQuery } from "@/hooks/use-membership";
+import type { RouterOutputs } from "@/trpc/types";
 import { LoaderIcon } from "lucide-react";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -15,14 +15,14 @@ export function TeamAvatarUpload({
 	onSuccess,
 	onError,
 }: {
-	team: Team;
-	onSuccess: (avatar_url: string) => void;
+	team: NonNullable<RouterOutputs["team"]["current"]>;
+	onSuccess: (avatarUrl: string) => void;
 	onError: (message: string) => void;
 }) {
-	const { teamMembership } = useTeamContext((state) => state.data);
+	const { role } = useMembershipQuery();
 	const [cropDialogOpen, setCropDialogOpen] = useState(false);
 	const [image, setImage] = useState<File | null>(null);
-	const [avatarUrl, setAvatarUrl] = useState<string | null>(team.avatar_url);
+	const [avatarUrl, setAvatarUrl] = useState<string | null>(team.avatarUrl);
 
 	const { uploadFile, isLoading } = useUpload();
 
@@ -65,10 +65,7 @@ export function TeamAvatarUpload({
 	return (
 		<>
 			<div className="relative rounded-full" {...getRootProps()}>
-				<input
-					{...getInputProps()}
-					disabled={teamMembership?.role !== "OWNER"}
-				/>
+				<input {...getInputProps()} disabled={role !== "OWNER"} />
 				<UserAvatar
 					className="size-24 cursor-pointer text-xl"
 					avatarUrl={avatarUrl ?? ""}

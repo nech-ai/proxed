@@ -139,7 +139,7 @@ export default async function Page() {
 							</GradientText>
 							<div
 								className="bg-secondary/20 rounded-lg overflow-hidden"
-								// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+								// biome-ignore lint/security/noDangerouslySetInnerHtml: highlightedCode is sanitized
 								dangerouslySetInnerHTML={{ __html: highlightedCode }}
 							/>
 						</section>

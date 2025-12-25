@@ -15,20 +15,21 @@ import { Check, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { PLANS, formatPrice } from "@/utils/plans";
 import { Label } from "@proxed/ui/components/label";
+import { useBillingQuery } from "@/hooks/use-billing";
+import { useUserQuery } from "@/hooks/use-user";
 
 export function ChoosePlanModal({
 	isOpen,
 	onOpenChange,
 	daysLeft,
-	teamId,
-	canChooseStarterPlan,
 }: {
 	isOpen: boolean;
 	onOpenChange: (isOpen: boolean) => void;
 	daysLeft?: number;
-	teamId: string;
-	canChooseStarterPlan: boolean;
 }) {
+	const { data: user } = useUserQuery();
+	const { canChooseStarterPlan } = useBillingQuery();
+	const teamId = user?.teamId ?? user?.team?.id ?? null;
 	const [isLoading, setIsLoading] = useState(false);
 	const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(
 		"yearly",
@@ -57,9 +58,14 @@ export function ChoosePlanModal({
 	};
 
 	const handleContinue = () => {
+		if (!teamId) return;
 		setIsLoading(true);
 		window.location.href = `/api/checkout?plan=${planId}&teamId=${teamId}`;
 	};
+
+	if (!teamId) {
+		return null;
+	}
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onOpenChange}>

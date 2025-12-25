@@ -7,9 +7,9 @@ import {
 } from "@proxed/utils/lib/providers";
 
 export const updateUserSchema = z.object({
-	full_name: z.string().min(2).max(32).optional(),
-	email: z.string().email().optional(),
-	avatar_url: z.string().url().optional(),
+	fullName: z.string().min(2).max(32).optional(),
+	email: z.email().optional(),
+	avatarUrl: z.url().optional(),
 	revalidatePath: z.string().optional(),
 });
 
@@ -26,7 +26,7 @@ export type CreateTeamFormValues = z.infer<typeof createTeamSchema>;
 
 export const updateTeamSchema = z.object({
 	name: z.string().min(2).max(32).optional(),
-	avatar_url: z.string().url().optional(),
+	avatarUrl: z.url().optional(),
 	revalidatePath: z.string().optional(),
 });
 
@@ -49,7 +49,7 @@ export const acceptInvitationSchema = z.object({
 export type AcceptInvitationFormValues = z.infer<typeof acceptInvitationSchema>;
 
 export const inviteTeamMemberSchema = z.object({
-	email: z.string().email(),
+	email: z.email(),
 	role: z.enum(["OWNER", "MEMBER"]),
 	revalidatePath: z.string().optional(),
 });
@@ -59,7 +59,7 @@ export type InviteTeamMemberFormValues = z.infer<typeof inviteTeamMemberSchema>;
 export const inviteTeamMembersSchema = z.object({
 	invites: z.array(
 		z.object({
-			email: z.string().email(),
+			email: z.email(),
 			role: z.enum(["OWNER", "MEMBER"]),
 		}),
 	),
@@ -106,13 +106,13 @@ export const createDeviceCheckSchema = z.object({
 	name: z.string().min(2, {
 		message: "Name must be at least 2 characters.",
 	}),
-	key_id: z.string().min(1, {
+	keyId: z.string().min(1, {
 		message: "Key ID is required",
 	}),
-	private_key_p8: z.string().min(1, {
+	privateKeyP8: z.string().min(1, {
 		message: "Private key is required",
 	}),
-	apple_team_id: z.string().min(1, {
+	appleTeamId: z.string().min(1, {
 		message: "Apple Team ID is required",
 	}),
 	revalidatePath: z.string().optional(),
@@ -124,10 +124,10 @@ export type CreateDeviceCheckFormValues = z.infer<
 >;
 
 export const createProviderKeySchema = z.object({
-	display_name: z.string().min(2, {
+	displayName: z.string().min(2, {
 		message: "Name must be at least 2 characters.",
 	}),
-	partial_key_server: z.string().min(1),
+	partialKeyServer: z.string().min(1),
 	provider: z.enum(PROVIDER_VALUES as [ProviderValue, ...ProviderValue[]]),
 	revalidatePath: z.string().optional(),
 });
@@ -143,7 +143,7 @@ export const createProjectSchema = z.object({
 	revalidatePath: z.string().optional(),
 });
 
-export type CreateProjectFormValues = z.infer<typeof createProjectSchema>;
+export type CreateProjectFormValues = z.input<typeof createProjectSchema>;
 
 export const updateProjectSchemaSchema = z.object({
 	projectId: z.string(),
@@ -188,7 +188,7 @@ export const updateProjectSchema = z.object({
 	notificationIntervalSeconds: z.number().int().positive().nullish(),
 });
 
-export type UpdateProjectFormValues = z.infer<typeof updateProjectSchema>;
+export type UpdateProjectFormValues = z.input<typeof updateProjectSchema>;
 
 export const toggleProjectTestModeSchema = z.object({
 	projectId: z.string(),

@@ -1,79 +1,90 @@
 import { AppSidebar } from "@/components/layout/app-sidebar";
-import { TrialEnded } from "@/components/trial-ended.server";
+import { TrialEnded } from "@/components/trial-ended";
 import { TeamProvider } from "@/store/team/provider";
 import { UserProvider } from "@/store/user/provider";
-import {
-	getTeamMemberships,
-	getUser,
-	getTeamBilling,
-} from "@proxed/supabase/cached-queries";
 import { SidebarProvider } from "@proxed/ui/components/sidebar";
 import { redirect } from "next/navigation";
 import type { PropsWithChildren } from "react";
 import { Suspense } from "react";
 import { Footer } from "@/components/layout/footer";
+import {
+	batchPrefetch,
+	getQueryClient,
+	HydrateClient,
+	trpc,
+} from "@/trpc/server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function Layout({ children }: PropsWithChildren) {
-	const { data: user } = await getUser();
+	const queryClient = getQueryClient();
+	batchPrefetch([trpc.user.me.queryOptions()]);
+	const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
 
 	if (!user) {
 		return redirect("/login");
 	}
 
-	if (!user.team_id) {
+	if (!user.teamId) {
 		return redirect("/teams");
 	}
 
-	const userTeamMemberships = await getTeamMemberships();
-	const teamMemberships = userTeamMemberships?.data ?? [];
+	batchPrefetch([
+		trpc.team.memberships.queryOptions(),
+		trpc.team.billing.queryOptions(),
+		trpc.team.canChooseStarterPlan.queryOptions(),
+	]);
+	const [teamMemberships, billing] = await Promise.all([
+		queryClient.fetchQuery(trpc.team.memberships.queryOptions()),
+		queryClient.fetchQuery(trpc.team.billing.queryOptions()),
+	]);
 
 	if (!teamMemberships?.length) {
 		return redirect("/teams/create");
 	}
 
-	const { data: billing } = await getTeamBilling();
+	await Promise.all([
+		queryClient.fetchQuery(trpc.team.current.queryOptions()),
+		queryClient.fetchQuery(trpc.user.membership.queryOptions()),
+	]);
 
 	const userData = {
 		id: user.id,
-		full_name: user.full_name ?? "",
-		team_id: user.team_id,
+		fullName: user.fullName ?? "",
+		teamId: user.teamId,
 		locale: "en-GB",
-		date_format: "yyyy-MM-dd HH:mm:ss",
+		dateFormat: "yyyy-MM-dd HH:mm:ss",
 		timezone: "Europe/London",
 	};
 
 	const teamData = {
-		teamId: user.team_id,
+		teamId: user.teamId,
 		teamMembership:
-			teamMemberships.find((m) => m.team_id === user.team_id) ?? null,
+			teamMemberships.find((m) => m.teamId === user.teamId) ?? null,
 		allTeamMemberships: teamMemberships,
 		user,
 		billing,
 	};
 
 	return (
-		<TeamProvider data={teamData}>
-			<UserProvider data={userData}>
-				<div className="flex h-screen">
-					<SidebarProvider defaultOpen={false}>
-						<AppSidebar teamMemberships={teamMemberships} user={user} />
-						<div className="flex flex-col flex-grow overflow-auto">
-							<div className="flex-grow">{children}</div>
-							<Footer />
-						</div>
-					</SidebarProvider>
-					<Suspense>
-						<TrialEnded
-							createdAt={user.team?.created_at}
-							plan={user.team?.plan}
-							teamId={user.team?.id}
-						/>
-					</Suspense>
-				</div>
-			</UserProvider>
-		</TeamProvider>
+		<HydrateClient>
+			<TeamProvider data={teamData}>
+				<UserProvider data={userData}>
+					<div className="flex h-screen">
+						<SidebarProvider defaultOpen={false}>
+							<AppSidebar />
+							<div className="flex flex-col flex-grow overflow-auto">
+								<div className="flex-grow">{children}</div>
+								<Footer />
+							</div>
+						</SidebarProvider>
+						<Suspense>
+							<TrialEnded />
+						</Suspense>
+					</div>
+				</UserProvider>
+			</TeamProvider>
+		</HydrateClient>
 	);
 }

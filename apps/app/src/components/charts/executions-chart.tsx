@@ -1,6 +1,7 @@
+"use client";
+
 import { AnimatedNumber } from "@/components/animated-number";
 import { FormatAmount } from "@/components/format-amount";
-import { getExecutionMetrics } from "@proxed/supabase/cached-queries";
 import {
 	Tooltip,
 	TooltipContent,
@@ -10,21 +11,24 @@ import {
 import { cn } from "@proxed/ui/utils";
 import { InfoIcon } from "lucide-react";
 import { BarChart } from "./bar-chart";
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
+import { useMetricsParams } from "@/hooks/use-metrics-params";
 
 type Props = {
-	value: any;
-	defaultValue: any;
-	type: string;
 	disabled?: boolean;
 };
 
-export async function ExecutionsChart({
-	value,
-	defaultValue,
-	type,
-	disabled,
-}: Props) {
-	const data = await getExecutionMetrics({ ...defaultValue, ...value, type });
+export function ExecutionsChart({ disabled }: Props) {
+	const trpc = useTRPC();
+	const { params } = useMetricsParams();
+	const { data } = useQuery(
+		trpc.metrics.executions.queryOptions({
+			from: params.from,
+			to: params.to,
+			type: "all",
+		}),
+	);
 
 	return (
 		<div
@@ -58,33 +62,21 @@ export async function ExecutionsChart({
 								side="bottom"
 								sideOffset={10}
 							>
-								{type === "all" ? (
-									<div className="space-y-2">
-										<h3 className="font-medium text-primary">
-											All jobs show the total number of jobs created.
-										</h3>
-										<p>
-											Explanation: This shows how many jobs you created in the
-											system.
-										</p>
-									</div>
-								) : (
-									<div className="space-y-2">
-										<h3 className="font-medium text-primary">
-											Completed and Failed jobs have the final status.
-										</h3>
-										<p>
-											Explanation: This shows how many jobs you completed or
-											failed in the system for the selected period.
-										</p>
-									</div>
-								)}
+								<div className="space-y-2">
+									<h3 className="font-medium text-primary">
+										All jobs show the total number of jobs created.
+									</h3>
+									<p>
+										Explanation: This shows how many jobs you created in the
+										system.
+									</p>
+								</div>
 							</TooltipContent>
 						</Tooltip>
 					</TooltipProvider>
 				</div>
 			</div>
-			<BarChart data={data} disabled={disabled} />
+			<BarChart data={data ?? null} disabled={disabled} />
 		</div>
 	);
 }

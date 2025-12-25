@@ -64,11 +64,11 @@ export function DataTableHeader({ table, loading }: Props) {
 				{renderSortHeader("project", "Project", "250px")}
 				{renderSortHeader("model", "Model", "150px")}
 				{renderSortHeader("provider", "Provider", "100px")}
-				{renderSortHeader("total_tokens", "Tokens", "120px")}
-				{renderSortHeader("total_cost", "Cost", "120px")}
-				{renderSortHeader("finish_reason", "Status", "100px")}
+				{renderSortHeader("totalTokens", "Tokens", "120px")}
+				{renderSortHeader("totalCost", "Cost", "120px")}
+				{renderSortHeader("finishReason", "Status", "100px")}
 				{renderSortHeader("latency", "Latency", "100px")}
-				{renderSortHeader("created_at", "Created At", "150px")}
+				{renderSortHeader("createdAt", "Created At", "150px")}
 				{isVisible("actions") && (
 					<TableHead className="w-[50px] px-3 py-2 md:px-4" />
 				)}

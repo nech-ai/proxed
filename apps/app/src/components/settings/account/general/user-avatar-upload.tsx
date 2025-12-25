@@ -3,7 +3,7 @@
 import { UserAvatar } from "@/components/layout/user-avatar";
 import { CropImageDialog } from "@/components/shared/settings/crop-image-dialog";
 import { useUpload } from "@/hooks/use-upload";
-import type { User } from "@proxed/supabase/types";
+import type { RouterOutputs } from "@/trpc/types";
 import { LoaderIcon } from "lucide-react";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -14,13 +14,13 @@ export function UserAvatarUpload({
 	onSuccess,
 	onError,
 }: {
-	user: User;
-	onSuccess: (avatar_url: string) => void;
+	user: NonNullable<RouterOutputs["user"]["me"]>;
+	onSuccess: (avatarUrl: string) => void;
 	onError: (message: string) => void;
 }) {
 	const [cropDialogOpen, setCropDialogOpen] = useState(false);
 	const [image, setImage] = useState<File | null>(null);
-	const [avatarUrl, setAvatarUrl] = useState<string | null>(user.avatar_url);
+	const [avatarUrl, setAvatarUrl] = useState<string | null>(user.avatarUrl);
 
 	const { uploadFile, isLoading } = useUpload();
 
@@ -67,7 +67,7 @@ export function UserAvatarUpload({
 				<UserAvatar
 					className="size-24 cursor-pointer text-xl"
 					avatarUrl={avatarUrl ?? ""}
-					name={user.full_name ?? ""}
+					name={user.fullName ?? ""}
 				/>
 
 				{isLoading && (

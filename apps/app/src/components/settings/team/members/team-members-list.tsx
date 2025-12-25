@@ -15,7 +15,7 @@ import {
 } from "@tanstack/react-table";
 
 import { UserAvatar } from "@/components/layout/user-avatar";
-import type { TeamMembership } from "@proxed/supabase/types";
+import type { RouterOutputs } from "@/trpc/types";
 import { Button } from "@proxed/ui/components/button";
 import {
 	DropdownMenu,
@@ -34,39 +34,38 @@ import { useToast } from "@proxed/ui/hooks/use-toast";
 import { LogOutIcon, MoreVerticalIcon, TrashIcon } from "lucide-react";
 import { useState } from "react";
 import { TeamRoleSelect } from "./team-role-select";
+import { useMembershipQuery } from "@/hooks/use-membership";
+import { useUserQuery } from "@/hooks/use-user";
 
 export function TeamMembersList({
 	memberships,
 }: {
-	memberships: TeamMembership[];
+	memberships: RouterOutputs["team"]["members"];
 }) {
-	const teamMembership = {
-		role: "OWNER",
-	};
-	const user = {
-		id: "123",
-	};
+	type TeamMember = RouterOutputs["team"]["members"][number];
+	const { role } = useMembershipQuery();
+	const { data: user } = useUserQuery();
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const { toast } = useToast();
 
-	const columns: ColumnDef<TeamMembership>[] = [
+	const columns: ColumnDef<TeamMember>[] = [
 		{
 			accessorKey: "user",
 			header: "",
-			accessorFn: (row) => row.user_id,
+			accessorFn: (row) => row.userId,
 			cell: ({ row }) =>
-				row.original.user_id ? (
+				row.original.userId ? (
 					<div className="flex items-center gap-2">
 						<UserAvatar
 							name={
-								row.original.user?.full_name ?? row.original.user?.email ?? ""
+								row.original.user?.fullName ?? row.original.user?.email ?? ""
 							}
-							avatarUrl={row.original.user?.avatar_url}
+							avatarUrl={row.original.user?.avatarUrl}
 						/>
 						<div>
 							<strong className="block">
-								{row.original.user?.full_name ?? row.original.user?.email ?? ""}
+								{row.original.user?.fullName ?? row.original.user?.email ?? ""}
 							</strong>
 							<small className="text-muted-foreground">
 								{row.original.user?.email ?? ""}
@@ -88,15 +87,13 @@ export function TeamMembersList({
 					<div className="flex flex-row justify-end gap-2">
 						<TeamRoleSelect
 							value={row.original.role}
-							onSelect={async (value) => {
-								const loadingToast = toast({
+							onSelect={async (_value) => {
+								toast({
 									variant: "default",
 									description: "Updating membership role...",
 								});
 							}}
-							disabled={
-								teamMembership?.role !== "OWNER" || row.original.is_creator
-							}
+							disabled={role !== "OWNER" || row.original.isCreator}
 						/>
 
 						<DropdownMenu>
@@ -107,10 +104,10 @@ export function TeamMembersList({
 							</DropdownMenuTrigger>
 							<DropdownMenuContent>
 								<DropdownMenuItem
-									disabled={row.original.is_creator}
+									disabled={row.original.isCreator}
 									className="text-destructive"
 									onClick={() => {
-										const loadingToast = toast({
+										toast({
 											variant: "default",
 											description: "Removing member...",
 										});

@@ -1,7 +1,13 @@
-import { getSubscriberPreferences } from "@proxed/notifications";
-import { getUser } from "@proxed/supabase/cached-queries";
+"use client";
+
 import { Skeleton } from "@proxed/ui/components/skeleton";
 import { NotificationSetting } from "./notification-setting";
+import { useTRPC } from "@/trpc/client";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import type { RouterOutputs } from "@/trpc/types";
+
+type NotificationPreference =
+	RouterOutputs["notifications"]["preferences"][number];
 
 export function NotificationSettingsSkeleton() {
 	return [...Array(2)].map((_, index) => (
@@ -9,43 +15,40 @@ export function NotificationSettingsSkeleton() {
 	));
 }
 
-export async function NotificationSettings() {
-	const { data: userData } = await getUser();
-	const { data: subscriberPreferences } = await getSubscriberPreferences({
-		subscriberId: userData.id,
-		teamId: userData.team_id,
-	});
-	const inAppSettings = subscriberPreferences
-		?.filter((setting: any) =>
-			Object.keys(setting.preference.channels).includes("in_app"),
+export function NotificationSettings() {
+	const trpc = useTRPC();
+	const { data: subscriberPreferences } = useSuspenseQuery(
+		trpc.notifications.preferences.queryOptions(),
+	);
+	const preferences = (subscriberPreferences ?? []) as NotificationPreference[];
+
+	const inAppSettings = preferences
+		.filter((setting) =>
+			Object.keys(setting.preference.channels ?? {}).includes("inApp"),
 		)
-		.map((setting: any) => {
+		.map((setting) => {
 			return (
 				<NotificationSetting
-					key={setting.template._id}
-					id={setting.template._id}
+					key={setting.template.id}
+					id={setting.template.id}
 					name={setting.template.name}
-					enabled={setting.preference.channels?.in_app}
-					subscriberId={userData.id}
-					teamId={userData.team_id}
-					type="in_app"
+					enabled={Boolean(setting.preference.channels?.inApp)}
+					type="inApp"
 				/>
 			);
 		});
 
-	const emailSettings = subscriberPreferences
-		?.filter((setting: any) =>
-			Object.keys(setting.preference.channels).includes("email"),
+	const emailSettings = preferences
+		.filter((setting) =>
+			Object.keys(setting.preference.channels ?? {}).includes("email"),
 		)
-		.map((setting: any) => {
+		.map((setting) => {
 			return (
 				<NotificationSetting
-					key={setting.template._id}
-					id={setting.template._id}
+					key={setting.template.id}
+					id={setting.template.id}
 					name={setting.template.name}
-					enabled={setting.preference.channels?.email}
-					subscriberId={userData.id}
-					teamId={userData.team_id}
+					enabled={Boolean(setting.preference.channels?.email)}
 					type="email"
 				/>
 			);

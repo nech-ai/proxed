@@ -1,44 +1,38 @@
 "use client";
 
-import { signOutAction } from "@/actions/sign-out-action";
-import type { User } from "@proxed/supabase/types";
+import type { RouterOutputs } from "@/trpc/types";
+import { createClient } from "@proxed/supabase/client";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuLabel,
-	DropdownMenuPortal,
-	DropdownMenuRadioGroup,
-	DropdownMenuRadioItem,
 	DropdownMenuSeparator,
-	DropdownMenuSub,
-	DropdownMenuSubContent,
-	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "@proxed/ui/components/dropdown-menu";
 import { useMediaQuery } from "@proxed/ui/hooks/use-media-query";
 import { CircleHelpIcon, LogoutIcon, SettingsGearIcon } from "@proxed/ui/icons";
 import { cn } from "@proxed/ui/utils";
 import { LifeBuoy } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { UserAvatar } from "./user-avatar";
 
 interface UserMenuProps {
-	user: User;
+	user: NonNullable<RouterOutputs["user"]["me"]>;
 	className?: string;
 }
 
 export function UserMenu({ user, className }: UserMenuProps) {
 	const isMobile = useMediaQuery("(max-width: 768px)");
+	const router = useRouter();
+	const supabase = createClient();
 
 	if (!user) {
 		return null;
 	}
 
-	const { full_name, email, avatar_url } = user;
-
-	const signOut = useAction(signOutAction);
+	const { fullName, email, avatarUrl } = user;
 
 	return (
 		<DropdownMenu modal={false}>
@@ -48,7 +42,7 @@ export function UserMenu({ user, className }: UserMenuProps) {
 					className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary"
 					aria-label="User menu"
 				>
-					<UserAvatar name={full_name ?? ""} avatarUrl={avatar_url} />
+					<UserAvatar name={fullName ?? ""} avatarUrl={avatarUrl} />
 				</button>
 			</DropdownMenuTrigger>
 
@@ -65,7 +59,7 @@ export function UserMenu({ user, className }: UserMenuProps) {
 			>
 				<DropdownMenuLabel className="font-normal">
 					<div className="flex flex-col space-y-1">
-						<p className="font-medium text-sm leading-none">{full_name}</p>
+						<p className="font-medium text-sm leading-none">{fullName}</p>
 						<p className="text-muted-foreground text-xs leading-none">
 							{email}
 						</p>
@@ -99,7 +93,11 @@ export function UserMenu({ user, className }: UserMenuProps) {
 				</DropdownMenuItem>
 
 				<DropdownMenuItem
-					onClick={() => signOut.execute({})}
+					onClick={async () => {
+						await supabase.auth.signOut();
+						router.push("/login");
+						router.refresh();
+					}}
 					className="rounded-md"
 				>
 					<LogoutIcon className="mr-2 size-4" />

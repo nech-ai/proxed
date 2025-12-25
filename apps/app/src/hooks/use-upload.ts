@@ -10,7 +10,11 @@ export function useUpload() {
 		file,
 		path,
 		bucket,
-	}: { file: File; path: string[]; bucket: string }) => {
+	}: {
+		file: File;
+		path: string[];
+		bucket: string;
+	}) => {
 		setLoading(true);
 
 		const url = await upload(supabase, {

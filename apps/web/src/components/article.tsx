@@ -31,7 +31,11 @@ function ArticleHeader({
 	metadata,
 	slug,
 	firstPost,
-}: { metadata: ArticleMetadata; slug: string; firstPost: boolean }) {
+}: {
+	metadata: ArticleMetadata;
+	slug: string;
+	firstPost: boolean;
+}) {
 	return (
 		<header className="space-y-4">
 			<PostStatus status={metadata.tag} />

@@ -8,14 +8,10 @@ export function ChoosePlanButton({
 	children,
 	initialIsOpen,
 	daysLeft,
-	teamId,
-	canChooseStarterPlan,
 }: {
 	children: React.ReactNode;
 	initialIsOpen?: boolean;
 	daysLeft?: number;
-	teamId: string;
-	canChooseStarterPlan: boolean;
 }) {
 	const [isOpen, setIsOpen] = useState(initialIsOpen ?? false);
 
@@ -34,8 +30,6 @@ export function ChoosePlanButton({
 				isOpen={isOpen}
 				onOpenChange={setIsOpen}
 				daysLeft={daysLeft}
-				teamId={teamId}
-				canChooseStarterPlan={canChooseStarterPlan}
 			/>
 		</>
 	);

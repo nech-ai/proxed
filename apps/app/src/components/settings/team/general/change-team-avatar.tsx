@@ -1,10 +1,7 @@
 "use client";
 
 import { type UpdateTeamFormValues, updateTeamSchema } from "@/actions/schema";
-import { updateTeamAction } from "@/actions/update-team-action";
-
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Team } from "@proxed/supabase/types";
 import { Button } from "@proxed/ui/components/button";
 import {
 	Card,
@@ -17,31 +14,43 @@ import {
 import { Form, FormMessage } from "@proxed/ui/components/form";
 import { toast } from "@proxed/ui/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { TeamAvatarUpload } from "./team-avatar-upload";
-import { useTeamContext } from "@/store/team/hook";
+import { useRouter } from "next/navigation";
+import { useMembershipQuery } from "@/hooks/use-membership";
+import { useTeamMutation, useTeamQuery } from "@/hooks/use-team";
 
-type Props = {
-	team: Team;
-};
-
-export function ChangeTeamAvatar({ team }: Props) {
-	const action = useAction(updateTeamAction);
-	const { teamMembership } = useTeamContext((state) => state.data);
+export function ChangeTeamAvatar() {
+	const router = useRouter();
+	const { data: team } = useTeamQuery();
+	const { role } = useMembershipQuery();
 
 	const form = useForm<UpdateTeamFormValues>({
 		resolver: zodResolver(updateTeamSchema),
 		defaultValues: {
-			avatar_url: team.avatar_url ?? "",
+			avatarUrl: "",
 		},
 	});
 
+	useEffect(() => {
+		if (!team) return;
+		form.reset({ avatarUrl: team.avatarUrl ?? "" });
+	}, [team, form]);
+
+	const updateTeam = useTeamMutation();
+
 	const onSubmit = form.handleSubmit((data) => {
-		action.execute({
-			avatar_url: data?.avatar_url,
-			revalidatePath: "/settings/team/general",
-		});
+		updateTeam.mutate(
+			{
+				avatarUrl: data?.avatarUrl,
+			},
+			{
+				onSuccess: () => {
+					router.refresh();
+				},
+			},
+		);
 		form.reset();
 	});
 
@@ -55,25 +64,27 @@ export function ChangeTeamAvatar({ team }: Props) {
 					</CardHeader>
 
 					<CardContent>
-						<TeamAvatarUpload
-							team={team}
-							onSuccess={(avatar_url) => {
-								toast({
-									variant: "default",
-									description: "Your avatar has been updated.",
-								});
-								form.setValue("avatar_url", avatar_url, {
-									shouldDirty: true,
-								});
-							}}
-							onError={(error) => {
-								toast({
-									variant: "destructive",
-									title: "Avatar not updated",
-									description: error,
-								});
-							}}
-						/>
+						{team && (
+							<TeamAvatarUpload
+								team={team}
+								onSuccess={(avatarUrl) => {
+									toast({
+										variant: "default",
+										description: "Your avatar has been updated.",
+									});
+									form.setValue("avatarUrl", avatarUrl, {
+										shouldDirty: true,
+									});
+								}}
+								onError={(error) => {
+									toast({
+										variant: "destructive",
+										title: "Avatar not updated",
+										description: error,
+									});
+								}}
+							/>
+						)}
 						<FormMessage />
 					</CardContent>
 
@@ -82,12 +93,12 @@ export function ChangeTeamAvatar({ team }: Props) {
 						<Button
 							type="submit"
 							disabled={
-								action.status === "executing" ||
+								updateTeam.isPending ||
 								!form.formState.isDirty ||
-								teamMembership?.role !== "OWNER"
+								role !== "OWNER"
 							}
 						>
-							{action.status === "executing" ? (
+							{updateTeam.isPending ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
 							) : (
 								"Save"

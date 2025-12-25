@@ -1,6 +1,6 @@
 import { createClient } from "@proxed/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
+import { z } from "zod/v4";
 import {
 	NotificationTypes,
 	TriggerEvents,
@@ -8,8 +8,8 @@ import {
 } from "@proxed/notifications";
 
 export const highConsumptionPayloadSchema = z.object({
-	projectId: z.string().uuid(),
-	teamId: z.string().uuid(),
+	projectId: z.uuid(),
+	teamId: z.uuid(),
 	projectName: z.string(),
 	threshold: z.number(),
 	timeWindowSeconds: z.number(),

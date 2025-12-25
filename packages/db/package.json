@@ -1,0 +1,24 @@
+{
+	"name": "@proxed/db",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"clean": "rm -rf .turbo node_modules",
+		"lint": "biome check .",
+		"format": "biome format --write .",
+		"typecheck": "tsc --noEmit"
+	},
+	"exports": {
+		"./client": "./src/client.ts",
+		"./schema": "./src/schema.ts",
+		"./queries": "./src/queries/index.ts"
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.45.1",
+		"postgres": "^3.4.7"
+	},
+	"devDependencies": {
+		"drizzle-kit": "^0.31.8",
+		"typescript": "5.9.3"
+	}
+}

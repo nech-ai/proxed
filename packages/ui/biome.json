@@ -1,3 +1,11 @@
 {
-	"extends": ["../../biome.json"]
+	"root": false,
+	"extends": ["../../biome.json"],
+	"linter": {
+		"rules": {
+			"a11y": {
+				"noStaticElementInteractions": "off"
+			}
+		}
+	}
 }

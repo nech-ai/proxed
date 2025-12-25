@@ -5,6 +5,10 @@ import { geolocation } from "@vercel/functions";
 import { type NextRequest, NextResponse } from "next/server";
 
 export const GET = async (req: NextRequest) => {
+	type CheckoutCreateParams = Parameters<typeof api.checkouts.create>[0];
+	type BillingCountry = NonNullable<
+		CheckoutCreateParams["customerBillingAddress"]
+	>["country"];
 	const {
 		data: { session },
 	} = await getSession();
@@ -32,6 +36,7 @@ export const GET = async (req: NextRequest) => {
 	}
 
 	const { country } = geolocation(req);
+	const billingCountry = (country ?? "US").toUpperCase() as BillingCountry;
 
 	const successUrl = new URL("/api/checkout/success", req.nextUrl.origin);
 	successUrl.searchParams.set("redirectPath", redirectPath);
@@ -39,11 +44,11 @@ export const GET = async (req: NextRequest) => {
 	const checkout = await api.checkouts.create({
 		products: [selectedPlan.id],
 		successUrl: successUrl.toString(),
-		customerExternalId: teamId ?? user.team_id,
+		externalCustomerId: teamId ?? user.team_id,
 		customerEmail: user.email ?? undefined,
 		customerName: user.full_name ?? undefined,
 		customerBillingAddress: {
-			country: country ?? "US",
+			country: billingCountry,
 		},
 		metadata: {
 			teamId: teamId ?? user.team_id,

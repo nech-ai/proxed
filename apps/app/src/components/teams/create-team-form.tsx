@@ -1,6 +1,5 @@
 "use client";
 
-import { createTeamAction } from "@/actions/create-team-action";
 import { createTeamSchema } from "@/actions/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@proxed/ui/components/button";
@@ -13,13 +12,24 @@ import {
 } from "@proxed/ui/components/form";
 import { Input } from "@proxed/ui/components/input";
 import { Loader2, ChevronRight } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 import { TeamCard } from "./team-card";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 export function CreateTeamForm() {
-	const createTeam = useAction(createTeamAction);
+	const trpc = useTRPC();
+	const router = useRouter();
+	const createTeam = useMutation(
+		trpc.team.create.mutationOptions({
+			onSuccess: () => {
+				router.push("/teams/invite");
+				router.refresh();
+			},
+		}),
+	);
 
 	const form = useForm<z.infer<typeof createTeamSchema>>({
 		resolver: zodResolver(createTeamSchema),
@@ -29,9 +39,8 @@ export function CreateTeamForm() {
 	});
 
 	function onSubmit(values: z.infer<typeof createTeamSchema>) {
-		createTeam.execute({
+		createTeam.mutate({
 			name: values.name,
-			redirectTo: "/teams/invite",
 		});
 	}
 
@@ -52,7 +61,7 @@ export function CreateTeamForm() {
 										autoComplete="off"
 										autoCapitalize="none"
 										autoCorrect="off"
-										spellCheck="false"
+										spellCheck={false}
 										{...field}
 									/>
 								</FormControl>
@@ -67,9 +76,9 @@ export function CreateTeamForm() {
 							className="w-full px-6"
 							type="submit"
 							variant="default"
-							disabled={createTeam.status === "executing"}
+							disabled={createTeam.isPending}
 						>
-							{createTeam.status === "executing" ? (
+							{createTeam.isPending ? (
 								<>
 									<Loader2 className="h-4 w-4 mr-2 animate-spin" />
 									Creating...

@@ -18,10 +18,8 @@ import {
 } from "@proxed/ui/components/form";
 import { Input } from "@proxed/ui/components/input";
 import { Textarea } from "@proxed/ui/components/textarea";
-import {} from "@proxed/ui/components/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { createProjectAction } from "@/actions/create-project-action";
 import { useRouter } from "next/navigation";
 import { PlusIcon, LockClosedIcon } from "@radix-ui/react-icons";
 import { createProjectSchema } from "@/actions/schema";
@@ -32,11 +30,23 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "@proxed/ui/components/tooltip";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
 
 export function CreateProjectDialog() {
 	const canAccessFeature = useTeamContext((state) => state.canAccessFeature);
 	const billing = useTeamContext((state) => state.data.billing);
 	const router = useRouter();
+	const trpc = useTRPC();
+	const createProject = useMutation(
+		trpc.projects.create.mutationOptions({
+			onSuccess: (project) => {
+				if (project?.id) {
+					router.push(`/projects/${project.id}`);
+				}
+			},
+		}),
+	);
 	const form = useForm<CreateProjectFormValues>({
 		resolver: zodResolver(createProjectSchema),
 		defaultValues: {
@@ -46,16 +56,13 @@ export function CreateProjectDialog() {
 		},
 	});
 
-	async function onSubmit(data: CreateProjectFormValues) {
-		const result = await createProjectAction(data);
-		if (result?.data?.id) {
-			router.push(`/projects/${result.data.id}`);
-		}
+	function onSubmit(data: CreateProjectFormValues) {
+		createProject.mutate(data);
 	}
 
 	const canCreate = canAccessFeature("create_project");
-	const projectsLimit = billing?.limits?.projects_limit || 0;
-	const projectsCount = billing?.limits?.projects_count || 0;
+	const projectsLimit = billing?.limits?.projectsLimit || 0;
+	const projectsCount = billing?.limits?.projectsCount || 0;
 
 	return (
 		<Dialog>
@@ -140,8 +147,12 @@ export function CreateProjectDialog() {
 								</FormItem>
 							)}
 						/>
-						<Button type="submit" className="w-full">
-							Create Project
+						<Button
+							type="submit"
+							className="w-full"
+							disabled={createProject.isPending}
+						>
+							{createProject.isPending ? "Creating..." : "Create Project"}
 						</Button>
 					</form>
 				</Form>

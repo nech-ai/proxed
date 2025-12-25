@@ -1,11 +1,11 @@
-name: Production Deployment - Proxy
+name: Production Deployment - API
 
 on:
   push:
     branches:
       - main
     paths:
-      - apps/proxy/**
+      - apps/api/**
       - packages/**
       - "!packages/mail/**"
       - "!packages/ui/**"
@@ -21,14 +21,14 @@ jobs:
         run: bun install
       - name: 🔦 Run linter
         run: bun run lint
-        working-directory: ./apps/proxy
+        working-directory: ./apps/api
       - name: 🪐 Check TypeScript
         run: bun run typecheck
-        working-directory: ./apps/proxy
+        working-directory: ./apps/api
       - name: 🧪 Run unit tests
         run: bun run test
-        working-directory: ./apps/proxy
+        working-directory: ./apps/api
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only --dockerfile apps/proxy/Dockerfile --config apps/proxy/fly.toml
+      - run: flyctl deploy --remote-only --dockerfile apps/api/Dockerfile --config apps/api/fly.toml
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

@@ -110,9 +110,10 @@ export const userRouter = createTRPCRouter({
 		const memberships = await ctx.db
 			.select({ teamId: teamMemberships.teamId })
 			.from(teamMemberships)
-			.where(eq(teamMemberships.userId, ctx.user.id))
 			.groupBy(teamMemberships.teamId)
-			.having(sql`count(*) = 1`);
+			.having(
+				sql`count(*) = 1 and max(${teamMemberships.userId}) = ${ctx.user.id}`,
+			);
 
 		const teamIds = memberships.map((row) => row.teamId);
 		if (teamIds.length) {

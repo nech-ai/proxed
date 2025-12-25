@@ -125,6 +125,7 @@ export const executionsRouter = createTRPCRouter({
 			const [countRow] = await ctx.db
 				.select({ count: sql<number>`count(*)` })
 				.from(executions)
+				.leftJoin(projects, eq(executions.projectId, projects.id))
 				.where(whereClause);
 
 			const [sortColumn, sortDirection] = input.sort ?? ["createdAt", "desc"];

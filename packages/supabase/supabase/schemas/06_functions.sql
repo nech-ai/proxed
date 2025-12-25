@@ -167,13 +167,14 @@ GRANT
 EXECUTE ON FUNCTION public.check_and_notify_rate_limit (UUID, UUID) TO service_role;
 
 -- Function to get daily total tokens for a team within a date range
+-- Required for metrics charts; keep in sync with migrations restoring get_tokens_all.
 create or replace function public.get_tokens_all (
   p_team_id uuid,
   date_from date,
   date_to date
 ) returns table (
   date date,
-  total_tokens INTEGER
+  total_tokens integer
 ) language plpgsql as $$
 begin
   if date_from > date_to then

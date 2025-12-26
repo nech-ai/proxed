@@ -5,17 +5,47 @@ import { SchemaBuilder } from "./schema-builder";
 import type { JsonSchema } from "@proxed/structure";
 import { useTRPC } from "@/trpc/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { z } from "zod";
 
-const defaultSchema = {
+const defaultSchema: JsonSchema = {
 	type: "object",
 	fields: {},
-} as const;
+};
 
-const schemaConfigValidator = z.object({
-	type: z.string(),
-	fields: z.record(z.string(), z.any()).default({}),
-});
+const schemaTypes = [
+	"object",
+	"string",
+	"number",
+	"boolean",
+	"array",
+	"union",
+	"intersection",
+	"enum",
+	"literal",
+	"date",
+	"any",
+	"unknown",
+	"record",
+	"branded",
+	"promise",
+	"lazy",
+] as const;
+
+type SchemaType = (typeof schemaTypes)[number];
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null;
+}
+
+function isSchemaType(value: unknown): value is SchemaType {
+	return (
+		typeof value === "string" &&
+		schemaTypes.some((schemaType) => schemaType === value)
+	);
+}
+
+function isJsonSchema(value: unknown): value is JsonSchema {
+	return isRecord(value) && isSchemaType(value.type);
+}
 
 interface SchemaBuilderWrapperProps {
 	projectId: string;
@@ -53,10 +83,9 @@ export function SchemaBuilderWrapper({ projectId }: SchemaBuilderWrapperProps) {
 		return null;
 	}
 
-	const schemaConfig = schemaConfigValidator.safeParse(project.schemaConfig)
-		.success
-		? (project.schemaConfig as unknown as JsonSchema)
-		: (defaultSchema as JsonSchema);
+	const schemaConfig = isJsonSchema(project.schemaConfig)
+		? project.schemaConfig
+		: defaultSchema;
 
 	return (
 		<SchemaBuilder initialSchema={schemaConfig} onChange={handleSchemaChange} />

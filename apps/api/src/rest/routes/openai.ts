@@ -1,4 +1,4 @@
-import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, type RouteConfig } from "@hono/zod-openapi";
 import type { Context as HonoContext } from "hono";
 import { protectedMiddleware } from "../middleware";
 import type { Context as AppContext } from "../types";
@@ -33,16 +33,7 @@ const proxyResponseHeaders = {
 	},
 };
 
-const proxyResponses: Record<
-	200 | 400 | 401 | 403 | 404 | 429 | 500 | 502 | 503,
-	{
-		description: string;
-		headers?: typeof proxyResponseHeaders;
-		content: {
-			"application/json": { schema: any };
-		};
-	}
-> = {
+const proxyResponses: RouteConfig["responses"] = {
 	200: {
 		description: "Successful proxy response (pass-through).",
 		headers: proxyResponseHeaders,
@@ -110,8 +101,8 @@ const registerProxyRoute = (method: (typeof proxyMethods)[number]) =>
 				},
 			},
 			responses: proxyResponses,
-		}) as any,
-		(async (c: HonoContext<AppContext>) => {
+		}),
+		async (c: HonoContext<AppContext>) => {
 			const proxyPath = c.req.path.split(`/${c.req.param("projectId")}/`)[1];
 			const config = getProviderConfig("OPENAI");
 			const targetUrl = `${config.baseUrl}/${proxyPath}`;
@@ -134,7 +125,7 @@ const registerProxyRoute = (method: (typeof proxyMethods)[number]) =>
 				mapFinishReason: (response) =>
 					mapOpenAIFinishReason(response.choices?.[0]?.finish_reason),
 			});
-		}) as any,
+		},
 	);
 
 proxyMethods.forEach(registerProxyRoute);

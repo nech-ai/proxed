@@ -6,6 +6,8 @@ import {
 	type ProviderValue,
 } from "@proxed/utils/lib/providers";
 
+const MODEL_VALUE_SET = new Set<string>(MODEL_VALUES);
+
 export const updateUserSchema = z.object({
 	fullName: z.string().min(2).max(32).optional(),
 	email: z.email().optional(),
@@ -175,7 +177,7 @@ export const updateProjectSchema = z.object({
 		.min(1, {
 			message: "Model is required",
 		})
-		.refine((val) => val === "none" || MODEL_VALUES.includes(val as any), {
+		.refine((val) => val === "none" || MODEL_VALUE_SET.has(val), {
 			message: "Invalid model selected",
 		}),
 	keyId: z

@@ -24,7 +24,6 @@ import {
 	EyeIcon,
 	SmartphoneIcon,
 } from "lucide-react";
-import { z } from "zod";
 import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/layout/page-header";
@@ -36,15 +35,46 @@ import { ProjectConnectionDetails } from "@/components/projects/project-connecti
 import { ZodParser, SwiftParser } from "@proxed/structure";
 import type { JsonSchema } from "@proxed/structure";
 
-const defaultSchema = {
+const defaultSchema: JsonSchema = {
 	type: "object",
 	fields: {},
-} as const;
+};
 
-const schemaConfigValidator = z.object({
-	type: z.string(),
-	fields: z.record(z.string(), z.any()).default({}),
-});
+const schemaTypes = [
+	"object",
+	"string",
+	"number",
+	"boolean",
+	"array",
+	"union",
+	"intersection",
+	"enum",
+	"literal",
+	"date",
+	"any",
+	"unknown",
+	"record",
+	"branded",
+	"promise",
+	"lazy",
+] as const;
+
+type SchemaType = (typeof schemaTypes)[number];
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null;
+}
+
+function isSchemaType(value: unknown): value is SchemaType {
+	return (
+		typeof value === "string" &&
+		schemaTypes.some((schemaType) => schemaType === value)
+	);
+}
+
+function isJsonSchema(value: unknown): value is JsonSchema {
+	return isRecord(value) && isSchemaType(value.type);
+}
 
 export function ProjectDetails({ projectId }: { projectId: string }) {
 	const trpc = useTRPC();
@@ -56,10 +86,9 @@ export function ProjectDetails({ projectId }: { projectId: string }) {
 		return null;
 	}
 
-	const schemaConfig = schemaConfigValidator.safeParse(project.schemaConfig)
-		.success
-		? (project.schemaConfig as unknown as JsonSchema)
-		: (defaultSchema as JsonSchema);
+	const schemaConfig = isJsonSchema(project.schemaConfig)
+		? project.schemaConfig
+		: defaultSchema;
 
 	const zodParser = new ZodParser();
 	const swiftParser = new SwiftParser("");

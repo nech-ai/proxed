@@ -1,6 +1,5 @@
 import "server-only";
 
-import type { AppRouter } from "@proxed/api/trpc/routers/_app";
 import { createClient as createSupabaseClient } from "@proxed/supabase/server";
 import type { QueryClient } from "@tanstack/react-query";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
@@ -8,11 +7,13 @@ import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
 import {
 	createTRPCOptionsProxy,
 	type ResolverDef,
+	type TRPCInfiniteQueryOptions,
 	type TRPCQueryOptions,
 } from "@trpc/tanstack-react-query";
 import { cache } from "react";
 import superjson from "superjson";
 import { makeQueryClient } from "./query-client";
+import type { AppRouterClient } from "./types";
 
 const apiBaseUrl =
 	process.env.NEXT_PUBLIC_API_URL ??
@@ -21,15 +22,15 @@ const apiBaseUrl =
 		? "http://localhost:3002"
 		: "https://api.proxed.ai");
 
-const transformer = superjson as any;
+const transformer = superjson;
 
 export const getQueryClient = cache(makeQueryClient);
 
-export const trpc = createTRPCOptionsProxy<AppRouter>({
+export const trpc = createTRPCOptionsProxy<AppRouterClient>({
 	queryClient: getQueryClient,
-	client: createTRPCClient({
+	client: createTRPCClient<AppRouterClient>({
 		links: [
-			httpBatchLink({
+			httpBatchLink<AppRouterClient>({
 				url: `${apiBaseUrl}/trpc`,
 				transformer,
 				async headers() {
@@ -66,34 +67,41 @@ export function HydrateClient(props: { children: React.ReactNode }) {
 	);
 }
 
-type PrefetchInfiniteOptions = Parameters<
-	QueryClient["prefetchInfiniteQuery"]
->[0];
+type TRPCQueryOptionsOut = ReturnType<TRPCQueryOptions<ResolverDef>>;
+type TRPCInfiniteQueryOptionsOut = ReturnType<
+	TRPCInfiniteQueryOptions<ResolverDef>
+>;
+type PrefetchOptions = TRPCQueryOptionsOut | TRPCInfiniteQueryOptionsOut;
 
-export function prefetch<T extends ReturnType<TRPCQueryOptions<ResolverDef>>>(
-	queryOptions: T,
-) {
+type QueryKeyMeta = { type?: "query" | "infinite"; input?: unknown };
+
+function isQueryKeyMeta(value: unknown): value is QueryKeyMeta {
+	return typeof value === "object" && value !== null && "type" in value;
+}
+
+function isInfiniteQueryOptions(
+	queryOptions: PrefetchOptions,
+): queryOptions is TRPCInfiniteQueryOptionsOut {
+	const meta = queryOptions.queryKey[1];
+	return isQueryKeyMeta(meta) && meta.type === "infinite";
+}
+
+export function prefetch(queryOptions: PrefetchOptions) {
 	const queryClient = getQueryClient();
 
-	if (queryOptions.queryKey[1]?.type === "infinite") {
-		void queryClient.prefetchInfiniteQuery(
-			queryOptions as unknown as PrefetchInfiniteOptions,
-		);
+	if (isInfiniteQueryOptions(queryOptions)) {
+		void queryClient.prefetchInfiniteQuery(queryOptions);
 	} else {
 		void queryClient.prefetchQuery(queryOptions);
 	}
 }
 
-export function batchPrefetch<
-	T extends ReturnType<TRPCQueryOptions<ResolverDef>>,
->(queryOptionsArray: T[]) {
+export function batchPrefetch(queryOptionsArray: PrefetchOptions[]) {
 	const queryClient = getQueryClient();
 
 	for (const queryOptions of queryOptionsArray) {
-		if (queryOptions.queryKey[1]?.type === "infinite") {
-			void queryClient.prefetchInfiniteQuery(
-				queryOptions as unknown as PrefetchInfiniteOptions,
-			);
+		if (isInfiniteQueryOptions(queryOptions)) {
+			void queryClient.prefetchInfiniteQuery(queryOptions);
 		} else {
 			void queryClient.prefetchQuery(queryOptions);
 		}

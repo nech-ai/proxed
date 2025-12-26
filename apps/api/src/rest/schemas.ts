@@ -2,6 +2,8 @@ import { z } from "@hono/zod-openapi";
 
 const exampleProjectId = "2f5b9f7e-4b8c-4e02-9c1f-9d37a0e8d1ef";
 
+const jsonObjectSchema = z.record(z.string(), z.unknown());
+
 export const errorResponseSchema = z
 	.object({
 		error: z.string().openapi({
@@ -12,13 +14,10 @@ export const errorResponseSchema = z
 			description: "Human-readable error message.",
 			example: "Request validation failed",
 		}),
-		details: z
-			.record(z.string(), z.any())
-			.optional()
-			.openapi({
-				description: "Optional structured details for validation errors.",
-				example: { field: ["Required"] },
-			}),
+		details: jsonObjectSchema.optional().openapi({
+			description: "Optional structured details for validation errors.",
+			example: { field: ["Required"] },
+		}),
 		requestId: z.string().uuid().openapi({
 			description: "Request identifier for support and tracing.",
 			example: "9b6b8b32-874c-4b9b-8c4a-5a24d64e2d43",
@@ -166,7 +165,7 @@ export const structuredPdfRequestSchema = z.object({
 		}),
 });
 
-export const structuredResponseSchema = z.record(z.string(), z.any()).openapi({
+export const structuredResponseSchema = jsonObjectSchema.openapi({
 	description:
 		"Structured response generated from the project schema configuration.",
 });
@@ -213,8 +212,8 @@ export const imageGenerationRequestSchema = z
 		}),
 		providerOptions: z
 			.object({
-				openai: z.record(z.string(), z.any()).optional(),
-				google: z.record(z.string(), z.any()).optional(),
+				openai: jsonObjectSchema.optional(),
+				google: jsonObjectSchema.optional(),
 			})
 			.optional()
 			.openapi({

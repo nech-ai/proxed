@@ -36,8 +36,8 @@ export const withReplicas = <
 			getDbForRead().selectDistinctOn(...args);
 		const $count: Q["$count"] = (...args: [any]) =>
 			getDbForRead().$count(...args);
-		const _with: Q["with"] = (...args: any) => getDbForRead().with(...args);
-		const $with: Q["$with"] = (arg: any) => getDbForRead().$with(arg) as any;
+		const _with: Q["with"] = (...args: Parameters<Q["with"]>) =>
+			getDbForRead().with(...args);
 
 		const executeOnReplica: Q["execute"] = (...args: [any]) =>
 			getDbForRead().execute(...args);
@@ -72,7 +72,6 @@ export const withReplicas = <
 			selectDistinct,
 			selectDistinctOn,
 			$count,
-			$with,
 			with: _with,
 			get query() {
 				return getDbForRead().query;

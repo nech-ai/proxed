@@ -1,4 +1,4 @@
-import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, type RouteConfig } from "@hono/zod-openapi";
 import { publicMiddleware } from "../middleware";
 import type { Context } from "../types";
 import { metrics } from "../../utils/metrics";
@@ -13,15 +13,7 @@ import {
 
 const serverStartTime = Date.now();
 
-const healthResponses: Record<
-	200 | 503 | 500,
-	{
-		description: string;
-		content: {
-			"application/json": { schema: any };
-		};
-	}
-> = {
+const healthResponses: RouteConfig["responses"] = {
 	200: {
 		description: "Service is healthy or degraded.",
 		content: { "application/json": { schema: healthStatusSchema } },
@@ -36,30 +28,14 @@ const healthResponses: Record<
 	},
 };
 
-const geoResponses: Record<
-	200,
-	{
-		description: string;
-		content: {
-			"application/json": { schema: any };
-		};
-	}
-> = {
+const geoResponses: RouteConfig["responses"] = {
 	200: {
 		description: "Geo information.",
 		content: { "application/json": { schema: geoInfoResponseSchema } },
 	},
 };
 
-const metricsResponses: Record<
-	200 | 403,
-	{
-		description: string;
-		content: {
-			"application/json": { schema: any };
-		};
-	}
-> = {
+const metricsResponses: RouteConfig["responses"] = {
 	200: {
 		description: "Metrics data.",
 		content: { "application/json": { schema: metricsResponseSchema } },
@@ -82,7 +58,7 @@ router.openapi(
 			"Returns a detailed health snapshot including dependency checks, metrics, and circuit breaker states.",
 		tags: ["Health"],
 		responses: healthResponses,
-	}) as any,
+	}),
 	async (c) => {
 		const db = c.get("db");
 
@@ -123,7 +99,7 @@ router.openapi(
 		description: "Returns geo information extracted from request headers.",
 		tags: ["Health"],
 		responses: geoResponses,
-	}) as any,
+	}),
 	(c) => {
 		const geo = c.get("geo");
 		return c.json(geo, 200);
@@ -140,7 +116,7 @@ router.openapi(
 			"Returns current metrics (only available in development mode).",
 		tags: ["Health"],
 		responses: metricsResponses,
-	}) as any,
+	}),
 	(c) => {
 		if (process.env.NODE_ENV === "production") {
 			return c.json(

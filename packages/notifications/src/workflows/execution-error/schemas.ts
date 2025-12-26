@@ -1,4 +1,4 @@
-import { z } from "zod/v4";
+import { z } from "zod";
 
 export const payloadSchema = z.object({
 	recordId: z.string().describe("Execution ID"),

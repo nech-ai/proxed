@@ -7,6 +7,12 @@ interface Metadata {
 	summary: string;
 }
 
+const metadataKeys: Array<keyof Metadata> = ["title", "publishedAt", "summary"];
+
+function isMetadataKey(key: string): key is keyof Metadata {
+	return metadataKeys.some((metadataKey) => metadataKey === key);
+}
+
 function parseFrontmatter(fileContent: string) {
 	const frontmatterRegex = /---\s*([\s\S]*?)\s*---/;
 	const match = frontmatterRegex.exec(fileContent);
@@ -18,13 +24,16 @@ function parseFrontmatter(fileContent: string) {
 	for (const line of frontMatterLines) {
 		const [key, ...valueArr] = line.split(": ");
 		const SPREAD_OPERATOR = "...";
-		if (key && !key.includes(SPREAD_OPERATOR)) {
+		const trimmedKey = key?.trim();
+		if (trimmedKey && !trimmedKey.includes(SPREAD_OPERATOR)) {
 			let value = valueArr.join(": ").trim();
 			value = value.replace(/^['"](.*)['"]$/, "$1");
-			(metadata as any)[key.trim()] = value;
+			if (isMetadataKey(trimmedKey)) {
+				metadata[trimmedKey] = value;
+			}
 		}
 	}
-	return { metadata: metadata as Partial<Metadata>, content };
+	return { metadata, content };
 }
 
 function getMDXFiles(dir: string) {

@@ -55,7 +55,7 @@ describe("ZodParser", () => {
 				},
 			};
 
-			const result = parser.validate(invalidAst as any);
+			const result = parser.validate(invalidAst);
 			expect(result.success).toBe(false);
 			expect(result.errors).toBeDefined();
 			expect(result.errors?.length).toBeGreaterThan(0);

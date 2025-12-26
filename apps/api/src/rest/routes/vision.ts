@@ -1,11 +1,13 @@
-import { generateObject, NoObjectGeneratedError } from "ai";
+import { generateText, NoObjectGeneratedError } from "ai";
 import type { Context } from "hono";
-import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, type RouteConfig } from "@hono/zod-openapi";
 import { protectedMiddleware } from "../middleware";
 import type { Context as AppContext, FinishReason } from "../types";
 import { logger } from "../../utils/logger";
 import { createError, ErrorCode } from "../../utils/errors";
 import { createAIClient } from "../../utils/ai-client";
+import { createStructuredOutput } from "../../utils/ai-output";
+import { parseSchemaConfig } from "../../utils/schema-config";
 import { getVisionModel, supportsVision } from "../../utils/default-models";
 import {
 	validateAndGetProject,
@@ -14,7 +16,7 @@ import {
 	recordExecution,
 	withTimeout,
 } from "../../utils/route-handlers";
-import { ZodParser, type JsonSchema } from "@proxed/structure";
+import { ZodParser } from "@proxed/structure";
 import {
 	authHeaderSchema,
 	errorResponseSchema,
@@ -33,10 +35,16 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 
 	const { image } = await validateRequestBody(c, structuredVisionRequestSchema);
 
+	const schemaConfig = parseSchemaConfig(project.schemaConfig);
+	if (!schemaConfig) {
+		throw createError(
+			ErrorCode.VALIDATION_ERROR,
+			"Invalid project schema configuration",
+		);
+	}
+
 	const parser = new ZodParser();
-	const schema = parser.convertJsonSchemaToZodValidator(
-		project.schemaConfig as unknown as JsonSchema,
-	);
+	const schema = parser.convertJsonSchemaToZodValidator(schemaConfig.schema);
 	if (!schema) {
 		throw createError(
 			ErrorCode.VALIDATION_ERROR,
@@ -60,12 +68,16 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 	try {
 		const aiClient = createAIClient(project.key.provider, fullApiKey);
 
-		const { object, usage, finishReason } = await withTimeout(
-			generateObject({
+		const structuredOutput = createStructuredOutput(
+			schema,
+			schemaConfig.title,
+			schemaConfig.description,
+		);
+
+		const { output, totalUsage, finishReason } = await withTimeout(
+			generateText({
 				model: aiClient(modelToUse),
-				schema: schema as any,
-				schemaName: (project.schemaConfig as any)?.title,
-				schemaDescription: (project.schemaConfig as any)?.description,
+				output: structuredOutput,
 				messages: [
 					{
 						role: "system",
@@ -89,18 +101,6 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 						],
 					},
 				],
-				experimental_repairText: async ({
-					text,
-					error,
-				}: {
-					text: string;
-					error: Error;
-				}) => {
-					if (error.message.includes("Unexpected end of JSON input")) {
-						return `${text}}`;
-					}
-					return text;
-				},
 			}),
 			30000,
 			"Vision AI generation timed out after 30 seconds",
@@ -110,16 +110,16 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 			c,
 			startTime,
 			{
-				promptTokens: usage.inputTokens || 0,
-				completionTokens: usage.outputTokens || 0,
-				totalTokens: usage.totalTokens || 0,
+				promptTokens: totalUsage.inputTokens || 0,
+				completionTokens: totalUsage.outputTokens || 0,
+				totalTokens: totalUsage.totalTokens || 0,
 				finishReason: finishReason as FinishReason,
-				response: object,
+				response: output,
 			},
 			{ project, teamId },
 		);
 
-		return c.json(object, 200);
+		return c.json(output, 200);
 	} catch (error) {
 		logger.error(
 			`Vision structured response error: ${error instanceof Error ? error.message : error}`,
@@ -181,15 +181,7 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 	}
 }
 
-const structuredResponses: Record<
-	200 | 400 | 401 | 403 | 404 | 429 | 500,
-	{
-		description: string;
-		content: {
-			"application/json": { schema: any };
-		};
-	}
-> = {
+const structuredResponses: RouteConfig["responses"] = {
 	200: {
 		description: "Structured response payload.",
 		content: { "application/json": { schema: structuredResponseSchema } },
@@ -243,8 +235,8 @@ router.openapi(
 			},
 		},
 		responses: structuredResponses,
-	}) as any,
-	handleStructuredResponse as any,
+	}),
+	handleStructuredResponse,
 );
 
 router.use("/:projectId", ...protectedMiddleware);
@@ -269,8 +261,8 @@ router.openapi(
 			},
 		},
 		responses: structuredResponses,
-	}) as any,
-	handleStructuredResponse as any,
+	}),
+	handleStructuredResponse,
 );
 
 export { router as visionResponseRouter };

@@ -1,6 +1,6 @@
 import { createClient } from "@proxed/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
-import { z } from "zod/v4";
+import { z } from "zod";
 import {
 	NotificationTypes,
 	TriggerEvents,

@@ -13,4 +13,4 @@ export const createClient = (): Client =>
 				},
 			},
 		},
-	) as unknown as Client;
+	);

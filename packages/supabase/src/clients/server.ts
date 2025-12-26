@@ -54,5 +54,5 @@ export const createClient = async (): Promise<Client> => {
 				},
 			},
 		},
-	) as unknown as Client;
+	);
 };

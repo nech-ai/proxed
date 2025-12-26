@@ -559,29 +559,32 @@ export function SchemaNode({
 	);
 
 	const _handleTypeChange = useCallback(
-		(type: JsonSchema["type"]) => {
+		(type: SchemaType) => {
 			const baseProps = {
-				type,
 				nullable: schema.nullable,
 				description: schema.description,
 			};
 
-			const newSchema = (() => {
+			const newSchema: JsonSchema = (() => {
 				switch (type) {
 					case "string":
-						return { ...baseProps };
+						return { type: "string", ...baseProps };
 					case "number":
-						return { ...baseProps };
-					case "array":
-						return { ...baseProps, itemType: { type: "string" } };
-					case "object":
-						return { ...baseProps, fields: {} };
+						return { type: "number", ...baseProps };
+					case "boolean":
+						return { type: "boolean", ...baseProps };
 					case "enum":
-						return { ...baseProps };
-					default:
-						return baseProps;
+						return { type: "enum", ...baseProps, values: [] as string[] };
+					case "array":
+						return {
+							type: "array",
+							...baseProps,
+							itemType: { type: "string" },
+						};
+					case "object":
+						return { type: "object", ...baseProps, fields: {} };
 				}
-			})() as JsonSchema;
+			})();
 
 			onUpdate(newSchema);
 		},
@@ -591,16 +594,14 @@ export function SchemaNode({
 	const handleQuickAdd = (type: SchemaType) => {
 		if (!newFieldName.trim()) return;
 
-		const fieldSchema: JsonSchema = {
-			type,
-			nullable: false,
-		} as JsonSchema;
-
-		if (type === "object") {
-			(fieldSchema as any).fields = {};
-		} else if (type === "array") {
-			(fieldSchema as any).itemType = { type: "string" };
-		}
+		const fieldSchema: JsonSchema =
+			type === "object"
+				? { type, nullable: false, fields: {} }
+				: type === "array"
+					? { type, nullable: false, itemType: { type: "string" } }
+					: type === "enum"
+						? { type, nullable: false, values: [] as string[] }
+						: { type, nullable: false };
 
 		if (schema.type === "object") {
 			onUpdate({

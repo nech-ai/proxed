@@ -14,7 +14,11 @@ import type {
 	Expression,
 } from "./types/zod";
 import type { ValidationResult, JsonSchema, SchemaResult } from "../types";
-import { z } from "zod/v4";
+import { z } from "zod";
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null;
+}
 
 const ZOD_TOKEN_PATTERNS = [
 	// Keywords
@@ -313,12 +317,13 @@ export class ZodParser extends BaseParser<ExportNamedDeclaration> {
 		};
 	}
 
-	validate(ast: ExportNamedDeclaration): ValidationResult {
+	validate(ast: unknown): ValidationResult {
 		try {
-			if (ast.type !== "ExportNamedDeclaration") {
+			if (!isRecord(ast) || ast.type !== "ExportNamedDeclaration") {
 				throw new Error("Expected ExportNamedDeclaration");
 			}
-			if (!ast.declaration || ast.declaration.type !== "VariableDeclaration") {
+			const declaration = isRecord(ast.declaration) ? ast.declaration : null;
+			if (!declaration || declaration.type !== "VariableDeclaration") {
 				throw new Error("Expected VariableDeclaration");
 			}
 			return { success: true };
@@ -610,8 +615,11 @@ export type ${name}Type = z.infer<typeof ${name}>;
 					const stripOptionalAndNullable = <T extends JsonSchema>(
 						schema: T,
 					): T => {
-						const { optional, nullable, ...rest } = schema as any;
-						return rest as T;
+						return {
+							...schema,
+							optional: undefined,
+							nullable: undefined,
+						};
 					};
 
 					if (baseSchema.type === "object") {

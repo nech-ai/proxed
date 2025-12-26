@@ -2,6 +2,8 @@ import { headers } from "next/headers";
 import { EU_COUNTRY_CODES, Headers } from "./constants";
 import regions from "./regions.json";
 
+const regionMap: Record<string, Record<string, string>> = regions;
+
 export async function getCountryCode() {
 	const headersList = await headers();
 	return headersList.get(Headers.CountryCode) || "GB";
@@ -20,7 +22,7 @@ export async function getCity() {
 export async function getRegion() {
 	const countryCode = await getCountryCode();
 	const regionCode = await getRegionCode();
-	const region = (regions as any)[countryCode]?.[regionCode] || "Unknown";
+	const region = regionMap[countryCode]?.[regionCode] || "Unknown";
 	return region || "Unknown";
 }
 

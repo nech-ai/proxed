@@ -11,4 +11,4 @@ export const createClient = (accessToken?: string): Client =>
 				return Promise.resolve(accessToken || "");
 			},
 		},
-	) as unknown as Client;
+	);

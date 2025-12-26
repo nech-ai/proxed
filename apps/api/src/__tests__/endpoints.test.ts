@@ -93,9 +93,54 @@ mock.module(resolve(__dirname, "../utils/logger.ts"), () => {
 });
 
 // Create a more complete database mock
-const createMockDb = () => ({
-	execute: async () => ({ rows: [] as any[] }),
-	executeOnReplica: async () => ({ rows: [] as any[] }),
+const emptyRows: Array<Record<string, unknown>> = [];
+type MockDb = {
+	execute: () => Promise<{ rows: Array<Record<string, unknown>> }>;
+	executeOnReplica: () => Promise<{ rows: Array<Record<string, unknown>> }>;
+	query: {
+		users: {
+			findFirst: () => Promise<null>;
+		};
+	};
+	select: () => {
+		from: () => {
+			where: () => {
+				limit: () => Promise<Array<Record<string, unknown>>>;
+			};
+			leftJoin: () => {
+				leftJoin: () => {
+					where: () => {
+						limit: () => Promise<Array<Record<string, unknown>>>;
+					};
+				};
+			};
+		};
+	};
+	insert: () => {
+		values: () => {
+			returning: () => Promise<Array<Record<string, unknown>>>;
+		};
+	};
+	update: () => {
+		set: () => {
+			where: () => {
+				returning: () => Promise<Array<Record<string, unknown>>>;
+			};
+		};
+	};
+	delete: () => {
+		where: () => {
+			returning: () => Promise<Array<Record<string, unknown>>>;
+		};
+	};
+	transaction: <T>(fn: (db: MockDb) => Promise<T> | T) => Promise<T>;
+	$primary: MockDb | null;
+	usePrimaryOnly: () => MockDb;
+};
+
+const createMockDb = (): MockDb => ({
+	execute: async () => ({ rows: emptyRows }),
+	executeOnReplica: async () => ({ rows: emptyRows }),
 	query: {
 		users: {
 			findFirst: async (): Promise<null> => null,
@@ -104,12 +149,12 @@ const createMockDb = () => ({
 	select: () => ({
 		from: () => ({
 			where: () => ({
-				limit: async (): Promise<any[]> => [],
+				limit: async (): Promise<Array<Record<string, unknown>>> => [],
 			}),
 			leftJoin: () => ({
 				leftJoin: () => ({
 					where: () => ({
-						limit: async (): Promise<any[]> => [],
+						limit: async (): Promise<Array<Record<string, unknown>>> => [],
 					}),
 				}),
 			}),
@@ -117,23 +162,24 @@ const createMockDb = () => ({
 	}),
 	insert: () => ({
 		values: () => ({
-			returning: async () => [{}],
+			returning: async (): Promise<Array<Record<string, unknown>>> => [{}],
 		}),
 	}),
 	update: () => ({
 		set: () => ({
 			where: () => ({
-				returning: async () => [{}],
+				returning: async (): Promise<Array<Record<string, unknown>>> => [{}],
 			}),
 		}),
 	}),
 	delete: () => ({
 		where: () => ({
-			returning: async () => [{}],
+			returning: async (): Promise<Array<Record<string, unknown>>> => [{}],
 		}),
 	}),
-	transaction: async (fn: any) => fn(createMockDb()),
-	$primary: undefined as any,
+	transaction: async <T>(fn: (db: MockDb) => Promise<T> | T) =>
+		fn(createMockDb()),
+	$primary: null,
 	usePrimaryOnly: () => createMockDb(),
 });
 

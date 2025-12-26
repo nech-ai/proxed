@@ -1,4 +1,5 @@
 import { render } from "@react-email/render";
+import type { JSX } from "react";
 import { ForgotPassword } from "../emails/ForgotPassword";
 import { MagicLink } from "../emails/MagicLink";
 import { NewUser } from "../emails/NewUser";
@@ -19,6 +20,10 @@ export const mailTemplates = {
 	highConsumption: HighConsumption,
 };
 
+type TemplateWithSubjects<Context> = ((context: Context) => JSX.Element) & {
+	subjects: Record<string, string>;
+};
+
 export async function getTemplate<
 	TemplateId extends keyof typeof mailTemplates,
 >({
@@ -28,14 +33,13 @@ export async function getTemplate<
 }: {
 	templateId: TemplateId;
 	context: Parameters<(typeof mailTemplates)[TemplateId]>[0];
-	locale: keyof (typeof mailTemplates)[TemplateId]["subjects"];
+	locale: string;
 }) {
-	const template = mailTemplates[templateId];
-	const email = mailTemplates[templateId](context as any);
-	const subject =
-		locale in template.subjects
-			? (template.subjects as any)[locale]
-			: template.subjects.en;
+	const template = mailTemplates[templateId] as TemplateWithSubjects<
+		Parameters<(typeof mailTemplates)[TemplateId]>[0]
+	>;
+	const email = template(context);
+	const subject = template.subjects[locale] ?? template.subjects.en;
 	const html = await render(email);
 	const text = await render(email, { plainText: true });
 	return { html, text, subject };

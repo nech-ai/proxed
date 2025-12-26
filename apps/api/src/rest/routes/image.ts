@@ -1,14 +1,14 @@
-import {
-	experimental_generateImage as generateImage,
-	NoImageGeneratedError,
-} from "ai";
+import { generateImage, NoImageGeneratedError } from "ai";
+import { isJSONValue, type JSONObject } from "@ai-sdk/provider";
+import type { ProviderOptions } from "@ai-sdk/provider-utils";
 import type { Context } from "hono";
-import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, type RouteConfig } from "@hono/zod-openapi";
 import { protectedMiddleware } from "../middleware";
 import type { Context as AppContext, FinishReason } from "../types";
 import { logger } from "../../utils/logger";
 import { createError, ErrorCode } from "../../utils/errors";
 import { createAIClient } from "../../utils/ai-client";
+import type { z } from "zod";
 import {
 	calculateImageGenerationCost,
 	formatImageCostForDB,
@@ -33,6 +33,64 @@ import {
 	projectIdParamSchema,
 } from "../schemas";
 
+type ImageGenerationRequest = z.infer<typeof imageGenerationRequestSchema>;
+type ProviderOptionsInput = ImageGenerationRequest["providerOptions"];
+type ImageSize = `${number}x${number}`;
+type ImageAspectRatio = `${number}:${number}`;
+
+function isImageSize(value: string): value is ImageSize {
+	return /^\d+x\d+$/.test(value);
+}
+
+function isImageAspectRatio(value: string): value is ImageAspectRatio {
+	return /^\d+:\d+$/.test(value);
+}
+
+function isJsonObject(value: Record<string, unknown>): value is JSONObject {
+	return Object.values(value).every(isJSONValue);
+}
+
+function buildProviderOptions(
+	options: ProviderOptionsInput,
+): ProviderOptions | undefined {
+	if (!options) {
+		return undefined;
+	}
+
+	const providerOptions: ProviderOptions = {};
+
+	if (options.openai && isJsonObject(options.openai)) {
+		providerOptions.openai = options.openai;
+	}
+
+	if (options.google && isJsonObject(options.google)) {
+		providerOptions.google = options.google;
+	}
+
+	return Object.keys(providerOptions).length > 0 ? providerOptions : undefined;
+}
+
+function getOpenAIImageQuality(
+	options: ProviderOptionsInput,
+): string | undefined {
+	const openaiOptions = options?.openai;
+	if (!openaiOptions) {
+		return undefined;
+	}
+
+	const quality = openaiOptions.quality;
+	if (typeof quality === "string") {
+		return quality;
+	}
+
+	const style = openaiOptions.style;
+	if (typeof style === "string") {
+		return style;
+	}
+
+	return undefined;
+}
+
 async function handleImageGeneration(c: Context<AppContext>) {
 	const startTime = Date.now();
 
@@ -48,7 +106,7 @@ async function handleImageGeneration(c: Context<AppContext>) {
 		n = 1,
 		seed,
 		maxImagesPerCall,
-		providerOptions,
+		providerOptions: rawProviderOptions,
 		headers,
 	} = await validateRequestBody(c, imageGenerationRequestSchema);
 
@@ -67,40 +125,48 @@ async function handleImageGeneration(c: Context<AppContext>) {
 	}
 
 	try {
-		const aiClient = createAIClient(project.key.provider, fullApiKey);
+		const aiClient =
+			project.key.provider === "OPENAI"
+				? createAIClient("OPENAI", fullApiKey)
+				: project.key.provider === "GOOGLE"
+					? createAIClient("GOOGLE", fullApiKey)
+					: null;
+
+		if (!aiClient) {
+			throw createError(
+				ErrorCode.VALIDATION_ERROR,
+				`Provider ${project.key.provider} does not support image generation`,
+			);
+		}
+
+		const providerOptions = buildProviderOptions(rawProviderOptions);
+		const imageModel = aiClient.image(modelToUse);
 
 		const gen = await withTimeout(
 			generateImage({
-				model:
-					project.key.provider === "GOOGLE"
-						? (aiClient as any).image(modelToUse)
-						: (aiClient as any).image(modelToUse),
+				model: imageModel,
 				prompt,
-				...(size ? { size: size as `${number}x${number}` } : {}),
-				...(aspectRatio
-					? { aspectRatio: aspectRatio as `${number}:${number}` }
+				...(size && isImageSize(size) ? { size } : {}),
+				...(aspectRatio && isImageAspectRatio(aspectRatio)
+					? { aspectRatio }
 					: {}),
 				n,
 				...(seed !== undefined ? { seed } : {}),
 				...(maxImagesPerCall !== undefined ? { maxImagesPerCall } : {}),
-				...(providerOptions ? { providerOptions: providerOptions as any } : {}),
-				...(headers ? { headers: headers as Record<string, string> } : {}),
+				...(providerOptions ? { providerOptions } : {}),
+				...(headers ? { headers } : {}),
 			}),
 			60000,
 			"Image generation timed out after 60 seconds",
 		);
 
-		const images = (gen.images ?? (gen.image ? [gen.image] : [])).map(
-			(img) => ({
-				base64: img.base64,
-				mediaType: (img as any).mediaType ?? "image/png",
-			}),
-		);
+		const generatedImages = gen.images.length > 0 ? gen.images : [gen.image];
+		const images = generatedImages.map((img) => ({
+			base64: img.base64,
+			mediaType: img.mediaType,
+		}));
 
-		const quality =
-			(providerOptions as any)?.openai?.quality ||
-			(providerOptions as any)?.openai?.style ||
-			(providerOptions as any)?.quality;
+		const quality = getOpenAIImageQuality(rawProviderOptions);
 		const totalCostNumber = calculateImageGenerationCost({
 			provider: project.key.provider,
 			model: modelToUse,
@@ -118,7 +184,7 @@ async function handleImageGeneration(c: Context<AppContext>) {
 				promptTokens: 0,
 				completionTokens: 0,
 				totalTokens: 0,
-				finishReason: "stop" as FinishReason,
+				finishReason: "stop",
 				response: { imagesCount: images.length },
 			},
 			{ project, teamId },
@@ -138,7 +204,7 @@ async function handleImageGeneration(c: Context<AppContext>) {
 			`Image generation error: ${error instanceof Error ? error.message : error}`,
 		);
 
-		if ((NoImageGeneratedError as any)?.isInstance?.(error)) {
+		if (NoImageGeneratedError.isInstance(error)) {
 			await recordExecution(
 				c,
 				startTime,
@@ -146,22 +212,22 @@ async function handleImageGeneration(c: Context<AppContext>) {
 					promptTokens: 0,
 					completionTokens: 0,
 					totalTokens: 0,
-					finishReason: "error" as FinishReason,
+					finishReason: "error",
 					error: {
-						message: (error as any).message,
-						code: (error as any).name,
+						message: error.message,
+						code: error.name,
 					},
 					response: {
-						cause: (error as any).cause,
-						responses: (error as any).responses,
+						cause: error.cause,
+						responses: error.responses,
 					},
 				},
 				{ project, teamId },
 				{ overrideModel: modelToUse },
 			);
 
-			throw createError(ErrorCode.PROVIDER_ERROR, (error as any).message, {
-				originalError: (error as any).cause,
+			throw createError(ErrorCode.PROVIDER_ERROR, error.message, {
+				originalError: error.cause,
 				projectId: project.id,
 			});
 		}
@@ -173,7 +239,7 @@ async function handleImageGeneration(c: Context<AppContext>) {
 				promptTokens: 0,
 				completionTokens: 0,
 				totalTokens: 0,
-				finishReason: "error" as FinishReason,
+				finishReason: "error",
 				error: {
 					message: error instanceof Error ? error.message : "Unknown error",
 					code: error instanceof Error ? error.name : "UNKNOWN_ERROR",
@@ -194,15 +260,7 @@ async function handleImageGeneration(c: Context<AppContext>) {
 	}
 }
 
-const imageResponses: Record<
-	200 | 400 | 401 | 403 | 404 | 429 | 500,
-	{
-		description: string;
-		content: {
-			"application/json": { schema: any };
-		};
-	}
-> = {
+const imageResponses: RouteConfig["responses"] = {
 	200: {
 		description: "Image generation response.",
 		content: { "application/json": { schema: imageGenerationResponseSchema } },
@@ -256,8 +314,8 @@ router.openapi(
 			},
 		},
 		responses: imageResponses,
-	}) as any,
-	handleImageGeneration as any,
+	}),
+	handleImageGeneration,
 );
 
 router.use("/:projectId", ...protectedMiddleware);
@@ -282,8 +340,8 @@ router.openapi(
 			},
 		},
 		responses: imageResponses,
-	}) as any,
-	handleImageGeneration as any,
+	}),
+	handleImageGeneration,
 );
 
 export { router as imageGenerationRouter };

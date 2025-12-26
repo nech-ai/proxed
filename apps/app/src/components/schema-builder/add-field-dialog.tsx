@@ -75,21 +75,27 @@ export function AddFieldDialog({ open, onClose, onAdd }: AddFieldDialogProps) {
 			return;
 		}
 
-		const baseSchema: JsonSchema = {
-			type,
-			nullable: isNullable,
-			description: description || undefined,
-		} as JsonSchema;
+		const baseSchema: JsonSchema = (() => {
+			const baseProps = {
+				nullable: isNullable,
+				description: description || undefined,
+			};
 
-		// Add type-specific properties
-		switch (type) {
-			case "object":
-				(baseSchema as any).fields = {};
-				break;
-			case "array":
-				(baseSchema as any).itemType = { type: "string" };
-				break;
-		}
+			switch (type) {
+				case "object":
+					return { type: "object", ...baseProps, fields: {} };
+				case "array":
+					return { type: "array", ...baseProps, itemType: { type: "string" } };
+				case "enum":
+					return { type: "enum", ...baseProps, values: [] as string[] };
+				case "string":
+					return { type: "string", ...baseProps };
+				case "number":
+					return { type: "number", ...baseProps };
+				case "boolean":
+					return { type: "boolean", ...baseProps };
+			}
+		})();
 
 		onAdd(name, baseSchema);
 		setName("");

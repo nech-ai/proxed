@@ -166,6 +166,11 @@ async function handleImageGeneration(c: Context<AppContext>) {
 			mediaType: img.mediaType,
 		}));
 
+		const usage = gen.usage;
+		const promptTokens = usage?.inputTokens ?? 0;
+		const completionTokens = usage?.outputTokens ?? 0;
+		const totalTokens = usage?.totalTokens ?? promptTokens + completionTokens;
+
 		const quality = getOpenAIImageQuality(rawProviderOptions);
 		const totalCostNumber = calculateImageGenerationCost({
 			provider: project.key.provider,
@@ -181,9 +186,9 @@ async function handleImageGeneration(c: Context<AppContext>) {
 			c,
 			startTime,
 			{
-				promptTokens: 0,
-				completionTokens: 0,
-				totalTokens: 0,
+				promptTokens,
+				completionTokens,
+				totalTokens,
 				finishReason: "stop",
 				response: { imagesCount: images.length },
 			},

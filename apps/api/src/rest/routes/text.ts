@@ -96,8 +96,8 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 					},
 				],
 			}),
-			30000,
-			"AI generation timed out after 30 seconds",
+			180000,
+			"AI generation timed out after 180 seconds",
 		);
 
 		await recordExecution(

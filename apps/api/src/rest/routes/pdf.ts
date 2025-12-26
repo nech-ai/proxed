@@ -125,8 +125,8 @@ async function handleStructuredResponse(c: Context<AppContext>) {
 					},
 				],
 			}),
-			60000,
-			"PDF AI generation timed out after 60 seconds",
+			180000,
+			"PDF AI generation timed out after 180 seconds",
 		);
 
 		await recordExecution(

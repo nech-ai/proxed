@@ -156,8 +156,8 @@ async function handleImageGeneration(c: Context<AppContext>) {
 				...(providerOptions ? { providerOptions } : {}),
 				...(headers ? { headers } : {}),
 			}),
-			60000,
-			"Image generation timed out after 60 seconds",
+			180000,
+			"Image generation timed out after 180 seconds",
 		);
 
 		const generatedImages = gen.images.length > 0 ? gen.images : [gen.image];

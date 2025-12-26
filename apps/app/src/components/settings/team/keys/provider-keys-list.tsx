@@ -14,7 +14,9 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 
-import type { Tables } from "@proxed/supabase/types";
+import type { RouterOutputs } from "@/trpc/types";
+import { useUserContext } from "@/store/user/hook";
+import { UTCDate } from "@date-fns/utc";
 import { Button } from "@proxed/ui/components/button";
 import {
 	DropdownMenu,
@@ -29,44 +31,54 @@ import {
 	TableRow,
 } from "@proxed/ui/components/table";
 import { useToast } from "@proxed/ui/hooks/use-toast";
+import { format } from "date-fns";
 import { MoreVerticalIcon, TrashIcon } from "lucide-react";
 import { useState } from "react";
-import { deleteProviderKeyAction } from "@/actions/delete-provider-key-action";
-import { useAction } from "next-safe-action/hooks";
+import { useTRPC } from "@/trpc/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function ProviderKeysList({
 	providerKeys,
 }: {
-	providerKeys: Partial<Tables<"provider_keys">>[];
+	providerKeys: RouterOutputs["providerKeys"]["list"];
 }) {
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const { toast } = useToast();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { dateFormat } = useUserContext((state) => state.data);
+	const dateOnlyFormat = dateFormat?.split(" ")[0] || "yyyy-MM-dd";
 
-	const deleteProviderKey = useAction(deleteProviderKeyAction, {
-		onSuccess: () => {
-			toast({
-				title: "Partial Key deleted",
-				description: "The Partial Key has been deleted successfully.",
-			});
-		},
-		onError: (error) => {
-			toast({
-				variant: "destructive",
-				title: "Error",
-				description:
-					error?.error?.serverError || "Failed to delete Partial Key",
-			});
-		},
-	});
+	const deleteProviderKey = useMutation(
+		trpc.providerKeys.delete.mutationOptions({
+			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: trpc.providerKeys.list.queryKey(),
+				});
+				toast({
+					title: "Partial Key deleted",
+					description: "The Partial Key has been deleted successfully.",
+				});
+			},
+			onError: (error) => {
+				toast({
+					variant: "destructive",
+					title: "Error",
+					description: error?.message || "Failed to delete Partial Key",
+				});
+			},
+		}),
+	);
 
-	const columns: ColumnDef<Partial<Tables<"provider_keys">>>[] = [
+	type ProviderKey = RouterOutputs["providerKeys"]["list"][number];
+	const columns: ColumnDef<ProviderKey>[] = [
 		{
-			accessorKey: "display_name",
+			accessorKey: "displayName",
 			header: "Name",
 			cell: ({ row }) => (
 				<div>
-					<strong className="block">{row.original.display_name}</strong>
+					<strong className="block">{row.original.displayName}</strong>
 					<small className="text-muted-foreground">
 						{row.original.provider}
 					</small>
@@ -74,16 +86,16 @@ export function ProviderKeysList({
 			),
 		},
 		{
-			accessorKey: "key_id",
+			accessorKey: "id",
 			header: "Key ID",
 		},
 		{
-			accessorKey: "created_at",
+			accessorKey: "createdAt",
 			header: "Created",
 			cell: ({ row }) => (
 				<span>
-					{row.original.created_at
-						? new Date(row.original.created_at).toLocaleDateString()
+					{row.original.createdAt
+						? format(new UTCDate(row.original.createdAt), dateOnlyFormat)
 						: "N/A"}
 				</span>
 			),
@@ -111,9 +123,8 @@ export function ProviderKeysList({
 											description: "Deleting partial key...",
 										});
 
-										deleteProviderKey.execute({
+										deleteProviderKey.mutate({
 											id: row.original.id,
-											revalidatePath: "/settings/team/keys",
 										});
 
 										loadingToast.dismiss();

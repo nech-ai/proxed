@@ -1,26 +1,30 @@
 "use client";
 
-import { acceptInvitationAction } from "@/actions/accept-invitation-action";
 import { Button } from "@proxed/ui/components/button";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TeamCard } from "./team-card";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
 
 export function AcceptInvitationForm() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const code = searchParams.get("code");
+	const trpc = useTRPC();
 
-	const acceptInvitation = useAction(acceptInvitationAction, {
-		onSuccess: () => {
-			router.push("/");
-		},
-	});
+	const acceptInvitation = useMutation(
+		trpc.team.acceptInvitation.mutationOptions({
+			onSuccess: () => {
+				router.push("/");
+				router.refresh();
+			},
+		}),
+	);
 
 	function onAccept() {
 		if (!code) return;
-		acceptInvitation.execute({ invitationId: code, redirectTo: "/" });
+		acceptInvitation.mutate({ invitationId: code });
 	}
 
 	function onReject() {
@@ -35,9 +39,9 @@ export function AcceptInvitationForm() {
 			<Button
 				className="w-full"
 				onClick={onAccept}
-				disabled={acceptInvitation.status === "executing"}
+				disabled={acceptInvitation.isPending}
 			>
-				{acceptInvitation.status === "executing" ? (
+				{acceptInvitation.isPending ? (
 					<Loader2 className="h-4 w-4 animate-spin" />
 				) : (
 					"Accept Invitation"

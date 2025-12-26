@@ -40,7 +40,7 @@ export const userSchema = z.object({
 		complexSchema: `import { z } from "zod";
 
 export const schema = z.object({
-	email: z.string().email(),
+	email: z.email(),
 	age: z.number().min(18).max(100),
 	tags: z.array(z.string()),
 	status: z.enum(["active", "inactive"])
@@ -64,7 +64,7 @@ export const schema = z.object({
 
 export const schema = z.object({
 	name: z.string(),
-	email: z.string().email().optional(),
+	email: z.email().optional(),
 	age: z.number().nullable(),
 	tags: z.array(z.string()).optional()
 });`,

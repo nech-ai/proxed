@@ -5,7 +5,7 @@ export function absoluteUrl(path: string) {
 }
 
 export function formatDate(date: string) {
-	const currentDate = new Date().getTime();
+	const currentDate = Date.now();
 	let formattedDate = date;
 	if (!date.includes("T")) {
 		formattedDate = `${date}T00:00:00`;

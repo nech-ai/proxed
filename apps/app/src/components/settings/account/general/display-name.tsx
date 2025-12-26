@@ -1,7 +1,6 @@
 "use client";
 
 import { type UpdateUserFormValues, updateUserSchema } from "@/actions/schema";
-import { updateUserAction } from "@/actions/update-user-action";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@proxed/ui/components/button";
 import {
@@ -21,26 +20,43 @@ import {
 } from "@proxed/ui/components/form";
 import { Input } from "@proxed/ui/components/input";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { useUserMutation, useUserQuery } from "@/hooks/use-user";
 
-type Props = {
-	fullName: string;
-};
+export function DisplayName() {
+	const router = useRouter();
+	const { data: user } = useUserQuery();
+	const updateUser = useUserMutation();
 
-export function DisplayName({ fullName }: Props) {
-	const action = useAction(updateUserAction);
 	const form = useForm<UpdateUserFormValues>({
 		resolver: zodResolver(updateUserSchema),
 		defaultValues: {
-			full_name: fullName,
+			fullName: "",
 		},
 	});
 
+	useEffect(() => {
+		if (!user) return;
+		form.reset({ fullName: user.fullName ?? "" });
+	}, [user, form]);
+
+	if (!user) {
+		return null;
+	}
+
 	const onSubmit = form.handleSubmit((data) => {
-		action.execute({
-			full_name: data?.full_name,
-		});
+		updateUser.mutate(
+			{
+				fullName: data?.fullName,
+			},
+			{
+				onSuccess: () => {
+					router.refresh();
+				},
+			},
+		);
 	});
 
 	return (
@@ -58,7 +74,7 @@ export function DisplayName({ fullName }: Props) {
 					<CardContent>
 						<FormField
 							control={form.control}
-							name="full_name"
+							name="fullName"
 							render={({ field }) => (
 								<FormItem>
 									<FormControl>
@@ -68,7 +84,7 @@ export function DisplayName({ fullName }: Props) {
 											autoComplete="off"
 											autoCapitalize="none"
 											autoCorrect="off"
-											spellCheck="false"
+											spellCheck={false}
 											maxLength={32}
 										/>
 									</FormControl>
@@ -82,11 +98,9 @@ export function DisplayName({ fullName }: Props) {
 						<div>Please use 32 characters at maximum.</div>
 						<Button
 							type="submit"
-							disabled={
-								action.status === "executing" || !form.formState.isDirty
-							}
+							disabled={updateUser.isPending || !form.formState.isDirty}
 						>
-							{action.status === "executing" ? (
+							{updateUser.isPending ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
 							) : (
 								"Save"

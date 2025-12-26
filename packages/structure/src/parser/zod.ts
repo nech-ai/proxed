@@ -16,6 +16,10 @@ import type {
 import type { ValidationResult, JsonSchema, SchemaResult } from "../types";
 import { z } from "zod";
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null;
+}
+
 const ZOD_TOKEN_PATTERNS = [
 	// Keywords
 	"\\b(?:import|export|from|as|const|let|var)\\b",
@@ -313,12 +317,13 @@ export class ZodParser extends BaseParser<ExportNamedDeclaration> {
 		};
 	}
 
-	validate(ast: ExportNamedDeclaration): ValidationResult {
+	validate(ast: unknown): ValidationResult {
 		try {
-			if (ast.type !== "ExportNamedDeclaration") {
+			if (!isRecord(ast) || ast.type !== "ExportNamedDeclaration") {
 				throw new Error("Expected ExportNamedDeclaration");
 			}
-			if (!ast.declaration || ast.declaration.type !== "VariableDeclaration") {
+			const declaration = isRecord(ast.declaration) ? ast.declaration : null;
+			if (!declaration || declaration.type !== "VariableDeclaration") {
 				throw new Error("Expected VariableDeclaration");
 			}
 			return { success: true };
@@ -368,27 +373,49 @@ export type ${name}Type = z.infer<typeof ${name}>;
 
 		switch (schema.type) {
 			case "string": {
-				zodStr += ".string()";
-				if (schema.minLength !== undefined)
-					zodStr += `.min(${schema.minLength})`;
-				if (schema.maxLength !== undefined)
-					zodStr += `.max(${schema.maxLength})`;
-				if (schema.length !== undefined) zodStr += `.length(${schema.length})`;
-				if (schema.regex) zodStr += `.regex(/${schema.regex}/)`;
-				if (schema.email) zodStr += ".email()";
-				if (schema.url) zodStr += ".url()";
-				if (schema.uuid) zodStr += ".uuid()";
-				if (schema.cuid) zodStr += ".cuid()";
-				if (schema.cuid2) zodStr += ".cuid2()";
-				if (schema.ulid) zodStr += ".ulid()";
-				if (schema.emoji) zodStr += ".emoji()";
-				if (schema.ip) zodStr += ".ip()";
-				if (schema.datetime) zodStr += ".datetime()";
-				if (schema.startsWith) zodStr += `.startsWith("${schema.startsWith}")`;
-				if (schema.endsWith) zodStr += `.endsWith("${schema.endsWith}")`;
-				if (schema.trim) zodStr += ".trim()";
-				if (schema.toLowerCase) zodStr += ".toLowerCase()";
-				if (schema.toUpperCase) zodStr += ".toUpperCase()";
+				const applyStringConstraints = (base: string) => {
+					let value = base;
+					if (schema.minLength !== undefined)
+						value += `.min(${schema.minLength})`;
+					if (schema.maxLength !== undefined)
+						value += `.max(${schema.maxLength})`;
+					if (schema.length !== undefined) value += `.length(${schema.length})`;
+					if (schema.regex) value += `.regex(/${schema.regex}/)`;
+					if (schema.startsWith) value += `.startsWith("${schema.startsWith}")`;
+					if (schema.endsWith) value += `.endsWith("${schema.endsWith}")`;
+					if (schema.trim) value += ".trim()";
+					if (schema.toLowerCase) value += ".toLowerCase()";
+					if (schema.toUpperCase) value += ".toUpperCase()";
+					return value;
+				};
+
+				if (schema.ip) {
+					const ipv4 = applyStringConstraints("z.ipv4()");
+					const ipv6 = applyStringConstraints("z.ipv6()");
+					zodStr = `z.union([${ipv4}, ${ipv6}])`;
+					break;
+				}
+
+				let base = "z.string()";
+				if (schema.datetime) {
+					base = "z.iso.datetime()";
+				} else if (schema.email) {
+					base = "z.email()";
+				} else if (schema.url) {
+					base = "z.url()";
+				} else if (schema.uuid) {
+					base = "z.uuid()";
+				} else if (schema.cuid) {
+					base = "z.cuid()";
+				} else if (schema.cuid2) {
+					base = "z.cuid2()";
+				} else if (schema.ulid) {
+					base = "z.ulid()";
+				} else if (schema.emoji) {
+					base = "z.emoji()";
+				}
+
+				zodStr = applyStringConstraints(base);
 				break;
 			}
 
@@ -588,8 +615,11 @@ export type ${name}Type = z.infer<typeof ${name}>;
 					const stripOptionalAndNullable = <T extends JsonSchema>(
 						schema: T,
 					): T => {
-						const { optional, nullable, ...rest } = schema as any;
-						return rest as T;
+						return {
+							...schema,
+							optional: undefined,
+							nullable: undefined,
+						};
 					};
 
 					if (baseSchema.type === "object") {
@@ -728,7 +758,7 @@ export type ${name}Type = z.infer<typeof ${name}>;
 	private handleZodMethod(
 		method: string,
 		args: Expression[],
-		object: Expression,
+		_object: Expression,
 	): JsonSchema | undefined {
 		switch (method) {
 			case "object": {
@@ -827,15 +857,52 @@ export default schema;
 	convertJsonSchemaToZodValidator(schema: JsonSchema): z.ZodType {
 		switch (schema.type) {
 			case "string": {
-				let validator = z.string();
-				if (schema.minLength !== undefined)
-					validator = validator.min(schema.minLength);
-				if (schema.maxLength !== undefined)
-					validator = validator.max(schema.maxLength);
-				if (schema.regex) validator = validator.regex(new RegExp(schema.regex));
-				if (schema.email) validator = validator.email();
-				if (schema.url) validator = validator.url();
-				if (schema.uuid) validator = validator.uuid();
+				type StringSchema = z.ZodString | z.ZodStringFormat;
+				const applyStringConstraints = (
+					validator: StringSchema,
+				): StringSchema => {
+					let result: StringSchema = validator;
+					if (schema.minLength !== undefined)
+						result = result.min(schema.minLength);
+					if (schema.maxLength !== undefined)
+						result = result.max(schema.maxLength);
+					if (schema.length !== undefined)
+						result = result.length(schema.length);
+					if (schema.regex) result = result.regex(new RegExp(schema.regex));
+					if (schema.startsWith) result = result.startsWith(schema.startsWith);
+					if (schema.endsWith) result = result.endsWith(schema.endsWith);
+					if (schema.trim) result = result.trim();
+					if (schema.toLowerCase) result = result.toLowerCase();
+					if (schema.toUpperCase) result = result.toUpperCase();
+					return result;
+				};
+
+				if (schema.ip) {
+					const ipv4 = applyStringConstraints(z.ipv4());
+					const ipv6 = applyStringConstraints(z.ipv6());
+					return this.applyCommonValidators(z.union([ipv4, ipv6]), schema);
+				}
+
+				let validator: StringSchema = z.string();
+				if (schema.datetime) {
+					validator = z.iso.datetime();
+				} else if (schema.email) {
+					validator = z.email();
+				} else if (schema.url) {
+					validator = z.url();
+				} else if (schema.uuid) {
+					validator = z.uuid();
+				} else if (schema.cuid) {
+					validator = z.cuid();
+				} else if (schema.cuid2) {
+					validator = z.cuid2();
+				} else if (schema.ulid) {
+					validator = z.ulid();
+				} else if (schema.emoji) {
+					validator = z.emoji();
+				}
+
+				validator = applyStringConstraints(validator);
 				return this.applyCommonValidators(validator, schema);
 			}
 

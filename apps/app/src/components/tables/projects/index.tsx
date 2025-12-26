@@ -1,76 +1,67 @@
-import { DataTable } from "./data-table";
-import { Cookies } from "@/utils/constants";
-import { getProjects } from "@proxed/supabase/cached-queries";
-import { cookies } from "next/headers";
+"use client";
+
 import { columns } from "./columns";
-import { NoResults } from "./empty-states";
+import { DataTable } from "./data-table";
+import { useProjectsFilterParams } from "@/hooks/use-projects-filter-params";
+import { useSortParams } from "@/hooks/use-sort-params";
+import { useTRPC } from "@/trpc/client";
+import { useDeferredValue, useMemo } from "react";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import type { VisibilityState } from "@tanstack/react-table";
+import type { RouterInputs } from "@/trpc/types";
 
 const pageSize = 50;
 const maxItems = 100000;
 
 type Props = {
-	filter: any;
-	page: number;
-	sort: any;
-	query: string | null;
+	initialColumnVisibility: VisibilityState;
 };
 
-export async function Table({ filter, page, sort, query }: Props) {
-	const hasFilters = Object.values(filter).some((value) => value !== null);
-	const cookieStore = await cookies();
-	const initialColumnVisibility = JSON.parse(
-		cookieStore.get(Cookies.ProjectsColumns)?.value || "[]",
+export function Table({ initialColumnVisibility }: Props) {
+	const trpc = useTRPC();
+	const { filter, hasFilters } = useProjectsFilterParams();
+	const { params } = useSortParams();
+	const deferredSearch = useDeferredValue(filter.q);
+
+	type ProjectsListInput = Exclude<RouterInputs["projects"]["list"], void>;
+	const sort = params.sort
+		? (params.sort.split(":") as ProjectsListInput["sort"])
+		: undefined;
+
+	const infiniteQueryOptions = trpc.projects.list.infiniteQueryOptions(
+		{
+			filter: {
+				start: filter.start ?? undefined,
+				end: filter.end ?? undefined,
+				bundleId: filter.bundleId ?? undefined,
+				deviceCheckId: filter.deviceCheck ?? undefined,
+				keyId: filter.keyId ?? undefined,
+			},
+			sort,
+			searchQuery: deferredSearch ?? undefined,
+			pageSize: hasFilters ? maxItems : pageSize,
+		},
+		{
+			getNextPageParam: ({ meta }) => meta?.cursor,
+		},
 	);
 
-	const projects = await getProjects({
-		to: hasFilters ? maxItems : page > 0 ? pageSize : pageSize - 1,
-		from: 0,
-		filter,
-		sort,
-		searchQuery: query ?? undefined,
-	});
+	const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+		useSuspenseInfiniteQuery(infiniteQueryOptions);
 
-	const { data, meta } = projects ?? {};
-
-	async function loadMore({ from, to }: { from: number; to: number }) {
-		"use server";
-
-		return getProjects({
-			to,
-			from: from + 1,
-			filter,
-			sort,
-			searchQuery: query ?? undefined,
-		});
-	}
-
-	if (!data?.length) {
-		if (query?.length) {
-			return <NoResults hasFilters />;
-		}
-
-		return <NoResults hasFilters={hasFilters} />;
-	}
-
-	const hasNextPage = Boolean(
-		meta?.count && meta.count / (page + 1) > pageSize,
+	const rows = useMemo(
+		() => data.pages.flatMap((page) => page.data ?? []),
+		[data],
 	);
 
 	return (
 		<DataTable
 			initialColumnVisibility={initialColumnVisibility}
 			columns={columns}
-			// @ts-expect-error
-			data={data}
-			pageSize={pageSize}
-			// @ts-expect-error
-			loadMore={loadMore}
+			data={rows}
+			fetchNextPage={fetchNextPage}
 			hasNextPage={hasNextPage}
-			// @ts-expect-error
-			meta={meta}
-			hasFilters={hasFilters}
-			page={page}
-			query={query}
+			isFetchingNextPage={isFetchingNextPage}
 		/>
 	);
 }

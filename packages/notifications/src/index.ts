@@ -3,9 +3,20 @@ import { v4 as uuidv4 } from "uuid";
 import { executionError } from "./workflows/execution-error/workflow";
 import { highConsumption } from "./workflows/high-consumption/workflow";
 
-const novu = new Novu(process.env.NOVU_SECRET_KEY!);
-
 const API_ENDPOINT = "https://api.novu.co/v1";
+
+const getNovuSecretKey = () =>
+	process.env.NOVU_SECRET_KEY ?? process.env.NOVU_API_KEY;
+
+const getNovuClient = () => {
+	const secretKey = getNovuSecretKey();
+	if (!secretKey) {
+		throw new Error(
+			"Missing secret key. Set NOVU_SECRET_KEY (or NOVU_API_KEY) to use notifications.",
+		);
+	}
+	return new Novu(secretKey);
+};
 
 export enum TriggerEvents {
 	ExecutionError = "execution-error",
@@ -36,6 +47,7 @@ type TriggerPayload = {
 
 export async function trigger(data: TriggerPayload) {
 	try {
+		const novu = getNovuClient();
 		await novu.trigger(data.name, {
 			to: {
 				...data.user,
@@ -59,6 +71,7 @@ export async function trigger(data: TriggerPayload) {
 
 export async function triggerBulk(events: TriggerPayload[]) {
 	try {
+		const novu = getNovuClient();
 		await novu.bulkTrigger(
 			events.map((data) => ({
 				name: data.name,
@@ -92,12 +105,18 @@ export async function getSubscriberPreferences({
 	subscriberId,
 	teamId,
 }: GetSubscriberPreferencesParams) {
+	const secretKey = getNovuSecretKey();
+	if (!secretKey) {
+		throw new Error(
+			"Missing secret key. Set NOVU_SECRET_KEY (or NOVU_API_KEY) to use notifications.",
+		);
+	}
 	const response = await fetch(
 		`${API_ENDPOINT}/subscribers/${teamId}_${subscriberId}/preferences?includeInactiveChannels=false`,
 		{
 			method: "GET",
 			headers: {
-				Authorization: `ApiKey ${process.env.NOVU_SECRET_KEY!}`,
+				Authorization: `ApiKey ${secretKey}`,
 			},
 		},
 	);
@@ -120,12 +139,18 @@ export async function updateSubscriberPreference({
 	type,
 	enabled,
 }: UpdateSubscriberPreferenceParams) {
+	const secretKey = getNovuSecretKey();
+	if (!secretKey) {
+		throw new Error(
+			"Missing secret key. Set NOVU_SECRET_KEY (or NOVU_API_KEY) to use notifications.",
+		);
+	}
 	const response = await fetch(
 		`${API_ENDPOINT}/subscribers/${teamId}_${subscriberId}/preferences/${templateId}`,
 		{
 			method: "PATCH",
 			headers: {
-				Authorization: `ApiKey ${process.env.NOVU_SECRET_KEY!}`,
+				Authorization: `ApiKey ${secretKey}`,
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({

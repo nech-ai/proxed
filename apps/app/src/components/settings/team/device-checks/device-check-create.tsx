@@ -1,6 +1,5 @@
 "use client";
 
-import { createDeviceCheckAction } from "@/actions/create-device-check-action";
 import {
 	type CreateDeviceCheckFormValues,
 	createDeviceCheckSchema,
@@ -35,7 +34,6 @@ import {
 	AlertCircle,
 	HelpCircle,
 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { cn } from "@proxed/ui/utils";
 import {
@@ -50,51 +48,61 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@proxed/ui/components/accordion";
+import { useTRPC } from "@/trpc/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface DeviceCheckCreateFormProps {
 	onSuccessAction?: () => void;
-	revalidatePath?: string;
 }
 
 export function DeviceCheckCreateForm({
 	onSuccessAction,
-	revalidatePath,
 }: DeviceCheckCreateFormProps) {
 	const { toast } = useToast();
 	const form = useForm<CreateDeviceCheckFormValues>({
 		resolver: zodResolver(createDeviceCheckSchema),
 		defaultValues: {
 			name: "",
-			key_id: "",
-			private_key_p8: "",
-			apple_team_id: "",
-			revalidatePath,
+			keyId: "",
+			privateKeyP8: "",
+			appleTeamId: "",
 		},
 		mode: "onChange",
 	});
 
-	const createDeviceCheck = useAction(createDeviceCheckAction, {
-		onSuccess: () => {
-			form.reset();
-			toast({
-				title: "Device Check created",
-				description:
-					"The Device Check configuration has been created successfully.",
-			});
-			onSuccessAction?.();
-		},
-		onError: (error) => {
-			toast({
-				variant: "destructive",
-				title: "Error",
-				description:
-					error?.error?.serverError || "Failed to create Device Check",
-			});
-		},
-	});
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const createDeviceCheck = useMutation(
+		trpc.deviceChecks.create.mutationOptions({
+			onSuccess: () => {
+				form.reset();
+				toast({
+					title: "Device Check created",
+					description:
+						"The Device Check configuration has been created successfully.",
+				});
+				queryClient.invalidateQueries({
+					queryKey: trpc.deviceChecks.list.queryKey(),
+				});
+				onSuccessAction?.();
+			},
+			onError: (error) => {
+				toast({
+					variant: "destructive",
+					title: "Error",
+					description: error?.message || "Failed to create Device Check",
+				});
+			},
+		}),
+	);
 
 	const onSubmit = form.handleSubmit((data) => {
-		createDeviceCheck.execute(data);
+		createDeviceCheck.mutate({
+			name: data.name,
+			keyId: data.keyId,
+			privateKeyP8: data.privateKeyP8,
+			appleTeamId: data.appleTeamId,
+		});
 	});
 
 	return (
@@ -180,7 +188,7 @@ export function DeviceCheckCreateForm({
 						<div className="grid grid-cols-2 gap-3">
 							<FormField
 								control={form.control}
-								name="key_id"
+								name="keyId"
 								render={({ field }) => (
 									<FormItem>
 										<div className="flex items-center gap-2">
@@ -212,7 +220,7 @@ export function DeviceCheckCreateForm({
 
 							<FormField
 								control={form.control}
-								name="apple_team_id"
+								name="appleTeamId"
 								render={({ field }) => (
 									<FormItem>
 										<div className="flex items-center gap-2">
@@ -245,7 +253,7 @@ export function DeviceCheckCreateForm({
 
 						<FormField
 							control={form.control}
-							name="private_key_p8"
+							name="privateKeyP8"
 							render={({ field: { onChange, ...field } }) => (
 								<FormItem>
 									<div className="flex items-center gap-2">
@@ -283,7 +291,7 @@ export function DeviceCheckCreateForm({
 															description: `Successfully loaded ${file.name}`,
 															duration: 3000,
 														});
-													} catch (error) {
+													} catch (_error) {
 														toast({
 															variant: "destructive",
 															title: "Error",
@@ -355,15 +363,12 @@ export function DeviceCheckCreateForm({
 					<CardFooter className="flex justify-end pt-2">
 						<Button
 							type="submit"
-							disabled={
-								createDeviceCheck.status === "executing" ||
-								!form.formState.isValid
-							}
+							disabled={createDeviceCheck.isPending || !form.formState.isValid}
 							className={cn(
 								form.formState.isValid ? "bg-primary" : "bg-primary/80",
 							)}
 						>
-							{createDeviceCheck.status === "executing" ? (
+							{createDeviceCheck.isPending ? (
 								<>
 									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 									Creating...

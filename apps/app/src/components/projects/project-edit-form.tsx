@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { updateProjectAction } from "@/actions/update-project-action";
 import {
 	type UpdateProjectFormValues,
 	updateProjectSchema,
@@ -36,9 +35,7 @@ import {
 } from "@proxed/ui/components/select";
 import { useToast } from "@proxed/ui/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
-import type { Tables } from "@proxed/supabase/types";
 import { Textarea } from "@proxed/ui/components/textarea";
 import {
 	AlertDialog,
@@ -52,9 +49,11 @@ import {
 	AlertDialogTrigger,
 } from "@proxed/ui/components/alert-dialog";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Provider } from "@proxed/utils/lib/providers";
 import { getModelOptionsWithPricing } from "@proxed/utils/lib/pricing";
+import { useTRPC } from "@/trpc/client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface SectionProps {
 	title: string;
@@ -90,7 +89,6 @@ function EmptyState({ message, linkText, linkHref }: EmptyStateProps) {
 }
 
 interface ConfirmationDialogProps {
-	isOpen: boolean;
 	onCancel: () => void;
 	onConfirm: () => void;
 	title: string;
@@ -98,7 +96,6 @@ interface ConfirmationDialogProps {
 }
 
 function ConfirmationDialog({
-	isOpen,
 	onCancel,
 	onConfirm,
 	title,
@@ -121,34 +118,56 @@ function ConfirmationDialog({
 }
 
 interface ProjectEditFormProps {
-	project: Tables<"projects">;
-	deviceChecks: Tables<"device_checks">[];
-	keys: Tables<"provider_keys">[];
+	projectId: string;
 }
 
-export function ProjectEditForm({
-	project,
-	deviceChecks,
-	keys,
-}: ProjectEditFormProps) {
+export function ProjectEditForm({ projectId }: ProjectEditFormProps) {
 	const { toast } = useToast();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { data: project } = useQuery(
+		trpc.projects.byId.queryOptions({ id: projectId }),
+	);
+	const { data: deviceChecksResponse } = useQuery(
+		trpc.deviceChecks.list.queryOptions(),
+	);
+	const { data: keys = [] } = useQuery(trpc.providerKeys.list.queryOptions());
+	const deviceChecks = deviceChecksResponse?.data ?? [];
+
 	const form = useForm<UpdateProjectFormValues>({
 		resolver: zodResolver(updateProjectSchema),
 		defaultValues: {
+			id: projectId,
+			name: "",
+			description: "",
+			bundleId: "",
+			deviceCheckId: "none",
+			keyId: "none",
+			systemPrompt: "",
+			defaultUserPrompt: "",
+			model: "none",
+			notificationThreshold: undefined,
+			notificationIntervalSeconds: undefined,
+		},
+	});
+
+	useEffect(() => {
+		if (!project) return;
+		form.reset({
 			id: project.id,
 			name: project.name,
 			description: project.description || "",
-			bundleId: project.bundle_id,
-			deviceCheckId: project.device_check_id || "none",
-			keyId: project.key_id || "none",
-			systemPrompt: project.system_prompt || "",
-			defaultUserPrompt: project.default_user_prompt || "",
+			bundleId: project.bundleId,
+			deviceCheckId: project.deviceCheckId || "none",
+			keyId: project.keyId || "none",
+			systemPrompt: project.systemPrompt || "",
+			defaultUserPrompt: project.defaultUserPrompt || "",
 			model: project.model || "none",
-			notificationThreshold: project.notification_threshold ?? undefined,
+			notificationThreshold: project.notificationThreshold ?? undefined,
 			notificationIntervalSeconds:
-				project.notification_interval_seconds ?? undefined,
-		},
-	});
+				project.notificationIntervalSeconds ?? undefined,
+		});
+	}, [project, form]);
 
 	const [pendingKeyChange, setPendingKeyChange] = useState<string | null>(null);
 	const [pendingDeviceCheckChange, setPendingDeviceCheckChange] = useState<
@@ -196,24 +215,36 @@ export function ProjectEditForm({
 		}
 	};
 
-	const updateProject = useAction(updateProjectAction, {
-		onSuccess: () => {
-			toast({
-				title: "Project updated",
-				description: "The project has been updated successfully.",
-			});
-		},
-		onError: (error) => {
-			toast({
-				variant: "destructive",
-				title: "Error",
-				description: error?.error?.serverError || "Failed to update project",
-			});
-		},
-	});
+	const updateProject = useMutation(
+		trpc.projects.update.mutationOptions({
+			onSuccess: () => {
+				toast({
+					title: "Project updated",
+					description: "The project has been updated successfully.",
+				});
+				queryClient.invalidateQueries({
+					queryKey: trpc.projects.byId.queryKey({ id: projectId }),
+				});
+				queryClient.invalidateQueries({
+					queryKey: trpc.projects.list.queryKey({}),
+				});
+			},
+			onError: (error) => {
+				toast({
+					variant: "destructive",
+					title: "Error",
+					description: error?.message || "Failed to update project",
+				});
+			},
+		}),
+	);
 
 	const onSubmit = form.handleSubmit((data) => {
-		updateProject.execute(data);
+		updateProject.mutate({
+			...data,
+			deviceCheckId: data.deviceCheckId === "none" ? null : data.deviceCheckId,
+			keyId: data.keyId === "none" ? null : data.keyId,
+		});
 	});
 
 	const selectedKey = keys.find((k) => k.id === form.watch("keyId"));
@@ -221,6 +252,10 @@ export function ProjectEditForm({
 	const modelOptions = selectedProvider
 		? getModelOptionsWithPricing(selectedProvider)
 		: [];
+
+	if (!project) {
+		return null;
+	}
 
 	return (
 		<Form {...form}>
@@ -329,7 +364,6 @@ export function ProjectEditForm({
 													</AlertDialogTrigger>
 													{pendingDeviceCheckChange && (
 														<ConfirmationDialog
-															isOpen={!!pendingDeviceCheckChange}
 															onCancel={() => setPendingDeviceCheckChange(null)}
 															onConfirm={() => confirmChange("deviceCheck")}
 															title="Warning: Configuration Change"
@@ -368,7 +402,7 @@ export function ProjectEditForm({
 																					{
 																						keys.find(
 																							(k) => k.id === field.value,
-																						)?.display_name
+																						)?.displayName
 																					}{" "}
 																					(
 																					{
@@ -399,8 +433,7 @@ export function ProjectEditForm({
 																				<SelectItem key={key.id} value={key.id}>
 																					<div className="flex items-center gap-2">
 																						<span>
-																							{key.display_name} ({key.provider}
-																							)
+																							{key.displayName} ({key.provider})
 																						</span>
 																					</div>
 																				</SelectItem>
@@ -412,7 +445,6 @@ export function ProjectEditForm({
 													</AlertDialogTrigger>
 													{pendingKeyChange && (
 														<ConfirmationDialog
-															isOpen={!!pendingKeyChange}
 															onCancel={() => setPendingKeyChange(null)}
 															onConfirm={() => confirmChange("key")}
 															title="Warning: Credentials Change"
@@ -548,7 +580,7 @@ export function ProjectEditForm({
 														onChange={(e) =>
 															field.onChange(
 																e.target.value
-																	? Number.parseInt(e.target.value)
+																	? Number.parseInt(e.target.value, 10)
 																	: null,
 															)
 														}
@@ -575,7 +607,9 @@ export function ProjectEditForm({
 													value={field.value?.toString() ?? "none"}
 													onValueChange={(value) =>
 														field.onChange(
-															value === "none" ? null : Number.parseInt(value),
+															value === "none"
+																? null
+																: Number.parseInt(value, 10),
 														)
 													}
 												>
@@ -618,7 +652,6 @@ export function ProjectEditForm({
 								</Button>
 							</AlertDialogTrigger>
 							<ConfirmationDialog
-								isOpen={true}
 								onCancel={() => {}}
 								onConfirm={() => form.reset()}
 								title="Reset Changes?"
@@ -627,11 +660,9 @@ export function ProjectEditForm({
 						</AlertDialog>
 						<Button
 							type="submit"
-							disabled={
-								updateProject.status === "executing" || !form.formState.isDirty
-							}
+							disabled={updateProject.isPending || !form.formState.isDirty}
 						>
-							{updateProject.status === "executing" ? (
+							{updateProject.isPending ? (
 								<>
 									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 									Saving Changes...

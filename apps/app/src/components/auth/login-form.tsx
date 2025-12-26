@@ -28,7 +28,7 @@ import { TeamInvitationInfo } from "./team-invitation-info";
 import { AuthErrorAlert } from "./auth-error-alert";
 
 const formSchema = z.object({
-	email: z.string().email(),
+	email: z.email(),
 	password: z.optional(z.string()),
 });
 

@@ -1,6 +1,6 @@
 {
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4"
+		"@biomejs/biome": "2.3.10"
 	},
 	"scripts": {
 		"clean": "rm -rf .turbo node_modules",
@@ -9,5 +9,9 @@
 	"name": "tsconfig",
 	"private": true,
 	"version": "0.0.0",
-	"files": ["base.json", "nextjs.json", "react-library.json"]
+	"files": [
+		"base.json",
+		"nextjs.json",
+		"react-library.json"
+	]
 }

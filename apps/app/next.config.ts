@@ -16,20 +16,24 @@ const cspDirectives = () => {
 	}
 
 	// Public API base used in UI (with fallback used in code)
-	const proxyApiUrl =
-		process.env.NEXT_PUBLIC_PROXY_API_URL || "https://api.proxed.ai";
+	const apiUrl =
+		process.env.NEXT_PUBLIC_API_URL ||
+		process.env.NEXT_PUBLIC_PROXY_API_URL ||
+		"https://api.proxed.ai";
 	try {
-		const origin = new URL(proxyApiUrl).origin;
+		const origin = new URL(apiUrl).origin;
 		connectSrc.push(origin);
 		imgSrc.push(origin);
 	} catch {}
 
 	// Optional Sentry ingestion endpoints if enabled
 	connectSrc.push("https://*.sentry.io");
+	connectSrc.push("https://api.novu.co");
 
 	// Dev: allow websocket connections for HMR/dev overlay
 	if (isDev) {
 		connectSrc.push("ws:", "wss:");
+		connectSrc.push("http://localhost:3002", "http://127.0.0.1:3002");
 		// Dev: allow eval only in development to support tooling/source maps
 		scriptSrc.push("'unsafe-eval'");
 	}

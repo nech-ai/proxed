@@ -1,10 +1,6 @@
 import { darkTheme } from "./Wrapper";
 
-export function Logo({
-	withLabel = true,
-}: {
-	withLabel?: boolean;
-}) {
+export function Logo({ withLabel = true }: { withLabel?: boolean }) {
 	return (
 		<div
 			style={{

@@ -27,7 +27,7 @@ export function ActionBlock({
 	action,
 	onSubmit,
 	danger,
-	isSubmitting,
+	isSubmitting: _isSubmitting,
 	isSubmitDisabled,
 	submitLabel,
 	className,

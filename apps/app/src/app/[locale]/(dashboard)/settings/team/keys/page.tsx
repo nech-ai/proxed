@@ -1,6 +1,6 @@
 import { ProviderKeyCreateForm } from "@/components/settings/team/keys/provider-keys-create";
 import { ProviderKeysBlock } from "@/components/settings/team/keys/provider-keys";
-import { getProviderKeys } from "@proxed/supabase/cached-queries";
+import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
 
 export async function generateMetadata() {
 	return {
@@ -9,16 +9,14 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-	const providerKeys = await getProviderKeys();
-
-	if (!providerKeys || !providerKeys.data) {
-		return <div>No provider keys found</div>;
-	}
+	batchPrefetch([trpc.providerKeys.list.queryOptions()]);
 
 	return (
-		<div className="grid grid-cols-1 gap-6">
-			<ProviderKeyCreateForm revalidatePath="/settings/team/keys" />
-			<ProviderKeysBlock providerKeys={providerKeys.data} />
-		</div>
+		<HydrateClient>
+			<div className="grid grid-cols-1 gap-6">
+				<ProviderKeyCreateForm />
+				<ProviderKeysBlock />
+			</div>
+		</HydrateClient>
 	);
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { inviteTeamMembersAction } from "@/actions/invite-team-members-action";
 import {
 	type InviteTeamMembersFormValues,
 	inviteTeamMembersSchema,
@@ -24,31 +23,38 @@ import {
 } from "@proxed/ui/components/select";
 import { useToast } from "@proxed/ui/hooks/use-toast";
 import { PlusCircle, Loader2, Mail, X, ChevronRight } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { useFieldArray, useForm } from "react-hook-form";
 import { TeamCard } from "./team-card";
 import { cn } from "@proxed/ui/utils";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 export function InviteMembersForm() {
 	const { toast } = useToast();
+	const router = useRouter();
+	const trpc = useTRPC();
 
-	const inviteMembers = useAction(inviteTeamMembersAction, {
-		onError: () => {
-			toast({
-				duration: 3500,
-				variant: "destructive",
-				title: "Something went wrong please try again.",
-			});
-		},
-		onSuccess: () => {
-			toast({
-				duration: 3500,
-				title: "Invitations sent successfully!",
-				description: "Your team members will receive an email shortly.",
-			});
-		},
-	});
+	const inviteMembers = useMutation(
+		trpc.team.inviteMany.mutationOptions({
+			onSuccess: () => {
+				toast({
+					duration: 3500,
+					title: "Invitations sent successfully!",
+					description: "Your team members will receive an email shortly.",
+				});
+				router.push("/teams/device-check");
+			},
+			onError: () => {
+				toast({
+					duration: 3500,
+					variant: "destructive",
+					title: "Something went wrong please try again.",
+				});
+			},
+		}),
+	);
 
 	const form = useForm<InviteTeamMembersFormValues>({
 		resolver: zodResolver(inviteTeamMembersSchema),
@@ -64,9 +70,8 @@ export function InviteMembersForm() {
 	});
 
 	function onSubmit(values: InviteTeamMembersFormValues) {
-		inviteMembers.execute({
+		inviteMembers.mutate({
 			invites: values.invites.filter((invite) => invite.email !== undefined),
-			redirectTo: "/teams/device-check",
 		});
 	}
 
@@ -211,10 +216,10 @@ export function InviteMembersForm() {
 
 							<Button
 								type="submit"
-								disabled={inviteMembers.status === "executing"}
+								disabled={inviteMembers.isPending}
 								className="px-6"
 							>
-								{inviteMembers.status === "executing" ? (
+								{inviteMembers.isPending ? (
 									<>
 										<Loader2 className="h-4 w-4 mr-2 animate-spin" />
 										Sending...

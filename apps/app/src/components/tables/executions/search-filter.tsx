@@ -25,7 +25,6 @@ import {
 	ServerIcon,
 	ZapIcon,
 } from "lucide-react";
-import { parseAsString, useQueryStates } from "nuqs";
 import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FilterList } from "./filter-list";
@@ -36,20 +35,25 @@ import {
 	type Provider,
 } from "@proxed/utils/lib/providers";
 import { getModelOptionsWithPricing } from "@proxed/utils/lib/pricing";
+import { useExecutionsFilterParams } from "@/hooks/use-executions-filter-params";
 
 type Props = {
 	placeholder: string;
 	className?: string;
 };
 
-const defaultSearch = {
-	q: "",
-	projectId: "",
-	provider: "",
-	model: "",
-	finishReason: "",
-	start: "",
-	end: "",
+type ExecutionFilters = ReturnType<typeof useExecutionsFilterParams>["filter"];
+
+const defaultSearch: ExecutionFilters = {
+	q: null,
+	projectId: null,
+	provider: null,
+	model: null,
+	finishReason: null,
+	start: null,
+	end: null,
+	deviceCheckId: null,
+	keyId: null,
 };
 
 export function SearchFilter({ placeholder, className }: Props) {
@@ -60,21 +64,8 @@ export function SearchFilter({ placeholder, className }: Props) {
 
 	const deviceChecks: { id: string; name: string }[] = [];
 
-	const [filters, setFilters] = useQueryStates(
-		{
-			q: parseAsString,
-			projectId: parseAsString,
-			provider: parseAsString,
-			model: parseAsString,
-			finishReason: parseAsString,
-			start: parseAsString,
-			end: parseAsString,
-		},
-		{
-			shallow: false,
-			history: "push",
-		},
-	);
+	const { filter: filters, setFilter: setFilters } =
+		useExecutionsFilterParams();
 
 	useHotkeys(
 		"esc",
@@ -129,7 +120,7 @@ export function SearchFilter({ placeholder, className }: Props) {
 					finalObject = {
 						...finalObject,
 						...partialObject,
-						deviceCheck:
+						deviceCheckId:
 							deviceChecks?.find(
 								(deviceCheck) =>
 									deviceCheck.name === partialObject?.deviceCheck,
@@ -251,7 +242,11 @@ export function SearchFilter({ placeholder, className }: Props) {
 							{getModelOptionsWithPricing().map((model) => (
 								<DropdownMenuItem
 									key={model.value}
-									onClick={() => setFilters({ model: model.value })}
+									onClick={() =>
+										setFilters({
+											model: model.value as ExecutionFilters["model"],
+										})
+									}
 									className="flex items-center justify-between"
 								>
 									<span className="truncate">{model.label}</span>

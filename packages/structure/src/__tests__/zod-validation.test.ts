@@ -23,7 +23,7 @@ describe("Zod Validation Cycle", () => {
 	});
 
 	// Helper function to create and load a validator module
-	const loadValidator = (jsonSchema: JsonSchema) => {
+	const _loadValidator = (jsonSchema: JsonSchema) => {
 		// Generate validator code
 		const validatorCode = parser.createValidator(jsonSchema);
 
@@ -40,7 +40,7 @@ describe("Zod Validation Cycle", () => {
 		try {
 			unlinkSync(validatorPath);
 			rmdirSync(tempDir);
-		} catch (e) {
+		} catch (_e) {
 			// Ignore cleanup errors
 		}
 	});
@@ -120,48 +120,20 @@ describe("Zod Validation Cycle", () => {
 		const invalidResult = validator.safeParse(invalidData);
 		expect(invalidResult.success).toBe(false);
 		if (!invalidResult.success) {
-			const errors = invalidResult.error.errors;
-			expect(errors).toEqual([
-				{
-					code: "too_small",
-					minimum: 2,
-					type: "string",
-					inclusive: true,
-					exact: false,
-					message: "String must contain at least 2 character(s)",
-					path: ["name"],
-				},
-				{
-					code: "too_big",
-					maximum: 120,
-					type: "number",
-					inclusive: true,
-					exact: false,
-					message: "Number must be less than or equal to 120",
-					path: ["age"],
-				},
-				{
-					code: "invalid_string",
-					validation: "email",
-					message: "Invalid email",
-					path: ["email"],
-				},
-				{
-					code: "invalid_type",
-					expected: "boolean",
-					received: "string",
-					message: "Expected boolean, received string",
-					path: ["settings", "notifications"],
-				},
-				{
-					code: "invalid_enum_value",
-					options: ["light", "dark"],
-					received: "blue",
-					message:
-						"Invalid enum value. Expected 'light' | 'dark', received 'blue'",
-					path: ["settings", "theme"],
-				},
-			]);
+			const issues = invalidResult.error.issues;
+			const issueAt = (path: string) =>
+				issues.find((issue) => issue.path.join(".") === path);
+
+			expect(issues.length).toBeGreaterThanOrEqual(5);
+			expect(issueAt("name")?.code).toBe("too_small");
+			expect(issueAt("age")?.code).toBe("too_big");
+			expect(["invalid_format", "invalid_string"]).toContain(
+				issueAt("email")?.code,
+			);
+			expect(issueAt("settings.notifications")?.code).toBe("invalid_type");
+			expect(["invalid_value", "invalid_enum_value"]).toContain(
+				issueAt("settings.theme")?.code,
+			);
 		}
 
 		// 5. Test throw behavior
@@ -253,7 +225,7 @@ describe("Zod Validation Cycle", () => {
 		const invalidResult = validator.safeParse(invalidData);
 		expect(invalidResult.success).toBe(false);
 		if (!invalidResult.success) {
-			expect(invalidResult.error.errors.length).toBeGreaterThan(0);
+			expect(invalidResult.error.issues.length).toBeGreaterThan(0);
 		}
 
 		// Test throw behavior

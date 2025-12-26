@@ -12,7 +12,7 @@ export const changeChartPeriodAction = authActionClient
 		track: LogEvents.ChangeChartPeriod,
 	})
 	.action(async ({ parsedInput: value, ctx: { user } }) => {
-		revalidateTag(`chart_${user.team_id}`);
+		revalidateTag(`chart_${user.team_id}`, "default");
 
 		return value;
 	});

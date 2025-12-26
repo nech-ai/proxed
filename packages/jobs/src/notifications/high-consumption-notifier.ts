@@ -8,8 +8,8 @@ import {
 } from "@proxed/notifications";
 
 export const highConsumptionPayloadSchema = z.object({
-	projectId: z.string().uuid(),
-	teamId: z.string().uuid(),
+	projectId: z.uuid(),
+	teamId: z.uuid(),
 	projectName: z.string(),
 	threshold: z.number(),
 	timeWindowSeconds: z.number(),
@@ -39,6 +39,8 @@ export const sendHighConsumptionNotification = schemaTask({
 			return;
 		}
 
+		type NotificationEvent = Parameters<typeof triggerBulk>[0][number];
+
 		const notificationEvents = users
 			.map(({ user, team_id }) => {
 				if (!user || !user.email) {
@@ -49,7 +51,7 @@ export const sendHighConsumptionNotification = schemaTask({
 					return null;
 				}
 
-				return {
+				const event: NotificationEvent = {
 					name: TriggerEvents.HighConsumption,
 					payload: {
 						type: NotificationTypes.Alerts,
@@ -67,8 +69,9 @@ export const sendHighConsumptionNotification = schemaTask({
 						fullName: user.full_name ?? undefined,
 					},
 				};
+				return event;
 			})
-			.filter(Boolean) as any[];
+			.filter((event): event is NotificationEvent => event !== null);
 
 		if (notificationEvents.length === 0) {
 			return;

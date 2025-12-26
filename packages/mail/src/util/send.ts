@@ -30,7 +30,7 @@ export async function sendEmail<
 			html,
 		});
 		return true;
-	} catch (e) {
+	} catch (_error) {
 		return false;
 	}
 }

@@ -6,7 +6,9 @@ import { usePathname } from "next/navigation";
 
 export function SecondaryMenu({
 	items,
-}: { items: { title: string; href: string }[] }) {
+}: {
+	items: { title: string; href: string }[];
+}) {
 	const pathname = usePathname();
 	const isActiveMenuItem = (href: string) => pathname.includes(href);
 	return (

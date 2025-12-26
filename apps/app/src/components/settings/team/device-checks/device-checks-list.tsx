@@ -14,7 +14,9 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 
-import type { Tables } from "@proxed/supabase/types";
+import type { RouterOutputs } from "@/trpc/types";
+import { useUserContext } from "@/store/user/hook";
+import { UTCDate } from "@date-fns/utc";
 import { Button } from "@proxed/ui/components/button";
 import {
 	DropdownMenu,
@@ -29,39 +31,49 @@ import {
 	TableRow,
 } from "@proxed/ui/components/table";
 import { useToast } from "@proxed/ui/hooks/use-toast";
+import { format } from "date-fns";
 import { MoreVerticalIcon, TrashIcon } from "lucide-react";
 import { useState } from "react";
-import { deleteDeviceCheckAction } from "@/actions/delete-device-check-action";
-import { useAction } from "next-safe-action/hooks";
+import { useTRPC } from "@/trpc/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function DeviceChecksList({
 	deviceChecks,
 }: {
-	deviceChecks: Partial<Tables<"device_checks">>[];
+	deviceChecks: RouterOutputs["deviceChecks"]["list"]["data"];
 }) {
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const { toast } = useToast();
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const { dateFormat } = useUserContext((state) => state.data);
+	const dateOnlyFormat = dateFormat?.split(" ")[0] || "yyyy-MM-dd";
 
-	const deleteDeviceCheck = useAction(deleteDeviceCheckAction, {
-		onSuccess: () => {
-			toast({
-				title: "Device Check deleted",
-				description:
-					"The Device Check configuration has been deleted successfully.",
-			});
-		},
-		onError: (error) => {
-			toast({
-				variant: "destructive",
-				title: "Error",
-				description:
-					error?.error?.serverError || "Failed to delete Device Check",
-			});
-		},
-	});
+	const deleteDeviceCheck = useMutation(
+		trpc.deviceChecks.delete.mutationOptions({
+			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: trpc.deviceChecks.list.queryKey(),
+				});
+				toast({
+					title: "Device Check deleted",
+					description:
+						"The Device Check configuration has been deleted successfully.",
+				});
+			},
+			onError: (error) => {
+				toast({
+					variant: "destructive",
+					title: "Error",
+					description: error?.message || "Failed to delete Device Check",
+				});
+			},
+		}),
+	);
 
-	const columns: ColumnDef<Partial<Tables<"device_checks">>>[] = [
+	type DeviceCheck = RouterOutputs["deviceChecks"]["list"]["data"][number];
+	const columns: ColumnDef<DeviceCheck>[] = [
 		{
 			accessorKey: "name",
 			header: "Name",
@@ -69,22 +81,22 @@ export function DeviceChecksList({
 				<div>
 					<strong className="block">{row.original.name}</strong>
 					<small className="text-muted-foreground">
-						{row.original.apple_team_id}
+						{row.original.appleTeamId}
 					</small>
 				</div>
 			),
 		},
 		{
-			accessorKey: "key_id",
+			accessorKey: "keyId",
 			header: "Key ID",
 		},
 		{
-			accessorKey: "created_at",
+			accessorKey: "createdAt",
 			header: "Created",
 			cell: ({ row }) => (
 				<span>
-					{row.original.created_at
-						? new Date(row.original.created_at).toLocaleDateString()
+					{row.original.createdAt
+						? format(new UTCDate(row.original.createdAt), dateOnlyFormat)
 						: "N/A"}
 				</span>
 			),
@@ -112,9 +124,8 @@ export function DeviceChecksList({
 											description: "Deleting device check...",
 										});
 
-										deleteDeviceCheck.execute({
+										deleteDeviceCheck.mutate({
 											id: row.original.id,
-											revalidatePath: "/settings/team/device-check",
 										});
 
 										loadingToast.dismiss();

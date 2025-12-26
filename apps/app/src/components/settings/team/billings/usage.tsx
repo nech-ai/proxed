@@ -109,32 +109,32 @@ export function Usage({
 }: {
 	plan: string;
 	data: {
-		projects_limit: number | null;
-		projects_count: number;
-		api_calls_limit: number | null;
-		api_calls_used: number;
-		api_calls_remaining: number;
+		projectsLimit: number | null;
+		projectsCount: number;
+		apiCallsLimit: number | null;
+		apiCallsUsed: number;
+		apiCallsRemaining: number;
 	};
 }) {
 	// Check if plan exists and is not free
 	const hasPaidPlan = plan && !plan.startsWith("free");
 
 	const projectsTooltip = hasPaidPlan
-		? data.projects_limit
-			? `You have used ${data.projects_count.toLocaleString()} out of ${data.projects_limit.toLocaleString()} available projects. ${
-					data.projects_limit - data.projects_count
+		? data.projectsLimit
+			? `You have used ${data.projectsCount.toLocaleString()} out of ${data.projectsLimit.toLocaleString()} available projects. ${
+					data.projectsLimit - data.projectsCount
 				} projects remaining.`
-			: `You have ${data.projects_count.toLocaleString()} active projects with unlimited projects available.`
+			: `You have ${data.projectsCount.toLocaleString()} active projects with unlimited projects available.`
 		: "Upgrade to a paid plan to create more projects.";
 
 	const apiCallsTooltip = hasPaidPlan
-		? data.api_calls_limit
-			? `You have made ${data.api_calls_used.toLocaleString()} API calls this month. ${
-					data.api_calls_remaining > 0
-						? `${data.api_calls_remaining.toLocaleString()} calls remaining.`
+		? data.apiCallsLimit
+			? `You have made ${data.apiCallsUsed.toLocaleString()} API calls this month. ${
+					data.apiCallsRemaining > 0
+						? `${data.apiCallsRemaining.toLocaleString()} calls remaining.`
 						: "You have reached your API calls limit for this month."
 				}`
-			: `You have made ${data.api_calls_used.toLocaleString()} API calls this month with unlimited calls available.`
+			: `You have made ${data.apiCallsUsed.toLocaleString()} API calls this month with unlimited calls available.`
 		: "Upgrade to a paid plan to make API calls.";
 
 	return (
@@ -142,14 +142,14 @@ export function Usage({
 			<Card className="divide-y">
 				<UsageItem
 					label="Projects"
-					current={data.projects_count}
-					max={hasPaidPlan ? data.projects_limit : 0}
+					current={data.projectsCount}
+					max={hasPaidPlan ? data.projectsLimit : 0}
 					tooltip={projectsTooltip}
 				/>
 				<UsageItem
 					label="API Calls"
-					current={data.api_calls_used}
-					max={hasPaidPlan ? data.api_calls_limit : 0}
+					current={data.apiCallsUsed}
+					max={hasPaidPlan ? data.apiCallsLimit : 0}
 					period="month"
 					tooltip={apiCallsTooltip}
 				/>

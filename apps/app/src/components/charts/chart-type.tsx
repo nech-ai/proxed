@@ -1,6 +1,6 @@
 "use client";
 
-import { changeChartTypeAction } from "@/actions/change-chart-type-action";
+import { useMetricsParams, chartTypeOptions } from "@/hooks/use-metrics-params";
 import { useI18n } from "@/locales/client";
 import {
 	Select,
@@ -9,37 +9,35 @@ import {
 	SelectItem,
 	SelectTrigger,
 } from "@proxed/ui/components/select";
-import { useOptimisticAction } from "next-safe-action/hooks";
-
-const options = ["all", "tokens"];
 
 type Props = {
-	initialValue: string;
 	disabled?: boolean;
 };
 
-export function ChartType({ initialValue, disabled }: Props) {
+export function ChartType({ disabled }: Props) {
 	const t = useI18n();
-	const { execute, optimisticState } = useOptimisticAction(
-		changeChartTypeAction,
-		{
-			currentState: initialValue,
-			updateFn: (_, newState) => newState,
-		},
-	);
+	const { params, setParams } = useMetricsParams();
 
 	return (
-		<Select defaultValue={optimisticState} onValueChange={execute}>
+		<Select
+			value={params.chart}
+			onValueChange={(value) =>
+				setParams({
+					...params,
+					chart: value as NonNullable<typeof params.chart>,
+				})
+			}
+		>
 			<SelectTrigger
 				className="flex-1 space-x-1 font-medium"
 				disabled={disabled}
 			>
 				{/* @ts-expect-error */}
-				<span>{t(`chart_type.${optimisticState}`)}</span>
+				<span>{t(`chart_type.${params.chart}`)}</span>
 			</SelectTrigger>
 			<SelectContent>
 				<SelectGroup>
-					{options.map((option) => {
+					{chartTypeOptions.map((option) => {
 						return (
 							<SelectItem key={option} value={option}>
 								{/* @ts-expect-error */}

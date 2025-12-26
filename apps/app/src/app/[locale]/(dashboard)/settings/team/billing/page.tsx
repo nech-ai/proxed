@@ -1,10 +1,9 @@
 import { ManageSubscription } from "@/components/settings/team/billings/manage-subscription";
 import { Plans } from "@/components/settings/team/billings/plans";
 import { UsageSkeleton } from "@/components/settings/team/billings/usage";
-import { UsageServer } from "@/components/settings/team/billings/usage.server";
-import { canChooseStarterPlanQuery } from "@/utils/plans-server";
-import { getUser } from "@proxed/supabase/cached-queries";
 import { Suspense } from "react";
+import { UsageClient } from "@/components/settings/team/billings/usage-client";
+import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
 
 export async function generateMetadata() {
 	return {
@@ -13,30 +12,20 @@ export async function generateMetadata() {
 }
 
 export default async function Page() {
-	const { data: user } = await getUser();
-	const team = user?.team;
-
-	const canChooseStarterPlan = await canChooseStarterPlanQuery(team?.id);
+	batchPrefetch([
+		trpc.user.me.queryOptions(),
+		trpc.team.billing.queryOptions(),
+		trpc.team.canChooseStarterPlan.queryOptions(),
+	]);
 	return (
-		<div className="grid grid-cols-1 gap-6">
-			{team?.plan !== "trial" && (
-				<ManageSubscription
-					teamId={team?.id}
-					plan={team?.plan}
-					canceledAt={team?.canceled_at}
-				/>
-			)}
-			{team?.plan === "trial" && (
-				<div>
-					<Plans
-						teamId={team?.id}
-						canChooseStarterPlan={canChooseStarterPlan}
-					/>
-				</div>
-			)}
-			<Suspense fallback={<UsageSkeleton />}>
-				<UsageServer teamId={team?.id} plan={team?.plan} />
-			</Suspense>
-		</div>
+		<HydrateClient>
+			<div className="grid grid-cols-1 gap-6">
+				<ManageSubscription />
+				<Plans />
+				<Suspense fallback={<UsageSkeleton />}>
+					<UsageClient />
+				</Suspense>
+			</div>
+		</HydrateClient>
 	);
 }

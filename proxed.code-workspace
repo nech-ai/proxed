@@ -6,12 +6,12 @@
 		},
 		{
 			"name": "supabase-functions",
-			"path": "packages/supabase/functions"
+			"path": "packages/supabase/supabase/functions"
 		}
 	],
 	"settings": {
 		"files.exclude": {
-			"packages/supabase/functions/": true
+			"packages/supabase/supabase/functions/": true
 		}
 	}
 }

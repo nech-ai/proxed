@@ -6,7 +6,7 @@ export const Spinner = ({ size = 16 }) => {
 			<div
 				className="loading-wrapper"
 				data-visible
-				// @ts-ignore
+				// @ts-expect-error CSS custom property typing for inline style
 				style={{ "--spinner-size": `${size}px` }}
 			>
 				<div className="spinner">

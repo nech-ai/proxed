@@ -1,13 +1,6 @@
 import type { UseFormReturn } from "react-hook-form";
-import { ZodIssueCode, ZodParsedType, defaultErrorMap } from "zod";
-import type { ZodErrorMap, ZodIssueOptionalMessage } from "zod";
-
-const jsonStringifyReplacer = (_: string, value: unknown): unknown => {
-	if (typeof value === "bigint") {
-		return value.toString();
-	}
-	return value;
-};
+import { ZodIssueCode } from "zod";
+import type { ZodErrorMap, ZodIssue } from "zod";
 
 function joinValues<T extends unknown[]>(array: T, separator = " | "): string {
 	return array
@@ -15,31 +8,17 @@ function joinValues<T extends unknown[]>(array: T, separator = " | "): string {
 		.join(separator);
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> => {
-	if (typeof value !== "object" || value === null) return false;
-
-	for (const key in value) {
-		if (!Object.prototype.hasOwnProperty.call(value, key)) return false;
-	}
-
-	return true;
-};
-
 export function useFormErrors() {
-	const zodErrorMap: ZodErrorMap = (issue, ctx) => {
-		let message: string;
-		message = defaultErrorMap(issue, ctx).message;
+	const zodErrorMap: ZodErrorMap = (issue) => {
+		let message = issue.message ?? "Invalid input";
 
 		switch (issue.code) {
 			case ZodIssueCode.invalid_type:
-				if (issue.received === ZodParsedType.undefined) {
+				if (issue.input === undefined) {
 					message = "Required";
 				} else {
-					message = `Expected ${issue.expected}, received ${issue.received}`;
+					message = `Expected ${issue.expected}, received ${typeof issue.input}`;
 				}
-				break;
-			case ZodIssueCode.invalid_literal:
-				message = `Invalid literal value, expected ${JSON.stringify(issue.expected, jsonStringifyReplacer)}`;
 				break;
 			case ZodIssueCode.unrecognized_keys:
 				message = `Unrecognized key(s) in object: ${joinValues(issue.keys, ", ")}`;
@@ -47,42 +26,33 @@ export function useFormErrors() {
 			case ZodIssueCode.invalid_union:
 				message = "Invalid input";
 				break;
-			case ZodIssueCode.invalid_union_discriminator:
-				message = `Invalid discriminator value. Expected ${joinValues(issue.options)}`;
+			case ZodIssueCode.invalid_value:
+				message = `Invalid value. Expected ${joinValues(issue.values, ", ")}`;
 				break;
-			case ZodIssueCode.invalid_enum_value:
-				message = `Invalid enum value. Expected ${joinValues(issue.options)}, received '${issue.received}'`;
-				break;
-			case ZodIssueCode.invalid_arguments:
-				message = "Invalid function arguments";
-				break;
-			case ZodIssueCode.invalid_return_type:
-				message = "Invalid function return type";
-				break;
-			case ZodIssueCode.invalid_date:
-				message = "Invalid date";
-				break;
-			case ZodIssueCode.invalid_string:
-				if (typeof issue.validation === "object") {
-					if ("startsWith" in issue.validation) {
-						message = `Invalid input: must start with "${issue.validation.startsWith}"`;
-					} else if ("endsWith" in issue.validation) {
-						message = `Invalid input: must end with "${issue.validation.endsWith}"`;
-					}
+			case ZodIssueCode.invalid_format: {
+				if (issue.format === "starts_with" && "prefix" in issue) {
+					message = `Invalid input: must start with "${issue.prefix}"`;
+				} else if (issue.format === "ends_with" && "suffix" in issue) {
+					message = `Invalid input: must end with "${issue.suffix}"`;
+				} else if (issue.format === "includes" && "includes" in issue) {
+					message = `Invalid input: must include "${issue.includes}"`;
+				} else if (issue.format === "regex" && "pattern" in issue) {
+					message = `Invalid input: must match ${issue.pattern}`;
 				} else {
-					message = "Invalid input";
+					message = "Invalid input format";
 				}
 				break;
+			}
 			case ZodIssueCode.too_small: {
 				const minimum =
-					issue.type === "date"
+					issue.origin === "date"
 						? new Date(issue.minimum as number)
 						: (issue.minimum as number);
-				const type = issue.type;
+				const type = issue.origin;
 				const exact = issue.exact;
 				const inclusive = issue.inclusive;
 
-				if (type === "array") {
+				if (type === "array" || type === "set") {
 					if (exact) {
 						message = `Array must contain exactly ${minimum} element(s)`;
 					} else {
@@ -98,7 +68,7 @@ export function useFormErrors() {
 							? `String must contain at least ${minimum} character(s)`
 							: `String must contain over ${minimum} character(s)`;
 					}
-				} else if (type === "number") {
+				} else if (type === "number" || type === "int" || type === "bigint") {
 					if (exact) {
 						message = `Number must be exactly ${minimum}`;
 					} else {
@@ -119,14 +89,14 @@ export function useFormErrors() {
 			}
 			case ZodIssueCode.too_big: {
 				const maximum =
-					issue.type === "date"
+					issue.origin === "date"
 						? new Date(issue.maximum as number)
 						: (issue.maximum as number);
-				const type = issue.type;
+				const type = issue.origin;
 				const exact = issue.exact;
 				const inclusive = issue.inclusive;
 
-				if (type === "array") {
+				if (type === "array" || type === "set") {
 					if (exact) {
 						message = `Array must contain exactly ${maximum} element(s)`;
 					} else {
@@ -142,7 +112,7 @@ export function useFormErrors() {
 							? `String must contain at most ${maximum} character(s)`
 							: `String must contain under ${maximum} character(s)`;
 					}
-				} else if (type === "number") {
+				} else if (type === "number" || type === "int" || type === "bigint") {
 					if (exact) {
 						message = `Number must be exactly ${maximum}`;
 					} else {
@@ -181,20 +151,33 @@ export function useFormErrors() {
 				}
 				break;
 			}
-			case ZodIssueCode.invalid_intersection_types:
-				message = "Intersection results could not be merged";
+			case ZodIssueCode.invalid_key:
+				message = "Invalid key";
+				break;
+			case ZodIssueCode.invalid_element:
+				message = "Invalid element";
 				break;
 			case ZodIssueCode.not_multiple_of:
-				message = "Number must be a multiple of {multipleOf}";
+				message = `Number must be a multiple of ${issue.divisor}`;
 				break;
-			case ZodIssueCode.not_finite:
-				message = "Number must be finite";
-				break;
-			default:
-				message = ctx.defaultError;
 		}
 
 		return { message };
+	};
+
+	const getErrorMessage = (
+		error: ZodIssue,
+		fallback: string,
+		errorMap?: ZodErrorMap,
+	) => {
+		const mapped = errorMap?.(error as Parameters<ZodErrorMap>[0]);
+		if (typeof mapped === "string") {
+			return mapped;
+		}
+		if (mapped && typeof mapped === "object" && "message" in mapped) {
+			return mapped.message;
+		}
+		return error.message ?? fallback;
 	};
 
 	function setApiErrorsToForm<Form extends UseFormReturn<any, any>>(
@@ -216,24 +199,20 @@ export function useFormErrors() {
 		) {
 			const errorData = e.data as {
 				zodError?: {
-					fieldErrors?: Record<string, ZodIssueOptionalMessage[]>;
-					formErrors?: ZodIssueOptionalMessage[];
+					fieldErrors?: Record<string, ZodIssue[]>;
+					formErrors?: ZodIssue[];
 				};
 			};
 
 			if (errorData.zodError?.fieldErrors) {
 				Object.entries(errorData.zodError.fieldErrors).forEach(
 					([field, errors]) => {
-						const error = ((errors ?? []) as ZodIssueOptionalMessage[])[0];
+						const error = ((errors ?? []) as ZodIssue[])[0];
 
 						if (error) {
-							form.setError(
-								field,
-								errorMap?.(error, {
-									data: {},
-									defaultError: "",
-								}) ?? error,
-							);
+							form.setError(field, {
+								message: getErrorMessage(error, defaultError, errorMap),
+							});
 						}
 					},
 				);
@@ -242,18 +221,13 @@ export function useFormErrors() {
 			}
 
 			if (errorData.zodError?.formErrors) {
-				const error = (errorData.zodError.formErrors ??
-					[]) as ZodIssueOptionalMessage[];
+				const error = (errorData.zodError.formErrors ?? []) as ZodIssue[];
 				const firstError = error[0];
 
 				if (firstError) {
-					form.setError(
-						"root",
-						errorMap?.(firstError, {
-							data: {},
-							defaultError: "",
-						}) ?? firstError,
-					);
+					form.setError("root", {
+						message: getErrorMessage(firstError, defaultError, errorMap),
+					});
 				}
 
 				return;

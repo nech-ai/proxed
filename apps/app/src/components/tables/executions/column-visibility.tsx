@@ -14,7 +14,10 @@ import { cn } from "@proxed/ui/utils";
 export function ColumnVisibility({
 	disabled,
 	className,
-}: { disabled?: boolean; className?: string }) {
+}: {
+	disabled?: boolean;
+	className?: string;
+}) {
 	const { columns } = useExecutionsStore();
 
 	const visibleColumnsCount = columns.filter((column) =>

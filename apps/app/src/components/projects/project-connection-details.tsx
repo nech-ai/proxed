@@ -18,24 +18,33 @@ import {
 import { Button } from "@proxed/ui/components/button";
 import { Input } from "@proxed/ui/components/input";
 import { useToast } from "@proxed/ui/hooks/use-toast";
-import type { Tables } from "@proxed/supabase/types";
 import { CopyIcon, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
 
 interface ProjectConnectionDetailsProps {
-	project: Tables<"projects">;
+	projectId: string;
 }
 
 // Define endpoint paths
 const endpointPaths = ["/v1/text", "/v1/pdf", "/v1/vision", "/v1/openai"];
 
 export function ProjectConnectionDetails({
-	project,
+	projectId,
 }: ProjectConnectionDetailsProps) {
+	const trpc = useTRPC();
+	const { data: project } = useQuery(
+		trpc.projects.byId.queryOptions({ id: projectId }),
+	);
 	const { toast } = useToast();
 	const [selectedEndpointPath, setSelectedEndpointPath] = useState<string>(
 		endpointPaths[0],
 	);
+
+	if (!project) {
+		return null;
+	}
 
 	const proxyApiBaseUrl =
 		process.env.NEXT_PUBLIC_PROXY_API_URL || "https://api.proxed.ai";

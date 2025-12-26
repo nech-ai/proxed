@@ -326,7 +326,7 @@ export async function createExecution(
 ) {
 	const costs = calculateCosts({
 		provider: params.provider,
-		model: params.model as any,
+		model: params.model,
 		promptTokens: params.prompt_tokens,
 		completionTokens: params.completion_tokens,
 	});

@@ -27,7 +27,11 @@ function ChangelogEntryHeader({
 	metadata,
 	slug,
 	firstEntry,
-}: { metadata: ChangelogEntryMetadata; slug: string; firstEntry: boolean }) {
+}: {
+	metadata: ChangelogEntryMetadata;
+	slug: string;
+	firstEntry: boolean;
+}) {
 	return (
 		<header className="flex items-start justify-between gap-4">
 			<Link

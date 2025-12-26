@@ -1,6 +1,5 @@
 "use client";
 
-import { createDeviceCheckAction } from "@/actions/create-device-check-action";
 import {
 	type CreateDeviceCheckFormValues,
 	createDeviceCheckSchema,
@@ -30,7 +29,6 @@ import {
 	HelpCircle,
 	ChevronDown,
 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { TeamCard } from "./team-card";
 import Link from "next/link";
@@ -47,6 +45,9 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@proxed/ui/components/accordion";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 export function CreateDeviceCheckForm() {
 	const { toast } = useToast();
@@ -54,34 +55,41 @@ export function CreateDeviceCheckForm() {
 		resolver: zodResolver(createDeviceCheckSchema),
 		defaultValues: {
 			name: "",
-			key_id: "",
-			private_key_p8: "",
-			apple_team_id: "",
+			keyId: "",
+			privateKeyP8: "",
+			appleTeamId: "",
 		},
 		mode: "onChange",
 	});
 
-	const createDeviceCheck = useAction(createDeviceCheckAction, {
-		onSuccess: () => {
-			toast({
-				title: "Device Check configuration created",
-				description: "Your device check has been set up successfully",
-			});
-		},
-		onError: (error) => {
-			toast({
-				variant: "destructive",
-				title: "Error",
-				description:
-					error?.error?.serverError || "Failed to create Device Check",
-			});
-		},
-	});
+	const trpc = useTRPC();
+	const router = useRouter();
+	const createDeviceCheck = useMutation(
+		trpc.deviceChecks.create.mutationOptions({
+			onSuccess: () => {
+				toast({
+					title: "Device Check configuration created",
+					description: "Your device check has been set up successfully",
+				});
+				router.push("/teams/keys");
+				router.refresh();
+			},
+			onError: (error) => {
+				toast({
+					variant: "destructive",
+					title: "Error",
+					description: error?.message || "Failed to create Device Check",
+				});
+			},
+		}),
+	);
 
 	function onSubmit(values: CreateDeviceCheckFormValues) {
-		createDeviceCheck.execute({
-			...values,
-			redirectTo: "/teams/keys",
+		createDeviceCheck.mutate({
+			name: values.name,
+			keyId: values.keyId,
+			privateKeyP8: values.privateKeyP8,
+			appleTeamId: values.appleTeamId,
 		});
 	}
 
@@ -163,7 +171,7 @@ export function CreateDeviceCheckForm() {
 						<div className="grid grid-cols-2 gap-3">
 							<FormField
 								control={form.control}
-								name="key_id"
+								name="keyId"
 								render={({ field }) => (
 									<FormItem>
 										<div className="flex items-center gap-2">
@@ -195,7 +203,7 @@ export function CreateDeviceCheckForm() {
 
 							<FormField
 								control={form.control}
-								name="apple_team_id"
+								name="appleTeamId"
 								render={({ field }) => (
 									<FormItem>
 										<div className="flex items-center gap-2">
@@ -228,7 +236,7 @@ export function CreateDeviceCheckForm() {
 
 						<FormField
 							control={form.control}
-							name="private_key_p8"
+							name="privateKeyP8"
 							render={({ field: { onChange, ...field } }) => (
 								<FormItem>
 									<div className="flex items-center gap-2">
@@ -266,7 +274,7 @@ export function CreateDeviceCheckForm() {
 															description: `Successfully loaded ${file.name}`,
 															duration: 3000,
 														});
-													} catch (error) {
+													} catch (_error) {
 														toast({
 															variant: "destructive",
 															title: "Error",
@@ -351,15 +359,14 @@ export function CreateDeviceCheckForm() {
 								type="submit"
 								size="sm"
 								disabled={
-									createDeviceCheck.status === "executing" ||
-									!form.formState.isValid
+									createDeviceCheck.isPending || !form.formState.isValid
 								}
 								className={cn(
 									"px-6",
 									form.formState.isValid ? "bg-primary" : "bg-primary/80",
 								)}
 							>
-								{createDeviceCheck.status === "executing" ? (
+								{createDeviceCheck.isPending ? (
 									<>
 										<Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
 										Configuring...

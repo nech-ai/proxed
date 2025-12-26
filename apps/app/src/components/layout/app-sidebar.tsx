@@ -6,7 +6,6 @@ import {
 	FileIcon,
 	SettingsIcon,
 } from "lucide-react";
-import type { TeamMembership, User } from "@proxed/supabase/types";
 import {
 	Sidebar,
 	SidebarContent,
@@ -20,7 +19,6 @@ import { NavMain } from "./nav-main";
 import { TeamSwitcher } from "./team-switcher";
 import { Logo } from "./logo";
 import { cn } from "@proxed/ui/utils";
-import { useTeamContext } from "@/store/team/hook";
 import { Trial } from "../trial";
 import { FeedbackDialog } from "./feedback-dialog";
 
@@ -49,16 +47,9 @@ const data = {
 	],
 };
 
-interface AppSidebarProps {
-	teamMemberships: TeamMembership[];
-	user: User;
-}
-
-export function AppSidebar({ teamMemberships, user }: AppSidebarProps) {
-	const { teamId } = useTeamContext((state) => state.data);
+export function AppSidebar() {
 	const { open } = useSidebar();
 	const { isMobile } = useSidebar();
-	const { teamMembership, billing } = useTeamContext((state) => state.data);
 
 	return (
 		<Sidebar collapsible="icon">
@@ -81,17 +72,12 @@ export function AppSidebar({ teamMemberships, user }: AppSidebarProps) {
 			<SidebarFooter>
 				{isMobile && (
 					<div className="pb-2 px-2 space-y-2">
-						<Trial
-							createdAt={teamMembership.team?.created_at}
-							canceledAt={billing?.canceled_at}
-							teamId={teamMembership.team?.id}
-							plan={billing?.plan}
-						/>
+						<Trial />
 						<FeedbackDialog />
 					</div>
 				)}
 				{!open && <SidebarTrigger />}
-				<TeamSwitcher teamMemberships={teamMemberships} activeTeamId={teamId} />
+				<TeamSwitcher />
 			</SidebarFooter>
 			<SidebarRail />
 		</Sidebar>

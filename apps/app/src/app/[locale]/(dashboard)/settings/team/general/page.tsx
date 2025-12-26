@@ -1,8 +1,7 @@
 import { ChangeTeamAvatar } from "@/components/settings/team/general/change-team-avatar";
 import { DeleteTeam } from "@/components/settings/team/general/delete-team";
 import { DisplayTeamName } from "@/components/settings/team/general/display-team-name";
-import { getUser } from "@proxed/supabase/cached-queries";
-import { redirect } from "next/navigation";
+import { batchPrefetch, HydrateClient, trpc } from "@/trpc/server";
 
 export async function generateMetadata() {
 	return {
@@ -11,21 +10,15 @@ export async function generateMetadata() {
 }
 
 export default async function TeamSettingsPage() {
-	const userData = await getUser();
-
-	if (!userData?.data) {
-		redirect("/login");
-	}
-
-	if (!userData.data.team) {
-		redirect("/settings/team/general");
-	}
+	batchPrefetch([trpc.user.me.queryOptions()]);
 
 	return (
-		<div className="grid grid-cols-1 gap-6">
-			<ChangeTeamAvatar team={userData.data.team} />
-			<DisplayTeamName teamName={userData.data.team?.name ?? ""} />
-			<DeleteTeam teamId={userData.data.team.id} />
-		</div>
+		<HydrateClient>
+			<div className="grid grid-cols-1 gap-6">
+				<ChangeTeamAvatar />
+				<DisplayTeamName />
+				<DeleteTeam />
+			</div>
+		</HydrateClient>
 	);
 }

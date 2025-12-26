@@ -6,7 +6,7 @@ export interface GeneratorOptions {
 	[key: string]: unknown;
 }
 
-export abstract class BaseGenerator<T> {
+export abstract class BaseGenerator<_T> {
 	protected options: GeneratorOptions;
 
 	constructor(options: GeneratorOptions = {}) {

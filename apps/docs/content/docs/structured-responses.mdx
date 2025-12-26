@@ -57,7 +57,7 @@ import { z } from "zod";
 
 export const userSchema = z.object({
   name: z.string().min(2).describe("User's full name"),
-  email: z.string().email(),
+  email: z.email(),
   age: z.number().int().positive().optional(),
   roles: z.array(z.enum(["admin", "user", "guest"])),
 });

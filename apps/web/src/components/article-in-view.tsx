@@ -12,7 +12,7 @@ interface ArticleInViewProps {
 
 export function ArticleInView({
 	slug,
-	firstPost,
+	firstPost: _firstPost,
 	className,
 }: ArticleInViewProps) {
 	const pathname = usePathname();

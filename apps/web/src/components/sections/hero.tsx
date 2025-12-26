@@ -5,7 +5,6 @@ import { siteConfig } from "@/lib/config";
 import { Button } from "@proxed/ui/components/button";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-// @ts-ignore
 import Spline from "@splinetool/react-spline";
 import { GradientText } from "../gradient-text";
 
@@ -29,7 +28,7 @@ function SplineView() {
 	);
 }
 
-function HeroPill() {
+function _HeroPill() {
 	return (
 		<a
 			href="/updates/public-launch"

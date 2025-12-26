@@ -1,12 +1,5 @@
 "use client";
 
-import { changeTeamAction } from "@/actions/change-team-action";
-import type { TeamMembership } from "@proxed/supabase/types";
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
-} from "@proxed/ui/components/avatar";
 import { Button } from "@proxed/ui/components/button";
 import { cn } from "@proxed/ui/utils";
 import {
@@ -15,18 +8,30 @@ import {
 	TableCell,
 	TableRow,
 } from "@proxed/ui/components/table";
-import { useAction } from "next-safe-action/hooks";
 import { TeamCard } from "./team-card";
 import { TeamAvatar } from "./team-avatar";
+import { useTRPC } from "@/trpc/client";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useUserQuery } from "@/hooks/use-user";
 
-export function SelectTeamTable({
-	data,
-	activeTeamId,
-}: {
-	data: TeamMembership[];
-	activeTeamId: string | null | undefined;
-}) {
-	const changeTeam = useAction(changeTeamAction);
+export function SelectTeamTable() {
+	const trpc = useTRPC();
+	const router = useRouter();
+	const { data: memberships = [] } = useQuery(
+		trpc.team.memberships.queryOptions(),
+	);
+	const { data: user } = useUserQuery();
+	const activeTeamId = user?.teamId;
+
+	const changeTeam = useMutation(
+		trpc.team.switch.mutationOptions({
+			onSuccess: () => {
+				router.push("/");
+				router.refresh();
+			},
+		}),
+	);
 
 	return (
 		<TeamCard
@@ -35,12 +40,12 @@ export function SelectTeamTable({
 		>
 			<Table>
 				<TableBody>
-					{data.map((row) => (
+					{memberships.map((row) => (
 						<TableRow
 							key={row.id}
 							className={cn(
 								"hover:bg-transparent",
-								activeTeamId === row.team_id && "bg-muted/50 hover:bg-muted/50",
+								activeTeamId === row.teamId && "bg-muted/50 hover:bg-muted/50",
 							)}
 						>
 							<TableCell className="border-r-[0px] py-4">
@@ -48,17 +53,17 @@ export function SelectTeamTable({
 									<TeamAvatar
 										className="h-8 w-8"
 										name={row.team?.name ?? ""}
-										avatarUrl={row.team?.avatar_url ?? ""}
+										avatarUrl={row.team?.avatarUrl ?? ""}
 									/>
 									<div className="flex flex-col">
 										<span
 											className={cn(
 												"font-medium text-sm",
-												activeTeamId === row.team_id && "text-muted-foreground",
+												activeTeamId === row.teamId && "text-muted-foreground",
 											)}
 										>
 											{row.team?.name ?? ""}{" "}
-											{activeTeamId === row.team_id && "(active)"}
+											{activeTeamId === row.teamId && "(active)"}
 										</span>
 									</div>
 								</div>
@@ -68,13 +73,10 @@ export function SelectTeamTable({
 									<div className="flex items-center space-x-3">
 										<Button
 											variant="outline"
-											disabled={activeTeamId === row.team_id}
-											onClick={() =>
-												changeTeam.execute({
-													teamId: row.team_id,
-													redirectTo: "/",
-												})
+											disabled={
+												activeTeamId === row.teamId || changeTeam.isPending
 											}
+											onClick={() => changeTeam.mutate({ teamId: row.teamId })}
 										>
 											Activate
 										</Button>

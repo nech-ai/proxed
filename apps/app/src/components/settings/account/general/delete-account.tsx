@@ -1,6 +1,5 @@
 "use client";
 
-import { deleteUserAction } from "@/actions/delete-user-action";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -21,10 +20,25 @@ import {
 	CardTitle,
 } from "@proxed/ui/components/card";
 import { Loader2 } from "lucide-react";
-import { useTransition } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
+import { useRouter } from "next/navigation";
+import { createClient } from "@proxed/supabase/client";
 
 export function DeleteAccount() {
-	const [isPending, startTransition] = useTransition();
+	const trpc = useTRPC();
+	const router = useRouter();
+	const supabase = createClient();
+
+	const deleteUser = useMutation(
+		trpc.user.delete.mutationOptions({
+			onSuccess: async () => {
+				await supabase.auth.signOut();
+				router.push("/");
+				router.refresh();
+			},
+		}),
+	);
 
 	return (
 		<Card className="border-destructive">
@@ -58,10 +72,8 @@ export function DeleteAccount() {
 						</AlertDialogHeader>
 						<AlertDialogFooter>
 							<AlertDialogCancel>Cancel</AlertDialogCancel>
-							<AlertDialogAction
-								onClick={() => startTransition(() => deleteUserAction())}
-							>
-								{isPending ? (
+							<AlertDialogAction onClick={() => deleteUser.mutate()}>
+								{deleteUser.isPending ? (
 									<Loader2 className="h-4 w-4 animate-spin" />
 								) : (
 									"Continue"

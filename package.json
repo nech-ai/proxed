@@ -1,7 +1,11 @@
 {
 	"name": "proxed",
 	"private": true,
-	"workspaces": ["packages/*", "apps/*", "tooling/*"],
+	"workspaces": [
+		"packages/*",
+		"apps/*",
+		"tooling/*"
+	],
 	"scripts": {
 		"build": "turbo build",
 		"clean": "git clean -xdf node_modules",
@@ -15,26 +19,26 @@
 		"dev:trigger": "dotenv -c -- bun run --cwd apps/app dev:trigger",
 		"start:web": "dotenv -c -- turbo start --filter=@proxed/web",
 		"start:app": "dotenv -c -- turbo start --filter=@proxed/app",
-		"supabase:start": "dotenv -c -- bun run --cwd apps/api dev",
-		"supabase:reset": "dotenv -c -- bun run --cwd apps/api reset",
-		"supabase:migrate": "dotenv -c -- bun run --cwd apps/api migrate",
-		"supabase:migration:create": "dotenv -c -- bun run --cwd apps/api migration:create",
-		"supabase:generate": "dotenv -c -- bun run --cwd apps/api generate",
+		"supabase:start": "dotenv -c -- bun run --cwd packages/supabase dev",
+		"supabase:reset": "dotenv -c -- bun run --cwd packages/supabase reset",
+		"supabase:migrate": "dotenv -c -- bun run --cwd packages/supabase migrate",
+		"supabase:migration:create": "dotenv -c -- bun run --cwd packages/supabase migration:create",
+		"supabase:generate": "dotenv -c -- bun run --cwd packages/supabase generate",
 		"format": "biome format --write .",
 		"lint": "turbo lint && manypkg check",
 		"typecheck": "turbo typecheck",
 		"update:all": "manypkg exec bun update"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
-		"@manypkg/cli": "^0.24.0",
-		"@types/bun": "^1.2.20",
-		"@types/node": "^22.17.2",
-		"dotenv-cli": "^8.0.0",
+		"@biomejs/biome": "2.3.10",
+		"@manypkg/cli": "^0.25.1",
+		"@types/bun": "^1.3.5",
+		"@types/node": "^25.0.3",
+		"dotenv-cli": "^11.0.0",
 		"tsconfig": "workspace:*",
-		"turbo": "^2.6.3",
-		"type-fest": "^4.41.0",
-		"typescript": "5.8.3"
+		"turbo": "^2.7.2",
+		"type-fest": "^5.3.1",
+		"typescript": "5.9.3"
 	},
 	"packageManager": "bun@1.2.11",
 	"trustedDependencies": [

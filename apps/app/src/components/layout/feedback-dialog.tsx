@@ -19,17 +19,15 @@ import {
 import { Textarea } from "@proxed/ui/components/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { usePathname } from "next/navigation";
-import { useAction } from "next-safe-action/hooks";
-import { feedbackAction } from "@/actions/feedback-action";
 import { feedbackSchema } from "@/actions/schema";
 import type { FeedbackFormValues } from "@/actions/schema";
 import { MessageSquareText } from "lucide-react";
 import { useToast } from "@proxed/ui/hooks/use-toast";
 import { useState } from "react";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
 
 export function FeedbackDialog() {
-	const pathname = usePathname();
 	const { toast } = useToast();
 	const [open, setOpen] = useState(false);
 
@@ -40,29 +38,29 @@ export function FeedbackDialog() {
 		},
 	});
 
-	const submitFeedback = useAction(feedbackAction, {
-		onSuccess: () => {
-			toast({
-				title: "Feedback sent",
-				description: "Thank you for your feedback!",
-			});
-			form.reset();
-			setOpen(false);
-		},
-		onError: (error) => {
-			toast({
-				variant: "destructive",
-				title: "Error",
-				description: error?.error?.serverError || "Failed to send feedback",
-			});
-		},
-	});
+	const trpc = useTRPC();
+	const submitFeedback = useMutation(
+		trpc.support.feedback.mutationOptions({
+			onSuccess: () => {
+				toast({
+					title: "Feedback sent",
+					description: "Thank you for your feedback!",
+				});
+				form.reset();
+				setOpen(false);
+			},
+			onError: (error) => {
+				toast({
+					variant: "destructive",
+					title: "Error",
+					description: error?.message || "Failed to send feedback",
+				});
+			},
+		}),
+	);
 
 	function onSubmit(values: FeedbackFormValues) {
-		submitFeedback.execute({
-			message: values.message,
-			revalidatePath: pathname,
-		});
+		submitFeedback.mutate({ message: values.message });
 	}
 
 	return (
@@ -100,13 +98,8 @@ export function FeedbackDialog() {
 							)}
 						/>
 						<div className="flex justify-end">
-							<Button
-								type="submit"
-								disabled={submitFeedback.status === "executing"}
-							>
-								{submitFeedback.status === "executing"
-									? "Sending..."
-									: "Send Feedback"}
+							<Button type="submit" disabled={submitFeedback.isPending}>
+								{submitFeedback.isPending ? "Sending..." : "Send Feedback"}
 							</Button>
 						</div>
 					</form>

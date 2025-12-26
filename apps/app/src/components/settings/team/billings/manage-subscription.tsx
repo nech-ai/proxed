@@ -4,25 +4,28 @@ import { ActionBlock } from "@/components/shared/action-block";
 import { Card } from "@proxed/ui/components/card";
 import { Button } from "@proxed/ui/components/button";
 import { Badge } from "@proxed/ui/components/badge";
+import { useUserContext } from "@/store/user/hook";
+import { UTCDate } from "@date-fns/utc";
 import { Check, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { PLANS } from "@/utils/plans";
+import { useUserQuery } from "@/hooks/use-user";
+import { useBillingQuery } from "@/hooks/use-billing";
+import { format } from "date-fns";
 
-interface ManageSubscriptionProps {
-	teamId: string;
-	plan: string | null;
-	email?: string;
-	canceledAt?: string | null;
-}
-
-export function ManageSubscription({
-	teamId,
-	plan,
-	email,
-	canceledAt,
-}: ManageSubscriptionProps) {
+export function ManageSubscription() {
 	const [isLoading, setIsLoading] = useState(false);
+	const { billing, plan, canceledAt } = useBillingQuery();
+	const { data: user } = useUserQuery();
+	const { dateFormat } = useUserContext((state) => state.data);
+	const dateOnlyFormat = dateFormat?.split(" ")[0] || "yyyy-MM-dd";
+	const teamId = user?.teamId ?? user?.team?.id ?? null;
+	const email = billing?.email ?? user?.email;
+
+	if (!plan || plan === "trial" || !teamId) {
+		return null;
+	}
 
 	const planName = plan?.split("-")[0].toUpperCase() ?? "FREE";
 	const billingCycle = plan?.split("-")[1] ?? "MONTHLY";
@@ -67,7 +70,7 @@ export function ManageSubscription({
 								<h3 className="text-lg font-medium">{planName}</h3>
 								{canceledAt && (
 									<Badge variant="destructive">
-										Cancels on {new Date(canceledAt).toLocaleDateString()}
+										Cancels on {format(new UTCDate(canceledAt), dateOnlyFormat)}
 									</Badge>
 								)}
 							</div>

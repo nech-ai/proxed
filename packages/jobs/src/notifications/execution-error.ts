@@ -10,7 +10,7 @@ import {
 export const sendExecutionErrorNotifications = schemaTask({
 	id: "execution-error",
 	schema: z.object({
-		executionId: z.string().uuid(),
+		executionId: z.uuid(),
 		teamId: z.string(),
 		model: z.string(),
 		error: z.string(),

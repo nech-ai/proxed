@@ -12,10 +12,9 @@ This is a **monorepo** using Turborepo with Bun as the runtime and package manag
 
 ### Apps
 
-- **proxy** (`apps/proxy/`): Core API service using Hono framework on Bun runtime. Handles AI provider proxying, DeviceCheck verification, and rate limiting.
+- **api** (`apps/api/`): Core API service using Hono framework on Bun runtime. Handles AI provider proxying, DeviceCheck verification, and rate limiting.
 - **app** (`apps/app/`): Next.js 15 customer dashboard with Supabase auth for managing API keys and schemas
 - **web** (`apps/web/`): Marketing/landing website built with Next.js 15
-- **api** (`apps/api/`): Supabase database configuration and migrations
 - **docs** (`apps/docs/`): Documentation site using Fumadocs
 
 ### Packages
@@ -79,7 +78,7 @@ bun run update:all      # Update all dependencies
 - Form state: React Hook Form with Zod validation
 
 ### API Development
-The proxy app (`apps/proxy/`) is the core service:
+The API app (`apps/api/`) is the core service:
 - Built with Hono framework (NOT Next.js)
 - Handles AI provider proxying (OpenAI, Anthropic, Google AI)
 - Implements rate limiting and usage tracking
@@ -98,7 +97,7 @@ bun test --preload ./test/setup.ts auth
 ## Critical Rules
 
 1. **Always use React Server Components by default** - only use client components when necessary
-2. **Proxy app uses Hono**, not Next.js - don't confuse the two
+2. **API app uses Hono**, not Next.js - don't confuse the two
 3. **Use workspace imports**: `@proxed/ui`, `@proxed/supabase`, etc.
 4. **Never expose API keys** - all AI provider calls must go through the proxy
 5. **Always use RLS** when accessing Supabase from client components
@@ -107,10 +106,10 @@ bun test --preload ./test/setup.ts auth
 
 ## Project Structure Patterns
 
-- Migrations: `apps/api/supabase/migrations/`
-- Database schemas: `apps/api/supabase/schemas/`
+- Migrations: `packages/supabase/supabase/migrations/`
+- Database schemas: `packages/supabase/supabase/schemas/`
 - Shared types: `packages/*/src/types.ts`
-- API routes (proxy): `apps/proxy/src/routes/`
+- API routes (proxy): `apps/api/src/rest/routes/`
 - Dashboard routes: `apps/app/app/` (App Router)
 
 ## Environment Variables

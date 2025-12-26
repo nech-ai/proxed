@@ -1,6 +1,5 @@
 "use client";
 
-import { inviteTeamMemberAction } from "@/actions/invite-team-member-action";
 import {
 	type InviteTeamMemberFormValues,
 	inviteTeamMemberSchema,
@@ -32,48 +31,54 @@ import {
 } from "@proxed/ui/components/select";
 import { useToast } from "@proxed/ui/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
+import { useTRPC } from "@/trpc/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface InviteMemberFormProps {
 	onSuccess?: () => void;
-	revalidatePath?: string;
 }
 
-export function InviteMemberForm({
-	onSuccess,
-	revalidatePath,
-}: InviteMemberFormProps) {
+export function InviteMemberForm({ onSuccess }: InviteMemberFormProps) {
 	const { toast } = useToast();
 	const form = useForm<InviteTeamMemberFormValues>({
 		resolver: zodResolver(inviteTeamMemberSchema),
 		defaultValues: {
 			email: "",
 			role: "MEMBER",
-			revalidatePath,
 		},
 	});
 
-	const inviteMember = useAction(inviteTeamMemberAction, {
-		onSuccess: () => {
-			form.reset();
-			toast({
-				title: "Invitation sent",
-				description: "The team member has been invited successfully.",
-			});
-			onSuccess?.();
-		},
-		onError: (error) => {
-			toast({
-				variant: "destructive",
-				title: "Error",
-				description: error?.error?.serverError || "Failed to send invitation",
-			});
-		},
-	});
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const inviteMember = useMutation(
+		trpc.team.invite.mutationOptions({
+			onSuccess: () => {
+				form.reset();
+				queryClient.invalidateQueries({
+					queryKey: trpc.team.invites.queryKey(),
+				});
+				toast({
+					title: "Invitation sent",
+					description: "The team member has been invited successfully.",
+				});
+				onSuccess?.();
+			},
+			onError: (error) => {
+				toast({
+					variant: "destructive",
+					title: "Error",
+					description: error?.message || "Failed to send invitation",
+				});
+			},
+		}),
+	);
 
 	const onSubmit = form.handleSubmit((data) => {
-		inviteMember.execute(data);
+		inviteMember.mutate({
+			email: data.email,
+			role: data.role,
+		});
 	});
 
 	return (
@@ -133,11 +138,9 @@ export function InviteMemberForm({
 
 							<Button
 								type="submit"
-								disabled={
-									inviteMember.status === "executing" || !form.formState.isDirty
-								}
+								disabled={inviteMember.isPending || !form.formState.isDirty}
 							>
-								{inviteMember.status === "executing" ? (
+								{inviteMember.isPending ? (
 									<>
 										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 										Sending...

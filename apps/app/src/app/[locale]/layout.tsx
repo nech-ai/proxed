@@ -7,6 +7,7 @@ import NextTopLoader from "nextjs-toploader";
 import "@proxed/ui/globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { I18nProviderClient } from "@/locales/client";
+import { TRPCReactProvider } from "@/trpc/client";
 
 export const metadata: Metadata = {
 	title: {
@@ -44,9 +45,11 @@ export default async function RootLayout({
 			>
 				<NextTopLoader color="var(--colors-primary)" />
 				<I18nProviderClient locale="en">
-					<JotaiProvider>
-						<NuqsAdapter>{children}</NuqsAdapter>
-					</JotaiProvider>
+					<TRPCReactProvider>
+						<JotaiProvider>
+							<NuqsAdapter>{children}</NuqsAdapter>
+						</JotaiProvider>
+					</TRPCReactProvider>
 				</I18nProviderClient>
 				<Toaster />
 			</body>

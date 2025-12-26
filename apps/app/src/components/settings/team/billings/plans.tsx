@@ -15,18 +15,21 @@ import { Check, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { PLANS, formatPrice, formatCostPerCall } from "@/utils/plans";
+import { useUserQuery } from "@/hooks/use-user";
+import { useBillingQuery } from "@/hooks/use-billing";
 
-export function Plans({
-	teamId,
-	canChooseStarterPlan,
-}: {
-	teamId: string;
-	canChooseStarterPlan: boolean;
-}) {
+export function Plans() {
 	const [isLoading, setIsLoading] = useState(0);
 	const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(
 		"yearly",
 	);
+	const { plan, canChooseStarterPlan } = useBillingQuery();
+	const { data: user } = useUserQuery();
+	const teamId = user?.teamId ?? user?.team?.id ?? null;
+
+	if (!teamId || plan !== "trial") {
+		return null;
+	}
 
 	return (
 		<ActionBlock title="Available Plans">

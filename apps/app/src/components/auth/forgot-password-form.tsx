@@ -22,7 +22,7 @@ import * as z from "zod";
 import { AuthCard } from "./auth-card";
 
 const formSchema = z.object({
-	email: z.string().email(),
+	email: z.email(),
 });
 
 type FormValues = z.infer<typeof formSchema>;

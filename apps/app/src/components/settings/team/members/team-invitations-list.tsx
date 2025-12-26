@@ -27,41 +27,48 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 
-import { deleteInviteAction } from "@/actions/delete-invite-action";
-import type { TeamInvitation } from "@proxed/supabase/types";
+import type { RouterOutputs } from "@/trpc/types";
 import { Button } from "@proxed/ui/components/button";
 import { useToast } from "@proxed/ui/hooks/use-toast";
 import { MoreVerticalIcon, UndoIcon } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { TeamRoleSelect } from "./team-role-select";
+import { useTRPC } from "@/trpc/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMembershipQuery } from "@/hooks/use-membership";
 
 export function TeamInvitationsList({
 	invitations,
 }: {
-	invitations: TeamInvitation[];
+	invitations: RouterOutputs["team"]["invites"];
 }) {
+	type TeamInvitation = RouterOutputs["team"]["invites"][number];
 	const { toast } = useToast();
-	const teamMembership = {
-		role: "OWNER",
-	};
+	const { role } = useMembershipQuery();
 
-	const deleteInvite = useAction(deleteInviteAction, {
-		onSuccess: () => {
-			toast({
-				description: "The invite has been revoked.",
-				duration: 3500,
-				variant: "default",
-			});
-		},
-		onError: () => {
-			toast({
-				duration: 3500,
-				variant: "destructive",
-				description: "Something went wrong please try again.",
-			});
-		},
-	});
+	const trpc = useTRPC();
+	const queryClient = useQueryClient();
+	const deleteInvite = useMutation(
+		trpc.team.deleteInvite.mutationOptions({
+			onSuccess: () => {
+				toast({
+					description: "The invite has been revoked.",
+					duration: 3500,
+					variant: "default",
+				});
+				queryClient.invalidateQueries({
+					queryKey: trpc.team.invites.queryKey(),
+				});
+			},
+			onError: () => {
+				toast({
+					duration: 3500,
+					variant: "destructive",
+					description: "Something went wrong please try again.",
+				});
+			},
+		}),
+	);
 
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -85,7 +92,7 @@ export function TeamInvitationsList({
 							}}
 						/>
 
-						{teamMembership?.role === "OWNER" && (
+						{role === "OWNER" && (
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
 									<Button size="icon" variant="ghost">
@@ -95,9 +102,8 @@ export function TeamInvitationsList({
 								<DropdownMenuContent>
 									<DropdownMenuItem
 										onClick={() => {
-											deleteInvite.execute({
+											deleteInvite.mutate({
 												id: row.original.id,
-												revalidatePath: "settings/team/members",
 											});
 										}}
 									>

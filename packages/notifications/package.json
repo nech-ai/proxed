@@ -1,13 +1,13 @@
 {
 	"dependencies": {
-		"@novu/framework": "^2.6.7",
+		"@novu/framework": "^2.9.0",
 		"@novu/node": "^2.6.6",
 		"@proxed/logger": "workspace:*",
 		"@proxed/mail": "workspace:*",
 		"@proxed/supabase": "workspace:*",
-		"uuid": "^11.1.0",
-		"zod": "^3.25.76",
-		"zod-to-json-schema": "^3.24.6"
+		"uuid": "^13.0.0",
+		"zod": "^4.2.1",
+		"zod-to-json-schema": "^3.25.0"
 	},
 	"main": "./src/index.ts",
 	"name": "@proxed/notifications",
@@ -19,7 +19,7 @@
 	},
 	"devDependencies": {
 		"tsconfig": "workspace:*",
-		"typescript": "5.8.3"
+		"typescript": "5.9.3"
 	},
 	"version": "0.0.0"
 }

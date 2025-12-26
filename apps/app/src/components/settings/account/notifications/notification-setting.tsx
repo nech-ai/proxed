@@ -1,50 +1,39 @@
 "use client";
 
-import { updateSubscriberPreferenceAction } from "@/actions/update-subscriber-preference-action";
 import { useI18n } from "@/locales/client";
 import { Label } from "@proxed/ui/components/label";
 import { Switch } from "@proxed/ui/components/switch";
-import { useOptimisticAction } from "next-safe-action/hooks";
+import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import { useTRPC } from "@/trpc/client";
 
 type Props = {
 	id: string;
 	name: string;
 	enabled: boolean;
-	subscriberId: string;
-	teamId: string;
-	type: string;
+	type: "inApp" | "email";
 };
 
-export function NotificationSetting({
-	id,
-	name,
-	enabled,
-	subscriberId,
-	teamId,
-	type,
-}: Props) {
+export function NotificationSetting({ id, name, enabled, type }: Props) {
 	const t = useI18n();
-	const { execute, optimisticState } = useOptimisticAction(
-		updateSubscriberPreferenceAction,
-		{
-			currentState: { enabled },
-			updateFn: (state) => {
-				return {
-					...state,
-					enabled: !state.enabled,
-				};
+	const trpc = useTRPC();
+	const [checked, setChecked] = useState(enabled);
+
+	const updatePreference = useMutation(
+		trpc.notifications.updatePreference.mutationOptions({
+			onError: () => {
+				setChecked((prev) => !prev);
 			},
-		},
+		}),
 	);
 
 	const onChange = () => {
-		execute({
+		const nextValue = !checked;
+		setChecked(nextValue);
+		updatePreference.mutate({
 			templateId: id,
 			type,
-			revalidatePath: "/settings/account/notifications-beta",
-			subscriberId,
-			teamId,
-			enabled: !enabled,
+			enabled: nextValue,
 		});
 	};
 
@@ -62,8 +51,9 @@ export function NotificationSetting({
 			</div>
 			<Switch
 				id={id}
-				checked={optimisticState.enabled}
+				checked={checked}
 				onCheckedChange={onChange}
+				disabled={updatePreference.isPending}
 			/>
 		</div>
 	);

@@ -91,7 +91,7 @@ const typeColors: Record<SchemaType, string> = {
 	enum: "text-pink-500 bg-pink-500/10",
 } as const;
 
-function FieldHeader({
+function _FieldHeader({
 	name: fieldName,
 	type,
 	description,
@@ -199,7 +199,10 @@ function FieldHeader({
 function TypeValidationControls({
 	schema,
 	onUpdate,
-}: { schema: JsonSchema; onUpdate: (schema: JsonSchema) => void }) {
+}: {
+	schema: JsonSchema;
+	onUpdate: (schema: JsonSchema) => void;
+}) {
 	const [isOpen, setIsOpen] = useState(false);
 
 	const renderControls = () => {
@@ -244,7 +247,8 @@ function TypeValidationControls({
 										onChange={(e) =>
 											onUpdate({
 												...schema,
-												minLength: Number.parseInt(e.target.value) || undefined,
+												minLength:
+													Number.parseInt(e.target.value, 10) || undefined,
 											})
 										}
 										className="h-8"
@@ -258,7 +262,8 @@ function TypeValidationControls({
 										onChange={(e) =>
 											onUpdate({
 												...schema,
-												maxLength: Number.parseInt(e.target.value) || undefined,
+												maxLength:
+													Number.parseInt(e.target.value, 10) || undefined,
 											})
 										}
 										className="h-8"
@@ -329,7 +334,8 @@ function TypeValidationControls({
 										onChange={(e) =>
 											onUpdate({
 												...schema,
-												minItems: Number.parseInt(e.target.value) || undefined,
+												minItems:
+													Number.parseInt(e.target.value, 10) || undefined,
 											})
 										}
 										className="h-8"
@@ -345,7 +351,8 @@ function TypeValidationControls({
 										onChange={(e) =>
 											onUpdate({
 												...schema,
-												maxItems: Number.parseInt(e.target.value) || undefined,
+												maxItems:
+													Number.parseInt(e.target.value, 10) || undefined,
 											})
 										}
 										className="h-8"
@@ -395,8 +402,8 @@ function TypeValidationControls({
 }
 
 function QuickActionsMenu({
-	schema,
-	onUpdate,
+	schema: _schema,
+	onUpdate: _onUpdate,
 	onDelete,
 	onDuplicate,
 	onMoveUp,
@@ -446,7 +453,7 @@ function QuickActionsMenu({
 	);
 }
 
-function HotkeyBadge({ combo, label }: { combo: string[]; label: string }) {
+function _HotkeyBadge({ combo, label }: { combo: string[]; label: string }) {
 	return (
 		<div className="flex items-center gap-1.5 text-xs text-muted-foreground">
 			{combo.map((key, i) => (
@@ -462,7 +469,7 @@ function HotkeyBadge({ combo, label }: { combo: string[]; label: string }) {
 	);
 }
 
-function getTypeScriptPreview(
+function _getTypeScriptPreview(
 	name: string,
 	schema: JsonSchema,
 	indentLevel = 0,
@@ -485,7 +492,7 @@ function getTypeScriptPreview(
 			typeStr = "boolean";
 			break;
 		case "array":
-			typeStr = `Array<${schema.itemType ? getTypeScriptPreview("", schema.itemType).trim() : "any"}>`;
+			typeStr = `Array<${schema.itemType ? _getTypeScriptPreview("", schema.itemType).trim() : "any"}>`;
 			break;
 		case "object":
 			if (!schema.fields || Object.keys(schema.fields).length === 0) {
@@ -493,7 +500,7 @@ function getTypeScriptPreview(
 			} else {
 				typeStr = "{\n";
 				Object.entries(schema.fields).forEach(([fieldName, field]) => {
-					typeStr += getTypeScriptPreview(fieldName, field, indentLevel + 1);
+					typeStr += _getTypeScriptPreview(fieldName, field, indentLevel + 1);
 				});
 				typeStr += `${indent}}`;
 			}
@@ -551,30 +558,33 @@ export function SchemaNode({
 		[name, onRename],
 	);
 
-	const handleTypeChange = useCallback(
-		(type: JsonSchema["type"]) => {
+	const _handleTypeChange = useCallback(
+		(type: SchemaType) => {
 			const baseProps = {
-				type,
 				nullable: schema.nullable,
 				description: schema.description,
 			};
 
-			const newSchema = (() => {
+			const newSchema: JsonSchema = (() => {
 				switch (type) {
 					case "string":
-						return { ...baseProps };
+						return { type: "string", ...baseProps };
 					case "number":
-						return { ...baseProps };
-					case "array":
-						return { ...baseProps, itemType: { type: "string" } };
-					case "object":
-						return { ...baseProps, fields: {} };
+						return { type: "number", ...baseProps };
+					case "boolean":
+						return { type: "boolean", ...baseProps };
 					case "enum":
-						return { ...baseProps };
-					default:
-						return baseProps;
+						return { type: "enum", ...baseProps, values: [] as string[] };
+					case "array":
+						return {
+							type: "array",
+							...baseProps,
+							itemType: { type: "string" },
+						};
+					case "object":
+						return { type: "object", ...baseProps, fields: {} };
 				}
-			})() as JsonSchema;
+			})();
 
 			onUpdate(newSchema);
 		},
@@ -584,16 +594,14 @@ export function SchemaNode({
 	const handleQuickAdd = (type: SchemaType) => {
 		if (!newFieldName.trim()) return;
 
-		const fieldSchema: JsonSchema = {
-			type,
-			nullable: false,
-		} as JsonSchema;
-
-		if (type === "object") {
-			(fieldSchema as any).fields = {};
-		} else if (type === "array") {
-			(fieldSchema as any).itemType = { type: "string" };
-		}
+		const fieldSchema: JsonSchema =
+			type === "object"
+				? { type, nullable: false, fields: {} }
+				: type === "array"
+					? { type, nullable: false, itemType: { type: "string" } }
+					: type === "enum"
+						? { type, nullable: false, values: [] as string[] }
+						: { type, nullable: false };
 
 		if (schema.type === "object") {
 			onUpdate({

@@ -24,7 +24,6 @@ interface FeatureCardProps {
 	description: string;
 	icon: React.ReactNode;
 	href: string;
-	index: number;
 }
 
 function FeatureCard({
@@ -32,7 +31,6 @@ function FeatureCard({
 	description,
 	icon: Icon,
 	href,
-	index,
 }: FeatureCardProps) {
 	return (
 		<motion.div
@@ -104,8 +102,8 @@ export function Features() {
 				whileInView="visible"
 				viewport={{ once: true, margin: "-100px" }}
 			>
-				{siteConfig.features.map((feature, index) => (
-					<FeatureCard key={feature.name} {...feature} index={index} />
+				{siteConfig.features.map((feature) => (
+					<FeatureCard key={feature.name} {...feature} />
 				))}
 			</motion.div>
 		</Section>

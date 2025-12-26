@@ -35,7 +35,7 @@ export function StringControls({ schema, onUpdate }: TypeControlsProps) {
 					onChange={(e) =>
 						onUpdate({
 							...stringSchema,
-							minLength: Number.parseInt(e.target.value) || undefined,
+							minLength: Number.parseInt(e.target.value, 10) || undefined,
 						})
 					}
 				/>
@@ -48,7 +48,7 @@ export function StringControls({ schema, onUpdate }: TypeControlsProps) {
 					onChange={(e) =>
 						onUpdate({
 							...stringSchema,
-							maxLength: Number.parseInt(e.target.value) || undefined,
+							maxLength: Number.parseInt(e.target.value, 10) || undefined,
 						})
 					}
 				/>

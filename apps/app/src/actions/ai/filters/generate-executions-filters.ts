@@ -2,7 +2,7 @@
 
 import { filterExecutionsSchema } from "@/actions/schema";
 import { openai } from "@ai-sdk/openai";
-import { streamObject } from "ai";
+import { Output, streamText } from "ai";
 import { createStreamableValue } from "@ai-sdk/rsc";
 
 const VALID_FILTERS = [
@@ -12,7 +12,15 @@ const VALID_FILTERS = [
 	"finishReason",
 	"start",
 	"end",
-];
+] as const;
+
+function createPickMap<const T extends string>(keys: readonly T[]) {
+	const result: Record<T, true> = {} as Record<T, true>;
+	for (const key of keys) {
+		result[key] = true;
+	}
+	return result;
+}
 
 export async function generateExecutionsFilters(
 	prompt: string,
@@ -21,24 +29,21 @@ export async function generateExecutionsFilters(
 	const stream = createStreamableValue();
 
 	(async () => {
-		const { partialObjectStream } = await streamObject({
+		const { partialOutputStream } = streamText({
 			model: openai("gpt-4.1-nano"),
 			system: `You are a helpful assistant that generates filters for AI execution logs based on user queries. \n
                Current date is: ${new Date().toISOString().split("T")[0]} \n
                ${context}
       `,
-			schema: filterExecutionsSchema.pick({
-				...(VALID_FILTERS.reduce((acc: Record<string, boolean>, filter) => {
-					acc[filter] = true;
-					return acc;
-				}, {}) as any),
+			output: Output.object({
+				schema: filterExecutionsSchema.pick(createPickMap(VALID_FILTERS)),
 			}),
 			prompt,
 			temperature: 0.7,
 		});
 
-		for await (const partialObject of partialObjectStream) {
-			stream.update(partialObject);
+		for await (const partialOutput of partialOutputStream) {
+			stream.update(partialOutput);
 		}
 
 		stream.done();

@@ -1,5 +1,5 @@
 "use client";
-import type { Database } from "@proxed/supabase/types";
+import type { RouterOutputs } from "@/trpc/types";
 import { Badge } from "@proxed/ui/components/badge";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
@@ -13,21 +13,7 @@ import {
 } from "@proxed/ui/components/tooltip";
 
 export type ExecutionOutput =
-	Database["public"]["Tables"]["executions"]["Row"] & {
-		project: {
-			id: string;
-			name: string;
-			bundle_id: string;
-		};
-		device_check: {
-			id: string;
-			name: string;
-		};
-		key: {
-			id: string;
-			display_name: string;
-		};
-	};
+	RouterOutputs["executions"]["list"]["data"][number];
 
 export const columns: ColumnDef<ExecutionOutput>[] = [
 	{
@@ -36,9 +22,9 @@ export const columns: ColumnDef<ExecutionOutput>[] = [
 		enableSorting: true,
 		cell: ({ row }) => (
 			<div className="flex flex-col">
-				<span>{row.original.project.name}</span>
+				<span>{row.original.project?.name ?? "Unknown"}</span>
 				<span className="text-muted-foreground text-sm">
-					{row.original.project.bundle_id}
+					{row.original.project?.bundleId ?? "N/A"}
 				</span>
 			</div>
 		),
@@ -57,26 +43,26 @@ export const columns: ColumnDef<ExecutionOutput>[] = [
 	},
 	{
 		header: "Tokens",
-		accessorKey: "total_tokens",
+		accessorKey: "totalTokens",
 		enableSorting: true,
 		cell: ({ row }) => (
 			<div className="flex flex-col">
-				<span>{row.original.total_tokens?.toLocaleString() || 0}</span>
+				<span>{row.original.totalTokens?.toLocaleString() || 0}</span>
 				<span className="text-muted-foreground text-sm">
-					{row.original.prompt_tokens?.toLocaleString() || 0} /{" "}
-					{row.original.completion_tokens?.toLocaleString() || 0}
+					{row.original.promptTokens?.toLocaleString() || 0} /{" "}
+					{row.original.completionTokens?.toLocaleString() || 0}
 				</span>
 			</div>
 		),
 	},
 	{
 		header: "Cost",
-		accessorKey: "total_cost",
+		accessorKey: "totalCost",
 		enableSorting: true,
 		cell: ({ row }) => {
-			const totalCost = row.original.total_cost;
-			const promptCost = row.original.prompt_cost;
-			const completionCost = row.original.completion_cost;
+			const totalCost = row.original.totalCost;
+			const promptCost = row.original.promptCost;
+			const completionCost = row.original.completionCost;
 
 			const rawDollar = (n?: number | null) =>
 				n === null || n === undefined ? "$0.000000" : `$${n.toFixed(6)}`;
@@ -112,11 +98,11 @@ export const columns: ColumnDef<ExecutionOutput>[] = [
 	},
 	{
 		header: "Status",
-		accessorKey: "finish_reason",
+		accessorKey: "finishReason",
 		enableSorting: true,
 		cell: ({ row }) => (
-			<Badge variant={row.original.error_message ? "destructive" : "default"}>
-				{row.original.finish_reason}
+			<Badge variant={row.original.errorMessage ? "destructive" : "default"}>
+				{row.original.finishReason}
 			</Badge>
 		),
 	},
@@ -128,10 +114,10 @@ export const columns: ColumnDef<ExecutionOutput>[] = [
 	},
 	{
 		header: "Created At",
-		accessorKey: "created_at",
+		accessorKey: "createdAt",
 		enableSorting: true,
 		cell: ({ row }) =>
-			format(new Date(row.original.created_at), "yyyy-MM-dd HH:mm:ss"),
+			format(new Date(row.original.createdAt), "yyyy-MM-dd HH:mm:ss"),
 	},
 	{
 		header: "",

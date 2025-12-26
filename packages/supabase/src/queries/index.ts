@@ -2,8 +2,10 @@ import { UTCDate } from "@date-fns/utc";
 import type { Client } from "../types/index";
 import { subYears } from "date-fns";
 
-export function getPercentageIncrease(a: number, b: number) {
-	return a > 0 && b > 0 ? Math.abs(((a - b) / b) * 100).toFixed() : 0;
+export function getPercentageIncrease(previous: number, current: number) {
+	return previous > 0 && current > 0
+		? Math.abs(((current - previous) / previous) * 100).toFixed()
+		: 0;
 }
 
 // Database types

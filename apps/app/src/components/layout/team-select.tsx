@@ -1,7 +1,6 @@
 "use client";
-import { changeTeamAction } from "@/actions/change-team-action";
 
-import type { TeamMembership } from "@proxed/supabase/types";
+import type { RouterOutputs } from "@/trpc/types";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -13,11 +12,10 @@ import {
 	DropdownMenuTrigger,
 } from "@proxed/ui/components/dropdown-menu";
 import { ChevronsUpDownIcon, PlusIcon } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { redirect } from "next/navigation";
-// import { CreateTeamDialog } from "../teams/create-team-dialog";
 import { TeamAvatar } from "../teams/team-avatar";
-import { useTeamContext } from "@/store/team/hook";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 export function TeamSelect({
 	activeTeamId,
@@ -25,13 +23,23 @@ export function TeamSelect({
 	className,
 }: {
 	activeTeamId: string | null;
-	teamMemberships: TeamMembership[];
+	teamMemberships: RouterOutputs["team"]["memberships"];
 	className?: string;
 }) {
-	const changeTeam = useAction(changeTeamAction);
+	const trpc = useTRPC();
+	const router = useRouter();
 
 	const activeTeam = teamMemberships.find(
-		(teamMembership) => activeTeamId === teamMembership.team_id,
+		(teamMembership) => activeTeamId === teamMembership.teamId,
+	);
+
+	const changeTeam = useMutation(
+		trpc.team.switch.mutationOptions({
+			onSuccess: () => {
+				router.push("/");
+				router.refresh();
+			},
+		}),
 	);
 
 	const switchTeam = (teamId: string) => {
@@ -39,10 +47,7 @@ export function TeamSelect({
 			return;
 		}
 
-		changeTeam.execute({
-			teamId,
-			redirectTo: "/",
-		});
+		changeTeam.mutate({ teamId });
 	};
 
 	if (!activeTeam) {
@@ -58,7 +63,7 @@ export function TeamSelect({
 							<TeamAvatar
 								className="size-8"
 								name={activeTeam.team?.name ?? ""}
-								avatarUrl={activeTeam.team?.avatar_url ?? ""}
+								avatarUrl={activeTeam.team?.avatarUrl ?? ""}
 							/>
 						</span>
 						<span className="block flex-1 truncate">
@@ -69,20 +74,21 @@ export function TeamSelect({
 				</DropdownMenuTrigger>
 				<DropdownMenuContent className="w-full">
 					<DropdownMenuRadioGroup
-						value={activeTeam.team_id}
+						value={activeTeam.teamId}
 						onValueChange={switchTeam}
 					>
 						{teamMemberships.map((teamMembership) => (
 							<DropdownMenuRadioItem
-								key={teamMembership.team_id}
-								value={teamMembership.team_id}
+								key={teamMembership.teamId}
+								value={teamMembership.teamId}
 								className="flex items-center justify-center gap-2"
+								disabled={changeTeam.isPending}
 							>
 								<div className="flex flex-1 items-center justify-start gap-2">
 									<TeamAvatar
 										className="size-6"
 										name={teamMembership.team?.name ?? ""}
-										avatarUrl={teamMembership.team?.avatar_url ?? ""}
+										avatarUrl={teamMembership.team?.avatarUrl ?? ""}
 									/>
 									{teamMembership.team?.name ?? ""}
 								</div>
@@ -93,15 +99,13 @@ export function TeamSelect({
 					<DropdownMenuSeparator />
 
 					<DropdownMenuGroup>
-						<DropdownMenuItem onClick={() => redirect("/teams/create")}>
+						<DropdownMenuItem onClick={() => router.push("/teams/create")}>
 							<PlusIcon className="mr-2 size-4" />
 							Create Team
 						</DropdownMenuItem>
 					</DropdownMenuGroup>
 				</DropdownMenuContent>
 			</DropdownMenu>
-
-			{/* <CreateTeamDialog /> */}
 		</div>
 	);
 }

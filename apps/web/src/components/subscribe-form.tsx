@@ -21,7 +21,7 @@ import { cn } from "@proxed/ui/lib/utils";
 const SUBMIT_SUCCESS_DURATION = 2000;
 
 const formSchema = z.object({
-	email: z.string().email("Please enter a valid email"),
+	email: z.email("Please enter a valid email"),
 });
 
 type FormData = z.infer<typeof formSchema>;

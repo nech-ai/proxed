@@ -11,8 +11,8 @@ import {
 	SunIcon,
 } from "lucide-react";
 
-import { signOutAction } from "@/actions/sign-out-action";
-import type { User } from "@proxed/supabase/types";
+import type { RouterOutputs } from "@/trpc/types";
+import { createClient } from "@proxed/supabase/client";
 import { Avatar, AvatarFallback } from "@proxed/ui/components/avatar";
 import {
 	DropdownMenu,
@@ -37,14 +37,19 @@ import {
 } from "@proxed/ui/components/sidebar";
 import Link from "next/link";
 import { cn } from "@proxed/ui/utils";
-import { useAction } from "next-safe-action/hooks";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { UserAvatar } from "./user-avatar";
+import { useRouter } from "next/navigation";
 
-export function NavUser({ user }: { user: User }) {
+export function NavUser({
+	user,
+}: {
+	user: NonNullable<RouterOutputs["user"]["me"]>;
+}) {
 	const { isMobile } = useSidebar();
-	const signOut = useAction(signOutAction);
+	const router = useRouter();
+	const supabase = createClient();
 
 	const { setTheme: setCurrentTheme, theme: currentTheme } = useTheme();
 	const [theme, setTheme] = useState<string>(currentTheme ?? "system");
@@ -83,14 +88,14 @@ export function NavUser({ user }: { user: User }) {
 							<Avatar className="h-8 w-8 rounded-lg">
 								<UserAvatar
 									className="size-8"
-									name={user.full_name ?? ""}
-									avatarUrl={user.avatar_url}
+									name={user.fullName ?? ""}
+									avatarUrl={user.avatarUrl}
 								/>
 								<AvatarFallback className="rounded-lg">CN</AvatarFallback>
 							</Avatar>
 							<div className="grid flex-1 text-left text-sm leading-tight">
 								<span className="truncate font-semibold">
-									{user.full_name ?? ""}
+									{user.fullName ?? ""}
 								</span>
 								<span className="truncate text-xs">{user.email}</span>
 							</div>
@@ -108,14 +113,14 @@ export function NavUser({ user }: { user: User }) {
 								<Avatar className="h-8 w-8 rounded-lg">
 									<UserAvatar
 										className="size-8"
-										name={user.full_name ?? ""}
-										avatarUrl={user.avatar_url}
+										name={user.fullName ?? ""}
+										avatarUrl={user.avatarUrl}
 									/>
 									<AvatarFallback className="rounded-lg">CN</AvatarFallback>
 								</Avatar>
 								<div className="grid flex-1 text-left text-sm leading-tight">
 									<span className="truncate font-semibold">
-										{user.full_name ?? ""}
+										{user.fullName ?? ""}
 									</span>
 									<span className="truncate text-xs">{user.email}</span>
 								</div>
@@ -174,7 +179,13 @@ export function NavUser({ user }: { user: User }) {
 							</DropdownMenuPortal>
 						</DropdownMenuSub>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem onClick={() => signOut.execute({})}>
+						<DropdownMenuItem
+							onClick={async () => {
+								await supabase.auth.signOut();
+								router.push("/login");
+								router.refresh();
+							}}
+						>
 							<LogOut />
 							Log out
 						</DropdownMenuItem>

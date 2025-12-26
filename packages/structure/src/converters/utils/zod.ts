@@ -11,17 +11,54 @@ import type {
 
 const validationBuilders = {
 	string: (schema: JsonSchema): string => {
-		let code = "z.string()";
-		if ("minLength" in schema && schema.minLength !== undefined)
-			code += `.min(${schema.minLength})`;
-		if ("maxLength" in schema && schema.maxLength !== undefined)
-			code += `.max(${schema.maxLength})`;
-		if ("email" in schema && schema.email) code += ".email()";
-		if ("url" in schema && schema.url) code += ".url()";
-		if ("uuid" in schema && schema.uuid) code += ".uuid()";
-		if ("regex" in schema && schema.regex)
-			code += `.regex(new RegExp("${schema.regex}"))`;
-		return code;
+		const applyStringConstraints = (base: string) => {
+			let code = base;
+			if ("minLength" in schema && schema.minLength !== undefined)
+				code += `.min(${schema.minLength})`;
+			if ("maxLength" in schema && schema.maxLength !== undefined)
+				code += `.max(${schema.maxLength})`;
+			if ("length" in schema && schema.length !== undefined)
+				code += `.length(${schema.length})`;
+			if ("regex" in schema && schema.regex)
+				code += `.regex(new RegExp("${schema.regex}"))`;
+			if ("startsWith" in schema && schema.startsWith)
+				code += `.startsWith("${schema.startsWith}")`;
+			if ("endsWith" in schema && schema.endsWith)
+				code += `.endsWith("${schema.endsWith}")`;
+			if ("trim" in schema && schema.trim) code += ".trim()";
+			if ("toLowerCase" in schema && schema.toLowerCase)
+				code += ".toLowerCase()";
+			if ("toUpperCase" in schema && schema.toUpperCase)
+				code += ".toUpperCase()";
+			return code;
+		};
+
+		if ("ip" in schema && schema.ip) {
+			const ipv4 = applyStringConstraints("z.ipv4()");
+			const ipv6 = applyStringConstraints("z.ipv6()");
+			return `z.union([${ipv4}, ${ipv6}])`;
+		}
+
+		let base = "z.string()";
+		if ("datetime" in schema && schema.datetime) {
+			base = "z.iso.datetime()";
+		} else if ("email" in schema && schema.email) {
+			base = "z.email()";
+		} else if ("url" in schema && schema.url) {
+			base = "z.url()";
+		} else if ("uuid" in schema && schema.uuid) {
+			base = "z.uuid()";
+		} else if ("cuid" in schema && schema.cuid) {
+			base = "z.cuid()";
+		} else if ("cuid2" in schema && schema.cuid2) {
+			base = "z.cuid2()";
+		} else if ("ulid" in schema && schema.ulid) {
+			base = "z.ulid()";
+		} else if ("emoji" in schema && schema.emoji) {
+			base = "z.emoji()";
+		}
+
+		return applyStringConstraints(base);
 	},
 
 	number: (schema: JsonSchema): string => {

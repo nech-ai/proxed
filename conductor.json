@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "setup": "bun install; for app in api app inbox web docs; do if [ -f \"$CONDUCTOR_ROOT_PATH/apps/$app/.env.local\" ]; then cp \"$CONDUCTOR_ROOT_PATH/apps/$app/.env.local\" \"apps/$app/.env.local\"; fi; done",
+    "run": "bun dev"
+  }
+}

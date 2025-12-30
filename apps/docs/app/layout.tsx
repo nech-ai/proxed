@@ -1,6 +1,6 @@
-import { RootProvider } from "fumadocs-ui/provider";
+import { RootProvider } from "fumadocs-ui/provider/next";
 import "fumadocs-ui/style.css";
-import { cn } from "fumadocs-ui/utils/cn";
+import { cn } from "@proxed/ui/lib/utils";
 import { Geist } from "next/font/google";
 import type { ReactNode } from "react";
 

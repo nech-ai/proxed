@@ -1,13 +1,13 @@
-import { source } from "@/lib/source";
+import { getPageImage, source } from "@/lib/source";
 import {
 	DocsPage,
 	DocsBody,
 	DocsTitle,
 	DocsDescription,
 } from "fumadocs-ui/page";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import defaultMdxComponents from "fumadocs-ui/mdx";
-import { metadataImage } from "@/lib/metadata";
 import { cn } from "@proxed/ui/lib/utils";
 import type { ReactNode } from "react";
 
@@ -62,13 +62,34 @@ export async function generateStaticParams() {
 
 export async function generateMetadata(props: {
 	params: Promise<{ slug?: string[] }>;
-}) {
+}): Promise<Metadata> {
 	const params = await props.params;
 	const page = source.getPage(params.slug);
 	if (!page) notFound();
 
-	return metadataImage.withImage(page.slugs, {
+	const ogImage = getPageImage(page).url;
+
+	return {
 		title: page.data.title,
 		description: page.data.description,
-	});
+		openGraph: {
+			type: "article",
+			title: page.data.title,
+			description: page.data.description,
+			images: [
+				{
+					url: ogImage,
+					width: 1200,
+					height: 630,
+					alt: page.data.title,
+				},
+			],
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: page.data.title,
+			description: page.data.description,
+			images: [ogImage],
+		},
+	};
 }

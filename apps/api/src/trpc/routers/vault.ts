@@ -22,9 +22,47 @@ function normalizeVaultPath(path: string) {
 		: trimmed;
 }
 
-function ensureTeamPath(path: string, teamId: string) {
+function decodePathSegment(segment: string) {
+	try {
+		return decodeURIComponent(segment);
+	} catch {
+		return null;
+	}
+}
+
+function normalizeAndValidateVaultPath(path: string) {
 	const normalized = normalizeVaultPath(path);
-	const [teamSegment] = normalized.split("/");
+
+	if (!normalized || normalized.includes("\\") || normalized.includes("\0")) {
+		throw new TRPCError({ code: "FORBIDDEN", message: "Invalid vault path" });
+	}
+
+	const segments = normalized.split("/");
+	const decodedSegments = segments.map((segment) => {
+		if (!segment || segment === "." || segment === "..") {
+			throw new TRPCError({ code: "FORBIDDEN", message: "Invalid vault path" });
+		}
+
+		const decoded = decodePathSegment(segment);
+		if (
+			!decoded ||
+			decoded === "." ||
+			decoded === ".." ||
+			decoded.includes("/") ||
+			decoded.includes("\\")
+		) {
+			throw new TRPCError({ code: "FORBIDDEN", message: "Invalid vault path" });
+		}
+
+		return decoded;
+	});
+
+	return { normalized, decodedSegments };
+}
+
+function ensureTeamPath(path: string, teamId: string) {
+	const { normalized, decodedSegments } = normalizeAndValidateVaultPath(path);
+	const [teamSegment] = decodedSegments;
 	if (!teamSegment || teamSegment !== teamId) {
 		throw new TRPCError({ code: "FORBIDDEN", message: "Invalid vault path" });
 	}

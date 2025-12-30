@@ -9,6 +9,7 @@ import { providerKeysRouter } from "./provider-keys";
 import { supportRouter } from "./support";
 import { teamRouter } from "./team";
 import { userRouter } from "./user";
+import { vaultRouter } from "./vault";
 
 export const appRouter = createTRPCRouter({
 	user: userRouter,
@@ -20,6 +21,7 @@ export const appRouter = createTRPCRouter({
 	metrics: metricsRouter,
 	notifications: notificationsRouter,
 	support: supportRouter,
+	vault: vaultRouter,
 });
 
 export type AppRouter = typeof appRouter;

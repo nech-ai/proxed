@@ -151,7 +151,7 @@ export async function recordExecution(
 		};
 		overrideModel?: string;
 	},
-) {
+): Promise<string | null> {
 	const db = c.get("db");
 	const geo = c.get("geo");
 	const userAgent = c.req.header("user-agent");
@@ -196,7 +196,7 @@ export async function recordExecution(
 	}
 
 	try {
-		await createExecution(db, {
+		const execution = await createExecution(db, {
 			...commonParams,
 			promptTokens: metrics.promptTokens,
 			completionTokens: metrics.completionTokens,
@@ -222,9 +222,12 @@ export async function recordExecution(
 				projectName: projectData.project.name,
 			});
 		}
+
+		return execution?.id ?? null;
 	} catch (error) {
 		logger.error(`Failed to record execution: ${error}`);
 		// Don't throw - this is a non-critical operation
+		return null;
 	}
 }
 

@@ -3,6 +3,7 @@ import { isJSONValue, type JSONObject } from "@ai-sdk/provider";
 import type { ProviderOptions } from "@ai-sdk/provider-utils";
 import type { Context } from "hono";
 import { createRoute, OpenAPIHono, type RouteConfig } from "@hono/zod-openapi";
+import { inArray } from "drizzle-orm";
 import { protectedMiddleware } from "../middleware";
 import type { Context as AppContext, FinishReason } from "../types";
 import { logger } from "../../utils/logger";
@@ -24,6 +25,8 @@ import {
 	recordExecution,
 	withTimeout,
 } from "../../utils/route-handlers";
+import { createAdminClient } from "../../services/supabase";
+import { vaultObjects } from "@proxed/db/schema";
 import {
 	authHeaderSchema,
 	errorResponseSchema,
@@ -89,6 +92,30 @@ function getOpenAIImageQuality(
 	}
 
 	return undefined;
+}
+
+function parseBase64Image(base64: string) {
+	const dataUriMatch = base64.match(/^data:(.+);base64,(.*)$/);
+	if (dataUriMatch) {
+		return {
+			mediaType: dataUriMatch[1],
+			base64: dataUriMatch[2],
+		};
+	}
+	return { base64 };
+}
+
+function getExtensionForMediaType(mediaType: string) {
+	switch (mediaType) {
+		case "image/jpeg":
+			return "jpg";
+		case "image/webp":
+			return "webp";
+		case "image/png":
+			return "png";
+		default:
+			return "png";
+	}
 }
 
 async function handleImageGeneration(c: Context<AppContext>) {
@@ -161,10 +188,143 @@ async function handleImageGeneration(c: Context<AppContext>) {
 		);
 
 		const generatedImages = gen.images.length > 0 ? gen.images : [gen.image];
-		const images = generatedImages.map((img) => ({
-			base64: img.base64,
-			mediaType: img.mediaType,
-		}));
+		const vaultWarnings: string[] = [];
+		const savedItems: Array<{
+			index: number;
+			path: string;
+			mediaType: string;
+			url?: string | null;
+		}> = [];
+		let vaultItems: Array<{ id: string; path: string; mediaType: string }> = [];
+
+		if (project.saveImagesToVault) {
+			const supabase = createAdminClient();
+			const now = new Date();
+			const datePath = [
+				now.getUTCFullYear().toString(),
+				String(now.getUTCMonth() + 1).padStart(2, "0"),
+				String(now.getUTCDate()).padStart(2, "0"),
+			];
+			const basePath = [teamId, "generated-images", project.id, ...datePath];
+			const rowsToInsert: Array<typeof vaultObjects.$inferInsert> = [];
+
+			for (const [index, img] of generatedImages.entries()) {
+				try {
+					const parsed = parseBase64Image(img.base64);
+					const mediaType = img.mediaType || parsed.mediaType || "image/png";
+					const extension = getExtensionForMediaType(mediaType);
+					const filename = `${crypto.randomUUID()}.${extension}`;
+					const pathTokens = [...basePath, filename];
+					const path = pathTokens.join("/");
+					const buffer = Buffer.from(parsed.base64, "base64");
+
+					const uploadResult = await supabase.storage
+						.from("vault")
+						.upload(path, buffer, {
+							contentType: mediaType,
+							cacheControl: "3600",
+							upsert: false,
+						});
+
+					if (uploadResult.error) {
+						vaultWarnings.push(
+							`Failed to save generated image ${index + 1} to vault.`,
+						);
+						continue;
+					}
+
+					const { data: signed } = await supabase.storage
+						.from("vault")
+						.createSignedUrl(path, 600);
+
+					rowsToInsert.push({
+						teamId,
+						projectId: project.id,
+						bucket: "vault",
+						pathTokens,
+						mimeType: mediaType,
+						sizeBytes: buffer.byteLength,
+					});
+
+					savedItems.push({
+						index,
+						path,
+						mediaType,
+						url: signed?.signedUrl ?? null,
+					});
+				} catch (error) {
+					logger.error(
+						`Failed to save generated image to vault: ${
+							error instanceof Error ? error.message : error
+						}`,
+					);
+					vaultWarnings.push(
+						`Failed to save generated image ${index + 1} to vault.`,
+					);
+				}
+			}
+
+			if (rowsToInsert.length > 0) {
+				try {
+					const inserted = await db
+						.insert(vaultObjects)
+						.values(rowsToInsert)
+						.returning();
+					const insertedByPath = new Map(
+						inserted.map((row) => [row.pathTokens.join("/"), row]),
+					);
+
+					vaultItems = savedItems
+						.map((item) => {
+							const row = insertedByPath.get(item.path);
+							if (!row) return null;
+							return {
+								id: row.id,
+								path: item.path,
+								mediaType: item.mediaType,
+							};
+						})
+						.filter(
+							(item): item is { id: string; path: string; mediaType: string } =>
+								!!item,
+						);
+				} catch (error) {
+					logger.error(
+						`Failed to record vault items: ${
+							error instanceof Error ? error.message : error
+						}`,
+					);
+					vaultWarnings.push(
+						"Failed to register saved images in the vault. Images were not stored.",
+					);
+					try {
+						await supabase.storage
+							.from("vault")
+							.remove(savedItems.map((item) => item.path));
+					} catch (cleanupError) {
+						logger.error(
+							`Failed to clean up vault uploads: ${
+								cleanupError instanceof Error
+									? cleanupError.message
+									: cleanupError
+							}`,
+						);
+					}
+					savedItems.length = 0;
+				}
+			}
+		}
+
+		const savedByIndex = new Map(savedItems.map((item) => [item.index, item]));
+		const images = generatedImages.map((img, index) => {
+			const saved = savedByIndex.get(index);
+			return {
+				base64: img.base64,
+				mediaType: img.mediaType,
+				...(saved?.url ? { url: saved.url } : {}),
+				...(saved?.path ? { path: saved.path } : {}),
+			};
+		});
 
 		const usage = gen.usage;
 		const promptTokens = usage?.inputTokens ?? 0;
@@ -182,7 +342,7 @@ async function handleImageGeneration(c: Context<AppContext>) {
 		});
 		const overrideCosts = formatImageCostForDB(totalCostNumber);
 
-		await recordExecution(
+		const executionId = await recordExecution(
 			c,
 			startTime,
 			{
@@ -190,16 +350,41 @@ async function handleImageGeneration(c: Context<AppContext>) {
 				completionTokens,
 				totalTokens,
 				finishReason: "stop",
-				response: { imagesCount: images.length },
+				response: {
+					imagesCount: images.length,
+					...(vaultItems.length > 0 ? { vault: { items: vaultItems } } : {}),
+				},
 			},
 			{ project, teamId },
 			{ overrideCosts, overrideModel: modelToUse },
 		);
 
+		if (executionId && vaultItems.length > 0) {
+			try {
+				await db
+					.update(vaultObjects)
+					.set({ executionId })
+					.where(
+						inArray(
+							vaultObjects.id,
+							vaultItems.map((item) => item.id),
+						),
+					);
+			} catch (error) {
+				logger.error(
+					`Failed to link vault items to execution: ${
+						error instanceof Error ? error.message : error
+					}`,
+				);
+			}
+		}
+
+		const warnings = [...(gen.warnings ?? []), ...vaultWarnings];
+
 		return c.json(
 			{
 				images,
-				warnings: gen.warnings,
+				warnings: warnings.length > 0 ? warnings : undefined,
 				providerMetadata: gen.providerMetadata,
 			},
 			200,

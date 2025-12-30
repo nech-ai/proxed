@@ -1,0 +1,39 @@
+---
+title: "Introducing Vault: a home for generated images"
+publishedAt: "2025-12-31"
+summary: "Save generated images automatically, view them in executions, and browse everything in the new Vault library."
+image: "/images/vault.png"
+tag: "Feature"
+---
+
+# Introducing Vault: a home for generated images
+
+Today we're launching **Vault**, a secure library for generated images. When enabled, every image produced by `/v1/image` is automatically stored in Supabase Storage and attached to its execution. You can browse everything in one place, with powerful filters and quick actions.
+
+## Why Vault
+
+- **Persistence by default**: keep generated images beyond the response payload.
+- **Execution context**: every saved image stays linked to the execution that created it.
+- **Private by design**: Vault uses a private storage bucket and team-scoped access.
+- **Fast retrieval**: get short‑lived signed URLs when you need to display or download.
+
+## How it works
+
+1. Open your project settings.
+2. Toggle **Save images to Vault**.
+3. Generate images with `/v1/image` as usual.
+
+When Vault is enabled, each image response includes a signed `url` and a stable `path` alongside the base64 payload.
+
+## What you’ll see in the dashboard
+
+- **Execution details** now show a grid of saved images for that run.
+- The new **Vault** page shows all saved images across projects.
+- Filters for **search**, **project**, and **date range** help you find what you need fast.
+- Actions include **open**, **download**, and **delete**.
+
+## Get started
+
+Read the full guide here: [/docs/projects/vault](/docs/projects/vault)
+
+If you're self‑hosting, make sure you’ve applied the latest Supabase migrations so the `vault` bucket and policies are created.

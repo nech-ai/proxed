@@ -57,11 +57,18 @@ Requires authentication. See the [API Authentication guide](/docs/authentication
 ## Successful Response (200 OK)
 
 The response includes generated images as base64 strings and optional metadata.
+If the project has **Save images to Vault** enabled, each image also includes a
+signed `url` and `path` for the stored file.
 
 ```json
 {
   "images": [
-    { "base64": "iVBORw0KGgoAAAANSUhEUg...", "mediaType": "image/png" }
+    {
+      "base64": "iVBORw0KGgoAAAANSUhEUg...",
+      "mediaType": "image/png",
+      "url": "https://...signed-url...",
+      "path": "team-id/generated-images/project-id/2025/12/30/uuid.png"
+    }
   ],
   "warnings": ["quality parameter not supported"],
   "providerMetadata": { "openai": { "images": [{ "revisedPrompt": "..." }] } }

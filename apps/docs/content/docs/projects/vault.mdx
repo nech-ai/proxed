@@ -1,0 +1,69 @@
+---
+title: Vault for Generated Images
+description: |
+  Save generated images to the Vault, keep them attached to executions, and manage them in the dashboard.
+---
+
+# Vault for Generated Images
+
+Vault is a secure, private library for generated images. When enabled on a project, every image produced by the Image Generation API is stored in Supabase Storage and appears in both the execution details and the Vault page.
+
+## Enable Vault for a project
+
+1. Open the project in the Proxed.AI dashboard.
+2. In the **Image Generation** section, toggle **Save images to Vault**.
+
+Once enabled, new images generated for that project are automatically saved.
+
+## What gets saved
+
+When Vault is enabled, Proxed stores:
+
+- The image file in the private `vault` bucket.
+- Metadata such as project, execution, mime type, size, and timestamps.
+
+Object paths follow this pattern:
+
+```
+team-id/generated-images/<project-id>/YYYY/MM/DD/<uuid>.<ext>
+```
+
+## API response changes
+
+When Vault is enabled, each image includes a signed `url` and its `path` in addition to the base64 payload.
+
+```json
+{
+  "images": [
+    {
+      "base64": "iVBORw0KGgoAAAANSUhEUg...",
+      "mediaType": "image/png",
+      "url": "https://...signed-url...",
+      "path": "team-id/generated-images/project-id/2025/12/30/uuid.png"
+    }
+  ]
+}
+```
+
+Signed URLs are short-lived to keep Vault private. Use `path` to request a fresh signed URL when needed.
+
+## Viewing in the dashboard
+
+- **Execution details** show a grid of saved images for that run.
+- **Vault** shows all saved images across projects in a single grid.
+
+Vault supports search, project filtering, and date range filtering. Each image includes actions to open, download, or delete.
+
+## Permissions
+
+- Team members can view Vault items for their team.
+- Only team owners can delete items from Vault.
+
+## Self-hosting notes
+
+If you self-host Proxed.AI:
+
+- Run the latest Supabase migrations.
+- Ensure the `vault` storage bucket and policies are applied.
+
+This keeps Vault private and scoped to team membership.

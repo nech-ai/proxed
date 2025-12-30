@@ -18,6 +18,17 @@ Proxed.AI is a platform for building secure, scalable, and compliant API for AI 
 - **Scalable**: Designed to handle production workloads with built-in rate limiting and monitoring
 - **Compliant**: Adheres to the latest security standards with comprehensive audit trails
 
+## Architecture and performance
+
+Proxed.AI is designed to keep your requests fast, reliable, and observable. Under the hood you will find:
+
+- A hardened proxy pipeline with retries, timeouts, and circuit breakers
+- Streaming-safe handling for SSE and raw responses
+- Read-after-write database routing to mitigate replica lag
+- Lightweight metrics and health endpoints for visibility
+
+Read more in [Architecture & Performance](/architecture).
+
 ## Supported AI Providers
 
 - **OpenAI**: GPT-4.1, GPT-4o, GPT-4o-mini, and other models
@@ -33,7 +44,6 @@ To self-host Proxed.AI, you need to have accounts for the following services:
 - [Supabase](https://supabase.com)
 - [Vercel](https://vercel.com)
 - [GitHub](https://github.com)
-
 
 
 

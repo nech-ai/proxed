@@ -6,6 +6,7 @@
 		"guides",
 		"---Core Concepts---",
 		"authentication",
+		"architecture",
 		"api-errors",
 		"---API Reference---",
 		"api-reference/index",

@@ -1,0 +1,73 @@
+---
+title: Architecture & Performance
+description: |
+  How Proxed.AI routes requests, enforces security, and stays fast and reliable.
+---
+
+# Architecture & Performance
+
+Proxed.AI is built as a secure AI gateway with a clear separation between the data plane (request path) and the control plane (configuration and management).
+
+## Core components
+
+- **API proxy (data plane)**: The Hono + Bun service that authenticates requests, enforces rate limits, proxies to upstream providers, and records usage.
+- **Structured endpoints**: `/v1/text`, `/v1/vision`, `/v1/pdf` provide schema-validated responses using the AI SDK.
+- **Image generation**: `/v1/image` generates images using the AI SDK (not schema-based output).
+- **Dashboard (control plane)**: The Next.js app that manages projects, keys, schemas, and usage analytics.
+- **Background jobs**: Notifications and scheduled tasks run via Trigger.dev jobs.
+- **Database and storage**: Supabase-backed persistence for projects, executions, and configuration.
+
+## Request lifecycle (data plane)
+
+1. **Client request** (for authenticated AI routes) includes a project ID and authentication token (partial key + test or DeviceCheck token).
+2. **Middleware** validates headers, applies rate limiting, and attaches geo context.
+3. **Project lookup** reconstructs the full provider API key from the server-side key and the client partial key.
+4. **Routing decision** selects either:
+   - **Proxy routes** (`/v1/openai`, `/v1/anthropic`, `/v1/google`) for pass-through requests.
+   - **Structured routes** (`/v1/text`, `/v1/vision`, `/v1/pdf`) for schema-validated responses.
+   - **Image generation** (`/v1/image`) for image outputs.
+5. **Execution recording** stores usage, latency, costs, and response snapshots for analytics and alerting (provider metadata when available).
+
+## Performance and reliability building blocks
+
+### Retries, timeouts, and backoff
+
+- Proxy calls are wrapped in automatic retries for transient errors (429, 502, 503, 504) with exponential backoff and jitter.
+- Provider-specific retry counts, delays, and timeouts are configurable via environment variables.
+- Structured routes use explicit execution timeouts (e.g., 180s for long-running text/vision/PDF/image generation).
+
+### Circuit breakers
+
+- Each upstream provider has a circuit breaker to prevent cascading failures during outages.
+- Circuit breakers expose state via the `/health` endpoint for easier debugging.
+
+### Streaming-aware proxying
+
+- Streaming responses are handled explicitly for SSE and raw streams, keeping long-running requests stable.
+- Proxy responses include `X-Proxed-Latency` and `X-Proxed-Retries` headers for visibility.
+
+### Read-after-write database routing
+
+- Requests that mutate state force reads to the primary database for a short window to avoid replica lag.
+- A lightweight in-memory LRU cache tracks recent writers per team.
+- If you run multiple API instances per region, use a shared store (e.g., Redis) to synchronize this window.
+
+### Rate limiting and abuse protection
+
+- Fixed-window rate limits are applied by endpoint class (default, AI proxy, structured endpoints).
+- Rate limit headers (`X-RateLimit-*`) are returned on protected endpoints for client-side backoff.
+
+### Metrics and health
+
+- A lightweight metrics collector tracks request counts, errors, and latency histograms for proxy routes.
+- `/health` returns system status plus circuit breaker state.
+- `/metrics` is available in development to inspect live counters.
+
+## Self-hosting performance knobs
+
+- **Provider timeouts/retries**: Tune `OPENAI_TIMEOUT`, `ANTHROPIC_TIMEOUT`, `GOOGLE_TIMEOUT` and related retry settings.
+- **Rate limits**: Adjust limits for your workload in the rate-limit middleware if you expect higher throughput.
+- **Replica lag window**: The read-after-write window is set to 10 seconds by default.
+- **Observability**: Export logs and metrics into your preferred APM if you need deeper production insights.
+
+If you want a guided walkthrough, see the [Quickstart](/quickstart) and the [Structured Responses](/structured-responses) guide.

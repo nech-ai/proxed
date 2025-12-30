@@ -1,0 +1,73 @@
+---
+title: "Architecture & Performance Updates: A Faster, Safer Proxed.AI"
+publishedAt: "2025-12-30"
+summary: "A deep dive into the data-plane improvements behind Proxed.AI's speed and reliability: retries, circuit breakers, read-after-write routing, and more."
+image: "/images/proxed-fly-io-multiregion.png"
+tag: "Engineering"
+---
+
+Over the last few months we have been tightening the core of Proxed.AI to make production traffic faster, more reliable, and easier to observe. This post walks through the architectural and performance upgrades that now sit behind every request.
+
+<br />
+### Architecture at a glance
+
+Proxed.AI is intentionally split into two planes:
+
+- **Data plane**: the API proxy and structured endpoints that validate, route, and execute requests.
+- **Control plane**: the dashboard, project configuration, and analytics.
+
+On the data plane, authenticated AI requests follow a consistent pipeline: authenticate, validate, route, execute, and record usage. This predictable flow is what allows us to improve reliability without changing your integrations.
+
+<br />
+### Performance and reliability upgrades
+
+1. **Hardened proxy pipeline**
+   - Automatic retries for transient upstream errors (429, 502, 503, 504).
+   - Exponential backoff with jitter to reduce thundering herd effects.
+   - Provider-specific timeouts and retry settings, configurable via environment variables.
+
+2. **Circuit breakers for upstreams**
+   - Each provider is protected by a circuit breaker to avoid cascading failures.
+   - Circuit state is exposed through the `/health` endpoint for quick diagnosis.
+
+3. **Streaming-safe responses**
+   - SSE and raw streaming responses are handled explicitly to keep long-lived requests stable.
+   - Proxy responses surface `X-Proxed-Latency` and `X-Proxed-Retries` for visibility.
+
+4. **Header sanitation and request validation**
+   - Inbound headers are sanitized before proxying to avoid leaking sensitive or invalid values.
+   - Request validation includes protections against malformed or suspicious inputs.
+
+5. **Rate limiting by endpoint type**
+   - Different fixed-window limits apply to default, proxy, and structured routes.
+   - Clients receive `X-RateLimit-*` headers to guide backoff behavior.
+
+<br />
+### Consistency at scale: read-after-write routing
+
+Multi-region deployments are only useful when the data plane reads the right data. To avoid replica lag after mutations, we maintain a short read-after-write window per team and route those reads to the primary database. The result is consistent behavior without requiring every request to hit the primary.
+
+<br />
+### Observability you can use
+
+- A lightweight metrics collector tracks request counts, errors, and latency histograms for proxy traffic.
+- `/health` reports overall status plus circuit breaker state.
+- `/metrics` is available in development to inspect live counters.
+- Executions store tokens, costs, and response snapshots for analytics and alerts (provider metadata where available).
+
+<br />
+### What this means for you
+
+- **Fewer transient failures** thanks to retries and circuit breakers.
+- **More stable streaming** for realtime or long-running responses.
+- **Clearer debugging** via response headers and health endpoints.
+- **Predictable costs** with consistent usage recording across routes.
+
+We also published a deeper technical breakdown in our docs: [Architecture & Performance](https://docs.proxed.ai/architecture).
+
+<br />
+### What is next
+
+These foundations unlock the next wave of performance work: smarter routing, deeper observability integrations, and multi-region efficiency improvements. If you are self-hosting, keep an eye on the architecture docs for tuning recommendations.
+
+As always, you can follow progress on [GitHub](https://github.com/nech-ai/proxed) and our updates page.

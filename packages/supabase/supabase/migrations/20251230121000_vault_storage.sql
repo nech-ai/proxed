@@ -3,6 +3,16 @@ insert into storage.buckets (id, name, public)
 values ('vault', 'vault', false)
 on conflict (id) do nothing;
 
+-- Ensure storage helper functions exist for policy checks
+create or replace function public.storage_foldername (name TEXT) returns text[] language plpgsql as $function$
+declare
+_parts text[];
+begin
+    select string_to_array(name, '/') into _parts;
+    return _parts[1:array_length(_parts,1)-1];
+end
+$function$;
+
 -- Storage policies for vault bucket
 create policy "Vault: allow select for team members" on storage.objects
     for select

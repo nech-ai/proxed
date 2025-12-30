@@ -37,6 +37,7 @@ import { useToast } from "@proxed/ui/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Textarea } from "@proxed/ui/components/textarea";
+import { Switch } from "@proxed/ui/components/switch";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -148,6 +149,7 @@ export function ProjectEditForm({ projectId }: ProjectEditFormProps) {
 			model: "none",
 			notificationThreshold: undefined,
 			notificationIntervalSeconds: undefined,
+			saveImagesToVault: false,
 		},
 	});
 
@@ -166,6 +168,7 @@ export function ProjectEditForm({ projectId }: ProjectEditFormProps) {
 			notificationThreshold: project.notificationThreshold ?? undefined,
 			notificationIntervalSeconds:
 				project.notificationIntervalSeconds ?? undefined,
+			saveImagesToVault: project.saveImagesToVault ?? false,
 		});
 	}, [project, form]);
 
@@ -561,6 +564,30 @@ export function ProjectEditForm({ projectId }: ProjectEditFormProps) {
 										)}
 									/>
 								</div>
+							</Section>
+
+							<Section title="Image Generation">
+								<FormField
+									control={form.control}
+									name="saveImagesToVault"
+									render={({ field }) => (
+										<FormItem className="flex items-center justify-between gap-4 rounded-md border border-border p-4">
+											<div className="space-y-1">
+												<FormLabel>Save images to Vault</FormLabel>
+												<FormDescription>
+													Store generated images in Supabase storage and show them
+													in Vault and executions.
+												</FormDescription>
+											</div>
+											<FormControl>
+												<Switch
+													checked={Boolean(field.value)}
+													onCheckedChange={field.onChange}
+												/>
+											</FormControl>
+										</FormItem>
+									)}
+								/>
 							</Section>
 
 							<Section title="Consumption Notifications">

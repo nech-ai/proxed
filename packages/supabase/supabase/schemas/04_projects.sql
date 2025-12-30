@@ -20,6 +20,7 @@ create table if not exists public.projects (
   last_rate_limit_notified_at TIMESTAMPTZ NULL, -- Track last notification time
   notification_threshold INT NULL, -- Number of calls in the interval to trigger notification
   notification_interval_seconds INT NULL, -- Time window in seconds for notification check
+  save_images_to_vault BOOLEAN default false not null,
   constraint unique_team_bundle unique (team_id, bundle_id),
   constraint projects_test_key_key unique (test_key)
 );

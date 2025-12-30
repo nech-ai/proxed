@@ -3,6 +3,7 @@ import type {
 	executions,
 	projects,
 	providerKeys,
+	vaultObjects,
 	teamInvitations,
 	teamMemberships,
 	teams,
@@ -17,6 +18,7 @@ type DeviceCheckRow = typeof deviceChecks.$inferSelect;
 type ProviderKeyRow = typeof providerKeys.$inferSelect;
 type ProjectRow = typeof projects.$inferSelect;
 type ExecutionRow = typeof executions.$inferSelect;
+type VaultObjectRow = typeof vaultObjects.$inferSelect;
 
 export function mapTeam(team: TeamRow | null) {
 	if (!team) return null;
@@ -128,6 +130,7 @@ export function mapProject(
 		lastRateLimitNotifiedAt: project.lastRateLimitNotifiedAt,
 		notificationIntervalSeconds: project.notificationIntervalSeconds,
 		notificationThreshold: project.notificationThreshold,
+		saveImagesToVault: project.saveImagesToVault,
 		deviceCheck: deviceCheck ? mapDeviceCheck(deviceCheck) : null,
 		key: key ? mapProviderKey(key) : null,
 	};
@@ -188,6 +191,31 @@ export function mapExecution(
 			? {
 					id: key.id,
 					displayName: key.displayName,
+				}
+			: null,
+	};
+}
+
+export function mapVaultObject(
+	vaultObject: VaultObjectRow,
+	project?: ProjectRow | null,
+) {
+	return {
+		id: vaultObject.id,
+		teamId: vaultObject.teamId,
+		projectId: vaultObject.projectId,
+		executionId: vaultObject.executionId,
+		bucket: vaultObject.bucket,
+		pathTokens: vaultObject.pathTokens,
+		mimeType: vaultObject.mimeType,
+		sizeBytes: vaultObject.sizeBytes,
+		createdAt: vaultObject.createdAt,
+		updatedAt: vaultObject.updatedAt,
+		project: project
+			? {
+					id: project.id,
+					name: project.name,
+					bundleId: project.bundleId,
 				}
 			: null,
 	};

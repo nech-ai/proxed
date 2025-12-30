@@ -188,6 +188,7 @@ export const updateProjectSchema = z.object({
 		.nullish(),
 	notificationThreshold: z.number().int().positive().nullish(),
 	notificationIntervalSeconds: z.number().int().positive().nullish(),
+	saveImagesToVault: z.boolean().optional(),
 });
 
 export type UpdateProjectFormValues = z.input<typeof updateProjectSchema>;

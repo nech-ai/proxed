@@ -5,6 +5,7 @@ import {
 	BriefcaseIcon,
 	FileIcon,
 	SettingsIcon,
+	ArchiveIcon,
 } from "lucide-react";
 import {
 	Sidebar,
@@ -38,6 +39,11 @@ const data = {
 			title: "Projects",
 			url: "/projects",
 			icon: BriefcaseIcon,
+		},
+		{
+			title: "Vault",
+			url: "/vault",
+			icon: ArchiveIcon,
 		},
 		{
 			title: "Settings",

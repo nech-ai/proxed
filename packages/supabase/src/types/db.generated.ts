@@ -175,6 +175,67 @@ export type Database = {
 					},
 				];
 			};
+			vault_objects: {
+				Row: {
+					bucket: string;
+					created_at: string;
+					execution_id: string | null;
+					id: string;
+					mime_type: string;
+					path_tokens: string[];
+					project_id: string;
+					size_bytes: number | null;
+					team_id: string;
+					updated_at: string;
+				};
+				Insert: {
+					bucket: string;
+					created_at?: string;
+					execution_id?: string | null;
+					id?: string;
+					mime_type: string;
+					path_tokens: string[];
+					project_id: string;
+					size_bytes?: number | null;
+					team_id: string;
+					updated_at?: string;
+				};
+				Update: {
+					bucket?: string;
+					created_at?: string;
+					execution_id?: string | null;
+					id?: string;
+					mime_type?: string;
+					path_tokens?: string[];
+					project_id?: string;
+					size_bytes?: number | null;
+					team_id?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "vault_objects_execution_id_fkey";
+						columns: ["execution_id"];
+						isOneToOne: false;
+						referencedRelation: "executions";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "vault_objects_project_id_fkey";
+						columns: ["project_id"];
+						isOneToOne: false;
+						referencedRelation: "projects";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "vault_objects_team_id_fkey";
+						columns: ["team_id"];
+						isOneToOne: false;
+						referencedRelation: "teams";
+						referencedColumns: ["id"];
+					},
+				];
+			};
 			projects: {
 				Row: {
 					bundle_id: string;
@@ -191,6 +252,7 @@ export type Database = {
 					name: string;
 					notification_interval_seconds: number | null;
 					notification_threshold: number | null;
+					save_images_to_vault: boolean;
 					schema_config: Json | null;
 					system_prompt: string | null;
 					team_id: string;
@@ -213,6 +275,7 @@ export type Database = {
 					name: string;
 					notification_interval_seconds?: number | null;
 					notification_threshold?: number | null;
+					save_images_to_vault?: boolean;
 					schema_config?: Json | null;
 					system_prompt?: string | null;
 					team_id: string;
@@ -235,6 +298,7 @@ export type Database = {
 					name?: string;
 					notification_interval_seconds?: number | null;
 					notification_threshold?: number | null;
+					save_images_to_vault?: boolean;
 					schema_config?: Json | null;
 					system_prompt?: string | null;
 					team_id?: string;

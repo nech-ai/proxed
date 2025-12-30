@@ -24,6 +24,7 @@ export interface ProjectWithRelations {
 	lastRateLimitNotifiedAt: string | null;
 	notificationIntervalSeconds: number | null;
 	notificationThreshold: number | null;
+	saveImagesToVault: boolean;
 }
 
 export async function getProjectQuery(
@@ -60,6 +61,7 @@ export async function getProjectQuery(
 				lastRateLimitNotifiedAt: projects.lastRateLimitNotifiedAt,
 				notificationIntervalSeconds: projects.notificationIntervalSeconds,
 				notificationThreshold: projects.notificationThreshold,
+				saveImagesToVault: projects.saveImagesToVault,
 				deviceCheck: deviceChecks,
 				key: providerKeys,
 			})

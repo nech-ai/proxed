@@ -239,6 +239,13 @@ export const imageGenerationResponseSchema = z
 					description: "MIME type for the image.",
 					example: "image/png",
 				}),
+				url: z.string().url().optional().openapi({
+					description:
+						"Optional signed URL for the stored image (present when saved to vault).",
+				}),
+				path: z.string().optional().openapi({
+					description: "Storage path for the saved image (when saved to vault).",
+				}),
 			}),
 		),
 		warnings: z.array(z.any()).optional().openapi({

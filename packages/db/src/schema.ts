@@ -921,6 +921,9 @@ export const projects = pgTable(
 		}),
 		notificationIntervalSeconds: integer("notification_interval_seconds"),
 		notificationThreshold: integer("notification_threshold"),
+		saveImagesToVault: boolean("save_images_to_vault")
+			.default(false)
+			.notNull(),
 	},
 	(table) => [
 		foreignKey({
@@ -1082,6 +1085,82 @@ export const executions = pgTable(
 			as: "permissive",
 			for: "select",
 			to: ["public"],
+		}),
+	],
+);
+
+export const vaultObjects = pgTable(
+	"vault_objects",
+	{
+		id: uuid().defaultRandom().primaryKey().notNull(),
+		teamId: uuid("team_id").notNull(),
+		projectId: uuid("project_id").notNull(),
+		executionId: uuid("execution_id"),
+		bucket: text().notNull(),
+		pathTokens: text("path_tokens").array().notNull(),
+		mimeType: text("mime_type").notNull(),
+		sizeBytes: integer("size_bytes"),
+		createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+			.defaultNow()
+			.notNull(),
+		updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+			.defaultNow()
+			.notNull(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.teamId],
+			foreignColumns: [teams.id],
+			name: "vault_objects_team_id_fkey",
+		}).onDelete("cascade"),
+		foreignKey({
+			columns: [table.projectId],
+			foreignColumns: [projects.id],
+			name: "vault_objects_project_id_fkey",
+		}).onDelete("cascade"),
+		foreignKey({
+			columns: [table.executionId],
+			foreignColumns: [executions.id],
+			name: "vault_objects_execution_id_fkey",
+		}).onDelete("set null"),
+		index("vault_objects_team_id_idx").using(
+			"btree",
+			table.teamId.asc().nullsLast().op("uuid_ops"),
+		),
+		index("vault_objects_project_id_idx").using(
+			"btree",
+			table.projectId.asc().nullsLast().op("uuid_ops"),
+		),
+		index("vault_objects_execution_id_idx").using(
+			"btree",
+			table.executionId.asc().nullsLast().op("uuid_ops"),
+		),
+		index("vault_objects_created_at_idx").using(
+			"btree",
+			table.createdAt.desc().nullsLast(),
+		),
+		pgPolicy("allow insert for team members", {
+			as: "permissive",
+			for: "insert",
+			to: ["public"],
+			withCheck: sql`is_member_of(( SELECT auth.uid() AS uid), team_id)`,
+		}),
+		pgPolicy("allow select for team members", {
+			as: "permissive",
+			for: "select",
+			to: ["public"],
+		}),
+		pgPolicy("allow update for team owners", {
+			as: "permissive",
+			for: "update",
+			to: ["public"],
+			using: sql`is_owner_of(( SELECT auth.uid() AS uid), team_id)`,
+		}),
+		pgPolicy("allow delete for team owners", {
+			as: "permissive",
+			for: "delete",
+			to: ["public"],
+			using: sql`is_owner_of(( SELECT auth.uid() AS uid), team_id)`,
 		}),
 	],
 );
@@ -1269,6 +1348,7 @@ export const teamsRelations = relations(teams, ({ many }) => ({
 	providerKeys: many(providerKeys),
 	projects: many(projects),
 	executions: many(executions),
+	vaultObjects: many(vaultObjects),
 }));
 
 export const teamMembershipsRelations = relations(
@@ -1338,6 +1418,7 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
 		references: [providerKeys.id],
 	}),
 	executions: many(executions),
+	vaultObjects: many(vaultObjects),
 }));
 
 export const executionsRelations = relations(executions, ({ one }) => ({
@@ -1356,6 +1437,21 @@ export const executionsRelations = relations(executions, ({ one }) => ({
 	providerKey: one(providerKeys, {
 		fields: [executions.keyId],
 		references: [providerKeys.id],
+	}),
+}));
+
+export const vaultObjectsRelations = relations(vaultObjects, ({ one }) => ({
+	team: one(teams, {
+		fields: [vaultObjects.teamId],
+		references: [teams.id],
+	}),
+	project: one(projects, {
+		fields: [vaultObjects.projectId],
+		references: [projects.id],
+	}),
+	execution: one(executions, {
+		fields: [vaultObjects.executionId],
+		references: [executions.id],
 	}),
 }));
 

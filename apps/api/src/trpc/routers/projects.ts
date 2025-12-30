@@ -210,6 +210,7 @@ export const projectsRouter = createTRPCRouter({
 				model: z.string().optional(),
 				notificationThreshold: z.number().int().positive().nullish(),
 				notificationIntervalSeconds: z.number().int().positive().nullish(),
+				saveImagesToVault: z.boolean().optional(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -232,6 +233,8 @@ export const projectsRouter = createTRPCRouter({
 			if (input.notificationIntervalSeconds !== undefined)
 				payload.notificationIntervalSeconds =
 					input.notificationIntervalSeconds ?? null;
+			if (input.saveImagesToVault !== undefined)
+				payload.saveImagesToVault = input.saveImagesToVault;
 
 			const [updated] = await ctx.db
 				.update(projects)

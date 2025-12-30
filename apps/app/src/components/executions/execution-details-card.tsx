@@ -14,6 +14,7 @@ import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
 import { UTCDate } from "@date-fns/utc";
 import { format } from "date-fns";
+import { useMemo } from "react";
 
 interface ExecutionDetailsCardProps {
 	executionId: string;
@@ -32,6 +33,36 @@ export function ExecutionDetailsCard({
 	if (!execution) {
 		return null;
 	}
+
+	const responsePayload = useMemo(() => {
+		if (!execution.response) return null;
+		try {
+			return JSON.parse(execution.response);
+		} catch {
+			return null;
+		}
+	}, [execution.response]);
+
+	const vaultItems = Array.isArray(responsePayload?.vault?.items)
+		? responsePayload?.vault?.items
+		: [];
+
+	const vaultPaths = vaultItems
+		.map((item: { path?: string }) => item?.path)
+		.filter((path: string | undefined): path is string => Boolean(path));
+
+	const signedUrlsQuery = useQuery({
+		...trpc.vault.signedUrls.queryOptions(
+			{ paths: vaultPaths, expiresIn: 600 },
+		),
+		enabled: vaultPaths.length > 0,
+	});
+
+	const signedUrlsByPath = new Map(
+		(signedUrlsQuery.data ?? [])
+			.filter((item) => item.url)
+			.map((item) => [item.path, item.url]),
+	);
 
 	const locationInfo = getLocationInfo(
 		execution.countryCode,
@@ -154,6 +185,40 @@ export function ExecutionDetailsCard({
 							<p className="text-base whitespace-pre-wrap">
 								{execution.prompt}
 							</p>
+						</div>
+					)}
+					{vaultItems.length > 0 && (
+						<div className="mt-6">
+							<p className="text-sm text-muted-foreground mb-3">
+								Generated Images
+							</p>
+							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+								{vaultItems.map(
+									(item: { id?: string; path?: string; mediaType?: string }) => {
+										const url = item?.path
+											? signedUrlsByPath.get(item.path)
+											: null;
+										return (
+											<div
+												key={item.id ?? item.path}
+												className="relative overflow-hidden rounded-md border border-border bg-muted/20"
+											>
+												{url ? (
+													<img
+														src={url}
+														alt="Generated"
+														className="h-48 w-full object-cover"
+													/>
+												) : (
+													<div className="flex h-48 items-center justify-center text-xs text-muted-foreground">
+														Loading preview...
+													</div>
+												)}
+											</div>
+										);
+									},
+								)}
+							</div>
 						</div>
 					)}
 					{execution.response && (

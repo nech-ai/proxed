@@ -3,8 +3,8 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
-		"dev": "next dev -p 3005 --turbopack",
-		"build": "next build --turbopack",
+		"dev": "fumadocs-mdx && next dev -p 3005 --turbopack",
+		"build": "fumadocs-mdx && next build --turbopack",
 		"start": "next start",
 		"clean": "rm -rf .turbo node_modules",
 		"lint": "biome check .",
@@ -12,9 +12,9 @@
 	},
 	"dependencies": {
 		"@proxed/ui": "workspace:*",
-		"fumadocs-core": "^16.4.0",
-		"fumadocs-mdx": "^11.10.1",
-		"fumadocs-ui": "^16.4.0",
+		"fumadocs-core": "^16.4.1",
+		"fumadocs-mdx": "^14.2.3",
+		"fumadocs-ui": "^16.4.1",
 		"next": "^16.1.1",
 		"react": "19.2.3",
 		"react-dom": "19.2.3"

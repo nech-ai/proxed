@@ -575,8 +575,8 @@ export function ProjectEditForm({ projectId }: ProjectEditFormProps) {
 											<div className="space-y-1">
 												<FormLabel>Save images to Vault</FormLabel>
 												<FormDescription>
-													Store generated images in Supabase storage and show them
-													in Vault and executions.
+													Store generated images in Supabase storage and show
+													them in Vault and executions.
 												</FormDescription>
 											</div>
 											<FormControl>

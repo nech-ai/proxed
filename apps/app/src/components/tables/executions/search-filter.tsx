@@ -25,7 +25,7 @@ import {
 	ServerIcon,
 	ZapIcon,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FilterList } from "./filter-list";
 import { Button } from "@proxed/ui/components/button";
@@ -57,15 +57,14 @@ const defaultSearch: ExecutionFilters = {
 };
 
 export function SearchFilter({ placeholder, className }: Props) {
-	const [prompt, setPrompt] = useState("");
-	const inputRef = useRef<HTMLInputElement>(null);
-	const [streaming, setStreaming] = useState(false);
-	const [isOpen, setIsOpen] = useState(false);
-
 	const deviceChecks: { id: string; name: string }[] = [];
 
 	const { filter: filters, setFilter: setFilters } =
 		useExecutionsFilterParams();
+	const [prompt, setPrompt] = useState(filters.q ?? "");
+	const inputRef = useRef<HTMLInputElement>(null);
+	const [streaming, setStreaming] = useState(false);
+	const [isOpen, setIsOpen] = useState(false);
 
 	useHotkeys(
 		"esc",
@@ -89,6 +88,10 @@ export function SearchFilter({ placeholder, className }: Props) {
 		evt.preventDefault();
 		setIsOpen((prev) => !prev);
 	});
+
+	useEffect(() => {
+		setPrompt(filters.q ?? "");
+	}, [filters.q]);
 
 	const handleSearch = (evt: React.ChangeEvent<HTMLInputElement>) => {
 		const value = evt.target.value;

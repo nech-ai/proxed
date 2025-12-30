@@ -22,19 +22,11 @@ import { useTRPC } from "@/trpc/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Download, ExternalLink, MoreVerticalIcon, Trash2 } from "lucide-react";
 
-export function VaultItemActions({
-	id,
-	path,
-}: {
-	id: string;
-	path: string;
-}) {
+export function VaultItemActions({ id, path }: { id: string; path: string }) {
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
 
-	const signedUrlMutation = useMutation(
-		trpc.vault.signedUrl.mutationOptions(),
-	);
+	const signedUrlMutation = useMutation(trpc.vault.signedUrl.mutationOptions());
 
 	const deleteMutation = useMutation(
 		trpc.vault.delete.mutationOptions({
@@ -94,9 +86,7 @@ export function VaultItemActions({
 				</DropdownMenuItem>
 				<AlertDialog>
 					<AlertDialogTrigger asChild>
-						<DropdownMenuItem
-							onSelect={(event) => event.preventDefault()}
-						>
+						<DropdownMenuItem onSelect={(event) => event.preventDefault()}>
 							<Trash2 className="mr-2 size-4 text-destructive" />
 							<span className="text-destructive">Delete</span>
 						</DropdownMenuItem>

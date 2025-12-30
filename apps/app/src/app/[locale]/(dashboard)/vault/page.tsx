@@ -44,10 +44,7 @@ export default async function Page({ searchParams }: PageProps) {
 
 	return (
 		<HydrateClient>
-			<PageHeader
-				title="Vault"
-				description="Browse all saved generated files"
-			>
+			<PageHeader title="Vault" description="Browse all saved generated files">
 				<VaultFilters />
 			</PageHeader>
 

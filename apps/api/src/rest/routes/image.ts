@@ -364,7 +364,12 @@ async function handleImageGeneration(c: Context<AppContext>) {
 				await db
 					.update(vaultObjects)
 					.set({ executionId })
-					.where(inArray(vaultObjects.id, vaultItems.map((item) => item.id)));
+					.where(
+						inArray(
+							vaultObjects.id,
+							vaultItems.map((item) => item.id),
+						),
+					);
 			} catch (error) {
 				logger.error(
 					`Failed to link vault items to execution: ${

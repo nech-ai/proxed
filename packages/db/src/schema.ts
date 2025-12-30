@@ -921,9 +921,7 @@ export const projects = pgTable(
 		}),
 		notificationIntervalSeconds: integer("notification_interval_seconds"),
 		notificationThreshold: integer("notification_threshold"),
-		saveImagesToVault: boolean("save_images_to_vault")
-			.default(false)
-			.notNull(),
+		saveImagesToVault: boolean("save_images_to_vault").default(false).notNull(),
 	},
 	(table) => [
 		foreignKey({

@@ -17,7 +17,9 @@ const filterSchema = z
 
 function normalizeVaultPath(path: string) {
 	const trimmed = path.replace(/^\/+/, "");
-	return trimmed.startsWith("vault/") ? trimmed.slice("vault/".length) : trimmed;
+	return trimmed.startsWith("vault/")
+		? trimmed.slice("vault/".length)
+		: trimmed;
 }
 
 function ensureTeamPath(path: string, teamId: string) {
@@ -195,12 +197,18 @@ export const vaultRouter = createTRPCRouter({
 				.select({ vault: vaultObjects })
 				.from(vaultObjects)
 				.where(
-					and(eq(vaultObjects.id, input.id), eq(vaultObjects.teamId, ctx.teamId)),
+					and(
+						eq(vaultObjects.id, input.id),
+						eq(vaultObjects.teamId, ctx.teamId),
+					),
 				)
 				.limit(1);
 
 			if (!row?.vault) {
-				throw new TRPCError({ code: "NOT_FOUND", message: "Vault item not found" });
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Vault item not found",
+				});
 			}
 
 			const supabase = createAdminClient();

@@ -244,7 +244,8 @@ export const imageGenerationResponseSchema = z
 						"Optional signed URL for the stored image (present when saved to vault).",
 				}),
 				path: z.string().optional().openapi({
-					description: "Storage path for the saved image (when saved to vault).",
+					description:
+						"Storage path for the saved image (when saved to vault).",
 				}),
 			}),
 		),

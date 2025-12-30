@@ -4,6 +4,7 @@ import { useUserContext } from "@/store/user/hook";
 import { format } from "date-fns";
 import { UTCDate } from "@date-fns/utc";
 import { VaultItemActions } from "./vault-item-actions";
+import Image from "next/image";
 
 export type VaultItemData = {
 	id: string;
@@ -27,12 +28,15 @@ export function VaultItem({ item }: { item: VaultItemData }) {
 			<div className="absolute right-2 top-2 z-10 opacity-0 transition-opacity group-hover:opacity-100">
 				{item.path && <VaultItemActions id={item.id} path={item.path} />}
 			</div>
-			<div className="h-48 w-full overflow-hidden bg-muted/20">
+			<div className="relative h-48 w-full overflow-hidden bg-muted/20">
 				{item.url && item.mimeType.startsWith("image/") ? (
-					<img
+					<Image
 						src={item.url}
 						alt={filename}
-						className="h-full w-full object-cover"
+						fill
+						className="object-cover"
+						sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+						unoptimized
 					/>
 				) : (
 					<div className="flex h-full items-center justify-center text-xs text-muted-foreground">

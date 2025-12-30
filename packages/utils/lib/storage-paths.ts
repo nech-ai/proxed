@@ -15,10 +15,26 @@ export function decodePathSegment(segment: string): string | null {
 	}
 }
 
+function trimLeadingSlashes(value: string) {
+	let index = 0;
+	while (index < value.length && value[index] === "/") {
+		index += 1;
+	}
+	return value.slice(index);
+}
+
+function trimTrailingSlashes(value: string) {
+	let end = value.length;
+	while (end > 0 && value[end - 1] === "/") {
+		end -= 1;
+	}
+	return value.slice(0, end);
+}
+
 function normalizeStoragePath(path: string, prefix?: string) {
-	const trimmed = path.replace(/^\/+/, "");
+	const trimmed = trimLeadingSlashes(path);
 	if (!prefix) return trimmed;
-	const cleanedPrefix = prefix.replace(/^\/+|\/+$/g, "");
+	const cleanedPrefix = trimTrailingSlashes(trimLeadingSlashes(prefix));
 	if (!cleanedPrefix) return trimmed;
 	if (trimmed === cleanedPrefix) return "";
 	if (trimmed.startsWith(`${cleanedPrefix}/`)) {

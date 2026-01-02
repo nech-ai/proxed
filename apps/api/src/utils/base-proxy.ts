@@ -4,11 +4,7 @@ import type { Context as AppContext } from "../rest/types";
 import { logger } from "./logger";
 import { sanitizeRequestHeaders, filterResponseHeaders } from "./proxy-headers";
 import { AppError, ErrorCode } from "./errors";
-import {
-	shouldStream,
-	handleSSEStream,
-	handleRawStream,
-} from "./stream-handler";
+import { shouldStream } from "./stream-handler";
 import { circuitBreakers } from "./circuit-breaker";
 
 export interface ProxyConfig {
@@ -93,6 +89,20 @@ export async function baseProxy(
 	// Sanitize headers
 	const sanitizedHeaders = sanitizeRequestHeaders(c.req.header(), headers);
 
+	// Buffer the request body once so retries (and validators) don't consume it.
+	// Hono caches parsed bodies, so arrayBuffer() will rehydrate if already read.
+	const method = c.req.method.toUpperCase();
+	let requestBody: ArrayBuffer | undefined;
+	if (method !== "GET" && method !== "HEAD") {
+		try {
+			requestBody = await c.req.arrayBuffer();
+		} catch (error) {
+			logger.warn(
+				`Failed to read request body for proxy: ${error instanceof Error ? error.message : error}`,
+			);
+		}
+	}
+
 	if (debug) {
 		logger.debug(
 			`Proxy request: targetUrl=${targetUrl}, method=${c.req.method}, headers=${JSON.stringify(
@@ -123,7 +133,8 @@ export async function baseProxy(
 				// Execute the proxy request with circuit breaker if available
 				const executeRequest = async () => {
 					const response = await proxy(targetUrl, {
-						...c.req,
+						method: c.req.method,
+						body: requestBody,
 						headers: sanitizedHeaders,
 						signal: controller.signal,
 					});
@@ -173,37 +184,10 @@ export async function baseProxy(
 					headers: filteredHeaders,
 				});
 
-				// Check if we need to handle streaming
 				if (shouldStream(response)) {
 					logger.debug(
-						`Detected streaming response: contentType=${response.headers.get("content-type")}, transferEncoding=${response.headers.get("transfer-encoding")}`,
+						`Detected streaming response: contentType=${response.headers.get("content-type")}`,
 					);
-
-					// For SSE streams, use SSE handler
-					if (
-						response.headers.get("content-type")?.includes("text/event-stream")
-					) {
-						return {
-							response: await handleSSEStream(c, filteredResponse, {
-								onStart: () => logger.debug("SSE stream started"),
-								onEnd: () => logger.debug("SSE stream ended"),
-								onError: (error) => logger.error(`SSE stream error: ${error}`),
-							}),
-							latency,
-							retries,
-						};
-					}
-
-					// For other streams, use raw handler
-					return {
-						response: await handleRawStream(c, filteredResponse, {
-							onStart: () => logger.debug("Raw stream started"),
-							onEnd: () => logger.debug("Raw stream ended"),
-							onError: (error) => logger.error(`Raw stream error: ${error}`),
-						}),
-						latency,
-						retries,
-					};
 				}
 
 				return {

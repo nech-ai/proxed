@@ -242,6 +242,7 @@ mock.module("@proxed/db/queries", () => {
 		}),
 		getServerKey: async () => "partial-key-value",
 		createExecution: async () => ({ id: "execution-123" }),
+		updateExecution: async () => ({ id: "execution-123" }),
 	};
 });
 

@@ -12,7 +12,7 @@ import {
 	proxyRequestSchema,
 	proxyResponseSchema,
 } from "../schemas";
-import { proxyMethods } from "./proxy-utils";
+import { getProxyPath, proxyMethods } from "./proxy-utils";
 
 const router = new OpenAPIHono<AppContext>();
 
@@ -103,7 +103,8 @@ const registerProxyRoute = (method: (typeof proxyMethods)[number]) =>
 			responses: proxyResponses,
 		}),
 		async (c: HonoContext<AppContext>) => {
-			const proxyPath = c.req.path.split(`/${c.req.param("projectId")}/`)[1];
+			const projectId = c.req.param("projectId");
+			const proxyPath = getProxyPath(c.req.path, projectId);
 			const config = getProviderConfig("OPENAI");
 			const targetUrl = `${config.baseUrl}/${proxyPath}`;
 			return handleProviderProxy<OpenAIResponse>(c, targetUrl, {

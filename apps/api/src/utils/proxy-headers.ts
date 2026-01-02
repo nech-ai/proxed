@@ -53,6 +53,7 @@ export const ALLOWED_RESPONSE_HEADERS = new Set([
 	"content-type",
 	"content-encoding",
 	"content-length",
+	"cache-control",
 	"x-request-id",
 	"x-ratelimit-limit",
 	"x-ratelimit-remaining",
@@ -62,6 +63,7 @@ export const ALLOWED_RESPONSE_HEADERS = new Set([
 	"openai-organization",
 	"openai-processing-ms",
 	"openai-version",
+	"x-accel-buffering",
 ]);
 
 /**

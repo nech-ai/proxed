@@ -23,15 +23,60 @@ export async function handleSSEStream(
 		try {
 			const reader = response.body?.getReader();
 			const decoder = new TextDecoder();
+			let buffer = "";
+			let dataLines: string[] = [];
+			let eventName: string | undefined;
+			let eventId: string | undefined;
+			let retry: number | undefined;
 
 			if (!reader) {
 				throw new Error("No response body to stream");
 			}
 
+			const dispatchEvent = async () => {
+				if (
+					dataLines.length === 0 &&
+					!eventName &&
+					!eventId &&
+					retry === undefined
+				) {
+					return;
+				}
+
+				await stream.writeSSE({
+					data: dataLines.join("\n"),
+					event: eventName,
+					id: eventId,
+					retry,
+				});
+
+				dataLines = [];
+				eventName = undefined;
+				eventId = undefined;
+				retry = undefined;
+			};
+
 			while (true) {
 				const { done, value } = await reader.read();
 
 				if (done) {
+					if (buffer.length > 0) {
+						// Process any remaining buffered line
+						const line = buffer.replace(/\r$/, "");
+						if (line.startsWith("data:")) {
+							dataLines.push(line.replace(/^data:\s?/, ""));
+						} else if (line.startsWith("event:")) {
+							eventName = line.replace(/^event:\s?/, "");
+						} else if (line.startsWith("id:")) {
+							eventId = line.replace(/^id:\s?/, "");
+						} else if (line.startsWith("retry:")) {
+							const value = Number.parseInt(line.replace(/^retry:\s?/, ""), 10);
+							if (!Number.isNaN(value)) {
+								retry = value;
+							}
+						}
+					}
+					await dispatchEvent();
 					config?.onEnd?.();
 					break;
 				}
@@ -39,11 +84,43 @@ export async function handleSSEStream(
 				const chunk = decoder.decode(value, { stream: true });
 				config?.onData?.(chunk);
 
-				// Parse SSE format and forward
-				const lines = chunk.split("\n");
-				for (const line of lines) {
-					if (line.startsWith("data: ")) {
-						await stream.writeSSE({ data: line.slice(6) });
+				// Parse SSE format with line buffering to handle split chunks
+				buffer += chunk;
+				const lines = buffer.split("\n");
+				buffer = lines.pop() ?? "";
+
+				for (const rawLine of lines) {
+					const line = rawLine.replace(/\r$/, "");
+
+					if (line === "") {
+						await dispatchEvent();
+						continue;
+					}
+
+					if (line.startsWith(":")) {
+						continue;
+					}
+
+					if (line.startsWith("data:")) {
+						dataLines.push(line.replace(/^data:\s?/, ""));
+						continue;
+					}
+
+					if (line.startsWith("event:")) {
+						eventName = line.replace(/^event:\s?/, "");
+						continue;
+					}
+
+					if (line.startsWith("id:")) {
+						eventId = line.replace(/^id:\s?/, "");
+						continue;
+					}
+
+					if (line.startsWith("retry:")) {
+						const value = Number.parseInt(line.replace(/^retry:\s?/, ""), 10);
+						if (!Number.isNaN(value)) {
+							retry = value;
+						}
 					}
 				}
 			}
@@ -111,7 +188,7 @@ export function shouldStream(response: Response): boolean {
 	return (
 		contentType.includes("text/event-stream") ||
 		contentType.includes("application/stream+json") ||
-		response.headers.get("transfer-encoding") === "chunked"
+		contentType.includes("application/x-ndjson")
 	);
 }
 

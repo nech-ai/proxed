@@ -9,6 +9,9 @@ import { createError, ErrorCode } from "./errors";
 import { baseProxy } from "./base-proxy";
 import { getProviderConfig, buildProviderHeaders } from "./provider-config";
 import { collectMetrics } from "./metrics";
+import { PROVIDERS } from "@proxed/utils/lib/providers";
+import { shouldStream } from "./stream-handler";
+import { safeWaitUntil } from "./execution-context";
 import {
 	validateAndGetProject,
 	getFullApiKey,
@@ -62,12 +65,23 @@ export async function handleProviderProxy<TResponse>(
 	const fullApiKey = await getFullApiKey(db, project.keyId, apiKey!);
 	const providerConfig = getProviderConfig(options.provider);
 	const userAgent = c.req.header("user-agent");
+	const method = c.req.method.toUpperCase();
+	const requestId = c.get("requestId");
+	const idempotencyKey =
+		options.provider === PROVIDERS.OPENAI &&
+		method !== "GET" &&
+		method !== "HEAD"
+			? (c.req.header("idempotency-key") ?? requestId)
+			: undefined;
 
 	try {
 		const headers = buildProviderHeaders(options.provider, fullApiKey, {
 			...c.req.header(),
 			"User-Agent": userAgent || "Proxed-API",
 		});
+		if (idempotencyKey) {
+			headers["Idempotency-Key"] = idempotencyKey;
+		}
 
 		const proxyOperation = baseProxy(c, targetUrl, {
 			headers,
@@ -91,6 +105,37 @@ export async function handleProviderProxy<TResponse>(
 			response.status,
 			latency,
 		);
+
+		const isStreaming = shouldStream(response);
+		if (isStreaming) {
+			if (response.headers.get("content-type")?.includes("text/event-stream")) {
+				if (!response.headers.get("cache-control")) {
+					response.headers.set("Cache-Control", "no-cache");
+				}
+				response.headers.set("Connection", "keep-alive");
+				response.headers.set("X-Accel-Buffering", "no");
+			}
+
+			void safeWaitUntil(
+				c,
+				recordExecution(
+					c,
+					startTime,
+					{
+						promptTokens: 0,
+						completionTokens: 0,
+						totalTokens: 0,
+						finishReason: "unknown" as FinishReason,
+					},
+					{ project, teamId },
+				),
+			);
+
+			response.headers.set("X-Proxed-Retries", retries.toString());
+			response.headers.set("X-Proxed-Latency", latency.toString());
+
+			return response;
+		}
 
 		const responseData = options.parseResponse
 			? await options.parseResponse(response, project.id)

@@ -115,14 +115,13 @@ const registerProxyRoute = (method: (typeof proxyMethods)[number]) =>
 				providerSlug: "anthropic",
 				providerLabel: "Anthropic",
 				extractUsage: (response) => {
-					const usage = response.usage ?? {
-						input_tokens: 0,
-						output_tokens: 0,
-					};
+					const usage = response.usage ?? {};
+					const promptTokens = usage.input_tokens ?? 0;
+					const completionTokens = usage.output_tokens ?? 0;
 					return {
-						promptTokens: usage.input_tokens ?? 0,
-						completionTokens: usage.output_tokens ?? 0,
-						totalTokens: (usage.input_tokens ?? 0) + (usage.output_tokens ?? 0),
+						promptTokens,
+						completionTokens,
+						totalTokens: promptTokens + completionTokens,
 					};
 				},
 				mapFinishReason: (response) =>

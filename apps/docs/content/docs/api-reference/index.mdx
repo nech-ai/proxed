@@ -12,7 +12,17 @@ All API endpoints are versioned under `/v1/`.
 
 ## Authentication
 
-All API endpoints (except for `/health`) require authentication. Please refer to our [API Authentication guide](/authentication) for detailed information on how to authenticate your requests.
+Most API endpoints require authentication. Public endpoints that **do not** require auth:
+
+*   `GET /health`
+*   `GET /v1/openai/models`
+*   `GET /v1/openai/{projectId}/models`
+*   `GET /v1/anthropic/models`
+*   `GET /v1/anthropic/{projectId}/models`
+*   `GET /v1/google/models`
+*   `GET /v1/google/{projectId}/models`
+
+All other API routes require authentication. See the [API Authentication guide](/authentication) for detailed information on how to authenticate your requests.
 
 ## Error Handling
 
@@ -29,3 +39,4 @@ Select an endpoint from the navigation sidebar to view its specific documentatio
 *   **OpenAI Proxy:** `/v1/openai/{projectId}/*`
 *   **Anthropic Proxy:** `/v1/anthropic/{projectId}/*`
 *   **Google AI Proxy:** `/v1/google/{projectId}/*`
+*   **Public Model Lists:** `/v1/{provider}/models` and `/v1/{provider}/{projectId}/models`

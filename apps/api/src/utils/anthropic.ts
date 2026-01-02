@@ -7,9 +7,10 @@ import type { FinishReason } from "../rest/types";
  */
 export interface AnthropicResponse {
 	usage?: {
-		input_tokens: number;
-		output_tokens: number; // Anthropic uses output_tokens
+		input_tokens?: number;
+		output_tokens?: number; // Anthropic uses output_tokens
 	};
+	model?: string;
 	stop_reason?: string | null; // Anthropic's term for finish_reason
 	// Other fields like id, model, role, type, content can be added if needed
 	[key: string]: unknown;

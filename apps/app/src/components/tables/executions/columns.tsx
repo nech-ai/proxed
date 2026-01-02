@@ -1,6 +1,7 @@
 "use client";
 import type { RouterOutputs } from "@/trpc/types";
 import { Badge } from "@proxed/ui/components/badge";
+import { ModelBadge } from "@proxed/ui/components/model-badge";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ActionsCell } from "./actions-cell";
@@ -11,6 +12,17 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@proxed/ui/components/tooltip";
+import {
+	getModelBadge,
+	getModelDisplayName,
+	isModelForProvider,
+	type Model,
+	type Provider,
+} from "@proxed/utils/lib/providers";
+import {
+	formatTokenPricingLabel,
+	getModelPricing,
+} from "@proxed/utils/lib/pricing";
 
 export type ExecutionOutput =
 	RouterOutputs["executions"]["list"]["data"][number];
@@ -33,7 +45,63 @@ export const columns: ColumnDef<ExecutionOutput>[] = [
 		header: "Model",
 		accessorKey: "model",
 		enableSorting: true,
-		cell: ({ row }) => <Badge variant="outline">{row.original.model}</Badge>,
+		cell: ({ row }) => {
+			const modelId = row.original.model ?? null;
+			const provider = row.original.provider as Provider | undefined;
+			const isProviderModel = modelId
+				? Boolean(provider && isModelForProvider(modelId, provider))
+				: false;
+			const displayName = modelId
+				? getModelDisplayName(modelId as Model)
+				: "Unknown model";
+			const badge =
+				modelId && isProviderModel
+					? getModelBadge(modelId as Model)
+					: undefined;
+			const pricingLabel =
+				modelId && provider && isProviderModel
+					? formatTokenPricingLabel(getModelPricing(provider, modelId as Model))
+					: null;
+
+			return (
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<div className="flex flex-col gap-1 min-w-[140px]">
+								<div className="flex items-center gap-2">
+									<span className="font-medium truncate">{displayName}</span>
+									{badge && <ModelBadge badge={badge} />}
+								</div>
+								{modelId ? (
+									<Badge
+										variant="outline"
+										className="w-fit max-w-[180px] truncate text-xs font-mono"
+									>
+										{modelId}
+									</Badge>
+								) : (
+									<span className="text-xs text-muted-foreground">
+										Unknown model
+									</span>
+								)}
+							</div>
+						</TooltipTrigger>
+						<TooltipContent className="max-w-[260px]">
+							<div className="flex flex-col gap-1 text-xs">
+								<span>Model ID: {modelId ?? "Unknown"}</span>
+								{pricingLabel ? (
+									<span>{pricingLabel}</span>
+								) : (
+									<span className="text-muted-foreground">
+										Pricing unavailable
+									</span>
+								)}
+							</div>
+						</TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
+			);
+		},
 	},
 	{
 		header: "Provider",

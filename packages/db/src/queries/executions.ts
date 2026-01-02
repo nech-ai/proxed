@@ -1,4 +1,5 @@
 import type { Database } from "../client";
+import { eq } from "drizzle-orm";
 import { executions } from "../schema";
 import type {
 	ProviderValue as ProviderType,
@@ -32,6 +33,21 @@ export interface CreateExecutionParams {
 	city?: string | null;
 	longitude?: number | null;
 	latitude?: number | null;
+}
+
+export interface UpdateExecutionParams {
+	id: string;
+	model?: string;
+	promptTokens?: number;
+	completionTokens?: number;
+	totalTokens?: number;
+	finishReason?: FinishReason;
+	response?: string | null;
+	errorMessage?: string | null;
+	errorCode?: string | null;
+	promptCost?: string;
+	completionCost?: string;
+	totalCost?: string;
 }
 
 export async function createExecution(
@@ -105,6 +121,79 @@ export async function createExecution(
 			projectId: params.projectId,
 		});
 		// Re-throw to let the caller handle it
+		throw error;
+	}
+}
+
+export async function updateExecution(
+	db: Database,
+	params: UpdateExecutionParams,
+): Promise<typeof executions.$inferSelect | null> {
+	try {
+		const updates: Partial<typeof executions.$inferInsert> = {};
+
+		const truncateString = (
+			str: string | null | undefined,
+			maxLength: number,
+		) => {
+			if (str === null || str === undefined) return str;
+			return str.length > maxLength ? `${str.substring(0, maxLength)}...` : str;
+		};
+
+		if (params.model) updates.model = params.model;
+		if (params.finishReason) updates.finishReason = params.finishReason;
+
+		const promptTokens =
+			params.promptTokens !== undefined
+				? Math.max(0, params.promptTokens || 0)
+				: undefined;
+		const completionTokens =
+			params.completionTokens !== undefined
+				? Math.max(0, params.completionTokens || 0)
+				: undefined;
+		const totalTokens =
+			params.totalTokens !== undefined
+				? Math.max(0, params.totalTokens || 0)
+				: promptTokens !== undefined || completionTokens !== undefined
+					? (promptTokens ?? 0) + (completionTokens ?? 0)
+					: undefined;
+
+		if (promptTokens !== undefined) updates.promptTokens = promptTokens;
+		if (completionTokens !== undefined)
+			updates.completionTokens = completionTokens;
+		if (totalTokens !== undefined) updates.totalTokens = totalTokens;
+
+		if (params.promptCost !== undefined) updates.promptCost = params.promptCost;
+		if (params.completionCost !== undefined)
+			updates.completionCost = params.completionCost;
+		if (params.totalCost !== undefined) updates.totalCost = params.totalCost;
+
+		if ("response" in params) {
+			updates.response = truncateString(params.response, 10000);
+		}
+		if ("errorMessage" in params) {
+			updates.errorMessage = truncateString(params.errorMessage, 1000);
+		}
+		if ("errorCode" in params) {
+			updates.errorCode = truncateString(params.errorCode, 100);
+		}
+
+		if (Object.keys(updates).length === 0) {
+			return null;
+		}
+
+		const [execution] = await db
+			.update(executions)
+			.set(updates)
+			.where(eq(executions.id, params.id))
+			.returning();
+
+		return execution ?? null;
+	} catch (error) {
+		console.error("Failed to update execution:", {
+			error: error instanceof Error ? error.message : error,
+			id: params.id,
+		});
 		throw error;
 	}
 }

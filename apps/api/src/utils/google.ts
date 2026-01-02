@@ -28,6 +28,7 @@ export interface GoogleResponse {
 		totalTokenCount?: number;
 	};
 	modelVersion?: string;
+	model?: string;
 }
 
 /**

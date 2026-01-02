@@ -112,15 +112,16 @@ const registerProxyRoute = (method: (typeof proxyMethods)[number]) =>
 				providerSlug: "openai",
 				providerLabel: "OpenAI",
 				extractUsage: (response) => {
-					const usage = response.usage ?? {
-						prompt_tokens: 0,
-						completion_tokens: 0,
-						total_tokens: 0,
-					};
+					const usage = response.usage ?? {};
+					const promptTokens = usage.prompt_tokens ?? usage.input_tokens ?? 0;
+					const completionTokens =
+						usage.completion_tokens ?? usage.output_tokens ?? 0;
+					const totalTokens =
+						usage.total_tokens ?? promptTokens + completionTokens;
 					return {
-						promptTokens: usage.prompt_tokens ?? 0,
-						completionTokens: usage.completion_tokens ?? 0,
-						totalTokens: usage.total_tokens ?? 0,
+						promptTokens,
+						completionTokens,
+						totalTokens,
 					};
 				},
 				mapFinishReason: (response) =>

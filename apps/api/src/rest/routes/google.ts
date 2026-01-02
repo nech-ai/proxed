@@ -112,15 +112,15 @@ const registerProxyRoute = (method: (typeof proxyMethods)[number]) =>
 				providerSlug: "google",
 				providerLabel: "Google AI",
 				extractUsage: (response) => {
-					const usage = response.usageMetadata ?? {
-						promptTokenCount: 0,
-						candidatesTokenCount: 0,
-						totalTokenCount: 0,
-					};
+					const usage = response.usageMetadata ?? {};
+					const promptTokens = usage.promptTokenCount ?? 0;
+					const completionTokens = usage.candidatesTokenCount ?? 0;
+					const totalTokens =
+						usage.totalTokenCount ?? promptTokens + completionTokens;
 					return {
-						promptTokens: usage.promptTokenCount ?? 0,
-						completionTokens: usage.candidatesTokenCount ?? 0,
-						totalTokens: usage.totalTokenCount ?? 0,
+						promptTokens,
+						completionTokens,
+						totalTokens,
 					};
 				},
 				mapFinishReason: (response) =>

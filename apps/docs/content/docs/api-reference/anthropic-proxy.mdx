@@ -17,9 +17,18 @@ The Anthropic Proxy endpoint allows you to securely route your requests to the o
 
 Currently, only `POST` requests to paths like `messages` are commonly used with Anthropic's API.
 
+## Model List (Public)
+
+Proxed exposes Anthropic model list endpoints for SDK discovery and tooling. These are **public** and do not require authentication:
+
+*   `GET /v1/anthropic/models`
+*   `GET /v1/anthropic/{projectId}/models`
+
+These endpoints return the models currently supported by Proxed, along with display name and pricing metadata.
+
 ## Authentication
 
-Requires authentication. See the [API Authentication guide](/docs/authentication).
+Requires authentication. See the [API Authentication guide](/authentication).
 
 ## Headers
 

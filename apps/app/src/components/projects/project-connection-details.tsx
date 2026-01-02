@@ -71,7 +71,7 @@ export function ProjectConnectionDetails({
 					</div>
 					<Button variant="link" asChild className="text-xs">
 						<Link
-							href="/docs/authentication"
+							href="https://docs.proxed.ai/authentication"
 							target="_blank"
 							rel="noopener noreferrer"
 						>
@@ -153,7 +153,10 @@ export function ProjectConnectionDetails({
 						Remember to include the necessary authentication headers as
 						described in the{" "}
 						<Button variant="link" asChild className="p-0 h-auto text-xs">
-							<Link href="/docs/authentication" target="_blank">
+							<Link
+								href="https://docs.proxed.ai/authentication"
+								target="_blank"
+							>
 								authentication documentation
 							</Link>
 						</Button>

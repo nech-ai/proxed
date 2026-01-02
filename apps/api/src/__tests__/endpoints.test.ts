@@ -193,8 +193,10 @@ mock.module("@proxed/db/client", () => {
 
 // Re-usable stub project
 const stubProjectId = "123e4567-e89b-12d3-a456-426614174000";
+let currentProvider: "OPENAI" | "ANTHROPIC" | "GOOGLE" = "OPENAI";
+
 // Use `any` to keep the stub lightweight for tests
-const stubProject: any = {
+const stubProject = (): any => ({
 	id: stubProjectId,
 	teamId: "team-123",
 	name: "Test Project",
@@ -213,7 +215,7 @@ const stubProject: any = {
 	iconUrl: null,
 	deviceCheck: null,
 	key: {
-		provider: "OPENAI",
+		provider: currentProvider,
 		id: "key-123",
 		teamId: "team-123",
 		isActive: true,
@@ -222,13 +224,13 @@ const stubProject: any = {
 	lastRateLimitNotifiedAt: null,
 	notificationIntervalSeconds: null,
 	notificationThreshold: null,
-};
+});
 
 // Mock DB queries used by the API
 mock.module("@proxed/db/queries", () => {
 	return {
-		getProjectQuery: async () => stubProject,
-		getActiveProjectWithProvider: async () => stubProject,
+		getProjectQuery: async () => stubProject(),
+		getActiveProjectWithProvider: async () => stubProject(),
 		getTeamLimitsMetricsQuery: async () => ({
 			api_calls_limit: 1000,
 			api_calls_used: 0,
@@ -240,6 +242,7 @@ mock.module("@proxed/db/queries", () => {
 		}),
 		getServerKey: async () => "partial-key-value",
 		createExecution: async () => ({ id: "execution-123" }),
+		updateExecution: async () => ({ id: "execution-123" }),
 	};
 });
 
@@ -390,6 +393,7 @@ test("POST /v1/image returns 401 without auth", async () => {
 // -----------------------------
 
 test("POST /v1/openai/:projectId/* returns 502 with test auth (no actual API key)", async () => {
+	currentProvider = "OPENAI";
 	const res = await post(
 		openaiPath,
 		{
@@ -406,6 +410,31 @@ test("POST /v1/openai/:projectId/* returns 502 with test auth (no actual API key
 	expect([400, 401, 500, 502]).toContain(res.status);
 });
 
+test("GET /v1/openai/:projectId/models is public", async () => {
+	currentProvider = "OPENAI";
+	const res = await get(`/v1/openai/${stubProjectId}/models`);
+	expect(res.status).toBe(200);
+	const json: any = await res.json();
+	expect(json.object).toBe("list");
+	expect(Array.isArray(json.data)).toBe(true);
+});
+
+test("GET /v1/anthropic/:projectId/models is public", async () => {
+	currentProvider = "ANTHROPIC";
+	const res = await get(`/v1/anthropic/${stubProjectId}/models`);
+	expect(res.status).toBe(200);
+	const json: any = await res.json();
+	expect(Array.isArray(json.data)).toBe(true);
+});
+
+test("GET /v1/google/:projectId/models is public", async () => {
+	currentProvider = "GOOGLE";
+	const res = await get(`/v1/google/${stubProjectId}/models`);
+	expect(res.status).toBe(200);
+	const json: any = await res.json();
+	expect(Array.isArray(json.models)).toBe(true);
+});
+
 test("GET / returns API documentation", async () => {
 	const res = await get("/");
 	expect(res.status).toBe(200);
@@ -418,4 +447,26 @@ test("GET /openapi returns OpenAPI spec", async () => {
 	const json: any = await res.json();
 	expect(json.openapi).toBe("3.1.0");
 	expect(json.info.title).toBe("Proxed API");
+});
+
+test("GET /v1/openai/models is public", async () => {
+	const res = await get("/v1/openai/models");
+	expect(res.status).toBe(200);
+	const json: any = await res.json();
+	expect(json.object).toBe("list");
+	expect(Array.isArray(json.data)).toBe(true);
+});
+
+test("GET /v1/anthropic/models is public", async () => {
+	const res = await get("/v1/anthropic/models");
+	expect(res.status).toBe(200);
+	const json: any = await res.json();
+	expect(Array.isArray(json.data)).toBe(true);
+});
+
+test("GET /v1/google/models is public", async () => {
+	const res = await get("/v1/google/models");
+	expect(res.status).toBe(200);
+	const json: any = await res.json();
+	expect(Array.isArray(json.models)).toBe(true);
 });

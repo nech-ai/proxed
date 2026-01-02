@@ -25,7 +25,7 @@ import {
 	ServerIcon,
 	ZapIcon,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FilterList } from "./filter-list";
 import { Button } from "@proxed/ui/components/button";
@@ -65,6 +65,7 @@ export function SearchFilter({ placeholder, className }: Props) {
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [streaming, setStreaming] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
+	const modelOptions = useMemo(() => getModelOptionsWithPricing(), []);
 
 	useHotkeys(
 		"esc",
@@ -242,7 +243,7 @@ export function SearchFilter({ placeholder, className }: Props) {
 							<span>Model</span>
 						</DropdownMenuSubTrigger>
 						<DropdownMenuSubContent>
-							{getModelOptionsWithPricing().map((model) => (
+							{modelOptions.map((model) => (
 								<DropdownMenuItem
 									key={model.value}
 									onClick={() =>

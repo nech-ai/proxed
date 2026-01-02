@@ -16,6 +16,18 @@ import { UTCDate } from "@date-fns/utc";
 import { format } from "date-fns";
 import Image from "next/image";
 import { useMemo } from "react";
+import { ModelBadge } from "@proxed/ui/components/model-badge";
+import {
+	getModelBadge,
+	getModelDisplayName,
+	isModelForProvider,
+	type Model,
+	type Provider,
+} from "@proxed/utils/lib/providers";
+import {
+	formatTokenPricingLabel,
+	getModelPricing,
+} from "@proxed/utils/lib/pricing";
 
 interface ExecutionDetailsCardProps {
 	executionId: string;
@@ -32,9 +44,14 @@ export function ExecutionDetailsCard({
 	const dateTimeFormat = dateFormat || "yyyy-MM-dd HH:mm:ss";
 
 	const responsePayload = useMemo(() => {
-		if (!execution?.response) return null;
+		const response = execution?.response;
+		if (!response) return null;
+		if (typeof response !== "string") {
+			return response;
+		}
+		if (!response.includes('"vault"')) return null;
 		try {
-			return JSON.parse(execution.response);
+			return JSON.parse(response);
 		} catch {
 			return null;
 		}
@@ -70,6 +87,20 @@ export function ExecutionDetailsCard({
 		execution.countryCode,
 		execution.regionCode,
 	);
+	const modelId = execution.model ?? null;
+	const provider = execution.provider as Provider | undefined;
+	const isProviderModel = modelId
+		? Boolean(provider && isModelForProvider(modelId, provider))
+		: false;
+	const displayName = modelId
+		? getModelDisplayName(modelId as Model)
+		: "Unknown model";
+	const badge =
+		modelId && isProviderModel ? getModelBadge(modelId as Model) : undefined;
+	const pricingLabel =
+		modelId && provider && isProviderModel
+			? formatTokenPricingLabel(getModelPricing(provider, modelId as Model))
+			: null;
 	return (
 		<Card>
 			<CardHeader>
@@ -122,7 +153,30 @@ export function ExecutionDetailsCard({
 							</div>
 							<div>
 								<p className="text-sm text-muted-foreground">Model</p>
-								<p className="text-base">{execution.model}</p>
+								<div className="flex flex-col gap-1">
+									<div className="flex items-center gap-2">
+										<p className="text-base font-medium">{displayName}</p>
+										{badge && <ModelBadge badge={badge} />}
+									</div>
+									{modelId ? (
+										<p className="text-xs text-muted-foreground font-mono">
+											{modelId}
+										</p>
+									) : (
+										<p className="text-xs text-muted-foreground">
+											Unknown model
+										</p>
+									)}
+									{pricingLabel ? (
+										<p className="text-xs text-muted-foreground">
+											{pricingLabel}
+										</p>
+									) : (
+										<p className="text-xs text-muted-foreground">
+											Pricing unavailable
+										</p>
+									)}
+								</div>
 							</div>
 							<div>
 								<p className="text-sm text-muted-foreground">Provider</p>

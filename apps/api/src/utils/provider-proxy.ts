@@ -581,7 +581,7 @@ export async function handleProviderProxy<TResponse>(
 			options.provider,
 			responseData,
 		);
-		const executionModel = requestModel ?? responseModel;
+		const executionModel = responseModel ?? requestModel;
 
 		await recordExecution(
 			c,

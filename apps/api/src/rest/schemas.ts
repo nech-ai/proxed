@@ -44,15 +44,18 @@ export const projectIdParamSchema = z.object({
 });
 
 export const proxyWildcardParamSchema = z.object({
-	"*": z.string().openapi({
-		param: {
-			name: "*",
-			in: "path",
-			description:
-				"Upstream provider path to proxy (example: chat/completions).",
-		},
-		example: "chat/completions",
-	}),
+	"*": z
+		.string()
+		.optional()
+		.openapi({
+			param: {
+				name: "*",
+				in: "path",
+				description:
+					"Upstream provider path to proxy (example: chat/completions).",
+			},
+			example: "chat/completions",
+		}),
 });
 
 export const proxyParamsSchema = projectIdParamSchema.merge(

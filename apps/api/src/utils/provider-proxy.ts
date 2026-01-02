@@ -58,6 +58,93 @@ function isJsonContentType(contentType: string | undefined): boolean {
 	);
 }
 
+function parseJsonBody(
+	body: ArrayBuffer | undefined,
+	providerLabel: string,
+): Record<string, unknown> | null {
+	if (!body || body.byteLength === 0) return null;
+	const text = new TextDecoder().decode(body);
+	if (!text.trim()) return null;
+	try {
+		const parsed = JSON.parse(text) as unknown;
+		if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+			return parsed as Record<string, unknown>;
+		}
+	} catch (error) {
+		logger.debug(
+			`Failed to parse ${providerLabel} request body: ${
+				error instanceof Error ? error.message : String(error)
+			}`,
+		);
+	}
+	return null;
+}
+
+function isStreamRequested(
+	provider: ProviderType,
+	targetUrl: string,
+	body: Record<string, unknown> | null,
+): boolean {
+	if (provider === PROVIDERS.OPENAI || provider === PROVIDERS.ANTHROPIC) {
+		return body?.stream === true;
+	}
+
+	if (provider === PROVIDERS.GOOGLE) {
+		return targetUrl.includes(":streamGenerateContent");
+	}
+
+	return false;
+}
+
+function ensureOpenAIStreamUsage(body: Record<string, unknown>): boolean {
+	const streamOptions = body.stream_options;
+	const normalized =
+		streamOptions &&
+		typeof streamOptions === "object" &&
+		!Array.isArray(streamOptions)
+			? (streamOptions as Record<string, unknown>)
+			: {};
+
+	if (normalized.include_usage !== undefined) {
+		return false;
+	}
+
+	body.stream_options = {
+		...normalized,
+		include_usage: true,
+	};
+	return true;
+}
+
+function extractErrorDetails(
+	payload: unknown,
+): { message: string; code: string } | null {
+	if (!payload || typeof payload !== "object") return null;
+	const data = payload as Record<string, unknown>;
+	const error = data.error as Record<string, unknown> | undefined;
+
+	const message =
+		(typeof error?.message === "string" && error.message) ||
+		(typeof data.message === "string" && data.message) ||
+		undefined;
+
+	const codeValue =
+		(typeof error?.type === "string" && error.type) ||
+		(typeof error?.code === "string" && error.code) ||
+		(typeof data.code === "string" && data.code) ||
+		(typeof data.status === "string" && data.status) ||
+		(typeof error?.code === "number" && error.code) ||
+		(typeof data.code === "number" && data.code) ||
+		undefined;
+
+	if (!message && codeValue === undefined) return null;
+
+	return {
+		message: message ?? "Upstream error",
+		code: codeValue !== undefined ? String(codeValue) : "UPSTREAM_ERROR",
+	};
+}
+
 function normalizeModelId(model: string, provider: ProviderType): string {
 	const trimmed = model.trim();
 	if (!trimmed) return trimmed;
@@ -416,6 +503,25 @@ export async function handleProviderProxy<TResponse>(
 		requestBody,
 	);
 
+	const contentType = c.req.header("content-type");
+	const parsedBody =
+		isJsonContentType(contentType) && requestBody
+			? parseJsonBody(requestBody, options.providerLabel)
+			: null;
+	const streamRequested = isStreamRequested(
+		options.provider,
+		targetUrl,
+		parsedBody,
+	);
+	let mutatedBody = false;
+
+	if (options.provider === PROVIDERS.OPENAI && streamRequested && parsedBody) {
+		mutatedBody = ensureOpenAIStreamUsage(parsedBody);
+		if (mutatedBody) {
+			requestBody = new TextEncoder().encode(JSON.stringify(parsedBody)).buffer;
+		}
+	}
+
 	const fullApiKey = await getFullApiKey(db, project.keyId, apiKey!);
 	const providerConfig = getProviderConfig(options.provider);
 	const userAgent = c.req.header("user-agent");
@@ -432,6 +538,12 @@ export async function handleProviderProxy<TResponse>(
 			...c.req.header(),
 			"User-Agent": userAgent || "Proxed-API",
 		});
+		if (streamRequested) {
+			headers["accept-encoding"] = "identity";
+		}
+		if (mutatedBody) {
+			headers["content-length"] = undefined;
+		}
 		if (idempotencyKey) {
 			headers["Idempotency-Key"] = idempotencyKey;
 		}
@@ -475,6 +587,7 @@ export async function handleProviderProxy<TResponse>(
 					completionTokens: 0,
 					totalTokens: 0,
 					finishReason: "unknown" as FinishReason,
+					responseCode: response.status,
 				},
 				{ project, teamId },
 				requestModel ? { overrideModel: requestModel } : undefined,
@@ -575,13 +688,22 @@ export async function handleProviderProxy<TResponse>(
 					project.id,
 				);
 
+		const isErrorResponse = !response.ok;
 		const usage = options.extractUsage(responseData);
-		const finishReason = options.mapFinishReason(responseData);
+		const finishReason = isErrorResponse
+			? ("error" as FinishReason)
+			: options.mapFinishReason(responseData);
 		const responseModel = extractModelFromResponse(
 			options.provider,
 			responseData,
 		);
 		const executionModel = responseModel ?? requestModel;
+		const errorDetails = isErrorResponse
+			? (extractErrorDetails(responseData) ?? {
+					message: "Upstream error",
+					code: "UPSTREAM_ERROR",
+				})
+			: undefined;
 
 		await recordExecution(
 			c,
@@ -592,6 +714,8 @@ export async function handleProviderProxy<TResponse>(
 				totalTokens: usage.totalTokens,
 				finishReason,
 				response: responseData,
+				responseCode: response.status,
+				error: errorDetails ?? undefined,
 			},
 			{ project, teamId },
 			executionModel ? { overrideModel: executionModel } : undefined,

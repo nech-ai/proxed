@@ -24,6 +24,7 @@ export interface ExecutionMetrics {
 	completionTokens: number;
 	totalTokens: number;
 	finishReason: FinishReason;
+	responseCode?: number;
 	response?: any;
 	error?: {
 		message: string;
@@ -196,6 +197,8 @@ export async function recordExecution(
 	}
 
 	try {
+		const responseCode = metrics.responseCode ?? (metrics.error ? 500 : 200);
+
 		const execution = await createExecution(db, {
 			...commonParams,
 			promptTokens: metrics.promptTokens,
@@ -203,7 +206,7 @@ export async function recordExecution(
 			totalTokens: metrics.totalTokens,
 			finishReason: metrics.finishReason,
 			latency,
-			responseCode: metrics.error ? 500 : 200,
+			responseCode,
 			response: metrics.response ? JSON.stringify(metrics.response) : undefined,
 			errorMessage: metrics.error?.message,
 			errorCode: metrics.error?.code,

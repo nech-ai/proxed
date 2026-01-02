@@ -50,7 +50,7 @@ import {
 	AlertDialogTrigger,
 } from "@proxed/ui/components/alert-dialog";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Provider } from "@proxed/utils/lib/providers";
 import { getModelOptionsWithPricing } from "@proxed/utils/lib/pricing";
 import { useTRPC } from "@/trpc/client";
@@ -252,9 +252,9 @@ export function ProjectEditForm({ projectId }: ProjectEditFormProps) {
 
 	const selectedKey = keys.find((k) => k.id === form.watch("keyId"));
 	const selectedProvider = selectedKey?.provider as Provider | undefined;
-	const modelOptions = selectedProvider
-		? getModelOptionsWithPricing(selectedProvider)
-		: [];
+	const modelOptions = useMemo(() => {
+		return selectedProvider ? getModelOptionsWithPricing(selectedProvider) : [];
+	}, [selectedProvider]);
 
 	if (!project) {
 		return null;

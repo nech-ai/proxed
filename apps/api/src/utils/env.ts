@@ -36,6 +36,7 @@ export interface ProxyEnv {
 	LOG_LEVEL?: string;
 	PORT?: string;
 	SUPPRESS_WAITUNTIL_WARNING?: string;
+	STREAM_STORE_SUMMARY?: string;
 
 	// Platform specific
 	FLY_REGION?: string;

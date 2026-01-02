@@ -45,6 +45,8 @@ Proxed.AI is built as a secure AI gateway with a clear separation between the da
 
 - Streaming responses are handled explicitly for SSE and raw streams, keeping long-running requests stable.
 - Proxy responses include `X-Proxed-Latency` and `X-Proxed-Retries` headers for visibility.
+- Streaming executions finalize usage **after the stream ends**, so token counts, finish reasons, and costs are complete.
+- You can disable storing stream summaries with `STREAM_STORE_SUMMARY=false`.
 
 ### Read-after-write database routing
 

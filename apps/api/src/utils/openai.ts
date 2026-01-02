@@ -6,10 +6,13 @@ import { logger } from "./logger";
  */
 export interface OpenAIResponse {
 	usage?: {
-		prompt_tokens: number;
-		completion_tokens: number;
-		total_tokens: number;
+		prompt_tokens?: number;
+		completion_tokens?: number;
+		total_tokens?: number;
+		input_tokens?: number;
+		output_tokens?: number;
 	};
+	model?: string;
 	choices?: Array<{
 		finish_reason?: string;
 	}>;

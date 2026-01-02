@@ -17,9 +17,18 @@ The OpenAI Proxy endpoint allows you to securely route your requests to the offi
 
 The HTTP method used (GET, POST, etc.) should match what the target OpenAI API path expects.
 
+## Model List (Public)
+
+Proxed exposes OpenAI model list endpoints for SDK discovery and tooling. These are **public** and do not require authentication:
+
+*   `GET /v1/openai/models`
+*   `GET /v1/openai/{projectId}/models`
+
+These endpoints return the models currently supported by Proxed (not a live upstream pass-through), along with display name and pricing metadata.
+
 ## Authentication
 
-Requires authentication. See the [API Authentication guide](/docs/authentication).
+Requires authentication. See the [API Authentication guide](/authentication).
 
 ## Headers
 

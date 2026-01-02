@@ -1,0 +1,33 @@
+---
+title: "Streaming Usage Finalization + Public Model Lists"
+publishedAt: "2026-01-02"
+summary: "Execution usage now finalizes after streams end, model lists are publicly accessible, and dashboard execution views include pricing + model metadata."
+---
+
+We shipped a set of proxy + dashboard improvements focused on usage accuracy and SDK compatibility:
+
+### Streaming usage finalization
+
+- Streaming responses now update execution usage **after the stream ends**, so token counts, finish reasons, and costs are complete.
+- Provider-specific stream usage parsing for OpenAI, Anthropic, and Google is now consistent.
+- Added a toggle to disable storing stream summaries: set `STREAM_STORE_SUMMARY=false`.
+
+### Public model list endpoints
+
+Model list endpoints are now **public** to match SDK discovery behavior (no auth header required):
+
+- `GET /v1/openai/models`
+- `GET /v1/openai/{projectId}/models`
+- `GET /v1/anthropic/models`
+- `GET /v1/anthropic/{projectId}/models`
+- `GET /v1/google/models`
+- `GET /v1/google/{projectId}/models`
+
+These return Proxed-supported models with display names and pricing metadata.
+
+### Dashboard execution details
+
+- Execution tables and details now show model display names and pricing badges.
+- Filters and model selectors are more responsive with reduced recomputation.
+
+Docs: https://docs.proxed.ai

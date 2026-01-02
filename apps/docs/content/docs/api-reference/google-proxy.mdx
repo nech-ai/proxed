@@ -17,9 +17,18 @@ The Google AI Proxy endpoint allows you to securely route your requests to the o
 
 Currently, POST requests to paths like `models/{model}:generateContent` are the primary method for Google's Gemini API.
 
+## Model List (Public)
+
+Proxed exposes Google AI model list endpoints for SDK discovery and tooling. These are **public** and do not require authentication:
+
+*   `GET /v1/google/models`
+*   `GET /v1/google/{projectId}/models`
+
+These endpoints return the models currently supported by Proxed, along with display name and pricing metadata.
+
 ## Authentication
 
-Requires authentication. See the [API Authentication guide](/docs/authentication).
+Requires authentication. See the [API Authentication guide](/authentication).
 
 ## Headers
 

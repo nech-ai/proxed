@@ -325,6 +325,7 @@ async function extractModelFromRequest(
 	c: Context<AppContext>,
 	provider: ProviderType,
 	targetUrl: string,
+	requestBody?: ArrayBuffer,
 ): Promise<string | null> {
 	const method = c.req.method.toUpperCase();
 	if (method === "GET" || method === "HEAD") {
@@ -342,7 +343,7 @@ async function extractModelFromRequest(
 	}
 
 	try {
-		const buffer = await c.req.arrayBuffer();
+		const buffer = requestBody ?? (await c.req.arrayBuffer());
 		if (!buffer || buffer.byteLength === 0) {
 			return modelFromPath ? normalizeModelId(modelFromPath, provider) : null;
 		}
@@ -394,16 +395,30 @@ export async function handleProviderProxy<TResponse>(
 		requireApiKey: true,
 	});
 
+	const method = c.req.method.toUpperCase();
+	let requestBody: ArrayBuffer | undefined;
+	if (method !== "GET" && method !== "HEAD") {
+		try {
+			requestBody = await c.req.arrayBuffer();
+		} catch (error) {
+			logger.debug(
+				`Failed to read request body for model extraction: ${
+					error instanceof Error ? error.message : String(error)
+				}`,
+			);
+		}
+	}
+
 	const requestModel = await extractModelFromRequest(
 		c,
 		options.provider,
 		targetUrl,
+		requestBody,
 	);
 
 	const fullApiKey = await getFullApiKey(db, project.keyId, apiKey!);
 	const providerConfig = getProviderConfig(options.provider);
 	const userAgent = c.req.header("user-agent");
-	const method = c.req.method.toUpperCase();
 	const requestId = c.get("requestId");
 	const idempotencyKey =
 		options.provider === PROVIDERS.OPENAI &&
@@ -428,6 +443,7 @@ export async function handleProviderProxy<TResponse>(
 			timeout: providerConfig.timeout,
 			debug: providerConfig.debug || process.env.NODE_ENV === "development",
 			provider: options.providerSlug,
+			body: requestBody,
 		});
 
 		const { response, latency, retries } = await withTimeout(

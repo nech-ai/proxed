@@ -32,6 +32,10 @@ export interface ProxyConfig {
 	 * Provider name for circuit breaker
 	 */
 	provider?: "openai" | "anthropic" | "google";
+	/**
+	 * Optional pre-read request body buffer for reuse (e.g. model extraction).
+	 */
+	body?: ArrayBuffer | null;
 }
 
 export interface ProxyResult {
@@ -90,10 +94,12 @@ export async function baseProxy(
 	const sanitizedHeaders = sanitizeRequestHeaders(c.req.header(), headers);
 
 	// Buffer the request body once so retries (and validators) don't consume it.
-	// Hono caches parsed bodies, so arrayBuffer() will rehydrate if already read.
+	// If a pre-read body is provided (e.g. for model extraction), reuse it.
 	const method = c.req.method.toUpperCase();
 	let requestBody: ArrayBuffer | undefined;
-	if (method !== "GET" && method !== "HEAD") {
+	if (typeof config.body !== "undefined") {
+		requestBody = config.body ?? undefined;
+	} else if (method !== "GET" && method !== "HEAD") {
 		try {
 			requestBody = await c.req.arrayBuffer();
 		} catch (error) {

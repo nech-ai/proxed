@@ -1,24 +1,23 @@
 ---
 description: Supabase conventions (local project, migrations, SSR auth, RLS)
 globs:
-  - "apps/api/supabase/**/*"
   - "packages/supabase/**/*"
   - "apps/app/**/*"
-  - "apps/proxy/**/*"
+  - "apps/api/**/*"
 alwaysApply: false
 ---
 # Supabase (database + auth)
 
 ## Repo layout
 
-- Local Supabase project: `apps/api/supabase/`
-  - Schemas: `apps/api/supabase/schemas/*.sql`
-  - Migrations: `apps/api/supabase/migrations/*.sql`
-  - Functions: `apps/api/supabase/functions/*`
+- Local Supabase project: `packages/supabase/supabase/`
+  - Schemas: `packages/supabase/supabase/schemas/*.sql`
+  - Migrations: `packages/supabase/supabase/migrations/*.sql`
+  - Functions: `packages/supabase/supabase/functions/*`
 - Runtime clients & queries: `packages/supabase/` (import via `@proxed/supabase/*`)
 - Generated types:
   - Public schema: `packages/supabase/src/types/db.generated.ts` (via `bun run supabase:generate`)
-  - Functions schema (optional): `apps/api` script `generate-functions` writes `packages/supabase/src/types/functions.generated.ts`
+  - Functions schema (optional): `packages/supabase/src/types/functions.generated.ts` (via `generate-functions` script)
 
 ## Commands (run from repo root)
 
@@ -42,3 +41,4 @@ alwaysApply: false
 - Prefer `snake_case` for tables/columns.
 - Enable RLS on new tables and write explicit policies (avoid `FOR ALL`; separate select/insert/update/delete).
 - Default to `security invoker`. If you must use `security definer`, always set an explicit `search_path` and fully-qualify referenced objects.
+

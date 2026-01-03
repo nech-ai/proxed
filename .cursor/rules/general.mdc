@@ -8,5 +8,5 @@ alwaysApply: true
 - This repo is a Turborepo + Bun monorepo: use `bun` + root scripts; avoid introducing `npm`/`yarn` workflows.
 - Prefer workspace imports (`@proxed/*`) and package entrypoints over deep relative imports across workspaces.
 - Next.js apps default to React Server Components; add `"use client"` only when necessary.
-- Security: never expose or log secrets (AI provider keys, Supabase keys, tokens). Provider calls should go through `apps/proxy` when applicable.
+- Security: never expose or log secrets (AI provider keys, Supabase keys, tokens). Provider calls should go through `apps/api` when applicable.
 

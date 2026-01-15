@@ -24,11 +24,13 @@ This is a **monorepo** using Turborepo with Bun as the runtime and package manag
 - **ui** (`packages/ui/`): Shared UI components using Shadcn/ui
 - **structure** (`packages/structure/`): Schema parser/generator for structured AI responses (Zod-based)
 - **jobs** (`packages/jobs/`): Background job implementations using Trigger.dev v3
-- **mail** (`packages/mail/`): Email templates with React Email + Nodemailer
+- **mail** (`packages/mail/`): Email templates with React Email + Resend
 - **kv** (`packages/kv/`): Upstash Redis client wrapper
 - **logger** (`packages/logger/`): Pino-based logging utility
 - **analytics** (`packages/analytics/`): OpenPanel analytics integration
 - **notifications** (`packages/notifications/`): Novu integration for in-app notifications
+- **location** (`packages/location/`): IP geolocation helpers and country/region metadata
+- **utils** (`packages/utils/`): Shared low-level utilities
 
 ## Commands
 
@@ -129,12 +131,18 @@ apps/api/src/
 ├── trpc/              # Internal RPC for dashboard
 └── utils/             # Provider proxies, errors, logger
 
-apps/app/
+apps/app/src/
 ├── app/[locale]/      # App Router with i18n
 ├── actions/           # Server actions (authActionClient)
 ├── components/        # UI components
-├── jobs/              # Trigger.dev task re-exports
 └── trpc/              # Client-side tRPC queries
+
+apps/app/jobs/         # Trigger.dev task re-exports
+
+packages/db/
+├── src/schema.ts      # Drizzle table definitions
+├── src/client.ts      # Database client with replicas
+└── src/queries/       # Typed query helpers
 
 packages/supabase/
 ├── supabase/migrations/  # SQL migrations

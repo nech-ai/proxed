@@ -1,25 +1,26 @@
 ---
-description: Core API service (@proxed/proxy) - Bun + Hono OpenAPI proxy
+description: Core API service (@proxed/api) - Bun + Hono proxy
 globs:
-  - "apps/proxy/**/*"
+  - "apps/api/**/*"
 alwaysApply: false
 ---
-# `apps/proxy` (`@proxed/proxy`)
+# `apps/api` (`@proxed/api`)
 
-Core proxy service running on Bun using Hono + OpenAPI.
+Core proxy service running on Bun using Hono.
 
 ## Key entry points
 
-- App bootstrap: `apps/proxy/src/index.ts`
-- Routers: `apps/proxy/src/rest/routers.ts` and `apps/proxy/src/rest/routes/*`
-- Middleware: `apps/proxy/src/rest/middleware/*`
-- DB: `apps/proxy/src/db/*` (Drizzle + Postgres)
-- Provider-specific helpers: `apps/proxy/src/utils/*`
+- App bootstrap: `apps/api/src/index.ts`
+- Routers: `apps/api/src/rest/routers.ts` and `apps/api/src/rest/routes/*`
+- Middleware: `apps/api/src/rest/middleware/*`
+- tRPC: `apps/api/src/trpc/*` (internal RPC for dashboard)
+- Provider-specific helpers: `apps/api/src/utils/*`
 
 ## Conventions
 
 - Use Hono patterns (not Next.js) and keep middleware order intentional.
 - Security: enforce auth + DeviceCheck for iOS requests; never leak provider keys.
-- Streaming responses should go through existing stream utilities (don’t reinvent SSE parsing).
-- Prefer structured errors via `apps/proxy/src/utils/errors.ts` and keep error responses consistent.
+- Streaming responses should go through existing stream utilities (don't reinvent SSE parsing).
+- Prefer structured errors via `apps/api/src/utils/errors.ts` and keep error responses consistent.
+- Use `@proxed/db` for database access (Drizzle ORM).
 

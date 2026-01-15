@@ -8,6 +8,7 @@ alwaysApply: true
 
 ## Packages (current)
 
+- `@proxed/db`: Drizzle ORM schemas and direct PostgreSQL queries (used by proxy API)
 - `@proxed/ui`: shared UI primitives (shadcn/radix + Tailwind)
 - `@proxed/supabase`: Supabase clients, queries, and generated types
 - `@proxed/jobs`: Trigger.dev tasks

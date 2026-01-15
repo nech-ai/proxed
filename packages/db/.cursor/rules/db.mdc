@@ -1,0 +1,22 @@
+---
+description: Conventions for @proxed/db (Drizzle ORM schemas and queries)
+globs:
+  - "packages/db/**/*.ts"
+alwaysApply: false
+---
+# `@proxed/db`
+
+Drizzle ORM schemas and direct PostgreSQL queries used by the proxy API.
+
+## Entry points
+
+- `@proxed/db/client` (database client with read replicas)
+- `@proxed/db/schema` (Drizzle table definitions)
+- `@proxed/db/queries` (typed query helpers)
+
+## Conventions
+
+- This package is used by `apps/api` for direct DB access (bypassing Supabase RLS).
+- Keep schemas in sync with Supabase migrations in `packages/supabase/supabase/migrations/`.
+- Prefer typed query helpers in `src/queries/` over raw `.from(...)` calls.
+- Use read replicas where appropriate via the client wrapper.

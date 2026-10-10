@@ -211,6 +211,13 @@ function getErrorMessage(params: AuthErrorParams) {
 				message: "Invalid or expired verification code",
 				title: "Verification Failed",
 			};
+		case "signup_disabled":
+		case "registration_closed":
+			return {
+				message:
+					"New registrations are paused while Proxed changes direction. Existing users can still sign in.",
+				title: "Registration is closed",
+			};
 		case "invitation-not-found":
 			return {
 				message: "We couldn't find the invitation you were looking for",

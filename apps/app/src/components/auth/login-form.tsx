@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { isRegistrationEnabled } from "@proxed/utils/lib/site";
 import { AuthCard } from "./auth-card";
 import { PasswordInput } from "./password-input";
 import SigninModeSwitch from "./signin-mode-switch";
@@ -91,6 +92,7 @@ export function LoginForm({
 				const { error: signInError } = await supabase.auth.signInWithOtp({
 					email,
 					options: {
+						shouldCreateUser: isRegistrationEnabled(),
 						emailRedirectTo: `${window.location.origin}/api/auth/callback?${redirectSearchParams.toString()}`,
 					},
 				});
@@ -176,20 +178,22 @@ export function LoginForm({
 							{signinMode === "password" ? "Sign in" : "Send magic link"}
 						</Button>
 
-						<div className={textClasses}>
-							Don&apos;t have an account?{" "}
-							<Link
-								href={`/signup${
-									invitationCode
-										? `?invitationCode=${invitationCode}&email=${email}`
-										: ""
-								}`}
-								className={linkClasses}
-							>
-								Create an account
-								<ArrowRightIcon className="ml-1 inline size-3 align-middle" />
-							</Link>
-						</div>
+						{isRegistrationEnabled() ? (
+							<div className={textClasses}>
+								Don&apos;t have an account?{" "}
+								<Link
+									href={`/signup${
+										invitationCode
+											? `?invitationCode=${invitationCode}&email=${email}`
+											: ""
+									}`}
+									className={linkClasses}
+								>
+									Create an account
+									<ArrowRightIcon className="ml-1 inline size-3 align-middle" />
+								</Link>
+							</div>
+						) : null}
 
 						<SocialAuth />
 					</div>

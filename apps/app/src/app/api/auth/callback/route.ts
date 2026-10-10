@@ -1,8 +1,13 @@
+import { Cookies } from "@/utils/constants";
+import { createClient as createAdminClient } from "@proxed/supabase/job";
 import { createClient } from "@proxed/supabase/server";
+import {
+	isNewlyCreatedAuthUser,
+	isRegistrationEnabled,
+} from "@proxed/utils/lib/site";
+import { addYears } from "date-fns";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { Cookies } from "@/utils/constants";
-import { addYears } from "date-fns";
 
 export async function GET(request: Request) {
 	const cookieStore = await cookies();
@@ -23,20 +28,30 @@ export async function GET(request: Request) {
 		});
 	}
 
+	const forwardedHost = request.headers.get("x-forwarded-host");
+	const isLocalEnv = process.env.NODE_ENV === "development";
+	const resolvedOrigin =
+		isLocalEnv || !forwardedHost ? origin : `https://${forwardedHost}`;
+
 	if (code) {
 		const supabase = await createClient();
 		const { error } = await supabase.auth.exchangeCodeForSession(code);
 		if (!error) {
-			const forwardedHost = request.headers.get("x-forwarded-host");
-			const isLocalEnv = process.env.NODE_ENV === "development";
+			if (!isRegistrationEnabled()) {
+				const {
+					data: { user },
+				} = await supabase.auth.getUser();
+				if (user && isNewlyCreatedAuthUser(user)) {
+					const admin = createAdminClient();
+					await admin.auth.admin.deleteUser(user.id);
+					await supabase.auth.signOut();
+					return NextResponse.redirect(
+						`${resolvedOrigin}/login?error=signup_disabled`,
+					);
+				}
+			}
 
-			const redirectUrl = isLocalEnv
-				? `${origin}${finalRedirectPath}`
-				: forwardedHost
-					? `https://${forwardedHost}${finalRedirectPath}`
-					: `${origin}${finalRedirectPath}`;
-
-			return NextResponse.redirect(redirectUrl);
+			return NextResponse.redirect(`${resolvedOrigin}${finalRedirectPath}`);
 		}
 	}
 

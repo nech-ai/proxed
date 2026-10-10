@@ -1,5 +1,7 @@
 import { Toaster } from "@proxed/ui/components/toaster";
+import { SiteBanner } from "@proxed/ui/components/site-banner";
 import { cn } from "@proxed/ui/utils";
+import { SITE_COPY } from "@proxed/utils/lib/site";
 import { Provider as JotaiProvider } from "jotai";
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
@@ -43,6 +45,7 @@ export default async function RootLayout({
 					sansFont.variable,
 				)}
 			>
+				<SiteBanner>{SITE_COPY.banner}</SiteBanner>
 				<NextTopLoader color="var(--colors-primary)" />
 				<I18nProviderClient locale="en">
 					<TRPCReactProvider>

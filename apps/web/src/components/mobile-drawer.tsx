@@ -43,8 +43,8 @@ interface DrawerActionsProps {
 function DrawerActions({ className }: DrawerActionsProps) {
 	return (
 		<div className={cn("flex flex-col gap-2", className)}>
-			<Button variant="ghost" className="w-full" disabled>
-				Login
+			<Button asChild variant="ghost" className="w-full">
+				<Link href="https://app.proxed.ai/login">Login</Link>
 			</Button>
 			<CtaButton className="w-full" />
 		</div>

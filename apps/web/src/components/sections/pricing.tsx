@@ -11,6 +11,7 @@ import { useState } from "react";
 import { GradientText } from "../gradient-text";
 import { usePlausible } from "next-plausible";
 import { Icons } from "@/components/icons";
+import { getAppAuthUrl, getAuthCtaLabel } from "@proxed/utils/lib/site";
 import Link from "next/link";
 
 // Define the cost per call for each plan
@@ -194,7 +195,7 @@ function PricingTier({
 								: "bg-muted text-foreground hover:bg-muted/80",
 						)}
 					>
-						<Link href="https://app.proxed.ai/signup">{tier.cta}</Link>
+						<Link href={getAppAuthUrl()}>{getAuthCtaLabel(tier.cta)}</Link>
 					</Button>
 				</div>
 			</div>

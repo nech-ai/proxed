@@ -1,3 +1,7 @@
+import {
+	isNewlyCreatedAuthUser,
+	isRegistrationEnabled,
+} from "@proxed/utils/lib/site";
 import { updateSession } from "@proxed/supabase/middleware";
 import { createI18nMiddleware } from "next-international/middleware";
 import { NextResponse } from "next/server";
@@ -24,12 +28,24 @@ function isPublicPath(path: string) {
 }
 
 export async function middleware(request: NextRequest) {
-	const { response, user } = await updateSession(
+	const { response, user, supabase } = await updateSession(
 		request,
 		I18nMiddleware(request),
 	);
 
 	const { pathname } = request.nextUrl;
+
+	if (
+		user &&
+		!isRegistrationEnabled() &&
+		isNewlyCreatedAuthUser(user) &&
+		!isPublicPath(pathname)
+	) {
+		await supabase.auth.signOut();
+		const loginUrl = new URL("/login", request.url);
+		loginUrl.searchParams.set("error", "signup_disabled");
+		return NextResponse.redirect(loginUrl);
+	}
 
 	if (isPublicPath(pathname)) {
 		return response;

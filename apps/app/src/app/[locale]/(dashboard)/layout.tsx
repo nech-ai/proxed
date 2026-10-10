@@ -71,7 +71,7 @@ export default async function Layout({ children }: PropsWithChildren) {
 		<HydrateClient>
 			<TeamProvider data={teamData}>
 				<UserProvider data={userData}>
-					<div className="flex h-screen">
+					<div className="flex h-[calc(100dvh-2.5rem)] min-h-0">
 						<SidebarProvider defaultOpen={false}>
 							<AppSidebar />
 							<div className="flex flex-col flex-grow overflow-auto">

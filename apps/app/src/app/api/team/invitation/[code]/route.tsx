@@ -1,6 +1,7 @@
 import { createClient as createSuperClient } from "@proxed/supabase/job";
 import { getTeamInviteQuery } from "@proxed/supabase/queries";
 import { createClient } from "@proxed/supabase/server";
+import { isRegistrationEnabled } from "@proxed/utils/lib/site";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -33,7 +34,8 @@ export async function GET(
 			.eq("email", invitation.data.email)
 			.single();
 
-		const authPath = existingUser ? "login" : "signup";
+		const authPath =
+			existingUser || !isRegistrationEnabled() ? "login" : "signup";
 		return redirect(
 			`/${authPath}?invitationCode=${invitation.data.id}&email=${encodeURIComponent(
 				invitation.data.email,

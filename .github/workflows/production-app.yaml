@@ -12,6 +12,7 @@ on:
     paths:
       - apps/app/**
       - packages/**
+      - .github/workflows/production-app.yaml
 jobs:
   deploy-production:
     runs-on: ubuntu-latest
@@ -45,5 +46,5 @@ jobs:
         env:
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
         run: |
-          TRIGGER_PROJECT_ID=${{ secrets.TRIGGER_PROJECT_ID }} bunx trigger.dev@3.3.16 deploy --skip-update-check
+          TRIGGER_PROJECT_ID=${{ secrets.TRIGGER_PROJECT_ID }} bunx trigger.dev@4.7.3 deploy --skip-update-check
         working-directory: apps/app

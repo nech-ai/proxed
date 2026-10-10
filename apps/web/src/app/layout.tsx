@@ -1,6 +1,4 @@
 import { cn } from "@proxed/ui/lib/utils";
-import { SiteBanner } from "@proxed/ui/components/site-banner";
-import { SITE_COPY } from "@proxed/utils/lib/site";
 import { Geist, Geist_Mono } from "next/font/google";
 import PlausibleProvider from "next-plausible";
 import type { Viewport } from "next";
@@ -58,9 +56,6 @@ export default function RootLayout({
 					monoFont.variable,
 				)}
 			>
-				<SiteBanner className="sticky top-0 z-[60] bg-zinc-950/90 text-zinc-100 border-zinc-800">
-					{SITE_COPY.banner}
-				</SiteBanner>
 				{children}
 				<AnalyticsProvider />
 			</body>

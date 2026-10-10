@@ -11,7 +11,11 @@ import { useState } from "react";
 import { GradientText } from "../gradient-text";
 import { usePlausible } from "next-plausible";
 import { Icons } from "@/components/icons";
-import { getAppAuthUrl, getAuthCtaLabel } from "@proxed/utils/lib/site";
+import {
+	getAppAuthUrl,
+	getAuthAnalyticsEvent,
+	getAuthCtaLabel,
+} from "@proxed/utils/lib/site";
 import Link from "next/link";
 
 // Define the cost per call for each plan
@@ -186,7 +190,7 @@ function PricingTier({
 				<div className="p-8 pt-0">
 					<Button
 						asChild
-						onClick={() => plausible("Signup")}
+						onClick={() => plausible(getAuthAnalyticsEvent())}
 						size="lg"
 						className={cn(
 							"w-full py-6 text-base font-medium",

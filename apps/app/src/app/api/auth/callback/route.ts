@@ -1,10 +1,8 @@
+import { isClosedRegistrationSignup } from "@/utils/closed-registration";
 import { Cookies } from "@/utils/constants";
 import { createClient as createAdminClient } from "@proxed/supabase/job";
 import { createClient } from "@proxed/supabase/server";
-import {
-	isNewlyCreatedAuthUser,
-	isRegistrationEnabled,
-} from "@proxed/utils/lib/site";
+import { isRegistrationEnabled } from "@proxed/utils/lib/site";
 import { addYears } from "date-fns";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
@@ -41,8 +39,8 @@ export async function GET(request: Request) {
 				const {
 					data: { user },
 				} = await supabase.auth.getUser();
-				if (user && isNewlyCreatedAuthUser(user)) {
-					const admin = createAdminClient();
+				const admin = createAdminClient();
+				if (user && (await isClosedRegistrationSignup(admin, user))) {
 					await admin.auth.admin.deleteUser(user.id);
 					await supabase.auth.signOut();
 					return NextResponse.redirect(

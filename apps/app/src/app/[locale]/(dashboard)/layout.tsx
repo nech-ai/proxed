@@ -3,6 +3,7 @@ import { TrialEnded } from "@/components/trial-ended";
 import { TeamProvider } from "@/store/team/provider";
 import { UserProvider } from "@/store/user/provider";
 import { SidebarProvider } from "@proxed/ui/components/sidebar";
+import { isRegistrationEnabled } from "@proxed/utils/lib/site";
 import { redirect } from "next/navigation";
 import type { PropsWithChildren } from "react";
 import { Suspense } from "react";
@@ -71,7 +72,13 @@ export default async function Layout({ children }: PropsWithChildren) {
 		<HydrateClient>
 			<TeamProvider data={teamData}>
 				<UserProvider data={userData}>
-					<div className="flex h-[calc(100dvh-2.5rem)] min-h-0">
+					<div
+						className={
+							isRegistrationEnabled()
+								? "flex h-dvh min-h-0"
+								: "flex h-[calc(100dvh-2.5rem)] min-h-0"
+						}
+					>
 						<SidebarProvider defaultOpen={false}>
 							<AppSidebar />
 							<div className="flex flex-col flex-grow overflow-auto">

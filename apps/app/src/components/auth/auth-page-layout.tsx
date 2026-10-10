@@ -1,5 +1,6 @@
 import { Logo } from "@/components/layout/logo";
 import { Footer } from "@/components/layout/footer";
+import { isRegistrationEnabled } from "@proxed/utils/lib/site";
 import { isEU } from "@proxed/location";
 import { cookies } from "next/headers";
 import { Cookies } from "@/utils/constants";
@@ -17,7 +18,13 @@ export async function AuthPageLayout({ children }: AuthPageLayoutProps) {
 
 	return (
 		<>
-			<div className="flex min-h-screen flex-col">
+			<div
+				className={
+					isRegistrationEnabled()
+						? "flex min-h-dvh flex-col"
+						: "flex min-h-[calc(100dvh-2.5rem)] flex-col"
+				}
+			>
 				<div className="flex w-full flex-1 items-center justify-center px-4">
 					<div className="flex w-full max-w-sm flex-col items-center">
 						<div className="relative mb-12 h-24 w-56">

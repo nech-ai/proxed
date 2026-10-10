@@ -15,8 +15,8 @@ import { Input } from "@proxed/ui/components/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertTriangleIcon, ArrowRightIcon, Loader2Icon } from "lucide-react";
 import Link from "next/link";
+import { isRegistrationEnabled } from "@proxed/utils/lib/site";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -60,6 +60,9 @@ export function SignupForm() {
 		email,
 		password,
 	}) => {
+		if (!isRegistrationEnabled()) {
+			return;
+		}
 		try {
 			const redirectSearchParams = new URLSearchParams();
 			redirectSearchParams.set("type", "SIGNUP");

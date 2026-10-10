@@ -21,6 +21,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { isRegistrationEnabled } from "@proxed/utils/lib/site";
 import { AuthCard } from "./auth-card";
 
 const REGEXP_ONLY_DIGITS_AND_CHARS = /^[0-9]*$/;
@@ -88,6 +89,11 @@ export function TokenVerificationForm() {
 			setError(null);
 
 			let verificationError: Error | null = null;
+
+			if (type === "SIGNUP" && !isRegistrationEnabled()) {
+				setError("Registration is closed");
+				return;
+			}
 
 			switch (type) {
 				case "PASSWORD_RESET": {

@@ -34,5 +34,5 @@ export const updateSession = async (
 		data: { user },
 	} = await supabase.auth.getUser();
 
-	return { response, user };
+	return { response, user, supabase };
 };

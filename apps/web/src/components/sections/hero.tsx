@@ -3,6 +3,12 @@
 import { Section } from "@/components/section";
 import { siteConfig } from "@/lib/config";
 import { Button } from "@proxed/ui/components/button";
+import {
+	SITE_COPY,
+	getAppAuthUrl,
+	getAuthCtaLabel,
+	isRegistrationEnabled,
+} from "@proxed/utils/lib/site";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import Spline from "@splinetool/react-spline";
@@ -75,6 +81,8 @@ function HeroTitles() {
 }
 
 function HeroCTA() {
+	const registrationOpen = isRegistrationEnabled();
+
 	return (
 		<div className="relative mt-8">
 			<div className="flex w-full max-w-2xl flex-col items-start justify-start space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
@@ -83,12 +91,22 @@ function HeroCTA() {
 					className="w-full sm:w-auto h-12 px-8 text-base"
 					size="lg"
 				>
-					<Link href="https://app.proxed.ai/signup">{siteConfig.hero.cta}</Link>
+					<Link href={getAppAuthUrl()}>
+						{getAuthCtaLabel(siteConfig.hero.cta)}
+					</Link>
 				</Button>
 			</div>
 			<p className="mt-4 text-sm text-muted-foreground text-left max-w-xl">
-				{siteConfig.hero.ctaDescription}{" "}
-				<span className="text-primary">Get started in under 5 minutes.</span>
+				{registrationOpen ? (
+					<>
+						{siteConfig.hero.ctaDescription}{" "}
+						<span className="text-primary">
+							Get started in under 5 minutes.
+						</span>
+					</>
+				) : (
+					SITE_COPY.marketingCtaDescription
+				)}
 			</p>
 		</div>
 	);

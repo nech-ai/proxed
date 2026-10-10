@@ -2,6 +2,11 @@
 
 import { siteConfig } from "@/lib/config";
 import { Button } from "@proxed/ui/components/button";
+import {
+	getAppAuthUrl,
+	getAuthAnalyticsEvent,
+	getAuthCtaLabel,
+} from "@proxed/utils/lib/site";
 import { usePlausible } from "next-plausible";
 import Link from "next/link";
 import { cn } from "@proxed/ui/utils";
@@ -26,11 +31,11 @@ export function CtaButton({
 		<Button
 			asChild
 			className={cn(CTA_BUTTON_CLASSES, className)}
-			onClick={() => plausible("Signup")}
+			onClick={() => plausible(getAuthAnalyticsEvent())}
 			variant={variant}
 			{...props}
 		>
-			<Link href="https://app.proxed.ai/signup">{siteConfig.cta}</Link>
+			<Link href={getAppAuthUrl()}>{getAuthCtaLabel(siteConfig.cta)}</Link>
 		</Button>
 	);
 }

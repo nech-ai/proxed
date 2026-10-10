@@ -224,6 +224,7 @@ export function CustomMDX({
 			<MDXRemote
 				source={source}
 				components={{ ...components, ...(customComponents || {}) }}
+				options={{ blockJS: false }}
 			/>
 		</div>
 	);

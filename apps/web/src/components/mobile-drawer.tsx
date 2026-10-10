@@ -17,6 +17,7 @@ import { cn } from "@proxed/ui/lib/utils";
 import Link from "next/link";
 import { IoMenuSharp } from "react-icons/io5";
 import { CtaButton } from "@/components/cta-button";
+import { isRegistrationEnabled } from "@proxed/utils/lib/site";
 import { usePathname } from "next/navigation";
 
 interface DrawerHeaderContentProps {
@@ -46,7 +47,7 @@ function DrawerActions({ className }: DrawerActionsProps) {
 			<Button asChild variant="ghost" className="w-full">
 				<Link href="https://app.proxed.ai/login">Login</Link>
 			</Button>
-			<CtaButton className="w-full" />
+			{isRegistrationEnabled() ? <CtaButton className="w-full" /> : null}
 		</div>
 	);
 }

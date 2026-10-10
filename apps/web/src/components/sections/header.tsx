@@ -8,6 +8,7 @@ import { cn } from "@proxed/ui/utils";
 import Link from "next/link";
 import { usePlausible } from "next-plausible";
 import { usePathname } from "next/navigation";
+import { isRegistrationEnabled } from "@proxed/utils/lib/site";
 import { CtaButton } from "../cta-button";
 import { Suspense } from "react";
 
@@ -76,9 +77,11 @@ export function Header() {
 					>
 						<Link href="https://app.proxed.ai/login">Login</Link>
 					</Button>
-					<Suspense fallback={null}>
-						<CtaButton />
-					</Suspense>
+					{isRegistrationEnabled() ? (
+						<Suspense fallback={null}>
+							<CtaButton />
+						</Suspense>
+					) : null}
 				</div>
 				<div className="mt-2 cursor-pointer block lg:hidden">
 					<MobileDrawer />

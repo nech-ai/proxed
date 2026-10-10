@@ -11,6 +11,7 @@ on:
     paths:
       - apps/web/**
       - packages/ui/**
+      - .github/workflows/production-web.yaml
 jobs:
   deploy-production:
     runs-on: ubuntu-latest
